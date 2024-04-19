@@ -31,13 +31,13 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
-import net.tclproject.metaworlds.mixin.mixins.util.IMixinAxisAlignedBB;
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
 import net.tclproject.metaworlds.api.RenderGlobalSuperClass;
 import net.tclproject.metaworlds.api.SubWorld;
 import net.tclproject.metaworlds.compat.packet.SubWorldUpdatePacket;
 import net.tclproject.metaworlds.core.SubWorldTransformationHandler;
+import net.tclproject.metaworlds.mixins.util.IMixinAxisAlignedBB;
 import net.tclproject.metaworlds.patcher.OrientedBB;
 import net.tclproject.metaworlds.patcher.RenderGlobalSubWorld;
 

@@ -12,7 +12,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
-import net.tclproject.metaworlds.mixin.mixins.entity.player.IMixinEntityPlayer;
+import net.tclproject.metaworlds.mixins.entity.player.IMixinEntityPlayer;
 
 public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements EntityPlayerProxy {
 

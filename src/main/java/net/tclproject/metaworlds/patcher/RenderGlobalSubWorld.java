@@ -7,7 +7,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.tclproject.metaworlds.api.IMixinWorld;
 import net.tclproject.metaworlds.api.RenderGlobalSuperClass;
-import net.tclproject.metaworlds.mixin.mixins.client.renderer.IMixinRenderGlobal;
+import net.tclproject.metaworlds.mixins.client.renderer.IMixinRenderGlobal;
 
 import java.nio.IntBuffer;
 
