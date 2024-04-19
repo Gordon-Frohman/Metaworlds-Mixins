@@ -45,7 +45,7 @@ import net.tclproject.metaworlds.api.SubWorld;
 import net.tclproject.metaworlds.api.WorldInfoSuperClass;
 import net.tclproject.metaworlds.compat.packet.SubWorldDestroyPacket;
 import net.tclproject.metaworlds.compat.packet.SubWorldUpdatePacket;
-import net.tclproject.metaworlds.mixins.util.IMixinAxisAlignedBB;
+import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import net.tclproject.metaworlds.patcher.ChunkSubWorld;
 import net.tclproject.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
 import net.tclproject.metaworlds.patcher.MinecraftServerSubWorldProxy;

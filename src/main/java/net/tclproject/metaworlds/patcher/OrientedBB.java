@@ -5,7 +5,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.tclproject.metaworlds.api.IMixinWorld;
-import net.tclproject.metaworlds.mixins.util.IMixinAxisAlignedBB;
+import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 
 import org.jblas.DoubleMatrix;
 

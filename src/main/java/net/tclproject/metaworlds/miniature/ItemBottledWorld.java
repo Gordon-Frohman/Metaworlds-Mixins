@@ -7,7 +7,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.tclproject.metaworlds.api.SubWorld;
-import net.tclproject.metaworlds.mixins.util.IMixinAxisAlignedBB;
+import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import net.tclproject.metaworlds.api.IMixinWorld;
 
 public class ItemBottledWorld extends Item {
