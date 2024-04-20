@@ -93,7 +93,7 @@ public class MixinS18PacketEntityTeleport implements IMixinS18PacketEntityTelepo
         return this;
     }
 
-    @Inject(method = "<init>", at = @At("TAIL"))
+    @Inject(method = "<init>(Lnet/minecraft/entity/Entity;)V", at = @At("TAIL"))
     public void S18PacketEntityTeleport(Entity entity, CallbackInfo ci) {
         this.subWorldId = ((IMixinWorld) ((IMixinEntity) entity).getWorldBelowFeet()).getSubWorldID();
         this.tractionLoss = ((IMixinEntity) entity).getTractionLossTicks();

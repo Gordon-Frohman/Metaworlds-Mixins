@@ -2,6 +2,7 @@ package net.tclproject.metaworlds.mixin.mixins.server;
 
 import java.io.File;
 import java.net.Proxy;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -54,9 +55,9 @@ public abstract class MixinMinecraftServer {
     @Shadow(remap = true)
     public abstract NetworkSystem func_147137_ag();
 
-	@Inject(at = @At("HEAD"), method = "<init>")
+    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;field_152366_X:Lnet/minecraft/server/management/PlayerProfileCache;"), method = "<init>")
 	// To get an empty MinecraftServer variable
-	private void init(File workDir, Proxy proxy) {
+	private void init(File workDir, Proxy proxy, CallbackInfo info) {
 		if(workDir == null && proxy == null)
 			return;
 	}
@@ -73,56 +74,58 @@ public abstract class MixinMinecraftServer {
             long j = System.nanoTime();
 
             if (id == 0 || this.getAllowNether()) {
-                for (World curWorld : ((IMixinWorld) DimensionManager.getWorld(id)).getWorlds()) {
-                    WorldServer worldserver = (WorldServer) curWorld;// DimensionManager.getWorld(id);
-                    this.theProfiler.startSection(
-                        worldserver.getWorldInfo()
-                            .getWorldName());
-                    this.theProfiler.startSection("pools");
-                    this.theProfiler.endSection();
-
-                    if (this.tickCounter % 20 == 0) {
-                        this.theProfiler.startSection("timeSync");
-                        this.serverConfigManager.sendPacketToAllPlayersInDimension(
-                            new S03PacketTimeUpdate(
-                                worldserver.getTotalWorldTime(),
-                                worldserver.getWorldTime(),
-                                worldserver.getGameRules()
-                                    .getGameRuleBooleanValue("doDaylightCycle")),
-                            worldserver.provider.dimensionId);
-                        this.theProfiler.endSection();
-                    }
-
-                    this.theProfiler.startSection("tick");
-                    FMLCommonHandler.instance()
-                        .onPreWorldTick(worldserver);
-                    CrashReport crashreport;
-
-                    try {
-                        worldserver.tick();
-                    } catch (Throwable throwable1) {
-                        crashreport = CrashReport.makeCrashReport(throwable1, "Exception ticking world");
-                        worldserver.addWorldInfoToCrashReport(crashreport);
-                        throw new ReportedException(crashreport);
-                    }
-
-                    try {
-                        worldserver.updateEntities();
-                    } catch (Throwable throwable) {
-                        crashreport = CrashReport.makeCrashReport(throwable, "Exception ticking world entities");
-                        worldserver.addWorldInfoToCrashReport(crashreport);
-                        throw new ReportedException(crashreport);
-                    }
-
-                    FMLCommonHandler.instance()
-                        .onPostWorldTick(worldserver);
-                    this.theProfiler.endSection();
-                    this.theProfiler.startSection("tracker");
-                    worldserver.getEntityTracker()
-                        .updateTrackedEntities();
-                    this.theProfiler.endSection();
-                    this.theProfiler.endSection();
-                }
+            	Collection<World> worlds = ((IMixinWorld) DimensionManager.getWorld(id)).getWorlds();
+            	if (worlds != null)
+	                for (World curWorld : worlds) {
+	                    WorldServer worldserver = (WorldServer) curWorld;// DimensionManager.getWorld(id);
+	                    this.theProfiler.startSection(
+	                        worldserver.getWorldInfo()
+	                            .getWorldName());
+	                    this.theProfiler.startSection("pools");
+	                    this.theProfiler.endSection();
+	
+	                    if (this.tickCounter % 20 == 0) {
+	                        this.theProfiler.startSection("timeSync");
+	                        this.serverConfigManager.sendPacketToAllPlayersInDimension(
+	                            new S03PacketTimeUpdate(
+	                                worldserver.getTotalWorldTime(),
+	                                worldserver.getWorldTime(),
+	                                worldserver.getGameRules()
+	                                    .getGameRuleBooleanValue("doDaylightCycle")),
+	                            worldserver.provider.dimensionId);
+	                        this.theProfiler.endSection();
+	                    }
+	
+	                    this.theProfiler.startSection("tick");
+	                    FMLCommonHandler.instance()
+	                        .onPreWorldTick(worldserver);
+	                    CrashReport crashreport;
+	
+	                    try {
+	                        worldserver.tick();
+	                    } catch (Throwable throwable1) {
+	                        crashreport = CrashReport.makeCrashReport(throwable1, "Exception ticking world");
+	                        worldserver.addWorldInfoToCrashReport(crashreport);
+	                        throw new ReportedException(crashreport);
+	                    }
+	
+	                    try {
+	                        worldserver.updateEntities();
+	                    } catch (Throwable throwable) {
+	                        crashreport = CrashReport.makeCrashReport(throwable, "Exception ticking world entities");
+	                        worldserver.addWorldInfoToCrashReport(crashreport);
+	                        throw new ReportedException(crashreport);
+	                    }
+	
+	                    FMLCommonHandler.instance()
+	                        .onPostWorldTick(worldserver);
+	                    this.theProfiler.endSection();
+	                    this.theProfiler.startSection("tracker");
+	                    worldserver.getEntityTracker()
+	                        .updateTrackedEntities();
+	                    this.theProfiler.endSection();
+	                    this.theProfiler.endSection();
+	                }
             }
 
             worldTickTimes.get(id)[this.tickCounter % 100] = System.nanoTime() - j;

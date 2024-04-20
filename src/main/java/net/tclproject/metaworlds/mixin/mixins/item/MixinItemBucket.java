@@ -32,17 +32,13 @@ public abstract class MixinItemBucket {
     @Shadow(remap = true)
     public abstract ItemStack func_150910_a(ItemStack itemStackIn, EntityPlayer player, Item waterBucket);
 
-    @Shadow(remap = true)
-    public abstract MovingObjectPosition getMovingObjectPositionFromPlayer(World worldIn, EntityPlayer player,
-        boolean flag);
-
     /**
      * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
      */
     @Overwrite
     public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer player) {
         boolean flag = this.isFull == Blocks.air;
-        MovingObjectPosition movingobjectposition = this.getMovingObjectPositionFromPlayer(worldIn, player, flag);
+        MovingObjectPosition movingobjectposition = ((ItemBucket)(Object)this).getMovingObjectPositionFromPlayer(worldIn, player, flag);
         if (movingobjectposition != null) worldIn = ((IMixinMovingObjectPosition) movingobjectposition).getWorld();
 
         if (movingobjectposition == null) {

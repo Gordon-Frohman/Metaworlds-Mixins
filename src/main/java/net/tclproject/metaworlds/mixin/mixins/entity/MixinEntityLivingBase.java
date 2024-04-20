@@ -28,31 +28,13 @@ public abstract class MixinEntityLivingBase implements IMixinEntityLivingBase {
     private static boolean isTransformingClient = false;
     private static boolean isTransformingServer = false;
 
-    @Shadow(remap = true)
-    public World worldObj;
-
-    @Shadow(remap = true)
-    public double posX;
-
-    @Shadow(remap = true)
-    public double posY;
-
-    @Shadow(remap = true)
-    public double posZ;
-
-    @Shadow(remap = true)
-    public boolean onGround;
-
     // TODO
-
-    @Shadow(remap = true)
-    public abstract void setPosition(double x, double y, double z);
 
     @Shadow(remap = true)
     protected abstract boolean isPlayer();
 
-    @Inject(method = "setPosition", at = @At("TAIL"))
-    public void setPosition(double par1, double par3, double par5, CallbackInfo ci) {
+    public void setPosition(double par1, double par3, double par5) {
+    	((Entity)(Object)this).setPosition(par1, par3, par5);
         if (this.tryLockTransformations()) {
             EntityPlayer curProxyPlayer;
             if (this.isPlayerProxy) {
@@ -153,12 +135,12 @@ public abstract class MixinEntityLivingBase implements IMixinEntityLivingBase {
     public void moveEntity(double par1, double par3, double par5) {
         ((Entity) (Object) this).moveEntity(par1, par3, par5);
         if (this.isPlayerProxy || this.isPlayer()) {
-            this.setPosition(this.posX, this.posY, this.posZ);
+            ((EntityLivingBase)(Object)this).setPosition(((EntityLivingBase)(Object)this).posX, ((EntityLivingBase)(Object)this).posY, ((EntityLivingBase)(Object)this).posZ);
             EntityPlayerProxy curProxyPlayer;
             if (!this.isPlayerProxy) {
                 for (Iterator i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
-                    .iterator(); i$.hasNext(); ((EntityPlayer) curProxyPlayer).onGround = this.onGround) {
+                    .iterator(); i$.hasNext(); ((EntityPlayer) curProxyPlayer).onGround = ((EntityLivingBase)(Object)this).onGround) {
                     curProxyPlayer = (EntityPlayerProxy) i$.next();
                 }
             }
@@ -338,8 +320,8 @@ public abstract class MixinEntityLivingBase implements IMixinEntityLivingBase {
     }
 
     private boolean tryLockTransformations() {
-        if ((!this.worldObj.isRemote || !isTransformingClient) && (this.worldObj.isRemote || !isTransformingServer)) {
-            if (this.worldObj.isRemote) {
+        if ((!((EntityLivingBase)(Object)this).worldObj.isRemote || !isTransformingClient) && (((EntityLivingBase)(Object)this).worldObj.isRemote || !isTransformingServer)) {
+            if (((EntityLivingBase)(Object)this).worldObj.isRemote) {
                 isTransformingClient = true;
             } else {
                 isTransformingServer = true;
@@ -352,7 +334,7 @@ public abstract class MixinEntityLivingBase implements IMixinEntityLivingBase {
     }
 
     private void releaseTransformationLock() {
-        if (this.worldObj.isRemote) {
+        if (((EntityLivingBase)(Object)this).worldObj.isRemote) {
             isTransformingClient = false;
         } else {
             isTransformingServer = false;

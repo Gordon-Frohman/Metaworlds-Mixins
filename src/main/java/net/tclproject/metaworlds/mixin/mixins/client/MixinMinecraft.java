@@ -59,7 +59,7 @@ import net.tclproject.metaworlds.mixin.interfaces.util.IMixinMovingObjectPositio
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
 
-@Mixin(Minecraft.class)
+@Mixin(value = Minecraft.class, priority = 800)
 public abstract class MixinMinecraft {
 	
     @Shadow(remap = true)
@@ -140,9 +140,6 @@ public abstract class MixinMinecraft {
     public abstract void displayGuiScreen(GuiScreen p_147108_1_);
 
     @Shadow(remap = true)
-    public abstract long getSystemTime();
-
-    @Shadow(remap = true)
     public abstract void setIngameFocus();
 
     @Shadow(remap = true)
@@ -160,7 +157,7 @@ public abstract class MixinMinecraft {
     @Shadow(remap = true)
     public abstract NetHandlerPlayClient getNetHandler();
 	
-	@Inject(at = @At("HEAD"), method = "<init>")
+	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;theMinecraft:Lnet/minecraft/client/Minecraft;"), method = "<init>")
 	// To get an empty Minecraft variable
 	private void init(Session sessionIn, int displayWidth, int displayHeight, boolean fullscreen, boolean isDemo, File dataDir, File assetsDir, File resourcePackDir, Proxy proxy, String version, Multimap twitchDetails, String assetsJsonVersion, CallbackInfo info) {
 		if(sessionIn == null && displayWidth == 0 && displayHeight == 0 && fullscreen ==  false && isDemo == false && dataDir == null && assetsDir == null && resourcePackDir == null && version == null && twitchDetails == null && assetsJsonVersion == null && info == null)
@@ -430,7 +427,7 @@ public abstract class MixinMinecraft {
                     KeyBinding.onTick(j - 100);
                 }
 
-                long k = getSystemTime() - this.systemTime;
+                long k = Minecraft.getSystemTime() - this.systemTime;
 
                 if (k <= 200L) {
                     int i = Mouse.getEventDWheel();
@@ -478,7 +475,7 @@ public abstract class MixinMinecraft {
                 }
 
                 if (this.field_83002_am > 0L) {
-                    if (getSystemTime() - this.field_83002_am >= 6000L) {
+                    if (Minecraft.getSystemTime() - this.field_83002_am >= 6000L) {
                         throw new ReportedException(new CrashReport("Manually triggered debug crash", new Throwable()));
                     }
 
@@ -486,7 +483,7 @@ public abstract class MixinMinecraft {
                         this.field_83002_am = -1L;
                     }
                 } else if (Keyboard.isKeyDown(46) && Keyboard.isKeyDown(61)) {
-                    this.field_83002_am = getSystemTime();
+                    this.field_83002_am = Minecraft.getSystemTime();
                 }
 
                 this.func_152348_aa();
@@ -729,7 +726,7 @@ public abstract class MixinMinecraft {
             .onPostClientTick();
 
         this.mcProfiler.endSection();
-        this.systemTime = getSystemTime();
+        this.systemTime = Minecraft.getSystemTime();
     }
 
 	@Overwrite

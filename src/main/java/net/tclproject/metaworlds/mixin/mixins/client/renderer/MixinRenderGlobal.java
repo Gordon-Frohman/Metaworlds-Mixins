@@ -90,16 +90,15 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(RenderGlobal.class)
+@Mixin(value = RenderGlobal.class, priority = 800)
 public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     private List<WorldRenderer> worldRenderersList = new ArrayList<WorldRenderer>();
 
-    @Shadow(remap = true)
     private List<WorldRenderer> sortedWorldRenderersList = new ArrayList<WorldRenderer>();
 
-    @Shadow(remap = true)
     private Map<Integer, WorldRenderer> worldRenderersMap = new HashMap<Integer, WorldRenderer>();
 
     @Shadow(remap = true)
@@ -240,9 +239,9 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     @Shadow(remap = true)
     private int frustumCheckOffset;
 	
-	@Inject(at = @At("HEAD"), method = "<init>")
+    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;mc:Lnet/minecraft/client/Minecraft;"), method = "<init>")
 	// To get an empty RenderGlobal variable
-	private void init(Minecraft mc) {
+	private void init(Minecraft mc, CallbackInfo info) {
 		if(mc == null)
 			return;
 	}

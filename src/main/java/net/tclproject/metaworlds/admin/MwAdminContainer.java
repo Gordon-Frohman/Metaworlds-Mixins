@@ -22,7 +22,7 @@ import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.common.DimensionManager;
 import net.tclproject.metaworlds.api.IMixinWorld;
 import net.tclproject.metaworlds.api.SubWorld;
-import net.tclproject.metaworlds.api.WorldInfoSuperClass;
+import net.tclproject.metaworlds.api.IMixinWorldInfo;
 import net.tclproject.metaworlds.compat.packet.MwAdminGuiInitPacket;
 import net.tclproject.metaworlds.compat.packet.MwAdminGuiSubWorldInfosPacket;
 import net.tclproject.metaworlds.patcher.SubWorldInfoHolder;
@@ -109,7 +109,7 @@ public class MwAdminContainer extends Container {
     }
 
     public void sendSubWorldInfos() {
-        Collection subWorldInfos = ((WorldInfoSuperClass) DimensionManager.getWorld(0)
+        Collection subWorldInfos = ((IMixinWorldInfo) DimensionManager.getWorld(0)
             .getWorldInfo()).getSubWorldInfos();
         this.adminSubWorldInfos = new TreeMap();
         Iterator arr$ = subWorldInfos.iterator();
@@ -249,14 +249,14 @@ public class MwAdminContainer extends Container {
                     .getWorldInfo(saveInfo.worldFileName);
                 SubWorldInfoHolder sourceSubWorldInfo = null;
                 if (saveWorldInfo != null && subWorldInfo.subWorldId != 0) {
-                    sourceSubWorldInfo = ((WorldInfoSuperClass) saveWorldInfo).getSubWorldInfo(subWorldInfo.subWorldId);
+                    sourceSubWorldInfo = ((IMixinWorldInfo) saveWorldInfo).getSubWorldInfo(subWorldInfo.subWorldId);
                     if (sourceSubWorldInfo == null) {
                         saveWorldInfo = null;
                     }
                 }
 
                 File subWorldDir = new File(saveInfo.saveDir, subWorldInfo.subWorldSaveDirName);
-                int newSubWorldId = ((WorldInfoSuperClass) DimensionManager.getWorld(0)
+                int newSubWorldId = ((IMixinWorldInfo) DimensionManager.getWorld(0)
                     .getWorldInfo()).getNextSubWorldID();
                 SubWorldImporterThread newImportThread = new SubWorldImporterThread(
                     newSubWorldId,

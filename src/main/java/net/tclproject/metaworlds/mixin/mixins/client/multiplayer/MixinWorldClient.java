@@ -1,29 +1,46 @@
 package net.tclproject.metaworlds.mixin.mixins.client.multiplayer;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.MovingSoundMinecart;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.RenderList;
+import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityMinecart;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
+import net.tclproject.metaworlds.api.PlayerManagerSuperClass;
+import net.tclproject.metaworlds.api.SubWorld;
 import net.tclproject.metaworlds.core.SubWorldClientFactory;
 import net.tclproject.metaworlds.mixin.interfaces.client.multiplayer.IMixinWorldClient;
 import net.tclproject.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
+import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
+import net.tclproject.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import net.tclproject.metaworlds.patcher.EntityClientPlayerMPSubWorldProxy;
+import net.tclproject.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
 import net.tclproject.metaworlds.patcher.SubWorldFactory;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,11 +48,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WorldClient.class)
+@Mixin(value = WorldClient.class, priority = 800)
 public abstract class MixinWorldClient implements IMixinWorldClient {
 
+    private ArrayList collidingBBCacheIntermediate = new ArrayList();
+
     public int worldDimension;
-    public static SubWorldFactory subWorldFactory = null;
+    private static SubWorldFactory subWorldFactory = null;
 
     @Shadow(remap = true)
     private Minecraft mc;
@@ -47,13 +66,10 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
     private Set entityList;
 
     @Shadow(remap = true)
-    private Random rand;
-
-    @Shadow(remap = true)
-    public WorldProvider provider;
-
-    @Shadow(remap = true)
     public NetHandlerPlayClient sendQueue;
+
+    @Shadow(remap = true)
+    private Set entitySpawnQueue;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void WorldClient(NetHandlerPlayClient p_i45063_1_, WorldSettings p_i45063_2_, int p_i45063_3_,
@@ -162,7 +178,229 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
         return this.sendQueue;
     }
 
-    @Shadow(remap = true)
-    abstract void removeEntity(Entity entity);
+    // Probably no need to overwrite, since it is not present in the original class
+    // @Overwrite
+    public MovingObjectPosition func_147447_a(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) {
+       MovingObjectPosition bestResult = null;
+       Vec3 vecSource = ((IMixinWorld)this).transformToGlobal(par1Vec3);
+       Vec3 vecDest = ((IMixinWorld)this).transformToGlobal(par2Vec3);
+       Iterator i$ = ((IMixinWorld)((IMixinWorld)this).getParentWorld()).getWorlds().iterator();
+
+       while(i$.hasNext()) {
+          World curWorld = (World)i$.next();
+          MovingObjectPosition curResult = ((IMixinWorldClient)curWorld).rayTraceBlocks_do_do_single(((IMixinWorld)curWorld).transformToLocal(vecSource), ((IMixinWorld)curWorld).transformToLocal(vecDest), par3, par4, par5);
+          if(curResult != null) {
+         	// This field is actually inserted on runtime
+             ((IMixinMovingObjectPosition)curResult).setWorld(curWorld);
+             curResult.hitVec = ((IMixinWorld)curWorld).transformLocalToOther((WorldClient)(Object)this, curResult.hitVec);
+          }
+
+          if(bestResult == null || bestResult.typeOfHit == MovingObjectPosition.MovingObjectType.MISS || curResult != null && curResult.typeOfHit != MovingObjectPosition.MovingObjectType.MISS && bestResult.hitVec.squareDistanceTo(par1Vec3) > curResult.hitVec.squareDistanceTo(par1Vec3)) {
+             bestResult = curResult;
+          }
+       }
+
+       return bestResult;
+    }
+
+    public MovingObjectPosition rayTraceBlocks_do_do_single(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) {
+       return ((World)(Object)this).func_147447_a(par1Vec3, par2Vec3, par3, par4, par5);
+    }
+
+    // Probably no need to overwrite, since it is not present in the original class
+    // @Overwrite
+    public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+       this.collidingBBCacheIntermediate.clear();
+       this.collidingBBCacheIntermediate = (ArrayList)this.getCollidingBoundingBoxesLocal(par1Entity, par2AxisAlignedBB);
+       Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator();
+
+       while(i$.hasNext()) {
+          World curSubWorld = (World)i$.next();
+          this.collidingBBCacheIntermediate.addAll(((SubWorld)curSubWorld).getCollidingBoundingBoxesGlobal(par1Entity, par2AxisAlignedBB));
+       }
+
+       return this.collidingBBCacheIntermediate;
+    }
+
+    public List getCollidingBoundingBoxesLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+       return ((World)(Object)this).getCollidingBoundingBoxes(par1Entity, par2AxisAlignedBB);
+    }
+
+    // Probably no need to overwrite, since it is not present in the original class
+    // @Overwrite
+    public boolean isMaterialInBB(AxisAlignedBB par1AxisAlignedBB, Material par2Material) {
+       if(this.isMaterialInBBLocal(par1AxisAlignedBB, par2Material)) {
+          return true;
+       } else {
+          if(!((IMixinWorld)this).isSubWorld()) {
+             Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator();
+
+             while(i$.hasNext()) {
+                World curSubWorld = (World)i$.next();
+                if(((SubWorld)curSubWorld).isMaterialInBBGlobal(par1AxisAlignedBB, par2Material)) {
+                   return true;
+                }
+             }
+          }
+
+          return false;
+       }
+    }
+
+    public boolean isMaterialInBBLocal(AxisAlignedBB par1AxisAlignedBB, Material par2Material) {
+       return ((World)(Object)this).isMaterialInBB(par1AxisAlignedBB, par2Material);
+    }
+
+    // Probably no need to overwrite, since it is not present in the original class
+    // @Overwrite
+    public boolean isAABBInMaterial(AxisAlignedBB par1AxisAlignedBB, Material par2Material) {
+       if(((World)(Object)this).isAABBInMaterial(par1AxisAlignedBB, par2Material)) {
+          return true;
+       } else {
+          if(!((IMixinWorld)this).isSubWorld()) {
+             Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator();
+
+             while(i$.hasNext()) {
+                World curSubWorld = (World)i$.next();
+                if(((SubWorld)curSubWorld).isAABBInMaterialGlobal(par1AxisAlignedBB, par2Material)) {
+                   return true;
+                }
+             }
+          }
+
+          return false;
+       }
+    }
+
+    // Probably no need to overwrite, since it is not present in the original class
+    // @Overwrite
+    public List getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) {
+       ArrayList arraylist = new ArrayList();
+       arraylist.addAll(this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, par3IEntitySelector));
+       Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator();
+
+       while(i$.hasNext()) {
+          World curSubWorld = (World)i$.next();
+          arraylist.addAll(((IMixinWorld)curSubWorld).getEntitiesWithinAABBExcludingEntityLocal(par1Entity, ((IMixinAxisAlignedBB)par2AxisAlignedBB).getTransformedToLocalBoundingBox(curSubWorld), par3IEntitySelector));
+       }
+
+       return arraylist;
+    }
+
+    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+       return this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, (IEntitySelector)null);
+    }
+
+    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) {
+       if(par1Entity instanceof EntityPlayer) {
+          par1Entity = ((IMixinEntity)par1Entity).getProxyPlayer(((WorldClient)(Object)this));
+       }
+
+       return ((World)(Object)this).getEntitiesWithinAABBExcludingEntity((Entity)par1Entity, par2AxisAlignedBB, par3IEntitySelector);
+    }
+
+    // Probably no need to overwrite, since it is not present in the original class
+    // @Overwrite
+    public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) {
+       ArrayList arraylist = new ArrayList();
+       arraylist.addAll(this.selectEntitiesWithinAABBLocal(par1Class, par2AxisAlignedBB, par3IEntitySelector));
+       Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator();
+
+       while(i$.hasNext()) {
+          World curSubWorld = (World)i$.next();
+          arraylist.addAll(((IMixinWorldClient)curSubWorld).selectEntitiesWithinAABBLocal(par1Class, ((IMixinAxisAlignedBB)par2AxisAlignedBB).getTransformedToLocalBoundingBox(curSubWorld), par3IEntitySelector));
+       }
+
+       return arraylist;
+    }
+
+    public List selectEntitiesWithinAABBLocal(Class par1Class, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) {
+       return ((World)(Object)this).selectEntitiesWithinAABB(par1Class, par2AxisAlignedBB, par3IEntitySelector);
+    }
+
+    /**
+     * Called to place all entities as part of a world
+     */
+    @Overwrite
+    public boolean spawnEntityInWorld(Entity p_72838_1_)
+    {
+        boolean flag = spawnEntityInWorldIntermediate(p_72838_1_);
+        this.entityList.add(p_72838_1_);
+
+        if (!flag)
+        {
+            this.entitySpawnQueue.add(p_72838_1_);
+        }
+        else if (p_72838_1_ instanceof EntityMinecart)
+        {
+            this.mc.getSoundHandler().playSound(new MovingSoundMinecart((EntityMinecart)p_72838_1_));
+        }
+
+        return flag;
+    }
+
+    public boolean spawnEntityInWorldIntermediate(Entity par1Entity) {
+       boolean result = ((World)(Object)this).spawnEntityInWorld(par1Entity);
+       World curSubWorld;
+       Object proxyPlayer;
+       if(!((World)(Object)this).isRemote && !((IMixinWorld)this).isSubWorld() && par1Entity instanceof EntityPlayer) {
+          for(Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator(); i$.hasNext(); curSubWorld.spawnEntityInWorld((Entity)proxyPlayer)) {
+             curSubWorld = (World)i$.next();
+             proxyPlayer = ((IMixinEntity)par1Entity).getProxyPlayer(curSubWorld);
+             if(proxyPlayer == null) {
+                proxyPlayer = new EntityPlayerMPSubWorldProxy((EntityPlayerMP)par1Entity, curSubWorld);
+                ((EntityPlayerMP)proxyPlayer).theItemInWorldManager.setWorld((WorldServer)curSubWorld);
+             }
+          }
+       }
+
+       return result;
+    }
+
+    /**
+     * Schedule the entity for removal during the next tick. Marks the entity dead in anticipation.
+     */
+    @Overwrite
+    public void removeEntity(Entity p_72900_1_)
+    {
+    	removeEntityIntermediate(p_72900_1_);
+        this.entityList.remove(p_72900_1_);
+    }
+
+    public void removeEntityIntermediate(Entity par1Entity) {
+       ((World)(Object)this).removeEntity(par1Entity);
+       if(!((World)(Object)this).isRemote && !((IMixinWorld)this).isSubWorld() && par1Entity instanceof EntityPlayer) {
+          Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator();
+
+          while(i$.hasNext()) {
+             World curSubWorld = (World)i$.next();
+             EntityPlayer proxyPlayer = ((IMixinEntity)par1Entity).getProxyPlayer(curSubWorld);
+             if(proxyPlayer != null) {
+                curSubWorld.removeEntity(proxyPlayer);
+                if(!((PlayerManagerSuperClass)((WorldServer)curSubWorld).getPlayerManager()).getPlayers().contains(proxyPlayer)) {
+             	   ((IMixinEntity)par1Entity).getPlayerProxyMap().remove(Integer.valueOf(((IMixinWorld)curSubWorld).getSubWorldID()));
+                }
+             }
+          }
+       }
+    }
+
+    // Probably no need to overwrite, since it is not present in the original class
+    // @Overwrite
+    public void removePlayerEntityDangerously(Entity par1Entity) {
+       ((World)(Object)this).removePlayerEntityDangerously(par1Entity);
+       if(!((WorldClient)(Object)this).isRemote && !((IMixinWorld)this).isSubWorld() && par1Entity instanceof EntityPlayer) {
+          Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator();
+
+          while(i$.hasNext()) {
+             World curSubWorld = (World)i$.next();
+             EntityPlayer proxyPlayer = ((IMixinEntity)par1Entity).getProxyPlayer(curSubWorld);
+             curSubWorld.removeEntity(proxyPlayer);
+             if(!((PlayerManagerSuperClass)((WorldServer)curSubWorld).getPlayerManager()).getPlayers().contains(proxyPlayer)) {
+                ((IMixinEntity)par1Entity).getPlayerProxyMap().remove(Integer.valueOf(((IMixinWorld)curSubWorld).getSubWorldID()));
+             }
+          }
+       }
+    }
 
 }

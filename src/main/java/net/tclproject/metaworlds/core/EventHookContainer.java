@@ -12,7 +12,7 @@ import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
-import net.tclproject.metaworlds.api.WorldInfoSuperClass;
+import net.tclproject.metaworlds.api.IMixinWorldInfo;
 import net.tclproject.metaworlds.compat.packet.SubWorldCreatePacket;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
 
@@ -30,7 +30,7 @@ public class EventHookContainer {
                         new Integer[] { Integer.valueOf(((IMixinWorld) event.world).getSubWorldID()) }),
                     event.world.provider.dimensionId);
             } else {
-                Collection subWorldIDs = ((WorldInfoSuperClass) DimensionManager.getWorld(0)
+                Collection subWorldIDs = ((IMixinWorldInfo) DimensionManager.getWorld(0)
                     .getWorldInfo()).getSubWorldIDs(((WorldServer) event.world).provider.dimensionId);
                 if (subWorldIDs != null) {
                     Iterator i$ = subWorldIDs.iterator();

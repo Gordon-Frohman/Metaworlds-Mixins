@@ -7,20 +7,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.profiler.Profiler;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+import net.minecraft.world.storage.ISaveHandler;
 import net.tclproject.metaworlds.core.SubWorldServerFactory;
 import net.tclproject.metaworlds.patcher.SubWorldFactory;
 
 @Mixin(WorldServer.class)
 public class MixinWorldServer {
 
-    public static SubWorldFactory subWorldFactory = null;
+    private static SubWorldFactory subWorldFactory = null;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void WorldClient(NetHandlerPlayClient p_i45063_1_, WorldSettings p_i45063_2_, int p_i45063_3_,
-        EnumDifficulty p_i45063_4_, Profiler p_i45063_5_, CallbackInfo ci) {
+    public void WorldClient(MinecraftServer p_i45284_1_, ISaveHandler p_i45284_2_, String p_i45284_3_, int p_i45284_4_, WorldSettings p_i45284_5_, Profiler p_i45284_6_, CallbackInfo ci) {
         if (subWorldFactory == null)
         	subWorldFactory = new SubWorldServerFactory();
     }

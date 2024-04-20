@@ -176,18 +176,4 @@ public interface IMixinWorld {
     public Map<Integer, World> getSubWorldsMap();
     
     public void doTickPartial(double interpolationFactor);
-    
-    public MovingObjectPosition rayTraceBlocks_do_do_single(Vec3 transformToLocal, Vec3 transformToLocal2, boolean par3, boolean par4, boolean par5);
-    
-    public List getCollidingBoundingBoxesLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB);
-    
-    public boolean isAABBInMaterialLocal(AxisAlignedBB par1AxisAlignedBB, Material par2Material);
-    
-    public List selectEntitiesWithinAABBLocal(Class par1Class, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector);
-    
-    public boolean spawnEntityInWorldLocal(Entity par1Entity);
-    
-    public void removeEntityLocal(Entity par1Entity);
-    
-    public void removePlayerEntityDangerouslyLocal(Entity par1Entity);
 }

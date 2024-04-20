@@ -8,6 +8,8 @@ import net.minecraft.world.World;
 import net.tclproject.metaworlds.patcher.EntityPlayerProxy;
 
 public interface IMixinEntity {
+	
+    public static final byte tractionLossThreshold = 20;
 
     World getWorldBelowFeet();
 

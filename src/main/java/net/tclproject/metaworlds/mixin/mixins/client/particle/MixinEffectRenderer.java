@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -62,7 +63,7 @@ public abstract class MixinEffectRenderer {
     public abstract void addEffect(EntityFX p_78873_1_);
 
 	@Inject(method = "updateEffects", at = @At("TAIL"))
-    public void updateEffects() {
+    public void updateEffects(CallbackInfo info) {
         if (!((IMixinWorld)this.worldObj).isSubWorld()) {
             Entity globalPlayer = Minecraft.getMinecraft().thePlayer;
             for (EntityPlayerProxy curPlayer : ((IMixinEntity)globalPlayer).getPlayerProxyMap().values()) {

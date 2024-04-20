@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import net.tclproject.metaworlds.patcher.SubWorldInfoHolder;
 
-public interface WorldInfoSuperClass {
+public interface IMixinWorldInfo {
 
     public int getNextSubWorldID();
 

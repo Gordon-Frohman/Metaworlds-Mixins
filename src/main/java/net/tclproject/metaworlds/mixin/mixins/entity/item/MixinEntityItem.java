@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EntityItem.class)
 public class MixinEntityItem {
 
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "LEntity;<init>(Lnet/minecraft/world/World;)V"), index = 0)
-    private World adjustWorld(World world) {
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;<init>(Lnet/minecraft/world/World;)V"), index = 0)
+    private static World adjustWorld(World world) {
         return world != null ? ((IMixinWorld) world).getParentWorld() : world;
     }
 

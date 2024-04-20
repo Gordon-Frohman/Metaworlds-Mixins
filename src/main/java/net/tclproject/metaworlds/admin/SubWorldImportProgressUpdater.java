@@ -7,7 +7,7 @@ import java.util.ListIterator;
 
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.common.DimensionManager;
-import net.tclproject.metaworlds.api.WorldInfoSuperClass;
+import net.tclproject.metaworlds.api.IMixinWorldInfo;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
@@ -42,7 +42,7 @@ public class SubWorldImportProgressUpdater {
 
         while (i$1.hasNext()) {
             curFinishedImport = (SubWorldImporterThread) i$1.next();
-            ((WorldInfoSuperClass) worldInfo1).updateSubWorldInfo(curFinishedImport.targetSubWorldInfo);
+            ((IMixinWorldInfo) worldInfo1).updateSubWorldInfo(curFinishedImport.targetSubWorldInfo);
         }
 
         this.finishedImports.clear();

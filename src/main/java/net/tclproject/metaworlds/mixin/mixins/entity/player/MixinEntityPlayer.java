@@ -28,9 +28,6 @@ public abstract class MixinEntityPlayer implements IMixinEntityPlayer {
     private final boolean isProxyPlayer = this instanceof EntityPlayerProxy;
 
     @Shadow(remap = true)
-    public World worldObj;
-
-    @Shadow(remap = true)
     public ChunkCoordinates playerLocation;
 
     @Shadow(remap = true)
@@ -38,16 +35,16 @@ public abstract class MixinEntityPlayer implements IMixinEntityPlayer {
 
     @Overwrite
     public boolean isInBed() {
-        if (this.worldObj.getBlock(this.playerLocation.posX, this.playerLocation.posY, this.playerLocation.posZ)
+        if (((EntityPlayer)(Object)this).worldObj.getBlock(this.playerLocation.posX, this.playerLocation.posY, this.playerLocation.posZ)
             .isBed(
-                worldObj,
+            	((EntityPlayer)(Object)this).worldObj,
                 playerLocation.posX,
                 playerLocation.posY,
                 playerLocation.posZ,
                 (EntityLivingBase) (Object) this)) {
             return true;
         } else {
-            if (!((IMixinWorld) this.worldObj).isSubWorld()) {
+            if (!((IMixinWorld) ((EntityPlayer)(Object)this).worldObj).isSubWorld()) {
                 Iterator i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator();
@@ -89,11 +86,12 @@ public abstract class MixinEntityPlayer implements IMixinEntityPlayer {
         int i = MathHelper.floor_double(((Entity) (Object) this).posX);
         int j = MathHelper.floor_double(((Entity) (Object) this).boundingBox.minY);
         int k = MathHelper.floor_double(((Entity) (Object) this).posZ);
-        Block block = this.worldObj.getBlock(i, j, k);
-        return ForgeHooks.isLivingOnLadder(block, worldObj, i, j, k, (EntityLivingBase) (Object) this);
+        Block block = ((EntityPlayer)(Object)this).worldObj.getBlock(i, j, k);
+        return ForgeHooks.isLivingOnLadder(block, ((EntityPlayer)(Object)this).worldObj, i, j, k, (EntityLivingBase) (Object) this);
     }
 
-    @Overwrite
+    // Probably no need to overwrite because this function is not present in EntityPlayer
+    //@Overwrite
     public boolean isOnLadder() {
         if (this.isProxyPlayer) {
             return ((EntityPlayerProxy) this).getRealPlayer()
@@ -123,7 +121,7 @@ public abstract class MixinEntityPlayer implements IMixinEntityPlayer {
     }
 
     public boolean shouldRenderInPass(int pass) {
-        return ((IMixinWorld) this.worldObj).isSubWorld() ? false
+        return ((IMixinWorld) ((EntityPlayer)(Object)this).worldObj).isSubWorld() ? false
             : ((EntityPlayer) (Object) this).shouldRenderInPass(pass);
     }
 }

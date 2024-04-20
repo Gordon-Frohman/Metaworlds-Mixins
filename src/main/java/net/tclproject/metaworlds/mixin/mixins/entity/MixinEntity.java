@@ -166,7 +166,6 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
     public World worldBelowFeet;
     protected byte tractionLoss;
-    public static final byte tractionLossThreshold = 20;
     protected boolean losingTraction = false;
     public int serverPosXOnSubWorld;
     public int serverPosYOnSubWorld;
