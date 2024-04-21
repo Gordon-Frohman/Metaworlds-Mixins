@@ -34,6 +34,7 @@ import net.tclproject.metaworlds.api.IMixinWorld;
 import net.tclproject.metaworlds.api.PlayerManagerSuperClass;
 import net.tclproject.metaworlds.api.SubWorld;
 import net.tclproject.metaworlds.core.SubWorldClientFactory;
+import net.tclproject.metaworlds.mixin.mixins.world.MixinWorld;
 import net.tclproject.metaworlds.mixin.interfaces.client.multiplayer.IMixinWorldClient;
 import net.tclproject.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
 import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
@@ -49,7 +50,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = WorldClient.class, priority = 800)
-public abstract class MixinWorldClient implements IMixinWorldClient {
+public abstract class MixinWorldClient extends MixinWorld implements IMixinWorldClient {
 
     private ArrayList collidingBBCacheIntermediate = new ArrayList();
 
@@ -204,7 +205,7 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
     }
 
     public MovingObjectPosition rayTraceBlocks_do_do_single(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) {
-       return ((World)(Object)this).func_147447_a(par1Vec3, par2Vec3, par3, par4, par5);
+       return super.func_147447_a(par1Vec3, par2Vec3, par3, par4, par5);
     }
 
     // Probably no need to overwrite, since it is not present in the original class
@@ -223,7 +224,7 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
     }
 
     public List getCollidingBoundingBoxesLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
-       return ((World)(Object)this).getCollidingBoundingBoxes(par1Entity, par2AxisAlignedBB);
+       return super.getCollidingBoundingBoxes(par1Entity, par2AxisAlignedBB);
     }
 
     // Probably no need to overwrite, since it is not present in the original class
@@ -248,7 +249,7 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
     }
 
     public boolean isMaterialInBBLocal(AxisAlignedBB par1AxisAlignedBB, Material par2Material) {
-       return ((World)(Object)this).isMaterialInBB(par1AxisAlignedBB, par2Material);
+       return super.isMaterialInBB(par1AxisAlignedBB, par2Material);
     }
 
     // Probably no need to overwrite, since it is not present in the original class
@@ -296,7 +297,7 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
           par1Entity = ((IMixinEntity)par1Entity).getProxyPlayer(((WorldClient)(Object)this));
        }
 
-       return ((World)(Object)this).getEntitiesWithinAABBExcludingEntity((Entity)par1Entity, par2AxisAlignedBB, par3IEntitySelector);
+       return super.getEntitiesWithinAABBExcludingEntity((Entity)par1Entity, par2AxisAlignedBB, par3IEntitySelector);
     }
 
     // Probably no need to overwrite, since it is not present in the original class
@@ -315,7 +316,7 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
     }
 
     public List selectEntitiesWithinAABBLocal(Class par1Class, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) {
-       return ((World)(Object)this).selectEntitiesWithinAABB(par1Class, par2AxisAlignedBB, par3IEntitySelector);
+       return super.selectEntitiesWithinAABB(par1Class, par2AxisAlignedBB, par3IEntitySelector);
     }
 
     /**
@@ -340,7 +341,7 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
     }
 
     public boolean spawnEntityInWorldIntermediate(Entity par1Entity) {
-       boolean result = ((World)(Object)this).spawnEntityInWorld(par1Entity);
+       boolean result = super.spawnEntityInWorld(par1Entity);
        World curSubWorld;
        Object proxyPlayer;
        if(!((World)(Object)this).isRemote && !((IMixinWorld)this).isSubWorld() && par1Entity instanceof EntityPlayer) {
@@ -368,7 +369,7 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
     }
 
     public void removeEntityIntermediate(Entity par1Entity) {
-       ((World)(Object)this).removeEntity(par1Entity);
+       super.removeEntity(par1Entity);
        if(!((World)(Object)this).isRemote && !((IMixinWorld)this).isSubWorld() && par1Entity instanceof EntityPlayer) {
           Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator();
 
@@ -388,7 +389,7 @@ public abstract class MixinWorldClient implements IMixinWorldClient {
     // Probably no need to overwrite, since it is not present in the original class
     // @Overwrite
     public void removePlayerEntityDangerously(Entity par1Entity) {
-       ((World)(Object)this).removePlayerEntityDangerously(par1Entity);
+       super.removePlayerEntityDangerously(par1Entity);
        if(!((WorldClient)(Object)this).isRemote && !((IMixinWorld)this).isSubWorld() && par1Entity instanceof EntityPlayer) {
           Iterator i$ = ((IMixinWorld)this).getSubWorlds().iterator();
 

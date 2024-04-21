@@ -126,6 +126,24 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     // TODO
 
     @Shadow(remap = true)
+    public boolean shouldRenderInPass(int pass) { return false; }
+
+    @Shadow(remap = true)
+	protected void setPosition(double par1, double par3, double par5) {}
+
+    @Shadow(remap = true)
+    public void setRotation(float par1, float par2) {}
+
+    @Shadow(remap = true)
+    public void setPositionAndRotation(double par1, double par3, double par5, float par7, float par8) {}
+
+    @Shadow(remap = true)
+    public void setAngles(float par1, float par2) {}
+
+    @Shadow(remap = true)
+    public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {}
+
+    @Shadow(remap = true)
     public abstract double getDistanceSq(double p_70092_1_, double p_70092_3_, double p_70092_5_);
 
     @Shadow(remap = true)

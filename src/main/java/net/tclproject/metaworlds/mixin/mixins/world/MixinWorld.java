@@ -7,10 +7,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
@@ -53,6 +55,30 @@ public abstract class MixinWorld implements IMixinWorld {
     //TODO
 
     @Shadow(remap = true)
+    public MovingObjectPosition func_147447_a(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) { return null; }
+
+    @Shadow(remap = true)
+    public void removePlayerEntityDangerously(Entity par1Entity) {}
+
+    @Shadow(remap = true)
+    public void removeEntity(Entity p_72900_1_) {}
+
+    @Shadow(remap = true)
+    public boolean spawnEntityInWorld(Entity p_72838_1_) { return false; }
+
+    @Shadow(remap = true)
+    public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) { return null; }
+
+    @Shadow(remap = true)
+    public List getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) { return null; }
+
+    @Shadow(remap = true)
+    public boolean isMaterialInBB(AxisAlignedBB par1AxisAlignedBB, Material par2Material) { return false; }
+
+    @Shadow(remap = true)
+    public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) { return null; }
+
+    @Shadow(remap = true)
     public abstract void onEntityRemoved(Entity p_72847_1_);
 
     @Shadow(remap = true)
@@ -84,18 +110,26 @@ public abstract class MixinWorld implements IMixinWorld {
     public abstract World CreateSubWorld(int var1);
 
     public Collection<World> getWorlds() {
+    	if(this.allWorlds == null)
+    		this.allWorlds = new UnmodifiableSingleObjPlusCollection<World>((World) (Object) this, this.getSubWorlds());
         return this.allWorlds;
     }
 
     public Collection<World> getSubWorlds() {
-        return this.childSubWorlds.values();
+    	if(this.childSubWorlds == null)
+    		childSubWorlds = new TreeMap<Integer, World>();
+    	return this.childSubWorlds.values();
     }
 
     public Map<Integer, World> getSubWorldsMap() {
+    	if(this.childSubWorlds == null)
+    		childSubWorlds = new TreeMap<Integer, World>();
         return this.childSubWorlds;
     }
 
     public int getWorldsCount() {
+    	if(this.childSubWorlds == null)
+    		childSubWorlds = new TreeMap<Integer, World>();
         return this.childSubWorlds.size() + 1;
     }
 

@@ -12,6 +12,7 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
@@ -60,7 +61,7 @@ public abstract class MixinNetHandlerPlayServer {
     public boolean hasMoved;
 
     @Shadow(remap = true)
-    public Logger logger;
+    private static Logger logger;
 
     /** The last known x position for this connection. */
     @Shadow(remap = true)
@@ -77,9 +78,11 @@ public abstract class MixinNetHandlerPlayServer {
 
     @Shadow(remap = true)
     public int networkTickCount;
+    
+    //TODO
 
     @Shadow(remap = true)
-    public abstract void sendPacket(S2FPacketSetSlot s2fPacketSetSlot);
+    public abstract void sendPacket(final Packet packetIn);
 
     @Shadow(remap = true)
     public abstract void setPlayerLocation(double lastPosX2, double lastPosY2, double lastPosZ2, float rotationYaw,

@@ -26,7 +26,6 @@ import net.tclproject.metaworlds.api.IMixinWorld;
 @Mixin(PlayerControllerMP.class)
 public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerMP {
 
-    @Shadow(remap = true)
     private int currentBlockSubWorldID;
 
     @Shadow(remap = true)
@@ -60,9 +59,6 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
     private float stepSoundTickCounter;
     
     //TODO
-
-    @Shadow(remap = true)
-    protected abstract boolean sameToolAndBlock(int par1, int par2, int par3, World par4World);
 
     @Shadow(remap = true)
     protected abstract void syncCurrentPlayItem();
@@ -261,6 +257,19 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
                 this.clickBlock(par1, par2, par3, par4, par5World);
             }
         }
+    }
+
+    private boolean sameToolAndBlock(int par1, int par2, int par3, World par4World)
+    {
+        ItemStack itemstack = this.mc.thePlayer.getHeldItem();
+        boolean flag = this.currentItemHittingBlock == null && itemstack == null;
+
+        if (this.currentItemHittingBlock != null && itemstack != null)
+        {
+            flag = itemstack.getItem() == this.currentItemHittingBlock.getItem() && ItemStack.areItemStackTagsEqual(itemstack, this.currentItemHittingBlock) && (itemstack.isItemStackDamageable() || itemstack.getItemDamage() == this.currentItemHittingBlock.getItemDamage());
+        }
+
+        return par1 == this.currentBlockX && par2 == this.currentBlockY && par3 == this.currentblockZ && ((IMixinWorld)par4World).getSubWorldID() == this.currentBlockSubWorldID && flag;
     }
 
 }
