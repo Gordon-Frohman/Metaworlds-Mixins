@@ -70,6 +70,8 @@ import net.minecraftforge.client.MinecraftForgeClient;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.EntitySorter;
+import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.OpenGlCapsChecker;
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
 import net.tclproject.metaworlds.api.SubWorld;
@@ -83,13 +85,17 @@ import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import net.tclproject.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import net.tclproject.metaworlds.patcher.OrientedBB;
 
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.ARBOcclusionQuery;
 import org.lwjgl.opengl.GL11;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = RenderGlobal.class, priority = 800)
@@ -100,6 +106,15 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     private List<WorldRenderer> sortedWorldRenderersList = new ArrayList<WorldRenderer>();
 
     private Map<Integer, WorldRenderer> worldRenderersMap = new HashMap<Integer, WorldRenderer>();
+
+    @Shadow(remap = true)
+    public int starGLCallList;
+
+    @Shadow(remap = true)
+    public int glSkyList;
+
+    @Shadow(remap = true)
+    public int glSkyList2;
 
     @Shadow(remap = true)
     public Map damagedBlocks;
@@ -238,12 +253,182 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     @Shadow(remap = true)
     private int frustumCheckOffset;
+    
+    //TODO
+
+    @Shadow(remap = true)
+    private void renderStars() {}
+    
+    // To get an empty RenderGlobal variable
+    // Firstly - disable the original constructor
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;mc:Lnet/minecraft/client/Minecraft;", opcode = Opcodes.PUTFIELD))
+	private void disableMc(RenderGlobal renderGlobal, Minecraft value) {
+	    // Do nothing
+	}
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderEngine:Lnet/minecraft/client/renderer/texture/TextureManager;", opcode = Opcodes.PUTFIELD))
+	private void disableRenderEngine(RenderGlobal renderGlobal, TextureManager value) {
+	    // Do nothing
+	}
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;glRenderListBase:I", opcode = Opcodes.PUTFIELD))
+	private void disableGlRenderListBase(RenderGlobal renderGlobal, int value) {
+	    // Do nothing
+	}
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;displayListEntities:I", opcode = Opcodes.PUTFIELD))
+	private void disableDisplayListEntities(RenderGlobal renderGlobal, int value) {
+	    // Do nothing
+	}
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;displayListEntitiesDirty:Z", opcode = Opcodes.PUTFIELD))
+	private void disableDisplayListEntitiesDirty(RenderGlobal renderGlobal, boolean value) {
+	    // Do nothing
+	}
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;occlusionEnabled:Z", opcode = Opcodes.PUTFIELD))
+	private void disableOcclusionEnabled(RenderGlobal renderGlobal, boolean value) {
+	    // Do nothing
+	}
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;occlusionEnabled:Z", opcode = Opcodes.GETFIELD))
+	private boolean getOcclusionEnabled(RenderGlobal renderGlobal) {
+	    return false;
+	}
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;starGLCallList:I", opcode = Opcodes.PUTFIELD))
+	private void disableStarGLCallList(RenderGlobal renderGlobal, int value) {
+	    // Do nothing
+	}
+	
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glPushMatrix()V"))
+	public void disableGLPushMatrix() {
+		// Do nothing
+	}
+	
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glNewList(II)V"))
+	public void disableGLNewList(int i1, int i2) {
+		// Do nothing
+	}
+	
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderStars()V"))
+	public void disableRenderStars(RenderGlobal renderGlobal) {
+		// Do nothing
+	}
+	
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glEndList()V"))
+	public void disableGLEndList() {
+		// Do nothing
+	}
+	
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glPopMatrix()V"))
+	public void disableGLPopMatrix() {
+		// Do nothing
+	}
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;glSkyList:I", opcode = Opcodes.PUTFIELD))
+	private void disableGLSkyList(RenderGlobal renderGlobal, int value) {
+	    // Do nothing
+	}
+	
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;addVertex(DDD)V"))
+	public void disableTessellatorAddVertex(Tessellator tessellator, double d0, double d1, double d2) {
+		// Do nothing
+	}
+
+	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;glSkyList2:I", opcode = Opcodes.PUTFIELD))
+	private void disableGLSkyList2(RenderGlobal renderGlobal, int value) {
+	    // Do nothing
+	}
+	
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;startDrawingQuads()V"))
+	public void disableTessellatorStartDrawingQuads(Tessellator tessellator) {
+		// Do nothing
+	}
+	
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;draw()I"))
+	public int disableTessellatorDraw(Tessellator tessellator) {
+		// Do nothing, yet
+		return -1;
+	}
+	
+	// And secondly - set up a new constructor
 	
     @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;mc:Lnet/minecraft/client/Minecraft;"), method = "<init>")
-	// To get an empty RenderGlobal variable
 	private void init(Minecraft mc, CallbackInfo info) {
-		if(mc == null)
-			return;
+		if(mc == null) {
+			
+		}
+		else {
+	        this.mc = mc;
+	        this.renderEngine = mc.getTextureManager();
+	        byte b0 = 34;	// No need to disable
+	        byte b1 = 16;	// No need to disable
+	        this.glRenderListBase = GLAllocation.generateDisplayLists(b0 * b0 * b1 * 3);
+	        this.displayListEntitiesDirty = false;
+	        this.displayListEntities = GLAllocation.generateDisplayLists(1);
+	        this.occlusionEnabled = OpenGlCapsChecker.checkARBOcclusion();
+
+	        if (this.occlusionEnabled)	// Can be skipped
+	        {
+	            this.occlusionResult.clear();
+	            this.glOcclusionQueryBase = GLAllocation.createDirectIntBuffer(b0 * b0 * b1);
+	            this.glOcclusionQueryBase.clear();
+	            this.glOcclusionQueryBase.position(0);
+	            this.glOcclusionQueryBase.limit(b0 * b0 * b1);
+	            ARBOcclusionQuery.glGenQueriesARB(this.glOcclusionQueryBase);
+	        }
+
+	        this.starGLCallList = GLAllocation.generateDisplayLists(3);
+	        GL11.glPushMatrix();
+	        
+	        GL11.glNewList(this.starGLCallList, GL11.GL_COMPILE);
+	        this.renderStars();
+	        GL11.glEndList();
+	        GL11.glPopMatrix();
+	        Tessellator tessellator = Tessellator.instance;	// No need to disable
+	        this.glSkyList = this.starGLCallList + 1;
+	        GL11.glNewList(this.glSkyList, GL11.GL_COMPILE);
+	        byte b2 = 64;	// No need to disable
+	        int i = 256 / b2 + 2;	// No need to disable
+	        float f = 16.0F;	// No need to disable
+	        int j;	// No need to disable
+	        int k;	// No need to disable
+
+	        for (j = -b2 * i; j <= b2 * i; j += b2)	// Can be skipped
+	        {
+	            for (k = -b2 * i; k <= b2 * i; k += b2)
+	            {
+	                tessellator.startDrawingQuads();
+	                tessellator.addVertex((double)(j + 0), (double)f, (double)(k + 0));
+	                tessellator.addVertex((double)(j + b2), (double)f, (double)(k + 0));
+	                tessellator.addVertex((double)(j + b2), (double)f, (double)(k + b2));
+	                tessellator.addVertex((double)(j + 0), (double)f, (double)(k + b2));
+	                tessellator.draw();
+	            }
+	        }
+
+	        GL11.glEndList();
+	        this.glSkyList2 = this.starGLCallList + 2;
+	        GL11.glNewList(this.glSkyList2, GL11.GL_COMPILE);
+	        f = -16.0F;	// No need to disable
+	        tessellator.startDrawingQuads();
+
+	        for (j = -b2 * i; j <= b2 * i; j += b2)	// Can be skipped
+	        {
+	            for (k = -b2 * i; k <= b2 * i; k += b2)
+	            {
+	                tessellator.addVertex((double)(j + b2), (double)f, (double)(k + 0));
+	                tessellator.addVertex((double)(j + 0), (double)f, (double)(k + 0));
+	                tessellator.addVertex((double)(j + 0), (double)f, (double)(k + b2));
+	                tessellator.addVertex((double)(j + b2), (double)f, (double)(k + b2));
+	            }
+	        }
+
+	        tessellator.draw();
+	        GL11.glEndList();
+		}
 	}
 
     public RenderGlobal setMC(Minecraft par1Minecraft) {

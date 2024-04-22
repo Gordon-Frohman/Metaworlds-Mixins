@@ -40,7 +40,7 @@ import net.tclproject.metaworlds.mixin.interfaces.util.IMixinMovingObjectPositio
 import net.tclproject.metaworlds.api.IMixinEntity;
 
 @Mixin(EffectRenderer.class)
-public abstract class MixinEffectRenderer {
+public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
 
     @Shadow(remap = true)
     protected World worldObj;

@@ -5,10 +5,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.storage.ISaveHandler;
@@ -16,7 +14,7 @@ import net.tclproject.metaworlds.core.SubWorldServerFactory;
 import net.tclproject.metaworlds.patcher.SubWorldFactory;
 
 @Mixin(WorldServer.class)
-public class MixinWorldServer {
+public abstract class MixinWorldServer extends MixinWorld {
 
     private static SubWorldFactory subWorldFactory = null;
 
