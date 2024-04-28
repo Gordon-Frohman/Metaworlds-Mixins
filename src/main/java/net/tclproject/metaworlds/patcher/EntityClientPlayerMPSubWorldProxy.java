@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
-import net.tclproject.metaworlds.mixin.interfaces.client.multiplayer.IMixinWorldClient;
+import net.tclproject.metaworlds.api.IMixinWorldIntermediate;
 
 public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP implements EntityPlayerProxy {
 
@@ -49,7 +49,7 @@ public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP impl
         this.mc.effectRenderer = new EffectRenderer(targetSubWorld, Minecraft.getMinecraft().renderEngine);
         this.mc.renderGlobal = new RenderGlobalSubWorld(this.mc, Minecraft.getMinecraft().renderGlobal);
 
-        ((IMixinWorldClient)this.mc.theWorld).setMinecraft(this.mc);
+        ((IMixinWorldIntermediate)this.mc.theWorld).setMinecraft(this.mc);
 
         ((NetHandlerPlayClientSubWorldProxy) this.sendQueue).proxyPlayer = this;
 

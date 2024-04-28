@@ -1,4 +1,4 @@
-package net.tclproject.metaworlds.mixin.interfaces.client.multiplayer;
+package net.tclproject.metaworlds.api;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.tclproject.metaworlds.patcher.SubWorldFactory;
 
-public interface IMixinWorldClient {
+public interface IMixinWorldIntermediate {
 
     public World CreateSubWorld();
 

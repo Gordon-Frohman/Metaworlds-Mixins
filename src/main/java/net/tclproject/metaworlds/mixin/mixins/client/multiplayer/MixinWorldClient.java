@@ -31,11 +31,11 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
+import net.tclproject.metaworlds.api.IMixinWorldIntermediate;
 import net.tclproject.metaworlds.api.PlayerManagerSuperClass;
 import net.tclproject.metaworlds.api.SubWorld;
 import net.tclproject.metaworlds.core.SubWorldClientFactory;
 import net.tclproject.metaworlds.mixin.mixins.world.MixinWorld;
-import net.tclproject.metaworlds.mixin.interfaces.client.multiplayer.IMixinWorldClient;
 import net.tclproject.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
 import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import net.tclproject.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
@@ -50,7 +50,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = WorldClient.class, priority = 800)
-public abstract class MixinWorldClient extends MixinWorld implements IMixinWorldClient {
+public abstract class MixinWorldClient extends MixinWorld implements IMixinWorldIntermediate {
 
     private ArrayList collidingBBCacheIntermediate = new ArrayList();
 
@@ -189,7 +189,7 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
 
        while(i$.hasNext()) {
           World curWorld = (World)i$.next();
-          MovingObjectPosition curResult = ((IMixinWorldClient)curWorld).rayTraceBlocks_do_do_single(((IMixinWorld)curWorld).transformToLocal(vecSource), ((IMixinWorld)curWorld).transformToLocal(vecDest), par3, par4, par5);
+          MovingObjectPosition curResult = ((IMixinWorldIntermediate)curWorld).rayTraceBlocks_do_do_single(((IMixinWorld)curWorld).transformToLocal(vecSource), ((IMixinWorld)curWorld).transformToLocal(vecDest), par3, par4, par5);
           if(curResult != null) {
          	// This field is actually inserted on runtime
              ((IMixinMovingObjectPosition)curResult).setWorld(curWorld);
@@ -309,7 +309,7 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
 
        while(i$.hasNext()) {
           World curSubWorld = (World)i$.next();
-          arraylist.addAll(((IMixinWorldClient)curSubWorld).selectEntitiesWithinAABBLocal(par1Class, ((IMixinAxisAlignedBB)par2AxisAlignedBB).getTransformedToLocalBoundingBox(curSubWorld), par3IEntitySelector));
+          arraylist.addAll(((IMixinWorldIntermediate)curSubWorld).selectEntitiesWithinAABBLocal(par1Class, ((IMixinAxisAlignedBB)par2AxisAlignedBB).getTransformedToLocalBoundingBox(curSubWorld), par3IEntitySelector));
        }
 
        return arraylist;

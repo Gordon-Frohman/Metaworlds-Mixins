@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import net.minecraft.block.Block;
@@ -14,14 +15,15 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.WorldInfo;
 import net.tclproject.metaworlds.api.IMixinWorld;
 import net.tclproject.metaworlds.api.SubWorld;
-import net.tclproject.metaworlds.mixin.interfaces.client.multiplayer.IMixinWorldClient;
 import net.tclproject.metaworlds.patcher.UnmodifiableSingleObjPlusCollection;
 import org.jblas.DoubleMatrix;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,6 +31,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 @Mixin(World.class)
 public abstract class MixinWorld implements IMixinWorld {
@@ -51,8 +56,24 @@ public abstract class MixinWorld implements IMixinWorld {
 
     @Shadow(remap = true)
     public List loadedEntityList;
+
+    @Shadow(remap = true)
+    public WorldInfo worldInfo;
     
     //TODO
+
+    @Shadow(remap = true)
+    public abstract GameRules getGameRules();
+
+    @SideOnly(Side.CLIENT)
+    @Shadow(remap = true)
+    public abstract void func_82738_a(long p_82738_1_);
+
+    @Shadow(remap = true)
+    public abstract void setWorldTime(long time);
+
+    @Shadow(remap = true)
+    public abstract long getTotalWorldTime();
 
     @Shadow(remap = true)
     public MovingObjectPosition func_147447_a(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) { return null; }
@@ -105,7 +126,9 @@ public abstract class MixinWorld implements IMixinWorld {
     @Shadow(remap = true)
     public abstract boolean chunkExists(int p_72916_1_, int p_72916_2_);
 
-    public abstract World CreateSubWorld();
+    public World CreateSubWorld() {
+    	return this.CreateSubWorld(((IMixinWorld) this).getWorldsCount());
+    }
 
     public abstract World CreateSubWorld(int var1);
 
@@ -304,16 +327,14 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     public List getCollidingBoundingBoxesGlobal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
-        return ((IMixinWorldClient)this).getCollidingBoundingBoxesLocal(par1Entity, par2AxisAlignedBB);
+        return this.getCollidingBoundingBoxes(par1Entity, par2AxisAlignedBB);
     }
 
     public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
-       return ((IMixinWorldClient)this).getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB);
+    	return this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, (IEntitySelector)null);
     }
 
-    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) {
-       return ((IMixinWorldClient)this).getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, par3IEntitySelector);
-    }
+    public abstract List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector);
 
     public void doTickPartial(double interpolationFactor) {}
 

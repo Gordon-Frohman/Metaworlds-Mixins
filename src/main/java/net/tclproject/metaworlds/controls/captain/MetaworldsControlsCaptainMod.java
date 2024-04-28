@@ -23,20 +23,20 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 
 @Mod(
-    modid = "metaworldscontrolscaptainmod",
+    modid = "mwcaptainmod",
     name = "MetaworldsControlsCaptainMod",
     version = "0.995",
     dependencies = "required-after:mwcore")
 public class MetaworldsControlsCaptainMod {
 
-    public static final String MODID = "metaworldscontrolscaptainmod";
+    public static final String MODID = "mwcaptainmod";
     public static final String VERSION = "0.995";
     public static RecipeConfig subWorldControllerConfig;
     public static Block subWorldController;
     Configuration config;
     private static int count = 0;
     public static final String CHANNEL = "mwcaptain";
-    @Instance("metaworldscontrolscaptainmod")
+    @Instance("mwcaptainmod")
     public static MetaworldsControlsCaptainMod instance;
 
     @EventHandler
@@ -46,7 +46,7 @@ public class MetaworldsControlsCaptainMod {
             .setStepSound(Block.soundTypeGravel)
             .setBlockName("subWorldController");
         subWorldController
-            .setBlockTextureName("metaworldscontrolscaptainmod:" + subWorldController.getUnlocalizedName());
+            .setBlockTextureName("mwcaptainmod:" + subWorldController.getUnlocalizedName());
         this.config.load();
         subWorldControllerConfig = new RecipeConfig(
             this.config,

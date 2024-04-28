@@ -43,10 +43,10 @@ import net.tclproject.metaworlds.api.IMixinWorld;
 import net.tclproject.metaworlds.api.PlayerManagerSuperClass;
 import net.tclproject.metaworlds.api.SubWorld;
 import net.tclproject.metaworlds.api.IMixinWorldInfo;
+import net.tclproject.metaworlds.api.IMixinWorldIntermediate;
 import net.tclproject.metaworlds.compat.packet.SubWorldDestroyPacket;
 import net.tclproject.metaworlds.compat.packet.SubWorldUpdatePacket;
 import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
-import net.tclproject.metaworlds.mixin.interfaces.client.multiplayer.IMixinWorldClient;
 import net.tclproject.metaworlds.patcher.ChunkSubWorld;
 import net.tclproject.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
 import net.tclproject.metaworlds.patcher.MinecraftServerSubWorldProxy;
@@ -214,9 +214,9 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
         ArrayList arraylist = new ArrayList();
-        arraylist.addAll(((IMixinWorldClient)this).selectEntitiesWithinAABBLocal(par1Class, par2AxisAlignedBB, par3IEntitySelector));
+        arraylist.addAll(((IMixinWorldIntermediate)this).selectEntitiesWithinAABBLocal(par1Class, par2AxisAlignedBB, par3IEntitySelector));
         AxisAlignedBB globalBB = ((IMixinAxisAlignedBB) par2AxisAlignedBB).getTransformedToGlobalBoundingBox(this);
-        arraylist.addAll(((IMixinWorldClient)this.m_parentWorld).selectEntitiesWithinAABBLocal(par1Class, globalBB, par3IEntitySelector));
+        arraylist.addAll(((IMixinWorldIntermediate)this.m_parentWorld).selectEntitiesWithinAABBLocal(par1Class, globalBB, par3IEntitySelector));
         Iterator i$ = ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .iterator();
 
@@ -224,7 +224,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             World curSubWorld = (World) i$.next();
             if (curSubWorld != this) {
                 arraylist.addAll(
-                    ((IMixinWorldClient) curSubWorld).selectEntitiesWithinAABBLocal(
+                    ((IMixinWorldIntermediate) curSubWorld).selectEntitiesWithinAABBLocal(
                         par1Class,
                         ((IMixinAxisAlignedBB) globalBB).getTransformedToLocalBoundingBox(curSubWorld),
                         par3IEntitySelector));

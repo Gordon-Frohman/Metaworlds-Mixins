@@ -66,7 +66,9 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.client.MinecraftForgeClient;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.EntitySorter;
@@ -74,9 +76,10 @@ import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.OpenGlCapsChecker;
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
+import net.tclproject.metaworlds.api.IMixinWorldIntermediate;
+import net.tclproject.metaworlds.api.RenderGlobalSuperClass;
 import net.tclproject.metaworlds.api.SubWorld;
 import net.tclproject.metaworlds.core.client.SubWorldClient;
-import net.tclproject.metaworlds.mixin.interfaces.client.multiplayer.IMixinWorldClient;
 import net.tclproject.metaworlds.mixin.interfaces.client.renderer.IMixinDestroyBlockProgress;
 import net.tclproject.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
 import net.tclproject.metaworlds.mixin.interfaces.client.renderer.IMixinRenderList;
@@ -99,7 +102,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = RenderGlobal.class, priority = 800)
-public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
+public abstract class MixinRenderGlobal implements IMixinRenderGlobal, RenderGlobalSuperClass {
 
     private List<WorldRenderer> worldRenderersList = new ArrayList<WorldRenderer>();
 
@@ -265,6 +268,12 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;mc:Lnet/minecraft/client/Minecraft;", opcode = Opcodes.PUTFIELD))
 	private void disableMc(RenderGlobal renderGlobal, Minecraft value) {
 	    // Do nothing
+	}
+	
+	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getTextureManager()Lnet/minecraft/client/renderer/texture/TextureManager;"))
+	public TextureManager disableGetTextureManager(Minecraft minecraft) {
+		// Do nothing, yet
+		return null;
 	}
 
 	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderEngine:Lnet/minecraft/client/renderer/texture/TextureManager;", opcode = Opcodes.PUTFIELD))
@@ -808,8 +817,8 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
                 RenderHelper.enableStandardItemLighting();
 
                 for (i = 0; i
-                    < ((IMixinWorldClient) curClientWorld).getMinecraft().renderGlobal.tileEntities.size(); ++i) {
-                    TileEntity tile = (TileEntity) ((IMixinWorldClient) curClientWorld)
+                    < ((IMixinWorldIntermediate) curClientWorld).getMinecraft().renderGlobal.tileEntities.size(); ++i) {
+                    TileEntity tile = (TileEntity) ((IMixinWorldIntermediate) curClientWorld)
                         .getMinecraft().renderGlobal.tileEntities.get(i);
                     if (tile.shouldRenderInPass(pass) && p_147589_2_.isBoundingBoxInFrustum(
                         tile.getWorldObj() == null ? tile.getRenderBoundingBox()
