@@ -40,4 +40,6 @@ public interface IMixinWorldIntermediate {
     public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB);
     
     public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector);
+    
+    public int getDimension();
 }

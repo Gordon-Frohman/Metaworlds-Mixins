@@ -1163,25 +1163,21 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
 	@Override
 	public Vec3 transformToLocal(Entity var1) {
-		// TODO Auto-generated method stub
-		return null;
+		return transformToLocal(var1.posX, var1.posY, var1.posZ);
 	}
 
 	@Override
 	public Vec3 transformToGlobal(Entity var1) {
-		// TODO Auto-generated method stub
-		return null;
+		return transformToGlobal(var1.posX, var1.posY, var1.posZ);
 	}
 
 	@Override
 	public Vec3 transformLocalToOther(World var1, Entity var2) {
-		// TODO Auto-generated method stub
-		return null;
+		return transformLocalToOther(var1, var2.posX, var2.posY, var2.posZ);
 	}
 
 	@Override
 	public Vec3 transformOtherToLocal(World var1, Entity var2) {
-		// TODO Auto-generated method stub
-		return null;
+		return transformOtherToLocal(var1, var2.posX, var2.posY, var2.posZ);
 	}
 }

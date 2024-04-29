@@ -179,8 +179,6 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
         return this.sendQueue;
     }
 
-    // Probably no need to overwrite, since it is not present in the original class
-    // @Overwrite
     public MovingObjectPosition func_147447_a(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) {
        MovingObjectPosition bestResult = null;
        Vec3 vecSource = ((IMixinWorld)this).transformToGlobal(par1Vec3);
@@ -208,8 +206,6 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
        return super.func_147447_a(par1Vec3, par2Vec3, par3, par4, par5);
     }
 
-    // Probably no need to overwrite, since it is not present in the original class
-    // @Overwrite
     public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
        this.collidingBBCacheIntermediate.clear();
        this.collidingBBCacheIntermediate = (ArrayList)this.getCollidingBoundingBoxesLocal(par1Entity, par2AxisAlignedBB);
@@ -227,8 +223,6 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
        return super.getCollidingBoundingBoxes(par1Entity, par2AxisAlignedBB);
     }
 
-    // Probably no need to overwrite, since it is not present in the original class
-    // @Overwrite
     public boolean isMaterialInBB(AxisAlignedBB par1AxisAlignedBB, Material par2Material) {
        if(this.isMaterialInBBLocal(par1AxisAlignedBB, par2Material)) {
           return true;
@@ -252,8 +246,6 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
        return super.isMaterialInBB(par1AxisAlignedBB, par2Material);
     }
 
-    // Probably no need to overwrite, since it is not present in the original class
-    // @Overwrite
     public boolean isAABBInMaterial(AxisAlignedBB par1AxisAlignedBB, Material par2Material) {
        if(((World)(Object)this).isAABBInMaterial(par1AxisAlignedBB, par2Material)) {
           return true;
@@ -273,8 +265,6 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
        }
     }
 
-    // Probably no need to overwrite, since it is not present in the original class
-    // @Overwrite
     public List getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) {
        ArrayList arraylist = new ArrayList();
        arraylist.addAll(this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, par3IEntitySelector));
@@ -300,8 +290,6 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
        return super.getEntitiesWithinAABBExcludingEntity((Entity)par1Entity, par2AxisAlignedBB, par3IEntitySelector);
     }
 
-    // Probably no need to overwrite, since it is not present in the original class
-    // @Overwrite
     public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) {
        ArrayList arraylist = new ArrayList();
        arraylist.addAll(this.selectEntitiesWithinAABBLocal(par1Class, par2AxisAlignedBB, par3IEntitySelector));
@@ -386,8 +374,6 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
        }
     }
 
-    // Probably no need to overwrite, since it is not present in the original class
-    // @Overwrite
     public void removePlayerEntityDangerously(Entity par1Entity) {
        super.removePlayerEntityDangerously(par1Entity);
        if(!((WorldClient)(Object)this).isRemote && !((IMixinWorld)this).isSubWorld() && par1Entity instanceof EntityPlayer) {

@@ -44,9 +44,9 @@ public class MetaworldsMod {
 
     	// Again, moved to MixinWorldServer
 //        WorldServer.subWorldFactory = new SubWorldServerFactory();
-//        FMLCommonHandler.instance()
-//            .bus()
-//            .register(new EventHookContainer());
+        FMLCommonHandler.instance()
+            .bus()
+            .register(new EventHookContainer());
         MinecraftForge.EVENT_BUS.register(new EventHookContainer());
     }
 

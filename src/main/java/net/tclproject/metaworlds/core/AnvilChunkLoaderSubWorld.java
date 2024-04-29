@@ -19,14 +19,21 @@ public class AnvilChunkLoaderSubWorld extends AnvilChunkLoader {
     }
 
     public Chunk readChunkFromNBT(World par1World, NBTTagCompound par2NBTTagCompound) {
-        ChunkSubWorld subWorldChunk = null;
+        /*ChunkSubWorld subWorldChunk = null;
 
         try {
             subWorldChunk = (ChunkSubWorld) super.readChunkFromNBT(par1World, par2NBTTagCompound);
         } catch (Exception var5) {
             var5.printStackTrace();
         }
-
+        
         return subWorldChunk;
+        */
+        
+        Chunk chunk = super.readChunkFromNBT(par1World, par2NBTTagCompound);
+        if (chunk instanceof ChunkSubWorld)
+        	return (ChunkSubWorld) chunk;
+        else
+        	return chunk;
     }
 }

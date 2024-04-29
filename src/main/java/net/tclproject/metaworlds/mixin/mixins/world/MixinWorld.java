@@ -125,12 +125,9 @@ public abstract class MixinWorld implements IMixinWorld {
 
     @Shadow(remap = true)
     public abstract boolean chunkExists(int p_72916_1_, int p_72916_2_);
-
-    public World CreateSubWorld() {
-    	return this.CreateSubWorld(((IMixinWorld) this).getWorldsCount());
-    }
-
-    public abstract World CreateSubWorld(int var1);
+	
+	public abstract World CreateSubWorld();
+	public abstract World CreateSubWorld(int newSubWorldID);
 
     public Collection<World> getWorlds() {
     	if(this.allWorlds == null)
@@ -151,8 +148,10 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     public int getWorldsCount() {
-    	if(this.childSubWorlds == null)
+    	if(this.childSubWorlds == null) {
     		childSubWorlds = new TreeMap<Integer, World>();
+    		return 0;
+    	}
         return this.childSubWorlds.size() + 1;
     }
 

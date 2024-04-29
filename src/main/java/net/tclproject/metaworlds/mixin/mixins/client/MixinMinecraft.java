@@ -359,10 +359,10 @@ public abstract class MixinMinecraft {
 	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;theMinecraft:Lnet/minecraft/client/Minecraft;"), method = "<init>")
 	private void init(Session sessionIn, int displayWidth, int displayHeight, boolean fullscreen, boolean isDemo, File dataDir, File assetsDir, File resourcePackDir, Proxy proxy, String version, Multimap twitchDetails, String assetsJsonVersion, CallbackInfo info) {
 		if(sessionIn == null && displayWidth == 0 && displayHeight == 0 && fullscreen ==  false && isDemo == false && dataDir == null && assetsDir == null && resourcePackDir == null && version == null && twitchDetails == null && assetsJsonVersion == null) {
-			logger.info("Empty Minecraft object created");
+			//logger.info("Empty Minecraft object created");
 		}
 		else {
-			logger.info("Normal Minecraft object created");
+			//logger.info("Normal Minecraft object created");
 	        Minecraft.theMinecraft = (Minecraft)(Object)this;
 	        this.mcDataDir = dataDir;
 	        this.fileAssets = assetsDir;
