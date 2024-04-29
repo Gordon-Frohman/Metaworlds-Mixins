@@ -50,4 +50,6 @@ public interface IMixinEntity {
     public void setServerPosYOnSubWorld(int serverPosYOnSubWorld);
     
     public void setServerPosZOnSubWorld(int serverPosZOnSubWorld);
+    
+    public double getDistanceSq(double par1, double par3, double par5, World targetWorld);
 }

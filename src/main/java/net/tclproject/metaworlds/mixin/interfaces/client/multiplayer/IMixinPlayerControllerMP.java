@@ -9,7 +9,7 @@ public interface IMixinPlayerControllerMP {
     /**
      * Block dig operation in creative mode (instantly digs the block).
      */
-    public default void clickBlockCreative(Minecraft par0Minecraft, PlayerControllerMP par1PlayerControllerMP, int par2,
+    public static void clickBlockCreative(Minecraft par0Minecraft, PlayerControllerMP par1PlayerControllerMP, int par2,
         int par3, int par4, int par5, World par6World) {
         if (!par6World.extinguishFire(par0Minecraft.thePlayer, par2, par3, par4, par5)) {
             ((IMixinPlayerControllerMP)par1PlayerControllerMP).onPlayerDestroyBlock(par2, par3, par4, par5, par6World);

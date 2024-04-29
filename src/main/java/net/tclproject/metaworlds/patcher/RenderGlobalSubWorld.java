@@ -6,14 +6,13 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.tclproject.metaworlds.api.IMixinWorld;
-import net.tclproject.metaworlds.api.RenderGlobalSuperClass;
 import net.tclproject.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
 
 import java.nio.IntBuffer;
 
 import org.lwjgl.opengl.ARBOcclusionQuery;
 
-public class RenderGlobalSubWorld extends RenderGlobal implements RenderGlobalSuperClass {
+public class RenderGlobalSubWorld extends RenderGlobal {
 
     private RenderGlobal parentRenderGlobal;
     // private World worldObj;
@@ -52,8 +51,8 @@ public class RenderGlobalSubWorld extends RenderGlobal implements RenderGlobalSu
     public void onWorldRemove() {
         this.deleteAllDisplayLists();
 
-        if (this.getOcclusionEnabled()) {
-            ARBOcclusionQuery.glDeleteQueriesARB(this.getOcclusionQueryBase());
+        if (((IMixinRenderGlobal) this).getOcclusionEnabled()) {
+            ARBOcclusionQuery.glDeleteQueriesARB(((IMixinRenderGlobal) this).getOcclusionQueryBase());
         }
     }
 
@@ -167,28 +166,4 @@ public class RenderGlobalSubWorld extends RenderGlobal implements RenderGlobalSu
 
     @Override
     public void onStaticEntitiesChanged() {}
-
-	@Override
-	public void markRenderersForNewPositionSingle(double par1d, double par2d, double par3d, int subWorldID) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void unloadRenderersForSubWorld(int subWorldId) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean getOcclusionEnabled() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public IntBuffer getOcclusionQueryBase() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }

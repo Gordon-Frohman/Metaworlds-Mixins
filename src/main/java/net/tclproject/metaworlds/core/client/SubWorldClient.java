@@ -22,6 +22,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
@@ -30,16 +31,17 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
-import net.tclproject.metaworlds.api.RenderGlobalSuperClass;
 import net.tclproject.metaworlds.api.SubWorld;
 import net.tclproject.metaworlds.compat.packet.SubWorldUpdatePacket;
 import net.tclproject.metaworlds.core.SubWorldTransformationHandler;
 import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import net.tclproject.metaworlds.patcher.OrientedBB;
 import net.tclproject.metaworlds.patcher.RenderGlobalSubWorld;
+import net.tclproject.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
 
 import org.jblas.DoubleMatrix;
 
@@ -112,7 +114,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     public void removeSubWorld() {
         ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .remove(this);
-        ((RenderGlobalSuperClass) Minecraft.getMinecraft().renderGlobal)
+        ((IMixinRenderGlobal) Minecraft.getMinecraft().renderGlobal)
             .unloadRenderersForSubWorld(this.getSubWorldID());
         if (this.renderGlobalSubWorld != null) {
             this.renderGlobalSubWorld.onWorldRemove();
@@ -532,7 +534,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
             }
 
             EntityLivingBase playerEntity = Minecraft.getMinecraft().renderViewEntity;
-            ((RenderGlobalSuperClass) Minecraft.getMinecraft().renderGlobal).markRenderersForNewPositionSingle(
+            ((IMixinRenderGlobal) Minecraft.getMinecraft().renderGlobal).markRenderersForNewPositionSingle(
                 playerEntity.posX,
                 playerEntity.posY,
                 playerEntity.posZ,
@@ -1180,4 +1182,14 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 	public Vec3 transformOtherToLocal(World var1, Entity var2) {
 		return transformOtherToLocal(var1, var2.posX, var2.posY, var2.posZ);
 	}
+
+    public boolean setBlock(int par1, int par2, int par3, Block par4, int par5, int par6) {
+    	
+    	
+        boolean result = super.setBlock(par1, par2, par3, par4, par5, par6);
+        if (result) {
+        	Minecraft.logger.info("Setting block " + par4.toString() + " on client side");
+        }
+        return result;
+    }
 }

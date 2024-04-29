@@ -14,6 +14,7 @@ import java.util.TreeMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -1125,7 +1126,8 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public boolean setBlock(int par1, int par2, int par3, Block par4, int par5, int par6) {
         boolean result = super.setBlock(par1, par2, par3, par4, par5, par6);
         if (result) {
-            if (par4 != Blocks.air) {
+        	Minecraft.logger.info("Setting block " + par4.toString() + " on server side");
+        	if (par4 != Blocks.air) {
                 if (this.isEmpty) {
                     this.setBoundaries(par1, par2, par3, par1 + 1, par2 + 1, par3 + 1);
                 } else {

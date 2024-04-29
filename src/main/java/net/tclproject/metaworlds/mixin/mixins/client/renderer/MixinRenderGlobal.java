@@ -42,6 +42,7 @@ import net.minecraft.client.particle.EntitySpellParticleFX;
 import net.minecraft.client.particle.EntitySplashFX;
 import net.minecraft.client.particle.EntitySuspendFX;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderList;
@@ -51,6 +52,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.util.RenderDistanceSorter;
 import net.minecraft.entity.Entity;
@@ -62,13 +64,12 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.client.MinecraftForgeClient;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.EntitySorter;
@@ -77,7 +78,6 @@ import net.minecraft.client.renderer.OpenGlCapsChecker;
 import net.tclproject.metaworlds.api.IMixinEntity;
 import net.tclproject.metaworlds.api.IMixinWorld;
 import net.tclproject.metaworlds.api.IMixinWorldIntermediate;
-import net.tclproject.metaworlds.api.RenderGlobalSuperClass;
 import net.tclproject.metaworlds.api.SubWorld;
 import net.tclproject.metaworlds.core.client.SubWorldClient;
 import net.tclproject.metaworlds.mixin.interfaces.client.renderer.IMixinDestroyBlockProgress;
@@ -88,7 +88,6 @@ import net.tclproject.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import net.tclproject.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import net.tclproject.metaworlds.patcher.OrientedBB;
 
-import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.ARBOcclusionQuery;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.lib.Opcodes;
@@ -97,12 +96,11 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = RenderGlobal.class, priority = 800)
-public abstract class MixinRenderGlobal implements IMixinRenderGlobal, RenderGlobalSuperClass {
+public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     private List<WorldRenderer> worldRenderersList = new ArrayList<WorldRenderer>();
 
@@ -256,6 +254,12 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal, RenderGlo
 
     @Shadow(remap = true)
     private int frustumCheckOffset;
+
+    @Shadow(remap = true)
+    public RenderBlocks renderBlocksRg;
+
+    @Shadow(remap = true)
+    public IIcon[] destroyBlockIcons;
     
     //TODO
 
@@ -372,14 +376,14 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal, RenderGlo
 		else {
 	        this.mc = mc;
 	        this.renderEngine = mc.getTextureManager();
-	        byte b0 = 34;	// No need to disable
-	        byte b1 = 16;	// No need to disable
+	        byte b0 = 34;
+	        byte b1 = 16;
 	        this.glRenderListBase = GLAllocation.generateDisplayLists(b0 * b0 * b1 * 3);
 	        this.displayListEntitiesDirty = false;
 	        this.displayListEntities = GLAllocation.generateDisplayLists(1);
 	        this.occlusionEnabled = OpenGlCapsChecker.checkARBOcclusion();
 
-	        if (this.occlusionEnabled)	// Can be skipped
+	        if (this.occlusionEnabled)
 	        {
 	            this.occlusionResult.clear();
 	            this.glOcclusionQueryBase = GLAllocation.createDirectIntBuffer(b0 * b0 * b1);
@@ -396,16 +400,16 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal, RenderGlo
 	        this.renderStars();
 	        GL11.glEndList();
 	        GL11.glPopMatrix();
-	        Tessellator tessellator = Tessellator.instance;	// No need to disable
+	        Tessellator tessellator = Tessellator.instance;
 	        this.glSkyList = this.starGLCallList + 1;
 	        GL11.glNewList(this.glSkyList, GL11.GL_COMPILE);
-	        byte b2 = 64;	// No need to disable
-	        int i = 256 / b2 + 2;	// No need to disable
-	        float f = 16.0F;	// No need to disable
-	        int j;	// No need to disable
-	        int k;	// No need to disable
+	        byte b2 = 64;
+	        int i = 256 / b2 + 2;
+	        float f = 16.0F;
+	        int j;
+	        int k;
 
-	        for (j = -b2 * i; j <= b2 * i; j += b2)	// Can be skipped
+	        for (j = -b2 * i; j <= b2 * i; j += b2)
 	        {
 	            for (k = -b2 * i; k <= b2 * i; k += b2)
 	            {
@@ -421,10 +425,10 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal, RenderGlo
 	        GL11.glEndList();
 	        this.glSkyList2 = this.starGLCallList + 2;
 	        GL11.glNewList(this.glSkyList2, GL11.GL_COMPILE);
-	        f = -16.0F;	// No need to disable
+	        f = -16.0F;
 	        tessellator.startDrawingQuads();
 
-	        for (j = -b2 * i; j <= b2 * i; j += b2)	// Can be skipped
+	        for (j = -b2 * i; j <= b2 * i; j += b2)
 	        {
 	            for (k = -b2 * i; k <= b2 * i; k += b2)
 	            {
@@ -844,8 +848,12 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal, RenderGlo
     public void markRenderersForNewPosition(double par1, double par2, double par3) {
         for (World curWorld : ((IMixinWorld) this.theWorld).getWorlds()) {
             this.markRenderersForNewPositionSingle(par1, par2, par3, ((IMixinWorld) curWorld).getSubWorldID());
-
         }
+    }
+    
+    @Overwrite
+    public void markRenderersForNewPosition(int par1, int par2, int par3) {
+    	markRenderersForNewPosition((double) par1, (double) par2, (double) par3);
     }
 
     public void markRenderersForNewPositionSingle(double par1d, double par2d, double par3d, int subWorldID) {
@@ -1427,6 +1435,82 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal, RenderGlo
             }
 
             this.worldRenderersToUpdate.remove(k1);
+        }
+    }
+
+    @Overwrite (remap = false)
+    public void drawBlockDamageTexture(Tessellator p_72717_1_, EntityLivingBase par2EntityPlayer, float p_72717_3_)
+    {
+        double d0 = par2EntityPlayer.lastTickPosX + (par2EntityPlayer.posX - par2EntityPlayer.lastTickPosX) * (double)p_72717_3_;
+        double d1 = par2EntityPlayer.lastTickPosY + (par2EntityPlayer.posY - par2EntityPlayer.lastTickPosY) * (double)p_72717_3_;
+        double d2 = par2EntityPlayer.lastTickPosZ + (par2EntityPlayer.posZ - par2EntityPlayer.lastTickPosZ) * (double)p_72717_3_;
+
+        if (!this.damagedBlocks.isEmpty())
+        {
+            OpenGlHelper.glBlendFunc(774, 768, 1, 0);
+            this.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
+            GL11.glPushMatrix();
+            GL11.glPolygonOffset(-3.0F, -3.0F);
+            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+            GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
+            GL11.glEnable(GL11.GL_ALPHA_TEST);
+            
+            for (World curSubWorld : ((IMixinWorld)this.theWorld).getWorlds())
+            {
+                this.renderBlocksRg.blockAccess = curSubWorld;
+                if (((IMixinWorld)curSubWorld).isSubWorld())
+                {
+                    GL11.glPushMatrix();
+                    GL11.glTranslated(-d0, -d1, -d2);
+
+                    GL11.glMultMatrix(((SubWorld)curSubWorld).getTransformToGlobalMatrixDirectBuffer());
+                    GL11.glTranslated(d0, d1, d2);
+                }
+	            
+	            p_72717_1_.startDrawingQuads();
+	            p_72717_1_.setTranslation(-d0, -d1, -d2);
+	            p_72717_1_.disableColor();
+	            Iterator iterator = this.damagedBlocks.values().iterator();
+	
+	            while (iterator.hasNext())
+	            {
+	                DestroyBlockProgress destroyblockprogress = (DestroyBlockProgress)iterator.next();
+	//                double d3 = (double)destroyblockprogress.getPartialBlockX() - d0;
+	//                double d4 = (double)destroyblockprogress.getPartialBlockY() - d1;
+	//                double d5 = (double)destroyblockprogress.getPartialBlockZ() - d2;
+	                
+	                if (((IMixinDestroyBlockProgress)destroyblockprogress).getPartialBlockSubWorldID() != ((IMixinWorld)curSubWorld).getSubWorldID()) continue;
+	
+	                if (((IMixinEntity)par2EntityPlayer).getDistanceSq(destroyblockprogress.getPartialBlockX(), destroyblockprogress.getPartialBlockY(), destroyblockprogress.getPartialBlockZ(), curSubWorld) > 1024.0D)
+	                {
+	                    iterator.remove();
+	                }
+	                else
+	                {
+	                	Block block = curSubWorld.getBlock(destroyblockprogress.getPartialBlockX(), destroyblockprogress.getPartialBlockY(), destroyblockprogress.getPartialBlockZ());
+	                	
+	                    if (block.getMaterial() != Material.air)
+	                    {
+	                        this.renderBlocksRg.renderBlockUsingTexture(block, destroyblockprogress.getPartialBlockX(), destroyblockprogress.getPartialBlockY(), destroyblockprogress.getPartialBlockZ(), this.destroyBlockIcons[destroyblockprogress.getPartialBlockDamage()]);
+	                    }
+	                }
+	            }
+	
+	            p_72717_1_.draw();
+	            p_72717_1_.setTranslation(0.0D, 0.0D, 0.0D);
+	            
+	            if (((IMixinWorld)curSubWorld).isSubWorld())
+	                GL11.glPopMatrix();
+        }
+        this.renderBlocksRg.blockAccess = this.theWorld;
+            
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
+            GL11.glPolygonOffset(0.0F, 0.0F);
+            GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+            GL11.glEnable(GL11.GL_ALPHA_TEST);
+            GL11.glDepthMask(true);
+            GL11.glPopMatrix();
         }
     }
 
@@ -2048,6 +2132,16 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal, RenderGlo
 
     @Shadow(remap = true)
     protected abstract void onStaticEntitiesChanged();
+
+    /**
+     * Starts (or continues) destroying a block with given ID at the given coordinates for the given partially destroyed
+     * value
+     */
+    @Overwrite
+    public void destroyBlockPartially(int p_147587_1_, int p_147587_2_, int p_147587_3_, int p_147587_4_, int p_147587_5_)
+    {
+        destroyBlockPartially(p_147587_1_, p_147587_2_, p_147587_3_, p_147587_4_, p_147587_5_, 0);
+    }
     
     public void destroyBlockPartially(int p_147587_1_, int p_147587_2_, int p_147587_3_, int p_147587_4_, int p_147587_5_, int subWorldId)
     {
