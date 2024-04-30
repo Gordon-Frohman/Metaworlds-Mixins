@@ -955,7 +955,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     @Overwrite
     public int sortAndRender(EntityLivingBase par1EntityLivingBase, int par2, double par3) {
         this.theWorld.theProfiler.startSection("sortchunks");
-
+        
         for (int j = 0; j < 10; ++j) {
             this.worldRenderersCheckIndex = (this.worldRenderersCheckIndex + 1) % this.worldRenderersList.size();
             WorldRenderer worldrenderer = this.worldRenderersList.get(this.worldRenderersCheckIndex);

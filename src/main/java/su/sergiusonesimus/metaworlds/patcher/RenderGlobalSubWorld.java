@@ -19,20 +19,25 @@ public class RenderGlobalSubWorld extends RenderGlobal {
 
     public RenderGlobalSubWorld(Minecraft par1Minecraft, RenderGlobal origRenderGlobal) {
         super(null);
-        
+
         this.mc = par1Minecraft;
         this.renderEngine = par1Minecraft.getTextureManager();
+        
         this.worldRenderersToUpdate = ((IMixinRenderGlobal)origRenderGlobal).getWorldRenderersToUpdate();
-        ((IMixinRenderGlobal)origRenderGlobal).setSortedWorldRenderersList(((IMixinRenderGlobal)origRenderGlobal).getSortedWorldRenderersList());
-        ((IMixinRenderGlobal)origRenderGlobal).setWorldRenderersMap(((IMixinRenderGlobal)origRenderGlobal).getWorldRenderersMap());
-        ((IMixinRenderGlobal)origRenderGlobal).setWorldRenderersList(((IMixinRenderGlobal)origRenderGlobal).getWorldRenderersList());
+        ((IMixinRenderGlobal)this).setSortedWorldRenderersList(((IMixinRenderGlobal)origRenderGlobal).getSortedWorldRenderersList());
+        ((IMixinRenderGlobal)this).setWorldRenderersMap(((IMixinRenderGlobal)origRenderGlobal).getWorldRenderersMap());
+        ((IMixinRenderGlobal)this).setWorldRenderersList(((IMixinRenderGlobal)origRenderGlobal).getWorldRenderersList());
+        
         this.renderChunksWide = ((IMixinRenderGlobal)origRenderGlobal).getRenderChunksWide();
         this.renderChunksTall = ((IMixinRenderGlobal)origRenderGlobal).getRenderChunksTall();
         this.renderChunksDeep = ((IMixinRenderGlobal)origRenderGlobal).getRenderChunksDeep();
+        
         this.occlusionEnabled = origRenderGlobal.occlusionEnabled;
-		byte b0 = 34;
+        
+        byte b0 = 34;
         byte b1 = 16;
         this.glRenderListBase = GLAllocation.generateDisplayLists(b0 * b0 * b1 * 3);
+ 
         if (this.occlusionEnabled)
         {
             this.occlusionResult.clear();
@@ -42,6 +47,7 @@ public class RenderGlobalSubWorld extends RenderGlobal {
             this.glOcclusionQueryBase.limit(b0 * b0 * b1);
             ARBOcclusionQuery.glGenQueriesARB(this.glOcclusionQueryBase);
         }
+        
         this.theWorld = par1Minecraft.theWorld;
         
         // this.worldObj = par1;

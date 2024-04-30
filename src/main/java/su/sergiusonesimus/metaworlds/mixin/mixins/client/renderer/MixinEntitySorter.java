@@ -24,7 +24,7 @@ public class MixinEntitySorter {
     public int compare(WorldRenderer p_compare_1_, WorldRenderer p_compare_2_) {
         Vec3 transformedPos1 = ((IMixinWorld)p_compare_1_.worldObj)
             .transformToLocal(-this.entityPosX, -this.entityPosY, -this.entityPosZ);
-        Vec3 transformedPos2 = ((IMixinWorld)p_compare_1_.worldObj)
+        Vec3 transformedPos2 = ((IMixinWorld)p_compare_2_.worldObj)
             .transformToLocal(-this.entityPosX, -this.entityPosY, -this.entityPosZ);
 
         double d0 = (double) p_compare_1_.posXPlus - transformedPos1.xCoord;
