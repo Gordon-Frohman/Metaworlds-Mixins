@@ -1,10 +1,9 @@
 package net.tclproject.mysteriumlib.network;
 
-import net.tclproject.metaworlds.compat.packet.*;
-
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
+import su.sergiusonesimus.metaworlds.compat.packet.*;
 
 public final class MetaMagicNetwork {
 
