@@ -1176,9 +1176,14 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                                                 if (inChunkZ1 >= maxZ) {
                                                     break;
                                                 }
-
+                                                
+                                                int heightValue = inChunkZ.getHeightValue(inChunkX, curX1) - 1;
+                                                Block blockAbove = inChunkZ.getBlock(inChunkX, heightValue + 1, curX1);
+                                                if(inChunkZ.getBlock(inChunkX, heightValue + 1, curX1) != Blocks.air)
+                                                	heightValue++;
+                                                
                                                 foundBlockAtZ = Math
-                                                    .max(foundBlockAtZ, inChunkZ.getHeightValue(inChunkX, curX1) - 1);
+                                                    .max(foundBlockAtZ, heightValue);
                                                 if (foundBlockAtZ >= maxY - 1) {
                                                     break;
                                                 }

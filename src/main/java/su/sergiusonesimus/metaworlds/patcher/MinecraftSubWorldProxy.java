@@ -65,4 +65,10 @@ public class MinecraftSubWorldProxy extends Minecraft {
     public LanguageManager getLanguageManager() {
         return this.realMinecraft.getLanguageManager();
     }
+
+    @Override
+    public boolean func_152349_b()
+    {
+        return realMinecraft.func_152349_b();
+    }
 }
