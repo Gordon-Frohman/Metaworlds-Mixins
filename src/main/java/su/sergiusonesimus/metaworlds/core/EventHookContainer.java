@@ -23,7 +23,6 @@ public class EventHookContainer {
     @SubscribeEvent
     public void worldLoaded(Load event) {
         if (!event.world.isRemote) {
-        	Minecraft.logger.info("Subworld loaded");
             if (((IMixinWorld) event.world).isSubWorld()) {
                 MetaMagicNetwork.dispatcher.sendToDimension(
                     new SubWorldCreatePacket(
@@ -31,11 +30,9 @@ public class EventHookContainer {
                         new Integer[] { Integer.valueOf(((IMixinWorld) event.world).getSubWorldID()) }),
                     event.world.provider.dimensionId);
             } else {
-            	Minecraft.logger.info("Normal world loaded");
                 Collection subWorldIDs = ((IMixinWorldInfo) DimensionManager.getWorld(0)
                     .getWorldInfo()).getSubWorldIDs(((WorldServer) event.world).provider.dimensionId);
                 if (subWorldIDs != null) {
-                	Minecraft.logger.info("Child subworlds amount: " + subWorldIDs.size());
                     Iterator i$ = subWorldIDs.iterator();
 
                     while (i$.hasNext()) {
@@ -45,8 +42,6 @@ public class EventHookContainer {
                             ((IMixinWorld) event.world).CreateSubWorld(curSubWorldID.intValue());
                     }
                 }
-                else
-                	Minecraft.logger.info("No child subworlds");
             }
         }
     }
