@@ -359,10 +359,6 @@ public class OrientedBB extends AxisAlignedBB {
         return super.isVecInside(par1Vec3);
     }
 
-    public MovingObjectPosition calculateIntercept(Vec3 par1Vec3, Vec3 par2Vec3, World par3World) {
-        return ((IMixinAxisAlignedBB) this).calculateIntercept(par1Vec3, par2Vec3, par3World);
-    }
-
     public double calculateXOffset(AxisAlignedBB par1AxisAlignedBB, double par2) {
         if (par1AxisAlignedBB.maxY > this.minY && par1AxisAlignedBB.minY < this.maxY
             && par1AxisAlignedBB.maxZ > this.minZ
