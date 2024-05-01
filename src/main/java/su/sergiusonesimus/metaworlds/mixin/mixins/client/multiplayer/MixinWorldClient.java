@@ -9,6 +9,7 @@ import java.util.Set;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.MovingSoundMinecart;
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -23,6 +24,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
@@ -389,6 +391,27 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
              }
           }
        }
+    }
+
+    /**
+     * par8 is loudness, all pars passed to minecraftInstance.sndManager.playSound
+     */
+    @Overwrite
+    public void playSound(double x, double y, double z, String soundName, float volume, float pitch, boolean distanceDelay)
+    {
+    	Vec3 globalPosition = this.transformToGlobal(x, y, z);
+        double d3 = this.mc.renderViewEntity.getDistanceSq(globalPosition.xCoord, globalPosition.yCoord, globalPosition.zCoord);
+        PositionedSoundRecord positionedsoundrecord = new PositionedSoundRecord(new ResourceLocation(soundName), volume, pitch, (float)x, (float)y, (float)z);
+
+        if (distanceDelay && d3 > 100.0D)
+        {
+            double d4 = Math.sqrt(d3) / 40.0D;
+            this.mc.getSoundHandler().playDelayedSound(positionedsoundrecord, (int)(d4 * 20.0D));
+        }
+        else
+        {
+            this.mc.getSoundHandler().playSound(positionedsoundrecord);
+        }
     }
 
 }

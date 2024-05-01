@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.Vec3;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
 
@@ -148,7 +149,8 @@ public class RenderGlobalSubWorld extends RenderGlobal {
 
     @Override
     public void broadcastSound(int par1, int par2, int par3, int par4, int par5) {
-        parentRenderGlobal.broadcastSound(par1, par2, par3, par4, par5);
+    	Vec3 globalCoords = ((IMixinWorld)this.theWorld).transformToGlobal(Vec3.createVectorHelper(par2, par3, par4));
+        parentRenderGlobal.broadcastSound(par1, (int)globalCoords.xCoord, (int)globalCoords.yCoord, (int)globalCoords.zCoord, par5);
     }
 
     /**
