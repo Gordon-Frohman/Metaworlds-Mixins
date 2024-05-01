@@ -17,6 +17,7 @@
   	"client.renderer.MixinRenderGlobal",
   	"client.renderer.MixinRenderList",
   	"client.renderer.MixinWorldRenderer",
+  	"client.renderer.tileentity.MixinTileEntityRendererDispatcher",
   	"entity.MixinEntity",
   	"entity.MixinEntityLivingBase",
   	"entity.MixinEntityTrackerEntry",
