@@ -71,4 +71,39 @@ public class MinecraftSubWorldProxy extends Minecraft {
     {
         return realMinecraft.func_152349_b();
     }
+
+    /**
+     * To fix various GUI bugs caused by a lack of screen size synchronization
+     */
+    public void toggleFullscreen()
+    {
+        try
+        {
+        	realMinecraft.toggleFullscreen();
+            this.fullscreen = realMinecraft.fullscreen;
+
+            this.displayWidth = realMinecraft.displayWidth;
+            this.displayHeight = realMinecraft.displayHeight;
+
+            if (this.displayWidth <= 0)
+            {
+                this.displayWidth = 1;
+            }
+
+            if (this.displayHeight <= 0)
+            {
+                this.displayHeight = 1;
+            }
+
+            if (this.currentScreen != null)
+            {
+                this.resize(this.displayWidth, this.displayHeight);
+            }
+            this.func_147120_f();
+        }
+        catch (Exception exception)
+        {
+            logger.error("Couldn\'t toggle fullscreen", exception);
+        }
+    }
 }

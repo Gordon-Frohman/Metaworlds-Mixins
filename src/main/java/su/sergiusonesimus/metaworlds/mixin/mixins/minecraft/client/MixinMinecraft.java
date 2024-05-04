@@ -22,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.google.common.collect.Multimap;
-import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 
@@ -54,20 +53,20 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Session;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
-import net.minecraft.world.storage.ISaveFormat;
 import net.minecraftforge.common.ForgeHooks;
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.compat.CompatUtil;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.multiplayer.IMixinPlayerControllerMP;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
+import su.sergiusonesimus.metaworlds.patcher.EntityClientPlayerMPSubWorldProxy;
+import su.sergiusonesimus.metaworlds.patcher.MinecraftSubWorldProxy;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Bootstrap;
 import net.minecraft.client.gui.GuiChat;
@@ -971,6 +970,20 @@ public abstract class MixinMinecraft {
                     .sendSlotPacket(this.thePlayer.inventory.getStackInSlot(this.thePlayer.inventory.currentItem), j);
             }
         }
+    }
+	
+	//To fix various GUI bugs caused by a lack of screen size synchronization
+	@Inject(method = "toggleFullscreen()V", at = { @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;func_147120_f()V") })
+    public void toggleFullscreen(CallbackInfo ci)
+    {
+		Minecraft mc = Minecraft.getMinecraft();
+		for(World subworld : ((IMixinWorld)mc.theWorld).getSubWorlds()) {
+			EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy)((IMixinEntity)mc.thePlayer).getProxyPlayer(subworld);
+			MinecraftSubWorldProxy proxyMC = (MinecraftSubWorldProxy)proxy.getMinecraft();
+			proxyMC.fullscreen = mc.fullscreen;
+			proxyMC.displayWidth = mc.displayWidth;
+			proxyMC.displayHeight = mc.displayHeight;
+		}
     }
 
 }
