@@ -6,6 +6,7 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
@@ -20,7 +21,9 @@ import net.minecraft.world.World;
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
+import su.sergiusonesimus.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.patcher.OrientedBB;
 
@@ -125,6 +128,9 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     public float width;
 
     // TODO
+
+    @Shadow(remap = true)
+    protected void setFlag(int flag, boolean set) {}
 
     @Shadow(remap = true)
     public boolean shouldRenderInPass(int pass) { return false; }
@@ -782,6 +788,19 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
          * double d5 = this.posZ - p_70011_5_;
          * return (double)MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
          */
+    }
+    
+    @Overwrite
+    public void setSneaking(boolean sneaking)
+    {
+    	if((Entity)(Object)this instanceof EntityPlayer) {
+    		EntityPlayer player = (EntityPlayer)(Object)this;
+    		for(World subworld : ((IMixinWorld)this.worldObj).getSubWorlds()) {
+    			EntityPlayer proxy = (EntityPlayer)((IMixinEntity)player).getProxyPlayer(subworld);
+    			proxy.setFlag(1, sneaking);
+    		}
+    	}
+        this.setFlag(1, sneaking);
     }
 
 }

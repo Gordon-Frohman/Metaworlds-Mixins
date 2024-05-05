@@ -971,8 +971,10 @@ public abstract class MixinMinecraft {
             }
         }
     }
-	
-	//To fix various GUI bugs caused by a lack of screen size synchronization
+
+    /**
+     * To fix various GUI bugs caused by a lack of screen size synchronization
+     */
 	@Inject(method = "toggleFullscreen()V", at = { @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;func_147120_f()V") })
     public void toggleFullscreen(CallbackInfo ci)
     {
