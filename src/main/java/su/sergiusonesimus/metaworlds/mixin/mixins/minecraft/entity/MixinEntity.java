@@ -790,8 +790,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
          */
     }
     
-    @Overwrite
-    public void setSneaking(boolean sneaking)
+    @Inject(method = "setSneaking(Z)V", at = @At("TAIL"))
+    public void setSneaking(boolean sneaking, CallbackInfo ci)
     {
     	if((Entity)(Object)this instanceof EntityPlayer) {
     		EntityPlayer player = (EntityPlayer)(Object)this;
@@ -800,7 +800,6 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     			proxy.setFlag(1, sneaking);
     		}
     	}
-        this.setFlag(1, sneaking);
     }
 
 }
