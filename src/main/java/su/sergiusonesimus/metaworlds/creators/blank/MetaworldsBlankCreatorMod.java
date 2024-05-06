@@ -36,7 +36,7 @@ public class MetaworldsBlankCreatorMod {
             .setBlockName("blankSubWorldCreator")
             .setCreativeTab(CreativeTabs.tabBlock);
         blankSubWorldCreator
-            .setBlockTextureName("metaworldsblankcreatormod:" + blankSubWorldCreator.getUnlocalizedName());
+            .setBlockTextureName("metaworlds:" + blankSubWorldCreator.getUnlocalizedName());
         this.config.load();
         blankSubWorldCreatorConfig = new RecipeConfig(
             this.config,

@@ -1,0 +1,14 @@
+tile.blankSubWorldCreator.name=Blank SubWorld Creator
+tile.contagiousSubWorldCreator.name=Contagious SubWorld Creator
+tile.subWorldAligner.name=SubWorld Aligner
+tile.subWorldController.name=SubWorld Controller
+tile.flipSubWorldBlock.name=Flip SubWorld Block
+tile.subWorldMiniaturizer.name=Miniaturization Block
+tile.subWorldScaleNormalizer.name=Scale Reset Block
+tile.subWorldSupersizer.name=Supersizing Block
+tile.subWorldReintegrator.name=SubWorld Reintegrator
+tile.subWorldHingeJoint.name=SubWorld Hinge Joint
+tile.floatingWoodBlock.name=Floating Wood
+
+item.emptyWorldBottle.name=Empty World Bottle
+item.bottledWorld.name=Bottled World

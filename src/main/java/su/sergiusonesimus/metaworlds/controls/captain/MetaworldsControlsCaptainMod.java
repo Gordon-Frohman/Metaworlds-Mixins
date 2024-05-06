@@ -45,7 +45,7 @@ public class MetaworldsControlsCaptainMod {
             .setStepSound(Block.soundTypeGravel)
             .setBlockName("subWorldController");
         subWorldController
-            .setBlockTextureName("mwcaptainmod:" + subWorldController.getUnlocalizedName());
+            .setBlockTextureName("metaworlds:" + subWorldController.getUnlocalizedName());
         this.config.load();
         subWorldControllerConfig = new RecipeConfig(
             this.config,

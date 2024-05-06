@@ -40,19 +40,19 @@ public class MetaworldsMiniatureMod {
         miniaturizerBlock = (new BlockMiniaturizer()).setHardness(0.5F)
             .setStepSound(Block.soundTypeWood)
             .setBlockName("subWorldMiniaturizer");
-        miniaturizerBlock.setBlockTextureName("metaworldsminiaturemod:" + miniaturizerBlock.getUnlocalizedName());
+        miniaturizerBlock.setBlockTextureName("metaworlds:" + miniaturizerBlock.getUnlocalizedName());
         scaleNormalizerBlock = (new BlockScaleNormalizer()).setHardness(0.5F)
             .setStepSound(Block.soundTypeWood)
             .setBlockName("subWorldScaleNormalizer");
-        scaleNormalizerBlock.setBlockTextureName("metaworldsminiaturemod:" + scaleNormalizerBlock.getUnlocalizedName());
+        scaleNormalizerBlock.setBlockTextureName("metaworlds:" + scaleNormalizerBlock.getUnlocalizedName());
         supersizerBlock = (new BlockSupersizer()).setHardness(0.5F)
             .setStepSound(Block.soundTypeWood)
             .setBlockName("subWorldSupersizer");
-        supersizerBlock.setBlockTextureName("metaworldsminiaturemod:" + supersizerBlock.getUnlocalizedName());
+        supersizerBlock.setBlockTextureName("metaworlds:" + supersizerBlock.getUnlocalizedName());
         emptyWorldBottleItem = (new ItemEmptyWorldBottle()).setUnlocalizedName("emptyWorldBottle");
         emptyWorldBottleItem.setTextureName("potion_bottle_empty");
         bottledWorldItem = (new ItemBottledWorld()).setUnlocalizedName("bottledWorld");
-        bottledWorldItem.setTextureName("metaworldsminiaturemod:" + bottledWorldItem.getUnlocalizedName());
+        bottledWorldItem.setTextureName("metaworlds:" + bottledWorldItem.getUnlocalizedName());
         this.config.load();
         miniaturizerBlockConfig = new RecipeConfig(
             this.config,

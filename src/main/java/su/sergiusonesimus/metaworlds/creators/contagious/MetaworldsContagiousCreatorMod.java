@@ -37,7 +37,7 @@ public class MetaworldsContagiousCreatorMod {
             .setBlockName("contagiousSubWorldCreator")
             .setCreativeTab(CreativeTabs.tabBlock);
         contagiousSubWorldCreator
-            .setBlockTextureName("metaworldscontagiouscreatormod:" + contagiousSubWorldCreator.getUnlocalizedName());
+            .setBlockTextureName("metaworlds:" + contagiousSubWorldCreator.getUnlocalizedName());
         dummyBlock = new BlockDummyReobfTracker();
         ((BlockDummyReobfTracker) dummyBlock).initialize();
         this.config.load();

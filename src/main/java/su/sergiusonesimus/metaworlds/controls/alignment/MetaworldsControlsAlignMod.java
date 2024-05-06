@@ -32,7 +32,7 @@ public class MetaworldsControlsAlignMod {
         subWorldAligner = (new BlockSubWorldAligner()).setHardness(0.5F)
             .setStepSound(Block.soundTypeWood)
             .setBlockName("subWorldAligner");
-        subWorldAligner.setBlockTextureName("metaworldscontrolsalignmod:" + subWorldAligner.getUnlocalizedName());
+        subWorldAligner.setBlockTextureName("metaworlds:" + subWorldAligner.getUnlocalizedName());
         this.config.load();
         subWorldAlignerConfig = new RecipeConfig(
             this.config,
