@@ -1,0 +1,14 @@
+tile.blankSubWorldCreator.name=Генератор Метамира
+tile.contagiousSubWorldCreator.name=Заразный генератор Метамира
+tile.subWorldAligner.name=Выравниватель Метамира
+tile.subWorldController.name=Контроллер Метамира
+tile.flipSubWorldBlock.name=Отражатель Метамира
+tile.subWorldMiniaturizer.name=Уменьшитель Метамира
+tile.subWorldScaleNormalizer.name=Восстановитель размера Метамира
+tile.subWorldSupersizer.name=Увеличитель Метамира
+tile.subWorldReintegrator.name=Реинтегратор Метамира
+tile.subWorldHingeJoint.name=Шарнир Метамира
+tile.floatingWoodBlock.name=Плавучие доски
+
+item.emptyWorldBottle.name=Пустая бутылка для мира
+item.bottledWorld.name=Мир в бутылке
