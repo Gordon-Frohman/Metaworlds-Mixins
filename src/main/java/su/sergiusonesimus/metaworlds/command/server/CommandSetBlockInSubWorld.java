@@ -21,16 +21,16 @@ import net.minecraft.world.World;
 
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 
-public class CommandSetBlockInMetaworld extends CommandSetBlock {
+public class CommandSetBlockInSubWorld extends CommandSetBlock {
 
     public String getCommandName() {
-        return "setblockinmetaworld";
+        return "setblockinsubworld";
     }
 
     /*
      * public String getCommandUsage(ICommandSender sender)
      * {
-     * return "commands.setblockinmetaworld.usage";
+     * return "commands.setblockinsubworld.usage";
      * }
      */
 
@@ -39,7 +39,7 @@ public class CommandSetBlockInMetaworld extends CommandSetBlock {
             World world = ((IMixinWorld) sender.getEntityWorld()).getSubWorld(Integer.parseInt(args[0]));
 
             if (world == null) {
-                throw new CommandException("commands.setblockinmetaworld.nosuchworld", new Object[0]);
+                throw new CommandException("commands.setblockinsubworld.nosuchworld", new Object[0]);
             } else {
                 int i = sender.getPlayerCoordinates().posX;
                 int j = sender.getPlayerCoordinates().posY;
