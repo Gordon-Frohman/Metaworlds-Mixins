@@ -24,6 +24,7 @@ import net.minecraft.world.chunk.storage.AnvilSaveConverter;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraftforge.common.DimensionManager;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.command.server.CommandSetBlockInMetaworld;
 
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -183,6 +184,7 @@ public abstract class MixinMinecraftServer {
 	        this.anvilFile = workDir;
 	        this.field_147144_o = new NetworkSystem((MinecraftServer)(Object)this);
 	        this.commandManager = new ServerCommandManager();
+	        ((ServerCommandManager)this.commandManager).registerCommand(new CommandSetBlockInMetaworld());
 	        this.anvilConverterForAnvilFile = new AnvilSaveConverter(workDir);
 	        this.field_152364_T = new YggdrasilAuthenticationService(proxy, UUID.randomUUID().toString());
 	        this.field_147143_S = this.field_152364_T.createMinecraftSessionService();
