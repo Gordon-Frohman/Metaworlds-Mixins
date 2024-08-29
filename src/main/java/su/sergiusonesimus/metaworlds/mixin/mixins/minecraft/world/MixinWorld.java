@@ -161,6 +161,15 @@ public abstract class MixinWorld implements IMixinWorld {
     	}
         return this.childSubWorlds.size() + 1;
     }
+    
+    public int getUnoccupiedSubworldID() {
+    	Map<Integer, World> subworlds = getSubWorldsMap();
+    	int maxID = getWorldsCount();
+    	for(int i = 1; i < maxID; i++)
+    		if(!subworlds.containsKey(i))
+    			return i;
+    	return maxID;
+    }
 
     public int getSubWorldID() {
         return 0;

@@ -35,6 +35,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.chunk.storage.IChunkLoader;
+import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraftforge.common.DimensionManager;
@@ -148,6 +149,17 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         MetaMagicNetwork.dispatcher.sendToDimension(
             new SubWorldDestroyPacket(1, new Integer[] { Integer.valueOf(this.getSubWorldID()) }),
             this.provider.dimensionId);
+    }
+    
+    public boolean deleteSubWorldDirectory() {
+    	String folder = MinecraftServer.mcServer.worldServers[0].getSaveHandler().getWorldDirectoryName();
+    	int dimension = this.provider.dimensionId;
+    	if (dimension != 0)
+    		folder += "/DIM" + dimension;
+    	folder += "/SUBWORLD" + this.subWorldID;
+        ISaveFormat isaveformat = MinecraftServer.mcServer.anvilConverterForAnvilFile;
+        isaveformat.flushCache();
+    	return isaveformat.deleteWorldDirectory(folder);
     }
 
     protected IChunkProvider createChunkProvider() {

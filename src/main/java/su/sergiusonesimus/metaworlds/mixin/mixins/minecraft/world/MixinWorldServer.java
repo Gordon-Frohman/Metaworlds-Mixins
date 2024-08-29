@@ -103,7 +103,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     public World CreateSubWorld()
     {
-        return this.CreateSubWorld(((IMixinWorld) this).getWorldsCount());
+        return this.CreateSubWorld(((IMixinWorld) this).getUnoccupiedSubworldID());
     }
     
     public World CreateSubWorld(int newSubWorldID)

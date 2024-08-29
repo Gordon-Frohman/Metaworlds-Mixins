@@ -30,6 +30,8 @@ public interface IMixinWorld {
     public Collection<World> getSubWorlds();
 
     public int getWorldsCount(); // Including this one. Equal to getSubWorlds().size() + 1 (= getWorlds().size())
+    
+    public int getUnoccupiedSubworldID(); // Returns first ID which is not occupied by any subworld
 
     // The parent worlds always have subWorldID 0. SubWorlds start from ID 1 counting up
     // The ID is the same as the number suffix of the save folders

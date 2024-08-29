@@ -14,6 +14,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.core.SubWorldServer;
 import su.sergiusonesimus.metaworlds.creators.contagious.BlockContagiousSubWorldCreator;
 
 public class BlockSubWorldReintegrator extends Block {
@@ -151,8 +152,15 @@ public class BlockSubWorldReintegrator extends Block {
                 }
 
                 subWorldPar.setCenter(oldCenterX, oldCenterY, oldCenterZ);
-                BlockContagiousSubWorldCreator.isBusy = false;
+                if(subWorldPar instanceof SubWorldServer && ((SubWorldServer)subWorldPar).isEmpty()) {
+                	SubWorldServer subWorldServer = ((SubWorldServer)subWorldPar);
+                	((IMixinWorld)subWorldServer.getParentWorld()).getSubWorldsMap().remove(subWorldServer.getSubWorldID());
+                	subWorldServer.removeSubWorld();
+                	subWorldServer.flush();
+                	subWorldServer.deleteSubWorldDirectory();
+                }
             }
+            BlockContagiousSubWorldCreator.isBusy = false;
         }
     }
 
