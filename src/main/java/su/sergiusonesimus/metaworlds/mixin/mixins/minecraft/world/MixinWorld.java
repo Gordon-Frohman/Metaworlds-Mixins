@@ -155,10 +155,8 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     public int getWorldsCount() {
-    	if(this.childSubWorlds == null) {
+    	if(this.childSubWorlds == null)
     		childSubWorlds = new TreeMap<Integer, World>();
-    		return 0;
-    	}
         return this.childSubWorlds.size() + 1;
     }
     
