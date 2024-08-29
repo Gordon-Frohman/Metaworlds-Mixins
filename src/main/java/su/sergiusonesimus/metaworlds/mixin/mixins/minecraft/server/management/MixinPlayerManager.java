@@ -57,6 +57,7 @@ public abstract class MixinPlayerManager implements PlayerManagerSuperClass {
      */
     @Overwrite
     public void addPlayer(EntityPlayerMP p_72683_1_) {
+    	
         int i = (int) p_72683_1_.posX >> 4;
         int j = (int) p_72683_1_.posZ >> 4;
         p_72683_1_.managedPosX = p_72683_1_.posX;
@@ -77,13 +78,13 @@ public abstract class MixinPlayerManager implements PlayerManagerSuperClass {
                 this.getOrCreateChunkWatcher(pair.chunkXPos, pair.chunkZPos, true)
                     .addPlayer(p_72683_1_);
         }
-
+    	
         this.players.add(p_72683_1_);
         ((PlayerManager) (Object) this).filterChunkLoadQueue(p_72683_1_);
 
         for (World curSubWorld : ((IMixinWorld) (Object) this.theWorldServer).getSubWorlds()) {
             EntityPlayer proxyPlayer = ((IMixinEntity) (Object) p_72683_1_).getProxyPlayer(curSubWorld);
-
+            
             if (proxyPlayer == null) {
                 proxyPlayer = new EntityPlayerMPSubWorldProxy(p_72683_1_, curSubWorld);
                 // TODO: newManager.setGameType(this.getGameType()); make this synchronized over all proxies and the
@@ -93,6 +94,108 @@ public abstract class MixinPlayerManager implements PlayerManagerSuperClass {
 
             ((WorldServer) curSubWorld).getPlayerManager()
                 .addPlayer((EntityPlayerMP) proxyPlayer);
+        }
+    }
+
+    /**
+     * Removes an EntityPlayerMP from the PlayerManager.
+     */
+    @Overwrite
+    public void removePlayer(EntityPlayerMP p_72695_1_)
+    {
+        int i = (int)p_72695_1_.managedPosX >> 4;
+        int j = (int)p_72695_1_.managedPosZ >> 4;
+
+        for (int k = i - this.playerViewRadius; k <= i + this.playerViewRadius; ++k)
+        {
+            for (int l = j - this.playerViewRadius; l <= j + this.playerViewRadius; ++l)
+            {
+                PlayerManager.PlayerInstance playerinstance = this.getOrCreateChunkWatcher(k, l, false);
+
+                if (playerinstance != null)
+                {
+                    playerinstance.removePlayer(p_72695_1_);
+                }
+            }
+        }
+
+        this.players.remove(p_72695_1_);
+        
+        for (World curSubWorld : ((IMixinWorld) this.theWorldServer).getSubWorlds())
+        {
+            EntityPlayer proxyPlayer = ((IMixinEntity) p_72695_1_).getProxyPlayer(curSubWorld);
+            ((WorldServer)curSubWorld).getPlayerManager().removePlayer((EntityPlayerMP)proxyPlayer);
+            //Sadly we need to do this check because minecraft in inconsequentian in the order it removes the player from a)the World and b)the PlayerManager
+            if (!curSubWorld.playerEntities.contains(proxyPlayer))
+            	((IMixinEntity) p_72695_1_).getPlayerProxyMap().remove(((IMixinWorld) curSubWorld).getSubWorldID());
+        }
+    }
+
+    /**
+     * Update which chunks the player needs info on.
+     */
+    @Overwrite
+    public void updatePlayerPertinentChunks(EntityPlayerMP p_72685_1_)
+    {
+        int i = (int)p_72685_1_.posX >> 4;
+        int j = (int)p_72685_1_.posZ >> 4;
+        double d0 = p_72685_1_.managedPosX - p_72685_1_.posX;
+        double d1 = p_72685_1_.managedPosZ - p_72685_1_.posZ;
+        double d2 = d0 * d0 + d1 * d1;
+
+        if (d2 >= 64.0D)
+        {
+            int k = (int)p_72685_1_.managedPosX >> 4;
+            int l = (int)p_72685_1_.managedPosZ >> 4;
+            int i1 = this.playerViewRadius;
+            int j1 = i - k;
+            int k1 = j - l;
+            List<ChunkCoordIntPair> chunksToLoad = new ArrayList<ChunkCoordIntPair>();
+
+            if (j1 != 0 || k1 != 0)
+            {
+                for (int l1 = i - i1; l1 <= i + i1; ++l1)
+                {
+                    for (int i2 = j - i1; i2 <= j + i1; ++i2)
+                    {
+                    	if (!((PlayerManager)(Object)this).overlaps(l1, i2, k, l, i1) && ((IMixinWorld)this.theWorldServer).isChunkWatchable(l1, i2))
+                        {
+                            chunksToLoad.add(new ChunkCoordIntPair(l1, i2));
+                        }
+
+                    	if (!((PlayerManager)(Object)this).overlaps(l1 - j1, i2 - k1, i, j, i1) && ((IMixinWorld)this.theWorldServer).isChunkWatchable(l1 - j1, i2 - k1))
+                        {
+                            PlayerManager.PlayerInstance playerinstance = this.getOrCreateChunkWatcher(l1 - j1, i2 - k1, false);
+
+                            if (playerinstance != null)
+                            {
+                                playerinstance.removePlayer(p_72685_1_);
+                            }
+                        }
+                    }
+                }
+
+                ((PlayerManager)(Object)this).filterChunkLoadQueue(p_72685_1_);
+                p_72685_1_.managedPosX = p_72685_1_.posX;
+                p_72685_1_.managedPosZ = p_72685_1_.posZ;
+                // send nearest chunks first
+                java.util.Collections.sort(chunksToLoad, new net.minecraftforge.common.util.ChunkCoordComparator(p_72685_1_));
+
+                for (ChunkCoordIntPair pair : chunksToLoad)
+                {
+                    this.getOrCreateChunkWatcher(pair.chunkXPos, pair.chunkZPos, true).addPlayer(p_72685_1_);
+                }
+
+                if (i1 > 1 || i1 < -1 || j1 > 1 || j1 < -1)
+                {
+                    java.util.Collections.sort(p_72685_1_.loadedChunks, new net.minecraftforge.common.util.ChunkCoordComparator(p_72685_1_));
+                }
+            }
+        }
+        
+        for (World curSubWorld : ((IMixinWorld)this.theWorldServer).getSubWorlds())
+        {
+            ((WorldServer)curSubWorld).getPlayerManager().updatePlayerPertinentChunks((EntityPlayerMP)((IMixinEntity)p_72685_1_).getProxyPlayer(curSubWorld));
         }
     }
 
