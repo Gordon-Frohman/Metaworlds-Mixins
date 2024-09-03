@@ -33,10 +33,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.client.IMixinC03PacketPlayer;
-import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,6 +40,10 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import cpw.mods.fml.common.eventhandler.Event;
+import su.sergiusonesimus.metaworlds.api.IMixinEntity;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.client.IMixinC03PacketPlayer;
+import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer {
@@ -78,8 +78,8 @@ public abstract class MixinNetHandlerPlayServer {
 
     @Shadow(remap = true)
     public int networkTickCount;
-    
-    //TODO
+
+    // TODO
 
     @Shadow(remap = true)
     public abstract void sendPacket(final Packet packetIn);

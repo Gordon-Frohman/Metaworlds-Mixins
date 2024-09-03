@@ -1,11 +1,9 @@
 package su.sergiusonesimus.metaworlds.core;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+
 import su.sergiusonesimus.metaworlds.patcher.SubWorldFactory;
 
 public class SubWorldServerFactory implements SubWorldFactory {

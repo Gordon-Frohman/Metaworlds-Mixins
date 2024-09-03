@@ -2,11 +2,6 @@ package su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.client.renderer;
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
@@ -28,6 +23,12 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
+
+import org.lwjgl.opengl.GL11;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 
@@ -35,7 +36,7 @@ import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 public abstract class MixinEntityRenderer {
 
     @Shadow(remap = true)
-	private Minecraft mc;
+    private Minecraft mc;
 
     @Shadow(remap = true)
     private Entity pointedEntity;
@@ -51,8 +52,8 @@ public abstract class MixinEntityRenderer {
 
     @Shadow(remap = true)
     private double cameraZoom;
-	
-	//TODO
+
+    // TODO
 
     @Shadow(remap = true)
     protected abstract void renderHand(float p_78476_1_, int p_78476_2_);
@@ -84,7 +85,7 @@ public abstract class MixinEntityRenderer {
     /**
      * Finds what block or object the mouse is over at the specified partial tick time. Args: partialTickTime
      */
-	@Overwrite
+    @Overwrite
     public void getMouseOver(float p_78473_1_) {
         if (this.mc.renderViewEntity != null) {
             if (this.mc.theWorld != null) {
@@ -126,9 +127,10 @@ public abstract class MixinEntityRenderer {
 
                     if (entity.canBeCollidedWith()) {
                         float f2 = entity.getCollisionBorderSize();
-                        AxisAlignedBB axisalignedbb = ((IMixinAxisAlignedBB)entity.boundingBox.expand((double) f2, (double) f2, (double) f2))
-                            .getTransformedToGlobalBoundingBox(entity.worldObj);
-                        MovingObjectPosition movingobjectposition = ((IMixinAxisAlignedBB)axisalignedbb)
+                        AxisAlignedBB axisalignedbb = ((IMixinAxisAlignedBB) entity.boundingBox
+                            .expand((double) f2, (double) f2, (double) f2))
+                                .getTransformedToGlobalBoundingBox(entity.worldObj);
+                        MovingObjectPosition movingobjectposition = ((IMixinAxisAlignedBB) axisalignedbb)
                             .calculateIntercept(vec3, vec32, entity.worldObj);
 
                         if (axisalignedbb.isVecInside(vec3)) {
@@ -168,7 +170,7 @@ public abstract class MixinEntityRenderer {
         }
     }
 
-	@Overwrite
+    @Overwrite
     public void renderWorld(float p_78471_1_, long p_78471_2_) {
         this.mc.mcProfiler.startSection("lightTex");
 
@@ -186,7 +188,8 @@ public abstract class MixinEntityRenderer {
         }
 
         this.mc.mcProfiler.endStartSection("pick");
-        for (World curWorld : ((IMixinWorld)this.mc.theWorld).getSubWorlds()) ((IMixinWorld)curWorld).doTickPartial(p_78471_1_);
+        for (World curWorld : ((IMixinWorld) this.mc.theWorld).getSubWorlds())
+            ((IMixinWorld) curWorld).doTickPartial(p_78471_1_);
 
         this.getMouseOver(p_78471_1_);
         EntityLivingBase entitylivingbase = this.mc.renderViewEntity;
@@ -427,5 +430,5 @@ public abstract class MixinEntityRenderer {
         GL11.glColorMask(true, true, true, false);
         this.mc.mcProfiler.endSection();
     }
-	
+
 }

@@ -9,6 +9,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
+
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.IMixinWorldIntermediate;
@@ -49,11 +50,11 @@ public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP impl
         this.mc.effectRenderer = new EffectRenderer(targetSubWorld, Minecraft.getMinecraft().renderEngine);
         this.mc.renderGlobal = new RenderGlobalSubWorld(this.mc, Minecraft.getMinecraft().renderGlobal);
 
-        ((IMixinWorldIntermediate)this.mc.theWorld).setMinecraft(this.mc);
+        ((IMixinWorldIntermediate) this.mc.theWorld).setMinecraft(this.mc);
 
         ((NetHandlerPlayClientSubWorldProxy) this.sendQueue).proxyPlayer = this;
 
-        ((IMixinEntity)this.realPlayer).getPlayerProxyMap()
+        ((IMixinEntity) this.realPlayer).getPlayerProxyMap()
             .put(((IMixinWorld) targetSubWorld).getSubWorldID(), this);
     }
 

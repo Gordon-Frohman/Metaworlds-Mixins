@@ -12,13 +12,13 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import cpw.mods.fml.common.eventhandler.Event;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 
 @Mixin(ItemBucket.class)
 public abstract class MixinItemBucket {
@@ -38,7 +38,8 @@ public abstract class MixinItemBucket {
     @Overwrite
     public ItemStack onItemRightClick(ItemStack itemStackIn, World worldIn, EntityPlayer player) {
         boolean flag = this.isFull == Blocks.air;
-        MovingObjectPosition movingobjectposition = ((ItemBucket)(Object)this).getMovingObjectPositionFromPlayer(worldIn, player, flag);
+        MovingObjectPosition movingobjectposition = ((ItemBucket) (Object) this)
+            .getMovingObjectPositionFromPlayer(worldIn, player, flag);
         if (movingobjectposition != null) worldIn = ((IMixinMovingObjectPosition) movingobjectposition).getWorld();
 
         if (movingobjectposition == null) {

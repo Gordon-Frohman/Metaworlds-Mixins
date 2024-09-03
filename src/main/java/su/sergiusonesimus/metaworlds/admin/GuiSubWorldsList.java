@@ -4,9 +4,10 @@ import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
+
+import cpw.mods.fml.client.GuiScrollingList;
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import cpw.mods.fml.client.GuiScrollingList;
 
 public class GuiSubWorldsList extends GuiScrollingList {
 

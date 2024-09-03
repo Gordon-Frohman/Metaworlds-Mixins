@@ -4,7 +4,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,10 +11,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+
 @Mixin(EntityItem.class)
 public class MixinEntityItem {
 
-    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;<init>(Lnet/minecraft/world/World;)V"), index = 0)
+    @ModifyArg(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;<init>(Lnet/minecraft/world/World;)V"),
+        index = 0)
     private static World adjustWorld(World world) {
         return world != null ? ((IMixinWorld) world).getParentWorld() : world;
     }

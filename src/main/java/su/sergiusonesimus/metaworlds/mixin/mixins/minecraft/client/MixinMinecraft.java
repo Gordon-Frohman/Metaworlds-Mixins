@@ -9,28 +9,12 @@ import java.util.concurrent.FutureTask;
 
 import javax.imageio.ImageIO;
 
-import org.apache.logging.log4j.Logger;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.spongepowered.asm.lib.Opcodes;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import com.google.common.collect.Multimap;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.MusicTicker;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.client.gui.GuiChat;
 import net.minecraft.client.gui.GuiIngame;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiSleepMP;
@@ -49,6 +33,8 @@ import net.minecraft.client.settings.GameSettings;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Bootstrap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.client.C16PacketClientStatus;
@@ -60,6 +46,24 @@ import net.minecraft.util.Session;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeHooks;
+
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.google.common.collect.Multimap;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+
+import cpw.mods.fml.common.FMLCommonHandler;
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.compat.CompatUtil;
@@ -67,28 +71,25 @@ import su.sergiusonesimus.metaworlds.mixin.interfaces.client.multiplayer.IMixinP
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.patcher.EntityClientPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.patcher.MinecraftSubWorldProxy;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Bootstrap;
-import net.minecraft.client.gui.GuiChat;
 
 @Mixin(value = Minecraft.class, priority = 800)
 public abstract class MixinMinecraft {
-	
+
     @Shadow(remap = true)
     private int leftClickCounter;
-	
+
     @Shadow(remap = true)
     public MovingObjectPosition objectMouseOver;
-	
+
     @Shadow(remap = true)
     public PlayerControllerMP playerController;
-	
+
     @Shadow(remap = true)
     public EntityClientPlayerMP thePlayer;
 
     @Shadow(remap = true)
     public EffectRenderer effectRenderer;
-    
+
     @Shadow(remap = true)
     private static Logger logger;
 
@@ -193,8 +194,8 @@ public abstract class MixinMinecraft {
 
     @Shadow(remap = true)
     public int tempDisplayHeight;
-	
-	//TODO
+
+    // TODO
 
     @Shadow(remap = true)
     private void startTimerHackThread() {}
@@ -223,171 +224,277 @@ public abstract class MixinMinecraft {
     @Shadow(remap = true)
     public abstract NetHandlerPlayClient getNetHandler();
 
-	// To get an empty Minecraft variable
+    // To get an empty Minecraft variable
     // Firstly - disable the original constructor
 
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;theMinecraft:Lnet/minecraft/client/Minecraft;", opcode = Opcodes.PUTSTATIC))
-	private void disableTheMinecraft(Minecraft value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;mcDataDir:Ljava/io/File;", opcode = Opcodes.PUTFIELD))
-	private void disableMcDataDir(Minecraft minecraft, File value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;fileAssets:Ljava/io/File;", opcode = Opcodes.PUTFIELD))
-	private void disableFileAssets(Minecraft minecraft, File value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;fileResourcepacks:Ljava/io/File;", opcode = Opcodes.PUTFIELD))
-	private void disableFileResourcepacks(Minecraft minecraft, File value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;launchedVersion:Ljava/lang/String;", opcode = Opcodes.PUTFIELD))
-	private void disableLaunchedVersion(Minecraft minecraft, String value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;field_152356_J:Lcom/google/common/collect/Multimap;", opcode = Opcodes.PUTFIELD))
-	private void disableField_152356_J(Minecraft minecraft, Multimap value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;mcDefaultResourcePack:Lnet/minecraft/client/resources/DefaultResourcePack;", opcode = Opcodes.PUTFIELD))
-	private void disableMcDefaultResourcePack(Minecraft minecraft, DefaultResourcePack value) {
-	    // Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;addDefaultResourcePack()V"))
-	public void disableAddDefaultResourcePack(Minecraft minecraft) {
-		// Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;proxy:Ljava/net/Proxy;", opcode = Opcodes.PUTFIELD))
-	private void disableProxy(Minecraft minecraft, Proxy value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;field_152355_az:Lcom/mojang/authlib/minecraft/MinecraftSessionService;", opcode = Opcodes.PUTFIELD))
-	private void disableField_152355_az(Minecraft minecraft, MinecraftSessionService value) {
-	    // Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startTimerHackThread()V"))
-	public void disableStartTimerHackThread(Minecraft minecraft) {
-		// Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;session:Lnet/minecraft/util/Session;", opcode = Opcodes.PUTFIELD))
-	private void disableSession(Minecraft minecraft, Session value) {
-	    // Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;)V"))
-	public void disableLogger_Info(Logger logger, String s) {
-		// Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;isDemo:Z", opcode = Opcodes.PUTFIELD))
-	private void disableIsDemo(Minecraft minecraft, boolean value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;fullscreen:Z", opcode = Opcodes.PUTFIELD))
-	private void disableFullscreen(Minecraft minecraft, boolean value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;jvm64bit:Z", opcode = Opcodes.PUTFIELD))
-	private void disableJVM64bit(Minecraft minecraft, boolean value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;displayWidth:I", opcode = Opcodes.PUTFIELD))
-	private void disableDisplayWidth(Minecraft minecraft, int value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;displayHeight:I", opcode = Opcodes.PUTFIELD))
-	private void disableDisplayHeight(Minecraft minecraft, int value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;tempDisplayWidth:I", opcode = Opcodes.PUTFIELD))
-	private void disableTempDisplayWidth(Minecraft minecraft, int value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;tempDisplayHeight:I", opcode = Opcodes.PUTFIELD))
-	private void disableTempDisplayHeight(Minecraft minecraft, int value) {
-	    // Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Ljavax/imageio/ImageIO;setUseCache(Z)V"))
-	private void disableSetUseCache(boolean b) {
-		// Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/init/Bootstrap;func_151354_b()V"))
-	private void disableFunc_151354_b() {
-		// Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "NEW", target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;"))
-	private YggdrasilAuthenticationService yggdrasilAuthenticationServicePlaceholder(Proxy proxy, String clientToken) {
-	  return new YggdrasilAuthenticationService(Minecraft.theMinecraft.proxy, clientToken);
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;"))
-	public MinecraftSessionService disableCreateMinecraftSessionService(YggdrasilAuthenticationService yggdrasilAuthenticationService) {
-		// Do nothing, yet
-		return null;
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Session;getUsername()Ljava/lang/String;"))
-	public String disableGetUsername(Session session) {
-		// Do nothing, yet
-		return "";
-	}
-	
-	// And secondly - set up a new constructor
-	
-	@Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;theMinecraft:Lnet/minecraft/client/Minecraft;"), method = "<init>")
-	private void init(Session sessionIn, int displayWidth, int displayHeight, boolean fullscreen, boolean isDemo, File dataDir, File assetsDir, File resourcePackDir, Proxy proxy, String version, Multimap twitchDetails, String assetsJsonVersion, CallbackInfo info) {
-		if(sessionIn == null && displayWidth == 0 && displayHeight == 0 && fullscreen ==  false && isDemo == false && dataDir == null && assetsDir == null && resourcePackDir == null && version == null && twitchDetails == null && assetsJsonVersion == null) {
-			//logger.info("Empty Minecraft object created");
-		}
-		else {
-			//logger.info("Normal Minecraft object created");
-	        Minecraft.theMinecraft = (Minecraft)(Object)this;
-	        this.mcDataDir = dataDir;
-	        this.fileAssets = assetsDir;
-	        this.fileResourcepacks = resourcePackDir;
-	        this.launchedVersion = version;
-	        this.field_152356_J = twitchDetails;
-	        this.mcDefaultResourcePack = new DefaultResourcePack((new ResourceIndex(assetsDir, assetsJsonVersion)).func_152782_a());
-	        this.addDefaultResourcePack();
-	        this.proxy = proxy == null ? Proxy.NO_PROXY : proxy;
-	        this.field_152355_az = (new YggdrasilAuthenticationService(proxy, UUID.randomUUID().toString())).createMinecraftSessionService();
-	        this.startTimerHackThread();
-	        this.session = sessionIn;
-	        logger.info("Setting user: " + sessionIn.getUsername());
-	        this.isDemo = isDemo;
-	        this.displayWidth = displayWidth;
-	        this.displayHeight = displayHeight;
-	        this.tempDisplayWidth = displayWidth;
-	        this.tempDisplayHeight = displayHeight;
-	        this.fullscreen = fullscreen;
-	        this.jvm64bit = Minecraft.isJvm64bit();
-	        ImageIO.setUseCache(false);
-	        Bootstrap.func_151354_b();
-		}
-	}
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;theMinecraft:Lnet/minecraft/client/Minecraft;",
+            opcode = Opcodes.PUTSTATIC))
+    private void disableTheMinecraft(Minecraft value) {
+        // Do nothing
+    }
 
-	@Overwrite
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;mcDataDir:Ljava/io/File;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableMcDataDir(Minecraft minecraft, File value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;fileAssets:Ljava/io/File;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableFileAssets(Minecraft minecraft, File value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;fileResourcepacks:Ljava/io/File;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableFileResourcepacks(Minecraft minecraft, File value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;launchedVersion:Ljava/lang/String;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableLaunchedVersion(Minecraft minecraft, String value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;field_152356_J:Lcom/google/common/collect/Multimap;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableField_152356_J(Minecraft minecraft, Multimap value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;mcDefaultResourcePack:Lnet/minecraft/client/resources/DefaultResourcePack;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableMcDefaultResourcePack(Minecraft minecraft, DefaultResourcePack value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;addDefaultResourcePack()V"))
+    public void disableAddDefaultResourcePack(Minecraft minecraft) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;proxy:Ljava/net/Proxy;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableProxy(Minecraft minecraft, Proxy value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;field_152355_az:Lcom/mojang/authlib/minecraft/MinecraftSessionService;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableField_152355_az(Minecraft minecraft, MinecraftSessionService value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;startTimerHackThread()V"))
+    public void disableStartTimerHackThread(Minecraft minecraft) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;session:Lnet/minecraft/util/Session;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableSession(Minecraft minecraft, Session value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;)V"))
+    public void disableLogger_Info(Logger logger, String s) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;isDemo:Z", opcode = Opcodes.PUTFIELD))
+    private void disableIsDemo(Minecraft minecraft, boolean value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;fullscreen:Z", opcode = Opcodes.PUTFIELD))
+    private void disableFullscreen(Minecraft minecraft, boolean value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;jvm64bit:Z", opcode = Opcodes.PUTFIELD))
+    private void disableJVM64bit(Minecraft minecraft, boolean value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;displayWidth:I", opcode = Opcodes.PUTFIELD))
+    private void disableDisplayWidth(Minecraft minecraft, int value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;displayHeight:I",
+            opcode = Opcodes.PUTFIELD))
+    private void disableDisplayHeight(Minecraft minecraft, int value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;tempDisplayWidth:I",
+            opcode = Opcodes.PUTFIELD))
+    private void disableTempDisplayWidth(Minecraft minecraft, int value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;tempDisplayHeight:I",
+            opcode = Opcodes.PUTFIELD))
+    private void disableTempDisplayHeight(Minecraft minecraft, int value) {
+        // Do nothing
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Ljavax/imageio/ImageIO;setUseCache(Z)V"))
+    private void disableSetUseCache(boolean b) {
+        // Do nothing
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/init/Bootstrap;func_151354_b()V"))
+    private void disableFunc_151354_b() {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "NEW", target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;"))
+    private YggdrasilAuthenticationService yggdrasilAuthenticationServicePlaceholder(Proxy proxy, String clientToken) {
+        return new YggdrasilAuthenticationService(Minecraft.theMinecraft.proxy, clientToken);
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;"))
+    public MinecraftSessionService disableCreateMinecraftSessionService(
+        YggdrasilAuthenticationService yggdrasilAuthenticationService) {
+        // Do nothing, yet
+        return null;
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Session;getUsername()Ljava/lang/String;"))
+    public String disableGetUsername(Session session) {
+        // Do nothing, yet
+        return "";
+    }
+
+    // And secondly - set up a new constructor
+
+    @Inject(
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;theMinecraft:Lnet/minecraft/client/Minecraft;"),
+        method = "<init>")
+    private void init(Session sessionIn, int displayWidth, int displayHeight, boolean fullscreen, boolean isDemo,
+        File dataDir, File assetsDir, File resourcePackDir, Proxy proxy, String version, Multimap twitchDetails,
+        String assetsJsonVersion, CallbackInfo info) {
+        if (sessionIn == null && displayWidth == 0
+            && displayHeight == 0
+            && fullscreen == false
+            && isDemo == false
+            && dataDir == null
+            && assetsDir == null
+            && resourcePackDir == null
+            && version == null
+            && twitchDetails == null
+            && assetsJsonVersion == null) {
+            // logger.info("Empty Minecraft object created");
+        } else {
+            // logger.info("Normal Minecraft object created");
+            Minecraft.theMinecraft = (Minecraft) (Object) this;
+            this.mcDataDir = dataDir;
+            this.fileAssets = assetsDir;
+            this.fileResourcepacks = resourcePackDir;
+            this.launchedVersion = version;
+            this.field_152356_J = twitchDetails;
+            this.mcDefaultResourcePack = new DefaultResourcePack(
+                (new ResourceIndex(assetsDir, assetsJsonVersion)).func_152782_a());
+            this.addDefaultResourcePack();
+            this.proxy = proxy == null ? Proxy.NO_PROXY : proxy;
+            this.field_152355_az = (new YggdrasilAuthenticationService(
+                proxy,
+                UUID.randomUUID()
+                    .toString())).createMinecraftSessionService();
+            this.startTimerHackThread();
+            this.session = sessionIn;
+            logger.info("Setting user: " + sessionIn.getUsername());
+            this.isDemo = isDemo;
+            this.displayWidth = displayWidth;
+            this.displayHeight = displayHeight;
+            this.tempDisplayWidth = displayWidth;
+            this.tempDisplayHeight = displayHeight;
+            this.fullscreen = fullscreen;
+            this.jvm64bit = Minecraft.isJvm64bit();
+            ImageIO.setUseCache(false);
+            Bootstrap.func_151354_b();
+        }
+    }
+
+    @Overwrite
     private void func_147115_a(boolean p_147115_1_) {
         if (!p_147115_1_) {
             this.leftClickCounter = 0;
@@ -400,13 +507,22 @@ public abstract class MixinMinecraft {
                 int j = this.objectMouseOver.blockY;
                 int k = this.objectMouseOver.blockZ;
 
-                if (((IMixinMovingObjectPosition)this.objectMouseOver).getWorld().getBlock(i, j, k)
+                if (((IMixinMovingObjectPosition) this.objectMouseOver).getWorld()
+                    .getBlock(i, j, k)
                     .getMaterial() != Material.air) {
-                    ((IMixinPlayerControllerMP)this.playerController)
-                        .onPlayerDamageBlock(i, j, k, this.objectMouseOver.sideHit, ((IMixinMovingObjectPosition)this.objectMouseOver).getWorld());
+                    ((IMixinPlayerControllerMP) this.playerController).onPlayerDamageBlock(
+                        i,
+                        j,
+                        k,
+                        this.objectMouseOver.sideHit,
+                        ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld());
 
-                    if (CompatUtil
-                        .isCurrentToolAdventureModeExempt(this.thePlayer, i, j, k, ((IMixinMovingObjectPosition)this.objectMouseOver).getWorld())) {
+                    if (CompatUtil.isCurrentToolAdventureModeExempt(
+                        this.thePlayer,
+                        i,
+                        j,
+                        k,
+                        ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld())) {
                         this.effectRenderer.addBlockHitEffects(i, j, k, this.objectMouseOver);
                         this.thePlayer.swingItem();
                     }
@@ -417,7 +533,7 @@ public abstract class MixinMinecraft {
         }
     }
 
-	@Overwrite
+    @Overwrite
     private void func_147116_af() {
         if (this.leftClickCounter <= 0) {
             this.thePlayer.swingItem();
@@ -432,7 +548,8 @@ public abstract class MixinMinecraft {
                 switch (Minecraft.SwitchMovingObjectType.field_152390_a[this.objectMouseOver.typeOfHit.ordinal()]) {
                     case 1:
                         this.playerController.attackEntity(
-                            ((IMixinEntity)this.thePlayer).getProxyPlayer(((IMixinMovingObjectPosition)this.objectMouseOver).getWorld()),
+                            ((IMixinEntity) this.thePlayer)
+                                .getProxyPlayer(((IMixinMovingObjectPosition) this.objectMouseOver).getWorld()),
                             this.objectMouseOver.entityHit);
                         break;
                     case 2:
@@ -440,21 +557,26 @@ public abstract class MixinMinecraft {
                         int j = this.objectMouseOver.blockY;
                         int k = this.objectMouseOver.blockZ;
 
-                        if (((IMixinMovingObjectPosition)this.objectMouseOver).getWorld().getBlock(i, j, k)
+                        if (((IMixinMovingObjectPosition) this.objectMouseOver).getWorld()
+                            .getBlock(i, j, k)
                             .getMaterial() == Material.air) {
                             if (this.playerController.isNotCreative()) {
                                 this.leftClickCounter = 10;
                             }
                         } else {
-                            ((IMixinPlayerControllerMP)this.playerController)
-                                .clickBlock(i, j, k, this.objectMouseOver.sideHit, ((IMixinMovingObjectPosition)this.objectMouseOver).getWorld());
+                            ((IMixinPlayerControllerMP) this.playerController).clickBlock(
+                                i,
+                                j,
+                                k,
+                                this.objectMouseOver.sideHit,
+                                ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld());
                         }
                 }
             }
         }
     }
 
-	@Overwrite
+    @Overwrite
     private void func_147121_ag() {
         this.rightClickDelayTimer = 4;
         boolean flag = true;
@@ -466,7 +588,8 @@ public abstract class MixinMinecraft {
             switch (Minecraft.SwitchMovingObjectType.field_152390_a[this.objectMouseOver.typeOfHit.ordinal()]) {
                 case 1:
                     if (this.playerController.interactWithEntitySendPacket(
-                        ((IMixinEntity)this.thePlayer).getProxyPlayer(((IMixinMovingObjectPosition)this.objectMouseOver).getWorld()),
+                        ((IMixinEntity) this.thePlayer)
+                            .getProxyPlayer(((IMixinMovingObjectPosition) this.objectMouseOver).getWorld()),
                         this.objectMouseOver.entityHit)) {
                         flag = false;
                     }
@@ -477,8 +600,9 @@ public abstract class MixinMinecraft {
                     int j = this.objectMouseOver.blockY;
                     int k = this.objectMouseOver.blockZ;
 
-                    if (!((IMixinMovingObjectPosition)this.objectMouseOver).getWorld().getBlock(i, j, k)
-                        .isAir(((IMixinMovingObjectPosition)this.objectMouseOver).getWorld(), i, j, k)) {
+                    if (!((IMixinMovingObjectPosition) this.objectMouseOver).getWorld()
+                        .getBlock(i, j, k)
+                        .isAir(((IMixinMovingObjectPosition) this.objectMouseOver).getWorld(), i, j, k)) {
                         int l = itemstack != null ? itemstack.stackSize : 0;
 
                         boolean result = !net.minecraftforge.event.ForgeEventFactory
@@ -493,7 +617,7 @@ public abstract class MixinMinecraft {
                             .isCanceled();
                         if (result && this.playerController.onPlayerRightClick(
                             this.thePlayer,
-                            ((IMixinMovingObjectPosition)this.objectMouseOver).getWorld(),
+                            ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld(),
                             itemstack,
                             i,
                             j,
@@ -540,7 +664,7 @@ public abstract class MixinMinecraft {
     /**
      * Runs the current tick.
      */
-	@Overwrite
+    @Overwrite
     public void runTick() {
         this.mcProfiler.startSection("scheduledExecutables");
         Queue queue = this.field_152351_aB;
@@ -897,7 +1021,7 @@ public abstract class MixinMinecraft {
                     --this.theWorld.lastLightningBolt;
                 }
 
-                for (World curWorld : ((IMixinWorld)this.theWorld).getWorlds()) curWorld.updateEntities();
+                for (World curWorld : ((IMixinWorld) this.theWorld).getWorlds()) curWorld.updateEntities();
             }
         }
 
@@ -952,7 +1076,7 @@ public abstract class MixinMinecraft {
         this.systemTime = Minecraft.getSystemTime();
     }
 
-	@Overwrite
+    @Overwrite
     private void func_147112_ai() {
         if (this.objectMouseOver != null) {
             boolean flag = this.thePlayer.capabilities.isCreativeMode;
@@ -961,7 +1085,10 @@ public abstract class MixinMinecraft {
             if (!ForgeHooks.onPickBlock(
                 this.objectMouseOver,
                 this.thePlayer,
-                ((IMixinMovingObjectPosition)this.objectMouseOver).getWorld() != null ? ((IMixinMovingObjectPosition)this.objectMouseOver).getWorld() : this.theWorld)) return;
+                ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld() != null
+                    ? ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld()
+                    : this.theWorld))
+                return;
             // We delete this code wholly instead of commenting it out, to make sure we detect changes in it between MC
             // versions
             if (flag) {
@@ -975,17 +1102,19 @@ public abstract class MixinMinecraft {
     /**
      * To fix various GUI bugs caused by a lack of screen size synchronization
      */
-	@Inject(method = "toggleFullscreen()V", at = { @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;func_147120_f()V") })
-    public void toggleFullscreen(CallbackInfo ci)
-    {
-		Minecraft mc = Minecraft.getMinecraft();
-		for(World subworld : ((IMixinWorld)mc.theWorld).getSubWorlds()) {
-			EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy)((IMixinEntity)mc.thePlayer).getProxyPlayer(subworld);
-			MinecraftSubWorldProxy proxyMC = (MinecraftSubWorldProxy)proxy.getMinecraft();
-			proxyMC.fullscreen = mc.fullscreen;
-			proxyMC.displayWidth = mc.displayWidth;
-			proxyMC.displayHeight = mc.displayHeight;
-		}
+    @Inject(
+        method = "toggleFullscreen()V",
+        at = { @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;func_147120_f()V") })
+    public void toggleFullscreen(CallbackInfo ci) {
+        Minecraft mc = Minecraft.getMinecraft();
+        for (World subworld : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
+            EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) mc.thePlayer)
+                .getProxyPlayer(subworld);
+            MinecraftSubWorldProxy proxyMC = (MinecraftSubWorldProxy) proxy.getMinecraft();
+            proxyMC.fullscreen = mc.fullscreen;
+            proxyMC.displayWidth = mc.displayWidth;
+            proxyMC.displayHeight = mc.displayHeight;
+        }
     }
 
 }

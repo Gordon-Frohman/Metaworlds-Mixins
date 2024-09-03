@@ -5,10 +5,7 @@ import net.minecraft.command.ServerCommandManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
-import su.sergiusonesimus.metaworlds.admin.MwAdminGuiHandler;
-import su.sergiusonesimus.metaworlds.admin.SubWorldImportProgressUpdater;
-import su.sergiusonesimus.metaworlds.boats.MetaworldsBoatsMod;
-import su.sergiusonesimus.metaworlds.serverlist.ServerListButtonAdder;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -18,6 +15,10 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
+import su.sergiusonesimus.metaworlds.admin.MwAdminGuiHandler;
+import su.sergiusonesimus.metaworlds.admin.SubWorldImportProgressUpdater;
+import su.sergiusonesimus.metaworlds.boats.MetaworldsBoatsMod;
+import su.sergiusonesimus.metaworlds.serverlist.ServerListButtonAdder;
 
 @Mod(modid = "mwcore", version = MetaworldsBoatsMod.VERSION, name = "MetaWorlds Core")
 public class MetaworldsMod {
@@ -28,21 +29,21 @@ public class MetaworldsMod {
 
     public GeneralPacketPipeline networkHandler;
     public static final String CHANNEL2 = "mwcaptainmod";
-    
+
     public MetaworldsMod() {
-    	instance = this;
+        instance = this;
     }
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-    	// Moved it to MixinWorldClient
-//        if (event.getSide()
-//            .isClient()) {
-//            WorldClient.subWorldFactory = new SubWorldClientFactory();
-//        }
+        // Moved it to MixinWorldClient
+        // if (event.getSide()
+        // .isClient()) {
+        // WorldClient.subWorldFactory = new SubWorldClientFactory();
+        // }
 
-    	// Again, moved to MixinWorldServer
-//        WorldServer.subWorldFactory = new SubWorldServerFactory();
+        // Again, moved to MixinWorldServer
+        // WorldServer.subWorldFactory = new SubWorldServerFactory();
         FMLCommonHandler.instance()
             .bus()
             .register(new EventHookContainer());

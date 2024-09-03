@@ -25,9 +25,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.storage.AnvilSaveConverter;
 import net.minecraft.world.storage.ISaveFormat;
 import net.minecraftforge.common.DimensionManager;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.command.server.CommandSetBlockInSubWorld;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
 
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,6 +40,9 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.command.server.CommandSetBlockInSubWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
 
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
@@ -97,107 +97,179 @@ public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
 
     @Shadow(remap = true)
     public abstract NetworkSystem func_147137_ag();
-    
-    //TODO
-    
+
+    // TODO
+
     private Map<Integer, World> existingSubWorlds = new HashMap<Integer, World>();
-    
+
     // To get an empty MinecraftServer variable
     // Firstly - disable the original constructor
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;field_152366_X:Lnet/minecraft/server/management/PlayerProfileCache;", opcode = Opcodes.PUTFIELD))
-	private void disableField_152366_X(MinecraftServer minecraftServer, PlayerProfileCache value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;mcServer:Lnet/minecraft/server/MinecraftServer;", opcode = Opcodes.PUTSTATIC))
-	private void disableMcServer(MinecraftServer value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;serverProxy:Ljava/net/Proxy;", opcode = Opcodes.PUTFIELD))
-	private void disableServerProxy(MinecraftServer minecraftServer, Proxy value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;anvilFile:Ljava/io/File;", opcode = Opcodes.PUTFIELD))
-	private void disableAnvilFile(MinecraftServer minecraftServer, File value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;field_147144_o:Lnet/minecraft/network/NetworkSystem;", opcode = Opcodes.PUTFIELD))
-	private void disableField_147144_o(MinecraftServer minecraftServer, NetworkSystem value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;commandManager:Lnet/minecraft/command/ICommandManager;", opcode = Opcodes.PUTFIELD))
-	private void disableCommandManager(MinecraftServer minecraftServer, ICommandManager value) {
-	    // Do nothing
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;anvilConverterForAnvilFile:Lnet/minecraft/world/storage/ISaveFormat;", opcode = Opcodes.PUTFIELD))
-	private void disableAnvilConverterForAnvilFile(MinecraftServer minecraftServer, ISaveFormat value) {
-	    // Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "NEW", target = "Lnet/minecraft/world/chunk/storage/AnvilSaveConverter;"))
-	private AnvilSaveConverter anvilSaveConverterPlaceholder(File file) {
-	  return (AnvilSaveConverter)MinecraftServer.mcServer.anvilConverterForAnvilFile;
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;field_152364_T:Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;", opcode = Opcodes.PUTFIELD))
-	private void disableField_152364_T(MinecraftServer minecraftServer, YggdrasilAuthenticationService value) {
-	    // Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "NEW", target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;"))
-	private YggdrasilAuthenticationService yggdrasilAuthenticationServicePlaceholder(Proxy proxy, String clientToken) {
-	  return MinecraftServer.mcServer.field_152364_T;
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;field_147143_S:Lcom/mojang/authlib/minecraft/MinecraftSessionService;", opcode = Opcodes.PUTFIELD))
-	private void disableField_147143_S(MinecraftServer minecraftServer, MinecraftSessionService value) {
-	    // Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;"))
-	public MinecraftSessionService disableCreateMinecraftSessionService(YggdrasilAuthenticationService yggdrasilAuthenticationService) {
-		// Do nothing, yet
-		return null;
-	}
-    
-	@Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;field_152365_W:Lcom/mojang/authlib/GameProfileRepository;", opcode = Opcodes.PUTFIELD))
-	private void disableField_152365_W(MinecraftServer minecraftServer, GameProfileRepository value) {
-	    // Do nothing
-	}
-	
-	@Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createProfileRepository()Lcom/mojang/authlib/GameProfileRepository;"))
-	public GameProfileRepository disableCreateProfileRepository(YggdrasilAuthenticationService yggdrasilAuthenticationService) {
-		// Do nothing, yet
-		return null;
-	}
-	
-	// And secondly - set up a new constructor
 
-    @Inject(at = @At(value = "FIELD", target = "Lnet/minecraft/server/MinecraftServer;field_152366_X:Lnet/minecraft/server/management/PlayerProfileCache;"), method = "<init>")
-	private void init(File workDir, Proxy proxy, CallbackInfo info) {
-		if(workDir == null && proxy == null) {
-			// No fields should be set here at all
-		}
-		else {
-	        this.field_152366_X = new PlayerProfileCache((MinecraftServer)(Object)this, MinecraftServer.field_152367_a);
-	        MinecraftServer.mcServer = (MinecraftServer)(Object)this;
-	        this.serverProxy = proxy;
-	        this.anvilFile = workDir;
-	        this.field_147144_o = new NetworkSystem((MinecraftServer)(Object)this);
-	        this.commandManager = new ServerCommandManager();
-	        ((ServerCommandManager)this.commandManager).registerCommand(new CommandSetBlockInSubWorld());
-	        this.anvilConverterForAnvilFile = new AnvilSaveConverter(workDir);
-	        this.field_152364_T = new YggdrasilAuthenticationService(proxy, UUID.randomUUID().toString());
-	        this.field_147143_S = this.field_152364_T.createMinecraftSessionService();
-	        this.field_152365_W = this.field_152364_T.createProfileRepository();
-		}
-	}
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;field_152366_X:Lnet/minecraft/server/management/PlayerProfileCache;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableField_152366_X(MinecraftServer minecraftServer, PlayerProfileCache value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;mcServer:Lnet/minecraft/server/MinecraftServer;",
+            opcode = Opcodes.PUTSTATIC))
+    private void disableMcServer(MinecraftServer value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;serverProxy:Ljava/net/Proxy;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableServerProxy(MinecraftServer minecraftServer, Proxy value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;anvilFile:Ljava/io/File;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableAnvilFile(MinecraftServer minecraftServer, File value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;field_147144_o:Lnet/minecraft/network/NetworkSystem;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableField_147144_o(MinecraftServer minecraftServer, NetworkSystem value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;commandManager:Lnet/minecraft/command/ICommandManager;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableCommandManager(MinecraftServer minecraftServer, ICommandManager value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;anvilConverterForAnvilFile:Lnet/minecraft/world/storage/ISaveFormat;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableAnvilConverterForAnvilFile(MinecraftServer minecraftServer, ISaveFormat value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "NEW", target = "Lnet/minecraft/world/chunk/storage/AnvilSaveConverter;"))
+    private AnvilSaveConverter anvilSaveConverterPlaceholder(File file) {
+        return (AnvilSaveConverter) MinecraftServer.mcServer.anvilConverterForAnvilFile;
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;field_152364_T:Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableField_152364_T(MinecraftServer minecraftServer, YggdrasilAuthenticationService value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "NEW", target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;"))
+    private YggdrasilAuthenticationService yggdrasilAuthenticationServicePlaceholder(Proxy proxy, String clientToken) {
+        return MinecraftServer.mcServer.field_152364_T;
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;field_147143_S:Lcom/mojang/authlib/minecraft/MinecraftSessionService;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableField_147143_S(MinecraftServer minecraftServer, MinecraftSessionService value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;"))
+    public MinecraftSessionService disableCreateMinecraftSessionService(
+        YggdrasilAuthenticationService yggdrasilAuthenticationService) {
+        // Do nothing, yet
+        return null;
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;field_152365_W:Lcom/mojang/authlib/GameProfileRepository;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableField_152365_W(MinecraftServer minecraftServer, GameProfileRepository value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createProfileRepository()Lcom/mojang/authlib/GameProfileRepository;"))
+    public GameProfileRepository disableCreateProfileRepository(
+        YggdrasilAuthenticationService yggdrasilAuthenticationService) {
+        // Do nothing, yet
+        return null;
+    }
+
+    // And secondly - set up a new constructor
+
+    @Inject(
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;field_152366_X:Lnet/minecraft/server/management/PlayerProfileCache;"),
+        method = "<init>")
+    private void init(File workDir, Proxy proxy, CallbackInfo info) {
+        if (workDir == null && proxy == null) {
+            // No fields should be set here at all
+        } else {
+            this.field_152366_X = new PlayerProfileCache(
+                (MinecraftServer) (Object) this,
+                MinecraftServer.field_152367_a);
+            MinecraftServer.mcServer = (MinecraftServer) (Object) this;
+            this.serverProxy = proxy;
+            this.anvilFile = workDir;
+            this.field_147144_o = new NetworkSystem((MinecraftServer) (Object) this);
+            this.commandManager = new ServerCommandManager();
+            ((ServerCommandManager) this.commandManager).registerCommand(new CommandSetBlockInSubWorld());
+            this.anvilConverterForAnvilFile = new AnvilSaveConverter(workDir);
+            this.field_152364_T = new YggdrasilAuthenticationService(
+                proxy,
+                UUID.randomUUID()
+                    .toString());
+            this.field_147143_S = this.field_152364_T.createMinecraftSessionService();
+            this.field_152365_W = this.field_152364_T.createProfileRepository();
+        }
+    }
 
     @Overwrite
     public void updateTimeLightAndEntities() {
@@ -211,58 +283,57 @@ public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
             long j = System.nanoTime();
 
             if (id == 0 || this.getAllowNether()) {
-            	Collection<World> worlds = ((IMixinWorld) DimensionManager.getWorld(id)).getWorlds();
-            	if (worlds != null)
-	                for (World curWorld : worlds) {
-	                    WorldServer worldserver = (WorldServer) curWorld;// DimensionManager.getWorld(id);
-	                    this.theProfiler.startSection(
-	                        worldserver.getWorldInfo()
-	                            .getWorldName());
-	                    this.theProfiler.startSection("pools");
-	                    this.theProfiler.endSection();
-	
-	                    if (this.tickCounter % 20 == 0) {
-	                        this.theProfiler.startSection("timeSync");
-	                        this.serverConfigManager.sendPacketToAllPlayersInDimension(
-	                            new S03PacketTimeUpdate(
-	                                worldserver.getTotalWorldTime(),
-	                                worldserver.getWorldTime(),
-	                                worldserver.getGameRules()
-	                                    .getGameRuleBooleanValue("doDaylightCycle")),
-	                            worldserver.provider.dimensionId);
-	                        this.theProfiler.endSection();
-	                    }
-	
-	                    this.theProfiler.startSection("tick");
-	                    FMLCommonHandler.instance()
-	                        .onPreWorldTick(worldserver);
-	                    CrashReport crashreport;
-	
-	                    try {
-	                        worldserver.tick();
-	                    } catch (Throwable throwable1) {
-	                        crashreport = CrashReport.makeCrashReport(throwable1, "Exception ticking world");
-	                        worldserver.addWorldInfoToCrashReport(crashreport);
-	                        throw new ReportedException(crashreport);
-	                    }
-	
-	                    try {
-	                        worldserver.updateEntities();
-	                    } catch (Throwable throwable) {
-	                        crashreport = CrashReport.makeCrashReport(throwable, "Exception ticking world entities");
-	                        worldserver.addWorldInfoToCrashReport(crashreport);
-	                        throw new ReportedException(crashreport);
-	                    }
-	
-	                    FMLCommonHandler.instance()
-	                        .onPostWorldTick(worldserver);
-	                    this.theProfiler.endSection();
-	                    this.theProfiler.startSection("tracker");
-	                    worldserver.getEntityTracker()
-	                        .updateTrackedEntities();
-	                    this.theProfiler.endSection();
-	                    this.theProfiler.endSection();
-	                }
+                Collection<World> worlds = ((IMixinWorld) DimensionManager.getWorld(id)).getWorlds();
+                if (worlds != null) for (World curWorld : worlds) {
+                    WorldServer worldserver = (WorldServer) curWorld;// DimensionManager.getWorld(id);
+                    this.theProfiler.startSection(
+                        worldserver.getWorldInfo()
+                            .getWorldName());
+                    this.theProfiler.startSection("pools");
+                    this.theProfiler.endSection();
+
+                    if (this.tickCounter % 20 == 0) {
+                        this.theProfiler.startSection("timeSync");
+                        this.serverConfigManager.sendPacketToAllPlayersInDimension(
+                            new S03PacketTimeUpdate(
+                                worldserver.getTotalWorldTime(),
+                                worldserver.getWorldTime(),
+                                worldserver.getGameRules()
+                                    .getGameRuleBooleanValue("doDaylightCycle")),
+                            worldserver.provider.dimensionId);
+                        this.theProfiler.endSection();
+                    }
+
+                    this.theProfiler.startSection("tick");
+                    FMLCommonHandler.instance()
+                        .onPreWorldTick(worldserver);
+                    CrashReport crashreport;
+
+                    try {
+                        worldserver.tick();
+                    } catch (Throwable throwable1) {
+                        crashreport = CrashReport.makeCrashReport(throwable1, "Exception ticking world");
+                        worldserver.addWorldInfoToCrashReport(crashreport);
+                        throw new ReportedException(crashreport);
+                    }
+
+                    try {
+                        worldserver.updateEntities();
+                    } catch (Throwable throwable) {
+                        crashreport = CrashReport.makeCrashReport(throwable, "Exception ticking world entities");
+                        worldserver.addWorldInfoToCrashReport(crashreport);
+                        throw new ReportedException(crashreport);
+                    }
+
+                    FMLCommonHandler.instance()
+                        .onPostWorldTick(worldserver);
+                    this.theProfiler.endSection();
+                    this.theProfiler.startSection("tracker");
+                    worldserver.getEntityTracker()
+                        .updateTrackedEntities();
+                    this.theProfiler.endSection();
+                    this.theProfiler.endSection();
+                }
             }
 
             worldTickTimes.get(id)[this.tickCounter % 100] = System.nanoTime() - j;
@@ -283,9 +354,9 @@ public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
 
         this.theProfiler.endSection();
     }
-    
+
     public Map<Integer, World> getExistingSubWorlds() {
-    	return this.existingSubWorlds;
+        return this.existingSubWorlds;
     }
 
 }

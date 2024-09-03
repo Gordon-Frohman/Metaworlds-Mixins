@@ -14,7 +14,6 @@ import java.util.TreeMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -41,6 +40,11 @@ import net.minecraft.world.storage.SaveHandler;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jblas.DoubleMatrix;
+
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.IMixinWorldInfo;
@@ -55,10 +59,6 @@ import su.sergiusonesimus.metaworlds.patcher.ChunkSubWorld;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.patcher.MinecraftServerSubWorldProxy;
 import su.sergiusonesimus.metaworlds.patcher.OrientedBB;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jblas.DoubleMatrix;
 
 // This says that there is an error, but it reality there isn't because we change WorldServer's superclass at runtime
 public class SubWorldServer extends WorldServer implements SubWorld {
@@ -117,13 +117,14 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         while (minecraftexception.hasNext()) {
             Object unloadWorldMethod = minecraftexception.next();
             EntityPlayerMPSubWorldProxy e = (EntityPlayerMPSubWorldProxy) unloadWorldMethod;
-            ((IMixinEntity)e.getRealPlayer()).getPlayerProxyMap()
+            ((IMixinEntity) e.getRealPlayer()).getPlayerProxyMap()
                 .remove(Integer.valueOf(this.getSubWorldID()));
         }
 
         ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .remove(this);
-        ((IMixinMinecraftServer)MinecraftServer.mcServer).getExistingSubWorlds().remove(this.subWorldID);
+        ((IMixinMinecraftServer) MinecraftServer.mcServer).getExistingSubWorlds()
+            .remove(this.subWorldID);
 
         try {
             Class[] minecraftexception1 = new Class[] { World.class };
@@ -152,16 +153,19 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             new SubWorldDestroyPacket(1, new Integer[] { Integer.valueOf(this.getSubWorldID()) }),
             this.provider.dimensionId);
     }
-    
+
     public boolean deleteSubWorldDirectory() {
-    	String folder = MinecraftServer.mcServer.worldServers[0].getSaveHandler().getWorldDirectoryName();
-    	int dimension = this.provider.dimensionId;
-    	/*if (dimension != 0)
-    		folder += "/DIM" + dimension;*/
-    	folder += "/SUBWORLD" + this.subWorldID;
+        String folder = MinecraftServer.mcServer.worldServers[0].getSaveHandler()
+            .getWorldDirectoryName();
+        int dimension = this.provider.dimensionId;
+        /*
+         * if (dimension != 0)
+         * folder += "/DIM" + dimension;
+         */
+        folder += "/SUBWORLD" + this.subWorldID;
         ISaveFormat isaveformat = MinecraftServer.mcServer.anvilConverterForAnvilFile;
         isaveformat.flushCache();
-    	return isaveformat.deleteWorldDirectory(folder);
+        return isaveformat.deleteWorldDirectory(folder);
     }
 
     protected IChunkProvider createChunkProvider() {
@@ -205,10 +209,12 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         IEntitySelector par3IEntitySelector) {
         this.entitiesWithinAABBExcludingEntityResult.clear();
         this.entitiesWithinAABBExcludingEntityResult.addAll(
-            ((IMixinWorld)this).getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, par3IEntitySelector));
+            ((IMixinWorld) this)
+                .getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, par3IEntitySelector));
         AxisAlignedBB globalBB = ((IMixinAxisAlignedBB) par2AxisAlignedBB).getTransformedToGlobalBoundingBox(this);
         this.entitiesWithinAABBExcludingEntityResult.addAll(
-            ((IMixinWorld)this.m_parentWorld).getEntitiesWithinAABBExcludingEntityLocal(par1Entity, globalBB, par3IEntitySelector));
+            ((IMixinWorld) this.m_parentWorld)
+                .getEntitiesWithinAABBExcludingEntityLocal(par1Entity, globalBB, par3IEntitySelector));
         Iterator i$ = ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .iterator();
 
@@ -216,7 +222,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             World curSubWorld = (World) i$.next();
             if (curSubWorld != this) {
                 this.entitiesWithinAABBExcludingEntityResult.addAll(
-                    ((IMixinWorld)curSubWorld).getEntitiesWithinAABBExcludingEntityLocal(
+                    ((IMixinWorld) curSubWorld).getEntitiesWithinAABBExcludingEntityLocal(
                         par1Entity,
                         ((IMixinAxisAlignedBB) globalBB).getTransformedToLocalBoundingBox(curSubWorld),
                         par3IEntitySelector));
@@ -229,9 +235,13 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
         ArrayList arraylist = new ArrayList();
-        arraylist.addAll(((IMixinWorldIntermediate)this).selectEntitiesWithinAABBLocal(par1Class, par2AxisAlignedBB, par3IEntitySelector));
+        arraylist.addAll(
+            ((IMixinWorldIntermediate) this)
+                .selectEntitiesWithinAABBLocal(par1Class, par2AxisAlignedBB, par3IEntitySelector));
         AxisAlignedBB globalBB = ((IMixinAxisAlignedBB) par2AxisAlignedBB).getTransformedToGlobalBoundingBox(this);
-        arraylist.addAll(((IMixinWorldIntermediate)this.m_parentWorld).selectEntitiesWithinAABBLocal(par1Class, globalBB, par3IEntitySelector));
+        arraylist.addAll(
+            ((IMixinWorldIntermediate) this.m_parentWorld)
+                .selectEntitiesWithinAABBLocal(par1Class, globalBB, par3IEntitySelector));
         Iterator i$ = ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .iterator();
 
@@ -779,7 +789,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                 newPosition = this.transformToGlobal((Vec3) curEntry.getValue());
                 if (curEntry.getKey() instanceof EntityPlayer) {
                     Entity curEntity = (Entity) curEntry.getKey();
-                    double subWorldWeight = ((IMixinEntity)curEntity).getTractionFactor();
+                    double subWorldWeight = ((IMixinEntity) curEntity).getTractionFactor();
                     double globalWeight = 1.0D - subWorldWeight;
                     curEntity.setPosition(
                         curEntity.posX * globalWeight + newPosition.xCoord * subWorldWeight,
@@ -945,8 +955,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
     public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
         ArrayList result = (ArrayList) this.getCollidingBoundingBoxesLocal(par1Entity, par2AxisAlignedBB);
-        AxisAlignedBB globalAABBPar = ((IMixinAxisAlignedBB) par2AxisAlignedBB)
-            .getTransformedToGlobalBoundingBox(this);
+        AxisAlignedBB globalAABBPar = ((IMixinAxisAlignedBB) par2AxisAlignedBB).getTransformedToGlobalBoundingBox(this);
         Iterator i$ = ((IMixinWorld) this.getParentWorld()).getWorlds()
             .iterator();
 
@@ -1040,8 +1049,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         ListIterator iter = result.listIterator();
 
         while (iter.hasNext()) {
-            AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next())
-                .getTransformedToGlobalBoundingBox(this);
+            AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next()).getTransformedToGlobalBoundingBox(this);
             iter.set(replacementBB);
         }
 
@@ -1140,7 +1148,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public boolean setBlock(int par1, int par2, int par3, Block par4, int par5, int par6) {
         boolean result = super.setBlock(par1, par2, par3, par4, par5, par6);
         if (result) {
-        	if (par4 != Blocks.air) {
+            if (par4 != Blocks.air) {
                 if (this.isEmpty) {
                     this.setBoundaries(par1, par2, par3, par1 + 1, par2 + 1, par3 + 1);
                 } else {
@@ -1190,14 +1198,13 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                                                 if (inChunkZ1 >= maxZ) {
                                                     break;
                                                 }
-                                                
+
                                                 int heightValue = inChunkZ.getHeightValue(inChunkX, curX1) - 1;
                                                 Block blockAbove = inChunkZ.getBlock(inChunkX, heightValue + 1, curX1);
-                                                if(inChunkZ.getBlock(inChunkX, heightValue + 1, curX1) != Blocks.air)
-                                                	heightValue++;
-                                                
-                                                foundBlockAtZ = Math
-                                                    .max(foundBlockAtZ, heightValue);
+                                                if (inChunkZ.getBlock(inChunkX, heightValue + 1, curX1) != Blocks.air)
+                                                    heightValue++;
+
+                                                foundBlockAtZ = Math.max(foundBlockAtZ, heightValue);
                                                 if (foundBlockAtZ >= maxY - 1) {
                                                     break;
                                                 }
@@ -1456,23 +1463,23 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return false;
     }
 
-	@Override
-	public Vec3 transformToLocal(Entity var1) {
-		return transformToLocal(var1.posX, var1.posY, var1.posZ);
-	}
+    @Override
+    public Vec3 transformToLocal(Entity var1) {
+        return transformToLocal(var1.posX, var1.posY, var1.posZ);
+    }
 
-	@Override
-	public Vec3 transformToGlobal(Entity var1) {
-		return transformToGlobal(var1.posX, var1.posY, var1.posZ);
-	}
+    @Override
+    public Vec3 transformToGlobal(Entity var1) {
+        return transformToGlobal(var1.posX, var1.posY, var1.posZ);
+    }
 
-	@Override
-	public Vec3 transformLocalToOther(World var1, Entity var2) {
-		return transformLocalToOther(var1, var2.posX, var2.posY, var2.posZ);
-	}
+    @Override
+    public Vec3 transformLocalToOther(World var1, Entity var2) {
+        return transformLocalToOther(var1, var2.posX, var2.posY, var2.posZ);
+    }
 
-	@Override
-	public Vec3 transformOtherToLocal(World var1, Entity var2) {
-		return transformOtherToLocal(var1, var2.posX, var2.posY, var2.posZ);
-	}
+    @Override
+    public Vec3 transformOtherToLocal(World var1, Entity var2) {
+        return transformOtherToLocal(var1, var2.posX, var2.posY, var2.posZ);
+    }
 }

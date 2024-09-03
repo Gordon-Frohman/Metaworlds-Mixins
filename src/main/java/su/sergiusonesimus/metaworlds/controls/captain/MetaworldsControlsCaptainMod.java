@@ -6,8 +6,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
-import su.sergiusonesimus.metaworlds.api.RecipeConfig;
-import su.sergiusonesimus.metaworlds.api.RecipeConfig.RecipePlaceHolderDef;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -20,6 +19,8 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
+import su.sergiusonesimus.metaworlds.api.RecipeConfig;
+import su.sergiusonesimus.metaworlds.api.RecipeConfig.RecipePlaceHolderDef;
 
 @Mod(
     modid = "mwcaptainmod",
@@ -44,8 +45,7 @@ public class MetaworldsControlsCaptainMod {
         subWorldController = (new BlockSubWorldController()).setHardness(0.5F)
             .setStepSound(Block.soundTypeGravel)
             .setBlockName("subWorldController");
-        subWorldController
-            .setBlockTextureName("metaworlds:" + subWorldController.getUnlocalizedName());
+        subWorldController.setBlockTextureName("metaworlds:" + subWorldController.getUnlocalizedName());
         this.config.load();
         subWorldControllerConfig = new RecipeConfig(
             this.config,

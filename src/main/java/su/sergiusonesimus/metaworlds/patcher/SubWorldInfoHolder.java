@@ -2,6 +2,7 @@ package su.sergiusonesimus.metaworlds.patcher;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
+
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 
 public class SubWorldInfoHolder {

@@ -2,13 +2,14 @@ package su.sergiusonesimus.metaworlds.compat.packet;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.SubWorld;
+
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
+import su.sergiusonesimus.metaworlds.api.IMixinEntity;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 
 public class SubWorldDestroyPacket implements IMessage {
 
@@ -55,13 +56,13 @@ public class SubWorldDestroyPacket implements IMessage {
             if (!ctx.side.isServer()) {
                 EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
                 if (message.subWorldsCount == -1) {
-                    while (!((IMixinWorld)player.worldObj).getSubWorldsMap()
+                    while (!((IMixinWorld) player.worldObj).getSubWorldsMap()
                         .isEmpty()) {
                         SubWorld arr$ = (SubWorld) ((IMixinWorld) player.worldObj).getSubWorlds()
                             .iterator()
                             .next();
                         arr$.removeSubWorld();
-                        ((IMixinEntity)player).getPlayerProxyMap()
+                        ((IMixinEntity) player).getPlayerProxyMap()
                             .remove(Integer.valueOf(arr$.getSubWorldID()));
                     }
                 } else {
@@ -73,7 +74,7 @@ public class SubWorldDestroyPacket implements IMessage {
                         SubWorld curSubWorld = (SubWorld) ((IMixinWorld) player.worldObj)
                             .getSubWorld(curSubWorldID.intValue());
                         curSubWorld.removeSubWorld();
-                        ((IMixinEntity)player).getPlayerProxyMap()
+                        ((IMixinEntity) player).getPlayerProxyMap()
                             .remove(Integer.valueOf(curSubWorld.getSubWorldID()));
                     }
                 }

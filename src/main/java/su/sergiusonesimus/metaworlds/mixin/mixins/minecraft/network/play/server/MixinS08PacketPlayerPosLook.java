@@ -4,12 +4,13 @@ import java.io.IOException;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.server.IMixinS08PacketPlayerPosLook;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.server.IMixinS08PacketPlayerPosLook;
 
 @Mixin(S08PacketPlayerPosLook.class)
 public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlayerPosLook {

@@ -5,14 +5,15 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
-import su.sergiusonesimus.metaworlds.api.RecipeConfig;
-import su.sergiusonesimus.metaworlds.api.RecipeConfig.RecipePlaceHolderDef;
+
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import su.sergiusonesimus.metaworlds.api.RecipeConfig;
+import su.sergiusonesimus.metaworlds.api.RecipeConfig.RecipePlaceHolderDef;
 
 @Mod(
     modid = "metaworldsblankcreatormod",
@@ -35,8 +36,7 @@ public class MetaworldsBlankCreatorMod {
             .setStepSound(Block.soundTypeStone)
             .setBlockName("blankSubWorldCreator")
             .setCreativeTab(CreativeTabs.tabBlock);
-        blankSubWorldCreator
-            .setBlockTextureName("metaworlds:" + blankSubWorldCreator.getUnlocalizedName());
+        blankSubWorldCreator.setBlockTextureName("metaworlds:" + blankSubWorldCreator.getUnlocalizedName());
         this.config.load();
         blankSubWorldCreatorConfig = new RecipeConfig(
             this.config,

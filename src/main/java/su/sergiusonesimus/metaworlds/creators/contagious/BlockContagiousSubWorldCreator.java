@@ -14,6 +14,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 
@@ -54,7 +55,7 @@ public class BlockContagiousSubWorldCreator extends Block {
             } while (margin.size() > 0);
 
             if (isValid) {
-                World newWorld1 = ((IMixinWorld)par1World).CreateSubWorld();
+                World newWorld1 = ((IMixinWorld) par1World).CreateSubWorld();
                 SubWorld newSubWorld = (SubWorld) newWorld1;
                 Iterator i$ = blocksToTake.iterator();
 
@@ -126,15 +127,18 @@ public class BlockContagiousSubWorldCreator extends Block {
                     par1World.setBlockToAir(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
                 }
 
-                newSubWorld.setCenter(((IMixinWorld)par1World).getCenterX(), ((IMixinWorld)par1World).getCenterY(), ((IMixinWorld)par1World).getCenterZ());
+                newSubWorld.setCenter(
+                    ((IMixinWorld) par1World).getCenterX(),
+                    ((IMixinWorld) par1World).getCenterY(),
+                    ((IMixinWorld) par1World).getCenterZ());
                 newSubWorld.setTranslation(
-                	((IMixinWorld)par1World).getTranslationX(),
-                	((IMixinWorld)par1World).getTranslationY(),
-                	((IMixinWorld)par1World).getTranslationZ());
-                newSubWorld.setRotationYaw(((IMixinWorld)par1World).getRotationYaw());
-                newSubWorld.setRotationPitch(((IMixinWorld)par1World).getRotationPitch());
-                newSubWorld.setRotationRoll(((IMixinWorld)par1World).getRotationRoll());
-                newSubWorld.setScaling(((IMixinWorld)par1World).getScaling());
+                    ((IMixinWorld) par1World).getTranslationX(),
+                    ((IMixinWorld) par1World).getTranslationY(),
+                    ((IMixinWorld) par1World).getTranslationZ());
+                newSubWorld.setRotationYaw(((IMixinWorld) par1World).getRotationYaw());
+                newSubWorld.setRotationPitch(((IMixinWorld) par1World).getRotationPitch());
+                newSubWorld.setRotationRoll(((IMixinWorld) par1World).getRotationRoll());
+                newSubWorld.setScaling(((IMixinWorld) par1World).getScaling());
                 newSubWorld.setCenter((double) par2 + 0.5D, (double) par3 + 0.5D, (double) par4 + 0.5D);
             }
 

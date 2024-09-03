@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 import net.minecraft.block.Block;
@@ -16,24 +15,16 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.core.SubWorldServerFactory;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
-import su.sergiusonesimus.metaworlds.patcher.UnmodifiableSingleObjPlusCollection;
 
 import org.jblas.DoubleMatrix;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,6 +32,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
+import su.sergiusonesimus.metaworlds.patcher.UnmodifiableSingleObjPlusCollection;
 
 @Mixin(World.class)
 public abstract class MixinWorld implements IMixinWorld {
@@ -69,8 +64,8 @@ public abstract class MixinWorld implements IMixinWorld {
 
     @Shadow(remap = true)
     protected List worldAccesses;
-    
-    //TODO
+
+    // TODO
 
     @Shadow(remap = true)
     public abstract GameRules getGameRules();
@@ -86,7 +81,9 @@ public abstract class MixinWorld implements IMixinWorld {
     public abstract long getTotalWorldTime();
 
     @Shadow(remap = true)
-    public MovingObjectPosition func_147447_a(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) { return null; }
+    public MovingObjectPosition func_147447_a(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) {
+        return null;
+    }
 
     @Shadow(remap = true)
     public void removePlayerEntityDangerously(Entity par1Entity) {}
@@ -95,19 +92,31 @@ public abstract class MixinWorld implements IMixinWorld {
     public void removeEntity(Entity p_72900_1_) {}
 
     @Shadow(remap = true)
-    public boolean spawnEntityInWorld(Entity p_72838_1_) { return false; }
+    public boolean spawnEntityInWorld(Entity p_72838_1_) {
+        return false;
+    }
 
     @Shadow(remap = true)
-    public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) { return null; }
+    public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
+        IEntitySelector par3IEntitySelector) {
+        return null;
+    }
 
     @Shadow(remap = true)
-    public List getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector) { return null; }
+    public List getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+        IEntitySelector par3IEntitySelector) {
+        return null;
+    }
 
     @Shadow(remap = true)
-    public boolean isMaterialInBB(AxisAlignedBB par1AxisAlignedBB, Material par2Material) { return false; }
+    public boolean isMaterialInBB(AxisAlignedBB par1AxisAlignedBB, Material par2Material) {
+        return false;
+    }
 
     @Shadow(remap = true)
-    public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) { return null; }
+    public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+        return null;
+    }
 
     @Shadow(remap = true)
     public abstract void onEntityRemoved(Entity p_72847_1_);
@@ -135,41 +144,37 @@ public abstract class MixinWorld implements IMixinWorld {
 
     @Shadow(remap = true)
     public abstract boolean chunkExists(int p_72916_1_, int p_72916_2_);
-	
-	public abstract World CreateSubWorld();
-	public abstract World CreateSubWorld(int newSubWorldID);
+
+    public abstract World CreateSubWorld();
+
+    public abstract World CreateSubWorld(int newSubWorldID);
 
     public Collection<World> getWorlds() {
-    	if(this.allWorlds == null)
-    		this.allWorlds = new UnmodifiableSingleObjPlusCollection<World>((World) (Object) this, this.getSubWorlds());
+        if (this.allWorlds == null)
+            this.allWorlds = new UnmodifiableSingleObjPlusCollection<World>((World) (Object) this, this.getSubWorlds());
         return this.allWorlds;
     }
 
     public Collection<World> getSubWorlds() {
-    	if(this.childSubWorlds == null)
-    		childSubWorlds = new TreeMap<Integer, World>();
-    	return this.childSubWorlds.values();
+        if (this.childSubWorlds == null) childSubWorlds = new TreeMap<Integer, World>();
+        return this.childSubWorlds.values();
     }
 
     public Map<Integer, World> getSubWorldsMap() {
-    	if(this.childSubWorlds == null)
-    		childSubWorlds = new TreeMap<Integer, World>();
+        if (this.childSubWorlds == null) childSubWorlds = new TreeMap<Integer, World>();
         return this.childSubWorlds;
     }
 
     public int getWorldsCount() {
-    	if(this.childSubWorlds == null)
-    		childSubWorlds = new TreeMap<Integer, World>();
+        if (this.childSubWorlds == null) childSubWorlds = new TreeMap<Integer, World>();
         return this.childSubWorlds.size() + 1;
     }
-    
+
     public int getUnoccupiedSubworldID() {
-    	Map<Integer, World> subworlds = ((IMixinMinecraftServer)MinecraftServer.mcServer).getExistingSubWorlds();
-    	int maxID = subworlds.size() + 1;
-    	for(int i = 1; i < maxID; i++)
-    		if(!subworlds.containsKey(i))
-    			return i;
-    	return maxID;
+        Map<Integer, World> subworlds = ((IMixinMinecraftServer) MinecraftServer.mcServer).getExistingSubWorlds();
+        int maxID = subworlds.size() + 1;
+        for (int i = 1; i < maxID; i++) if (!subworlds.containsKey(i)) return i;
+        return maxID;
     }
 
     public int getSubWorldID() {
@@ -347,10 +352,11 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
-    	return this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, (IEntitySelector)null);
+        return this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, (IEntitySelector) null);
     }
 
-    public abstract List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB, IEntitySelector par3IEntitySelector);
+    public abstract List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+        IEntitySelector par3IEntitySelector);
 
     public void doTickPartial(double interpolationFactor) {}
 
@@ -361,9 +367,10 @@ public abstract class MixinWorld implements IMixinWorld {
     public Chunk createNewChunk(int xPos, int zPos) {
         return new Chunk((World) (Object) this, xPos, zPos);
     }
-    
+
     @Inject(method = "<init>", at = @At("TAIL"))
-    public void World(ISaveHandler p_i45368_1_, String p_i45368_2_, WorldProvider p_i45368_3_, WorldSettings p_i45368_4_, Profiler p_i45368_5_, CallbackInfo ci) {
+    public void World(ISaveHandler p_i45368_1_, String p_i45368_2_, WorldProvider p_i45368_3_,
+        WorldSettings p_i45368_4_, Profiler p_i45368_5_, CallbackInfo ci) {
         childSubWorlds = new TreeMap<Integer, World>();
         allWorlds = new UnmodifiableSingleObjPlusCollection<World>((World) (Object) this, this.childSubWorlds.values());
     }
@@ -372,32 +379,36 @@ public abstract class MixinWorld implements IMixinWorld {
      * Sets the light value either into the sky map or block map depending on if enumSkyBlock is set to sky or block.
      * Args: enumSkyBlock, x, y, z, lightValue
      */
-    /*@Overwrite
-    public void setLightValue(EnumSkyBlock p_72915_1_, int p_72915_2_, int p_72915_3_, int p_72915_4_, int p_72915_5_)
-    {
-    	Collection<World> worldsList = ((IMixinWorld)this).isSubWorld()? ((IMixinWorld)((IMixinWorld)this).getParentWorld()).getSubWorlds() : ((IMixinWorld)this).getWorlds();
-    	
-    	for(World world : worldsList) {
-    		Vec3 localCoords = ((IMixinWorld)world).transformToLocal(p_72915_2_, p_72915_3_, p_72915_4_);
-	        if (localCoords.xCoord >= -30000000 && localCoords.zCoord >= -30000000 && localCoords.xCoord < 30000000 && localCoords.zCoord < 30000000)
-	        {
-	            if (localCoords.yCoord >= 0)
-	            {
-	                if (localCoords.yCoord < 256)
-	                {
-	                    if (world.chunkExists((int) localCoords.xCoord >> 4, (int) localCoords.zCoord >> 4))
-	                    {
-	                        Chunk chunk = world.getChunkFromChunkCoords((int) localCoords.xCoord >> 4, (int) localCoords.zCoord >> 4);
-	                        chunk.setLightValue(p_72915_1_, (int) localCoords.xCoord & 15, (int) localCoords.yCoord, (int) localCoords.zCoord & 15, p_72915_5_);
-	
-	                        for (int i1 = 0; i1 < world.worldAccesses.size(); ++i1)
-	                        {
-	                            ((IWorldAccess)world.worldAccesses.get(i1)).markBlockForRenderUpdate(p_72915_2_, p_72915_3_, p_72915_4_);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-    	}
-    }*/
+    /*
+     * @Overwrite
+     * public void setLightValue(EnumSkyBlock p_72915_1_, int p_72915_2_, int p_72915_3_, int p_72915_4_, int
+     * p_72915_5_)
+     * {
+     * Collection<World> worldsList = ((IMixinWorld)this).isSubWorld()?
+     * ((IMixinWorld)((IMixinWorld)this).getParentWorld()).getSubWorlds() : ((IMixinWorld)this).getWorlds();
+     * for(World world : worldsList) {
+     * Vec3 localCoords = ((IMixinWorld)world).transformToLocal(p_72915_2_, p_72915_3_, p_72915_4_);
+     * if (localCoords.xCoord >= -30000000 && localCoords.zCoord >= -30000000 && localCoords.xCoord < 30000000 &&
+     * localCoords.zCoord < 30000000)
+     * {
+     * if (localCoords.yCoord >= 0)
+     * {
+     * if (localCoords.yCoord < 256)
+     * {
+     * if (world.chunkExists((int) localCoords.xCoord >> 4, (int) localCoords.zCoord >> 4))
+     * {
+     * Chunk chunk = world.getChunkFromChunkCoords((int) localCoords.xCoord >> 4, (int) localCoords.zCoord >> 4);
+     * chunk.setLightValue(p_72915_1_, (int) localCoords.xCoord & 15, (int) localCoords.yCoord, (int) localCoords.zCoord
+     * & 15, p_72915_5_);
+     * for (int i1 = 0; i1 < world.worldAccesses.size(); ++i1)
+     * {
+     * ((IWorldAccess)world.worldAccesses.get(i1)).markBlockForRenderUpdate(p_72915_2_, p_72915_3_, p_72915_4_);
+     * }
+     * }
+     * }
+     * }
+     * }
+     * }
+     * }
+     */
 }

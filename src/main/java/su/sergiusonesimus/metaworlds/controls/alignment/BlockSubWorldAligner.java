@@ -4,6 +4,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.world.World;
+
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 
@@ -15,7 +16,7 @@ public class BlockSubWorldAligner extends Block {
     }
 
     public void onBlockAdded(World par1World, int par2, int par3, int par4) {
-        if (((IMixinWorld)par1World).isSubWorld()) {
+        if (((IMixinWorld) par1World).isSubWorld()) {
             SubWorld subWorldPar = (SubWorld) par1World;
             subWorldPar.setRotationYaw((double) Math.round(subWorldPar.getRotationYaw() / 90.0D) * 90.0D);
             subWorldPar.setRotationPitch((double) Math.round(subWorldPar.getRotationPitch() / 90.0D) * 90.0D);

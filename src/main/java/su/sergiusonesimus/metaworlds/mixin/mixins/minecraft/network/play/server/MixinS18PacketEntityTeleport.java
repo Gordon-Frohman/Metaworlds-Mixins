@@ -4,16 +4,16 @@ import java.io.IOException;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.S14PacketEntity;
 import net.minecraft.network.play.server.S18PacketEntityTeleport;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.server.IMixinS18PacketEntityTeleport;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import su.sergiusonesimus.metaworlds.api.IMixinEntity;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.server.IMixinS18PacketEntityTeleport;
 
 @Mixin(S18PacketEntityTeleport.class)
 public class MixinS18PacketEntityTeleport implements IMixinS18PacketEntityTeleport {
@@ -43,18 +43,15 @@ public class MixinS18PacketEntityTeleport implements IMixinS18PacketEntityTelepo
         return this.sendSubWorldPosFlag;
     }
 
-    public int getXPosOnSubWorld()
-    {
+    public int getXPosOnSubWorld() {
         return this.xPosOnSubWorld;
     }
 
-    public int getYPosOnSubWorld()
-    {
+    public int getYPosOnSubWorld() {
         return this.yPosOnSubWorld;
     }
 
-    public int getZPosOnSubWorld()
-    {
+    public int getZPosOnSubWorld() {
         return this.zPosOnSubWorld;
     }
 

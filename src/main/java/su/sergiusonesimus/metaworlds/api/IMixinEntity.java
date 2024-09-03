@@ -5,10 +5,11 @@ import java.util.HashMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 
 public interface IMixinEntity {
-	
+
     public static final byte tractionLossThreshold = 20;
 
     World getWorldBelowFeet();
@@ -34,22 +35,22 @@ public interface IMixinEntity {
     public boolean isLosingTraction();
 
     public void slowlyRemoveWorldBelowFeet();
-    
+
     public double getTractionFactor();
 
     public void setTractionTickCount(byte newTickCount);
 
     public int getServerPosXOnSubWorld();
-    
+
     public int getServerPosYOnSubWorld();
-    
+
     public int getServerPosZOnSubWorld();
-    
+
     public void setServerPosXOnSubWorld(int serverPosXOnSubWorld);
-    
+
     public void setServerPosYOnSubWorld(int serverPosYOnSubWorld);
-    
+
     public void setServerPosZOnSubWorld(int serverPosZOnSubWorld);
-    
+
     public double getDistanceSq(double par1, double par3, double par5, World targetWorld);
 }

@@ -4,15 +4,16 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.patcher.OBBPool;
 import su.sergiusonesimus.metaworlds.patcher.OrientedBB;
-
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(AxisAlignedBB.class)
 public abstract class MixinAxisAlignedBB implements IMixinAxisAlignedBB {

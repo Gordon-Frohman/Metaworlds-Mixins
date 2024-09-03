@@ -6,12 +6,11 @@ import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Vec3;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
-
-import java.nio.IntBuffer;
 
 import org.lwjgl.opengl.ARBOcclusionQuery;
+
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
 
 public class RenderGlobalSubWorld extends RenderGlobal {
 
@@ -23,24 +22,26 @@ public class RenderGlobalSubWorld extends RenderGlobal {
 
         this.mc = par1Minecraft;
         this.renderEngine = par1Minecraft.getTextureManager();
-        
-        this.worldRenderersToUpdate = ((IMixinRenderGlobal)origRenderGlobal).getWorldRenderersToUpdate();
-        ((IMixinRenderGlobal)this).setSortedWorldRenderersList(((IMixinRenderGlobal)origRenderGlobal).getSortedWorldRenderersList());
-        ((IMixinRenderGlobal)this).setWorldRenderersMap(((IMixinRenderGlobal)origRenderGlobal).getWorldRenderersMap());
-        ((IMixinRenderGlobal)this).setWorldRenderersList(((IMixinRenderGlobal)origRenderGlobal).getWorldRenderersList());
-        
-        this.renderChunksWide = ((IMixinRenderGlobal)origRenderGlobal).getRenderChunksWide();
-        this.renderChunksTall = ((IMixinRenderGlobal)origRenderGlobal).getRenderChunksTall();
-        this.renderChunksDeep = ((IMixinRenderGlobal)origRenderGlobal).getRenderChunksDeep();
-        
+
+        this.worldRenderersToUpdate = ((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersToUpdate();
+        ((IMixinRenderGlobal) this)
+            .setSortedWorldRenderersList(((IMixinRenderGlobal) origRenderGlobal).getSortedWorldRenderersList());
+        ((IMixinRenderGlobal) this)
+            .setWorldRenderersMap(((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersMap());
+        ((IMixinRenderGlobal) this)
+            .setWorldRenderersList(((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersList());
+
+        this.renderChunksWide = ((IMixinRenderGlobal) origRenderGlobal).getRenderChunksWide();
+        this.renderChunksTall = ((IMixinRenderGlobal) origRenderGlobal).getRenderChunksTall();
+        this.renderChunksDeep = ((IMixinRenderGlobal) origRenderGlobal).getRenderChunksDeep();
+
         this.occlusionEnabled = origRenderGlobal.occlusionEnabled;
-        
+
         byte b0 = 34;
         byte b1 = 16;
         this.glRenderListBase = GLAllocation.generateDisplayLists(b0 * b0 * b1 * 3);
- 
-        if (this.occlusionEnabled)
-        {
+
+        if (this.occlusionEnabled) {
             this.occlusionResult.clear();
             this.glOcclusionQueryBase = GLAllocation.createDirectIntBuffer(b0 * b0 * b1);
             this.glOcclusionQueryBase.clear();
@@ -48,9 +49,9 @@ public class RenderGlobalSubWorld extends RenderGlobal {
             this.glOcclusionQueryBase.limit(b0 * b0 * b1);
             ARBOcclusionQuery.glGenQueriesARB(this.glOcclusionQueryBase);
         }
-        
+
         this.theWorld = par1Minecraft.theWorld;
-        
+
         // this.worldObj = par1;
         this.parentRenderGlobal = origRenderGlobal;
     }
@@ -149,8 +150,13 @@ public class RenderGlobalSubWorld extends RenderGlobal {
 
     @Override
     public void broadcastSound(int par1, int par2, int par3, int par4, int par5) {
-    	Vec3 globalCoords = ((IMixinWorld)this.theWorld).transformToGlobal(Vec3.createVectorHelper(par2, par3, par4));
-        parentRenderGlobal.broadcastSound(par1, (int)globalCoords.xCoord, (int)globalCoords.yCoord, (int)globalCoords.zCoord, par5);
+        Vec3 globalCoords = ((IMixinWorld) this.theWorld).transformToGlobal(Vec3.createVectorHelper(par2, par3, par4));
+        parentRenderGlobal.broadcastSound(
+            par1,
+            (int) globalCoords.xCoord,
+            (int) globalCoords.yCoord,
+            (int) globalCoords.zCoord,
+            par5);
     }
 
     /**
@@ -168,7 +174,7 @@ public class RenderGlobalSubWorld extends RenderGlobal {
      */
     @Override
     public void destroyBlockPartially(int par1, int par2, int par3, int par4, int par5) {
-        ((IMixinRenderGlobal)parentRenderGlobal)
+        ((IMixinRenderGlobal) parentRenderGlobal)
             .destroyBlockPartially(par1, par2, par3, par4, par5, ((IMixinWorld) this.theWorld).getSubWorldID());
     }
 

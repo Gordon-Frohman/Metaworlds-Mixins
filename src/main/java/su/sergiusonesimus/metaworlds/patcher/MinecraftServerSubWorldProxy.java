@@ -15,17 +15,17 @@ public class MinecraftServerSubWorldProxy extends MinecraftServer {
 
     public MinecraftServerSubWorldProxy(MinecraftServer original) {
         super(null, null);
-        
-    	this.serverProxy = null;
-    	this.anvilFile = null;
-    	this.field_147144_o = null;
-    	this.commandManager = null;
-    	this.anvilConverterForAnvilFile = null;
-    	this.field_147143_S = null;
-    	this.field_152364_T = original.field_152364_T;
-    	this.field_152365_W = original.field_152365_W;
-    	this.field_152366_X = original.field_152366_X;
-    	
+
+        this.serverProxy = null;
+        this.anvilFile = null;
+        this.field_147144_o = null;
+        this.commandManager = null;
+        this.anvilConverterForAnvilFile = null;
+        this.field_147143_S = null;
+        this.field_152364_T = original.field_152364_T;
+        this.field_152365_W = original.field_152365_W;
+        this.field_152366_X = original.field_152366_X;
+
         this.realServer = original;
     }
 

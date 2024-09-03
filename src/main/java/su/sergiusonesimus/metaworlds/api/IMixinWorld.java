@@ -4,11 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.block.material.Material;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -30,7 +28,7 @@ public interface IMixinWorld {
     public Collection<World> getSubWorlds();
 
     public int getWorldsCount(); // Including this one. Equal to getSubWorlds().size() + 1 (= getWorlds().size())
-    
+
     public int getUnoccupiedSubworldID(); // Returns first ID which is not occupied by any subworld
 
     // The parent worlds always have subWorldID 0. SubWorlds start from ID 1 counting up
@@ -176,6 +174,6 @@ public interface IMixinWorld {
     public boolean isChunkWatchable(int chunkX, int chunkZ);
 
     public Map<Integer, World> getSubWorldsMap();
-    
+
     public void doTickPartial(double interpolationFactor);
 }

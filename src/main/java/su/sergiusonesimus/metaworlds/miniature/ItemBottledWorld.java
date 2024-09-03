@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
@@ -27,9 +28,9 @@ public class ItemBottledWorld extends Item {
                 .hasKey("subWorldID")) {
                 int storedSubWorldID = par1ItemStack.getTagCompound()
                     .getInteger("subWorldID");
-                World restoredWorld = ((IMixinWorld)par2EntityPlayer.worldObj).CreateSubWorld(storedSubWorldID);
+                World restoredWorld = ((IMixinWorld) par2EntityPlayer.worldObj).CreateSubWorld(storedSubWorldID);
                 SubWorld restoredSubWorld = (SubWorld) restoredWorld;
-                Vec3 destPos = ((IMixinWorld)par3World).transformToGlobal(
+                Vec3 destPos = ((IMixinWorld) par3World).transformToGlobal(
                     (double) ((float) par4 + par8),
                     (double) ((float) par5 + par9),
                     (double) ((float) par6 + par10));
@@ -40,7 +41,7 @@ public class ItemBottledWorld extends Item {
                     (double) restoredSubWorld.getMaxX(),
                     (double) restoredSubWorld.getMaxY(),
                     (double) restoredSubWorld.getMaxZ());
-                newAABB = ((IMixinAxisAlignedBB)newAABB).getTransformedToGlobalBoundingBox(restoredWorld);
+                newAABB = ((IMixinAxisAlignedBB) newAABB).getTransformedToGlobalBoundingBox(restoredWorld);
                 Vec3 posDiff = Vec3.createVectorHelper(
                     destPos.xCoord - (newAABB.maxX + newAABB.minX) * 0.5D,
                     destPos.yCoord - newAABB.minY,

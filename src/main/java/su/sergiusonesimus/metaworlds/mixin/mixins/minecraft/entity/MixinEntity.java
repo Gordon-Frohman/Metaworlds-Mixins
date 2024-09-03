@@ -6,7 +6,6 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
@@ -18,14 +17,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.player.IMixinEntityPlayer;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
-import su.sergiusonesimus.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
-import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
-import su.sergiusonesimus.metaworlds.patcher.OrientedBB;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -33,6 +24,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import su.sergiusonesimus.metaworlds.api.IMixinEntity;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
+import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
+import su.sergiusonesimus.metaworlds.patcher.OrientedBB;
 
 @Mixin(Entity.class)
 public abstract class MixinEntity implements Comparable, IMixinEntity {
@@ -133,10 +131,12 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     protected void setFlag(int flag, boolean set) {}
 
     @Shadow(remap = true)
-    public boolean shouldRenderInPass(int pass) { return false; }
+    public boolean shouldRenderInPass(int pass) {
+        return false;
+    }
 
     @Shadow(remap = true)
-	protected void setPosition(double par1, double par3, double par5) {}
+    protected void setPosition(double par1, double par3, double par5) {}
 
     @Shadow(remap = true)
     public void setRotation(float par1, float par2) {}
@@ -198,29 +198,29 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     public HashMap<Integer, EntityPlayerProxy> playerProxyMap = ((Entity) (Object) this) instanceof EntityPlayer
         ? new HashMap()
         : null;
-    
+
     public int getServerPosXOnSubWorld() {
-    	return serverPosXOnSubWorld;
+        return serverPosXOnSubWorld;
     }
-    
+
     public int getServerPosYOnSubWorld() {
-    	return serverPosYOnSubWorld;
+        return serverPosYOnSubWorld;
     }
-    
+
     public int getServerPosZOnSubWorld() {
-    	return serverPosZOnSubWorld;
+        return serverPosZOnSubWorld;
     }
-    
+
     public void setServerPosXOnSubWorld(int serverPosXOnSubWorld) {
-    	this.serverPosXOnSubWorld = serverPosXOnSubWorld;
+        this.serverPosXOnSubWorld = serverPosXOnSubWorld;
     }
-    
+
     public void setServerPosYOnSubWorld(int serverPosYOnSubWorld) {
-    	this.serverPosYOnSubWorld = serverPosYOnSubWorld;
+        this.serverPosYOnSubWorld = serverPosYOnSubWorld;
     }
-    
+
     public void setServerPosZOnSubWorld(int serverPosZOnSubWorld) {
-    	this.serverPosZOnSubWorld = serverPosZOnSubWorld;
+        this.serverPosZOnSubWorld = serverPosZOnSubWorld;
     }
 
     public double getTractionFactor() {
@@ -362,7 +362,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             if (flag) {
                 double d9;
 
-                for (d9 = 0.05D; x != 0.0D && this.worldObj.getCollidingBoundingBoxes(
+                for (d9 = 0.05D; x != 0.0D && this.worldObj
+                    .getCollidingBoundingBoxes(
                         (Entity) (Object) this,
                         this.boundingBox.getOffsetBoundingBox(x, -1.0D, 0.0D))
                     .isEmpty(); d6 = x) {
@@ -375,7 +376,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                     }
                 }
 
-                for (; z != 0.0D && this.worldObj.getCollidingBoundingBoxes(
+                for (; z != 0.0D && this.worldObj
+                    .getCollidingBoundingBoxes(
                         (Entity) (Object) this,
                         this.boundingBox.getOffsetBoundingBox(0.0D, -1.0D, z))
                     .isEmpty(); d8 = z) {
@@ -389,7 +391,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 }
 
                 while (x != 0.0D && z != 0.0D
-                    && this.worldObj.getCollidingBoundingBoxes(
+                    && this.worldObj
+                        .getCollidingBoundingBoxes(
                             (Entity) (Object) this,
                             this.boundingBox.getOffsetBoundingBox(x, -1.0D, z))
                         .isEmpty()) {
@@ -414,7 +417,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 }
             }
 
-            List list = this.worldObj.getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(x, y, z));
+            List list = this.worldObj
+                .getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(x, y, z));
 
             World newWorldBelowFeet = this.worldObj;
             double yOffset;
@@ -480,7 +484,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 z = d8;
                 AxisAlignedBB axisalignedbb1 = this.boundingBox.copy();
                 this.boundingBox.setBB(axisalignedbb);
-                list = this.worldObj.getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(d6, y, d8));
+                list = this.worldObj
+                    .getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(d6, y, d8));
 
                 for (k = 0; k < list.size(); ++k) {
                     y = ((AxisAlignedBB) list.get(k)).calculateYOffset(this.boundingBox, y);
@@ -789,17 +794,16 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
          * return (double)MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
          */
     }
-    
+
     @Inject(method = "setSneaking(Z)V", at = @At("TAIL"))
-    public void setSneaking(boolean sneaking, CallbackInfo ci)
-    {
-    	if((Entity)(Object)this instanceof EntityPlayer) {
-    		EntityPlayer player = (EntityPlayer)(Object)this;
-    		for(World subworld : ((IMixinWorld)this.worldObj).getSubWorlds()) {
-    			EntityPlayer proxy = (EntityPlayer)((IMixinEntity)player).getProxyPlayer(subworld);
-    			proxy.setFlag(1, sneaking);
-    		}
-    	}
+    public void setSneaking(boolean sneaking, CallbackInfo ci) {
+        if ((Entity) (Object) this instanceof EntityPlayer) {
+            EntityPlayer player = (EntityPlayer) (Object) this;
+            for (World subworld : ((IMixinWorld) this.worldObj).getSubWorlds()) {
+                EntityPlayer proxy = (EntityPlayer) ((IMixinEntity) player).getProxyPlayer(subworld);
+                proxy.setFlag(1, sneaking);
+            }
+        }
     }
 
 }

@@ -9,8 +9,6 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 
 import com.google.common.collect.BiMap;
 
@@ -18,6 +16,8 @@ import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import su.sergiusonesimus.metaworlds.api.IMixinEntity;
+import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 
 public class CSubWorldProxyPacket extends MetaWorldsPacket {
 
@@ -85,7 +85,8 @@ public class CSubWorldProxyPacket extends MetaWorldsPacket {
         if (side.isClient()) return;// player = Minecraft.getMinecraft().thePlayer;
         else player = ((NetHandlerPlayServer) netHandler).playerEntity;
 
-        EntityPlayerProxy playerProxy = ((IMixinEntity)player).getPlayerProxyMap().get(this.subWorldID);
+        EntityPlayerProxy playerProxy = ((IMixinEntity) player).getPlayerProxyMap()
+            .get(this.subWorldID);
 
         if (playerProxy == null) return;
 

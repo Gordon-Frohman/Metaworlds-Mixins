@@ -7,12 +7,13 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
+
+import io.netty.channel.Channel;
+import io.netty.util.concurrent.GenericFutureListener;
 import su.sergiusonesimus.metaworlds.core.CSubWorldProxyPacket;
 import su.sergiusonesimus.metaworlds.core.GeneralPacketPipeline;
 import su.sergiusonesimus.metaworlds.core.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.core.SSubWorldProxyPacket;
-import io.netty.channel.Channel;
-import io.netty.util.concurrent.GenericFutureListener;
 
 public class NetworkManagerSubWorldProxy extends NetworkManager {
 

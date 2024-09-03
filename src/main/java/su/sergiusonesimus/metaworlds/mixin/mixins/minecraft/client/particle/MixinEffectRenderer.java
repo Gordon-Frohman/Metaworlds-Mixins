@@ -4,16 +4,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
-import org.lwjgl.opengl.GL11;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.particle.EntityDiggingFX;
 import net.minecraft.client.particle.EntityFX;
@@ -29,6 +22,15 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+
+import org.lwjgl.opengl.GL11;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
@@ -36,7 +38,6 @@ import su.sergiusonesimus.metaworlds.mixin.interfaces.client.particles.IMixinEff
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.patcher.EntityClientPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
-import net.minecraft.client.Minecraft;
 
 @Mixin(EffectRenderer.class)
 public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
@@ -55,17 +56,18 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
 
     @Shadow(remap = true)
     private Random rand;
-    
-    //TODO
+
+    // TODO
 
     @Shadow(remap = true)
     public abstract void addEffect(EntityFX p_78873_1_);
 
-	@Inject(method = "updateEffects", at = @At("TAIL"))
+    @Inject(method = "updateEffects", at = @At("TAIL"))
     public void updateEffects(CallbackInfo info) {
-        if (!((IMixinWorld)this.worldObj).isSubWorld()) {
+        if (!((IMixinWorld) this.worldObj).isSubWorld()) {
             Entity globalPlayer = Minecraft.getMinecraft().thePlayer;
-            for (EntityPlayerProxy curPlayer : ((IMixinEntity)globalPlayer).getPlayerProxyMap().values()) {
+            for (EntityPlayerProxy curPlayer : ((IMixinEntity) globalPlayer).getPlayerProxyMap()
+                .values()) {
                 EntityClientPlayerMPSubWorldProxy curPlayerProxy = (EntityClientPlayerMPSubWorldProxy) curPlayer;
                 curPlayerProxy.getMinecraft().effectRenderer.updateEffects();
             }
@@ -75,7 +77,7 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
     /**
      * Renders all current particles. Args player, partialTickTime
      */
-	@Overwrite
+    @Overwrite
     public void renderParticles(Entity p_78874_1_, float p_78874_2_) {
         float f1 = ActiveRenderInfo.rotationX;
         float f2 = ActiveRenderInfo.rotationZ;
@@ -88,8 +90,8 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
             + (p_78874_1_.posY - p_78874_1_.lastTickPosY) * (double) p_78874_2_;
         EntityFX.interpPosZ = p_78874_1_.lastTickPosZ
             + (p_78874_1_.posZ - p_78874_1_.lastTickPosZ) * (double) p_78874_2_;
-        if (((IMixinWorld)this.worldObj).isSubWorld()) {
-            Vec3 transformedViewDir = ((IMixinWorld)this.worldObj).rotateToLocal(f3, f5, f4);
+        if (((IMixinWorld) this.worldObj).isSubWorld()) {
+            Vec3 transformedViewDir = ((IMixinWorld) this.worldObj).rotateToLocal(f3, f5, f4);
             f3 = (float) transformedViewDir.xCoord;
             f5 = (float) transformedViewDir.yCoord;
             f4 = (float) transformedViewDir.zCoord;
@@ -124,7 +126,7 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
                 GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
                 GL11.glAlphaFunc(GL11.GL_GREATER, 0.003921569F);
 
-                if (((IMixinWorld)this.worldObj).isSubWorld()) {
+                if (((IMixinWorld) this.worldObj).isSubWorld()) {
                     GL11.glPushMatrix();
                     GL11.glTranslated(-EntityFX.interpPosX, -EntityFX.interpPosY, -EntityFX.interpPosZ);
                     SubWorld parentSubWorld = (SubWorld) this.worldObj;
@@ -170,7 +172,7 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
 
                 tessellator.draw();
 
-                if (((IMixinWorld)this.worldObj).isSubWorld()) {
+                if (((IMixinWorld) this.worldObj).isSubWorld()) {
                     GL11.glPopMatrix();
                 }
 
@@ -180,8 +182,9 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
             }
         }
 
-        if (!((IMixinWorld)this.worldObj).isSubWorld()) {
-            for (EntityPlayerProxy curPlayer : ((IMixinEntity)p_78874_1_).getPlayerProxyMap().values()) {
+        if (!((IMixinWorld) this.worldObj).isSubWorld()) {
+            for (EntityPlayerProxy curPlayer : ((IMixinEntity) p_78874_1_).getPlayerProxyMap()
+                .values()) {
                 EntityClientPlayerMPSubWorldProxy curPlayerProxy = (EntityClientPlayerMPSubWorldProxy) curPlayer;
                 curPlayerProxy.getMinecraft().effectRenderer.renderParticles(p_78874_1_, p_78874_2_);
             }
@@ -252,11 +255,14 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
         }
     }
 
-	@Overwrite(remap = false)
-	public void addBlockHitEffects(int x, int y, int z, MovingObjectPosition target) {
-        Block block = ((IMixinMovingObjectPosition)target).getWorld().getBlock(x, y, z);
-        if (block != null && !block.addHitEffects(((IMixinMovingObjectPosition)target).getWorld(), target, (EffectRenderer)(Object)this)) {
-            ((IMixinEffectRenderer)this).addBlockHitEffects(x, y, z, target.sideHit, ((IMixinMovingObjectPosition)target).getWorld());
+    @Overwrite(remap = false)
+    public void addBlockHitEffects(int x, int y, int z, MovingObjectPosition target) {
+        Block block = ((IMixinMovingObjectPosition) target).getWorld()
+            .getBlock(x, y, z);
+        if (block != null && !block
+            .addHitEffects(((IMixinMovingObjectPosition) target).getWorld(), target, (EffectRenderer) (Object) this)) {
+            ((IMixinEffectRenderer) this)
+                .addBlockHitEffects(x, y, z, target.sideHit, ((IMixinMovingObjectPosition) target).getWorld());
         }
     }
 

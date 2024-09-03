@@ -4,11 +4,12 @@ import java.util.Iterator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.World;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.core.client.SubWorldClient;
+
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.core.client.SubWorldClient;
 
 public class SubWorldClientPreTickHandler {
 

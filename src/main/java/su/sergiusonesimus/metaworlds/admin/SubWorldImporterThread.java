@@ -20,12 +20,12 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.chunk.storage.RegionFile;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.common.DimensionManager;
-import su.sergiusonesimus.metaworlds.patcher.SubWorldInfoHolder;
 
 import org.apache.commons.io.FileUtils;
 
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.registry.GameData;
+import su.sergiusonesimus.metaworlds.patcher.SubWorldInfoHolder;
 
 public class SubWorldImporterThread extends Thread {
 

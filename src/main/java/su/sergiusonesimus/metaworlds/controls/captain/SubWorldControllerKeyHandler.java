@@ -3,7 +3,6 @@ package su.sergiusonesimus.metaworlds.controls.captain;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
-import su.sergiusonesimus.metaworlds.compat.packet.ControllerKeyUpdatePacket;
 
 import org.lwjgl.input.Keyboard;
 
@@ -11,6 +10,7 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import su.sergiusonesimus.metaworlds.compat.packet.ControllerKeyUpdatePacket;
 
 public class SubWorldControllerKeyHandler {
 

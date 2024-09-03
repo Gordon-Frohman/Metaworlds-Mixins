@@ -5,15 +5,16 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.core.SubWorldServer;
-import su.sergiusonesimus.metaworlds.core.client.SubWorldClient;
+
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.core.SubWorldServer;
+import su.sergiusonesimus.metaworlds.core.client.SubWorldClient;
 
 public class SubWorldUpdatePacket implements IMessage {
 

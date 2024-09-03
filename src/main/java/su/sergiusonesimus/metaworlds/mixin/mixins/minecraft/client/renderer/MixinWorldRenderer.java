@@ -1,16 +1,17 @@
 package su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.client.renderer;
 
-import org.lwjgl.opengl.GL11;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+
+import org.lwjgl.opengl.GL11;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinWorldRenderer;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
@@ -71,8 +72,8 @@ public abstract class MixinWorldRenderer implements IMixinWorldRenderer {
 
     @Shadow(remap = true)
     private boolean isInitialized;
-    
-    //TODO
+
+    // TODO
 
     @Shadow(remap = true)
     public abstract void setDontDraw();
@@ -83,7 +84,7 @@ public abstract class MixinWorldRenderer implements IMixinWorldRenderer {
     /**
      * Sets a new position for the renderer and setting it up so it can be reloaded with the new data for that position
      */
-	@Overwrite
+    @Overwrite
     public void setPosition(int p_78913_1_, int p_78913_2_, int p_78913_3_) {
         if (p_78913_1_ != this.posX || p_78913_2_ != this.posY || p_78913_3_ != this.posZ) {
             this.setDontDraw();
@@ -125,9 +126,9 @@ public abstract class MixinWorldRenderer implements IMixinWorldRenderer {
      * Returns the distance of this chunk renderer to the entity without performing the final normalizing square root,
      * for performance reasons.
      */
-	@Overwrite
+    @Overwrite
     public float distanceToEntitySquared(Entity par1Entity) {
-        return (float) ((IMixinEntity)par1Entity).getLocalPos(this.worldObj)
+        return (float) ((IMixinEntity) par1Entity).getLocalPos(this.worldObj)
             .squareDistanceTo((double) this.posXPlus, (double) this.posYPlus, (double) this.posZPlus);
         /*
          * float f = (float)(par1Entity.posX - (double)this.posXPlus);
@@ -137,10 +138,10 @@ public abstract class MixinWorldRenderer implements IMixinWorldRenderer {
          */
     }
 
-	@Overwrite
+    @Overwrite
     public void updateInFrustum(ICamera p_78908_1_) {
-        this.isInFrustum = p_78908_1_
-            .isBoundingBoxInFrustum(((IMixinAxisAlignedBB)this.rendererBoundingBox).getTransformedToGlobalBoundingBox(this.worldObj));
+        this.isInFrustum = p_78908_1_.isBoundingBoxInFrustum(
+            ((IMixinAxisAlignedBB) this.rendererBoundingBox).getTransformedToGlobalBoundingBox(this.worldObj));
     }
 
     public boolean isInitialized() {

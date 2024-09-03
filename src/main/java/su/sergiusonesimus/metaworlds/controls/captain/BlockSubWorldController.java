@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
@@ -49,9 +50,10 @@ public class BlockSubWorldController extends Block {
                 par5EntityPlayer.posX,
                 par5EntityPlayer.posY + 0.6D,
                 par5EntityPlayer.posZ);
-            controllerEntity.setStartingYaw((float) ((IMixinWorld)par1World).getRotationYaw() + par5EntityPlayer.rotationYaw);
+            controllerEntity
+                .setStartingYaw((float) ((IMixinWorld) par1World).getRotationYaw() + par5EntityPlayer.rotationYaw);
             controllerEntity.setControlledWorld(par1World);
-            ((IMixinEntity)controllerEntity).setWorldBelowFeet(((IMixinEntity)par5EntityPlayer).getWorldBelowFeet());
+            ((IMixinEntity) controllerEntity).setWorldBelowFeet(((IMixinEntity) par5EntityPlayer).getWorldBelowFeet());
             if (!entityParentWorld.isRemote) {
                 entityParentWorld.spawnEntityInWorld(controllerEntity);
             }

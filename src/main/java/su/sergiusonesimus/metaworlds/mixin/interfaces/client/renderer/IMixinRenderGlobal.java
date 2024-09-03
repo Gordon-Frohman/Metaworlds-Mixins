@@ -21,11 +21,11 @@ public interface IMixinRenderGlobal {
     public List getWorldRenderersToUpdate();
 
     public List<WorldRenderer> getSortedWorldRenderersList();
-    
+
     public void setSortedWorldRenderersList(List<WorldRenderer> sortedWorldRenderersList);
 
     public Map<Integer, WorldRenderer> getWorldRenderersMap();
-    
+
     public void setWorldRenderersMap(Map<Integer, WorldRenderer> worldRenderersMap);
 
     public List<WorldRenderer> getWorldRenderersList();
@@ -53,6 +53,7 @@ public interface IMixinRenderGlobal {
     public void setWorld(WorldClient newWorld);
 
     public void loadRenderersForNewSubWorld(int subWorldId);
-    
-    public void destroyBlockPartially(int p_147587_1_, int p_147587_2_, int p_147587_3_, int p_147587_4_, int p_147587_5_, int subWorldId);
+
+    public void destroyBlockPartially(int p_147587_1_, int p_147587_2_, int p_147587_3_, int p_147587_4_,
+        int p_147587_5_, int subWorldId);
 }

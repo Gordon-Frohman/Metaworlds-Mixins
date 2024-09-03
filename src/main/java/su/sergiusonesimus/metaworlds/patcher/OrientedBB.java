@@ -1,13 +1,12 @@
 package su.sergiusonesimus.metaworlds.patcher;
 
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 
 import org.jblas.DoubleMatrix;
+
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 
 public class OrientedBB extends AxisAlignedBB {
 

@@ -5,15 +5,16 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
+
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
+import su.sergiusonesimus.metaworlds.api.IMixinEntity;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
+import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
 
 public class MWCorePlayerTracker {
 
@@ -40,7 +41,7 @@ public class MWCorePlayerTracker {
             new SubWorldCreatePacket(
                 ((IMixinWorld) event.player.worldObj).getSubWorlds()
                     .size(),
-                (Integer[]) ((IMixinWorld)event.player.worldObj).getSubWorldsMap()
+                (Integer[]) ((IMixinWorld) event.player.worldObj).getSubWorldsMap()
                     .keySet()
                     .toArray(new Integer[0])),
             (EntityPlayerMP) event.player);
@@ -69,7 +70,7 @@ public class MWCorePlayerTracker {
             new SubWorldCreatePacket(
                 ((IMixinWorld) event.player.worldObj).getSubWorlds()
                     .size(),
-                (Integer[]) ((IMixinWorld)event.player.worldObj).getSubWorldsMap()
+                (Integer[]) ((IMixinWorld) event.player.worldObj).getSubWorldsMap()
                     .keySet()
                     .toArray(new Integer[0])),
             (EntityPlayerMP) event.player);

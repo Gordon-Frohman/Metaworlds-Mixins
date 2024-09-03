@@ -20,13 +20,14 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.MapData;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.PacketHandler;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+
+import su.sergiusonesimus.metaworlds.api.IMixinEntity;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.PacketHandler;
 
 @Mixin(EntityTrackerEntry.class)
 public abstract class MixinEntityTrackerEntry {
@@ -331,7 +332,7 @@ public abstract class MixinEntityTrackerEntry {
 
                         if (flag2) {
                             this.func_151259_a(
-                            		PacketHandler.getS16PacketEntityLook(
+                                PacketHandler.getS16PacketEntityLook(
                                     this.myEntity.getEntityId(),
                                     ((IMixinWorld) ((IMixinEntity) this.myEntity).getWorldBelowFeet()).getSubWorldID(),
                                     ((IMixinEntity) this.myEntity).getTractionLossTicks(),

@@ -5,6 +5,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 
@@ -53,7 +54,7 @@ public class EntitySubWorldController extends Entity {
     public void setControlledWorld(World newControlledWorld) {
         this.controlledWorld = newControlledWorld;
         if (this.controlledWorld != null) {
-            this.dataWatcher.updateObject(21, Integer.valueOf(((IMixinWorld)this.controlledWorld).getSubWorldID()));
+            this.dataWatcher.updateObject(21, Integer.valueOf(((IMixinWorld) this.controlledWorld).getSubWorldID()));
         } else {
             this.dataWatcher.updateObject(21, Integer.valueOf(0));
         }
@@ -79,12 +80,12 @@ public class EntitySubWorldController extends Entity {
 
     public void onUpdate() {
         super.onUpdate();
-        this.controlledWorld = ((IMixinWorld)this.worldObj).getSubWorld(this.dataWatcher.getWatchableObjectInt(21));
+        this.controlledWorld = ((IMixinWorld) this.worldObj).getSubWorld(this.dataWatcher.getWatchableObjectInt(21));
         this.startingYaw = (double) this.dataWatcher.getWatchableObjectFloat(22);
         this.prevPosX = this.posX;
         this.prevPosY = this.posY;
         this.prevPosZ = this.posZ;
-        if (this.riddenByEntity != null && ((IMixinWorld)this.controlledWorld).isSubWorld()) {
+        if (this.riddenByEntity != null && ((IMixinWorld) this.controlledWorld).isSubWorld()) {
             SubWorld subWorldObj = (SubWorld) this.controlledWorld;
             double sourceYaw = MathHelper
                 .wrapAngleTo180_double(subWorldObj.getRotationYaw() + (double) this.riddenByEntity.rotationYaw);

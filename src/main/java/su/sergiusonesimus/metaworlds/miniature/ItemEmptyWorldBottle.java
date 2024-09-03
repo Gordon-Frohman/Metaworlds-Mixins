@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 
@@ -20,11 +21,11 @@ public class ItemEmptyWorldBottle extends Item {
         int par5, int par6, int par7, float par8, float par9, float par10) {
         if (par2EntityPlayer.worldObj.isRemote) {
             return true;
-        } else if (par3World != null && ((IMixinWorld)par3World).isSubWorld()) {
+        } else if (par3World != null && ((IMixinWorld) par3World).isSubWorld()) {
             ItemStack newBottledWorld = new ItemStack(MetaworldsMiniatureMod.bottledWorldItem);
             newBottledWorld.setTagCompound(new NBTTagCompound());
             newBottledWorld.getTagCompound()
-                .setInteger("subWorldID", ((IMixinWorld)par3World).getSubWorldID());
+                .setInteger("subWorldID", ((IMixinWorld) par3World).getSubWorldID());
             if (!par2EntityPlayer.inventory.addItemStackToInventory(newBottledWorld)) {
                 return true;
             } else {

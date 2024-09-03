@@ -8,6 +8,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
+
 import su.sergiusonesimus.metaworlds.patcher.ChunkSubWorld;
 
 public class ChunkProviderServerSubWorldBlank extends ChunkProviderServer {

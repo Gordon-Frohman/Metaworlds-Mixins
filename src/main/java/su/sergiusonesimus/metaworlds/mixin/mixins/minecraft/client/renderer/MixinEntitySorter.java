@@ -1,11 +1,13 @@
 package su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.client.renderer;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import net.minecraft.client.renderer.EntitySorter;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.util.Vec3;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 
 @Mixin(EntitySorter.class)
@@ -19,12 +21,12 @@ public class MixinEntitySorter {
 
     @Shadow(remap = true)
     private double entityPosZ;
-	
+
     @Overwrite
     public int compare(WorldRenderer p_compare_1_, WorldRenderer p_compare_2_) {
-        Vec3 transformedPos1 = ((IMixinWorld)p_compare_1_.worldObj)
+        Vec3 transformedPos1 = ((IMixinWorld) p_compare_1_.worldObj)
             .transformToLocal(-this.entityPosX, -this.entityPosY, -this.entityPosZ);
-        Vec3 transformedPos2 = ((IMixinWorld)p_compare_2_.worldObj)
+        Vec3 transformedPos2 = ((IMixinWorld) p_compare_2_.worldObj)
             .transformToLocal(-this.entityPosX, -this.entityPosY, -this.entityPosZ);
 
         double d0 = (double) p_compare_1_.posXPlus - transformedPos1.xCoord;

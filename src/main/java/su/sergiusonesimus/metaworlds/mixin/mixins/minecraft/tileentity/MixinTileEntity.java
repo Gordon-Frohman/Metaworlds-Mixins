@@ -2,11 +2,12 @@ package su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.tileentity;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Vec3;
+
+import org.spongepowered.asm.mixin.Mixin;
+
 import su.sergiusonesimus.metaworlds.api.IMixinTileEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-
-import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(TileEntity.class)
 public abstract class MixinTileEntity implements IMixinTileEntity {

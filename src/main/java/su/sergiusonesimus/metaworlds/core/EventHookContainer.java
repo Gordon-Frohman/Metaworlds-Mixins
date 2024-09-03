@@ -3,7 +3,6 @@ package su.sergiusonesimus.metaworlds.core;
 import java.util.Collection;
 import java.util.Iterator;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -12,11 +11,12 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.world.WorldEvent.Load;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
+
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.IMixinWorldInfo;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class EventHookContainer {
 
@@ -37,7 +37,7 @@ public class EventHookContainer {
 
                     while (i$.hasNext()) {
                         Integer curSubWorldID = (Integer) i$.next();
-                        if (((IMixinWorld)event.world).getSubWorldsMap()
+                        if (((IMixinWorld) event.world).getSubWorldsMap()
                             .get(curSubWorldID) == null)
                             ((IMixinWorld) event.world).CreateSubWorld(curSubWorldID.intValue());
                     }

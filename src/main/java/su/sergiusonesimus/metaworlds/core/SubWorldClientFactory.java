@@ -3,6 +3,7 @@ package su.sergiusonesimus.metaworlds.core;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
+
 import su.sergiusonesimus.metaworlds.core.client.SubWorldClient;
 import su.sergiusonesimus.metaworlds.patcher.SubWorldFactory;
 

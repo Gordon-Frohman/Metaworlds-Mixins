@@ -5,14 +5,15 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
-import su.sergiusonesimus.metaworlds.api.RecipeConfig;
-import su.sergiusonesimus.metaworlds.api.RecipeConfig.RecipePlaceHolderDef;
+
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
+import su.sergiusonesimus.metaworlds.api.RecipeConfig;
+import su.sergiusonesimus.metaworlds.api.RecipeConfig.RecipePlaceHolderDef;
 
 @Mod(
     modid = "metaworldsminiaturemod",

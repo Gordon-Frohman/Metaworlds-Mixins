@@ -2,21 +2,11 @@ package su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.entity.player;
 
 import java.util.Iterator;
 
-import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinEntityLivingBase;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.player.IMixinEntityPlayer;
-import su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.entity.MixinEntity;
-import su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.entity.MixinEntityLivingBase;
-import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -27,6 +17,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import su.sergiusonesimus.metaworlds.api.IMixinEntity;
+import su.sergiusonesimus.metaworlds.api.IMixinEntityLivingBase;
+import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.player.IMixinEntityPlayer;
+import su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.entity.MixinEntityLivingBase;
+import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 
 @Mixin(EntityPlayer.class)
 public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer {
@@ -42,24 +38,25 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     @Shadow(remap = true)
     protected boolean sleeping;
-    
-    //TODO
+
+    // TODO
 
     @Shadow(remap = true)
     protected abstract boolean isPlayer();
 
     @Overwrite
     public boolean isInBed() {
-        if (((EntityPlayer)(Object)this).worldObj.getBlock(this.playerLocation.posX, this.playerLocation.posY, this.playerLocation.posZ)
+        if (((EntityPlayer) (Object) this).worldObj
+            .getBlock(this.playerLocation.posX, this.playerLocation.posY, this.playerLocation.posZ)
             .isBed(
-            	((EntityPlayer)(Object)this).worldObj,
+                ((EntityPlayer) (Object) this).worldObj,
                 playerLocation.posX,
                 playerLocation.posY,
                 playerLocation.posZ,
                 (EntityLivingBase) (Object) this)) {
             return true;
         } else {
-            if (!((IMixinWorld) ((EntityPlayer)(Object)this).worldObj).isSubWorld()) {
+            if (!((IMixinWorld) ((EntityPlayer) (Object) this).worldObj).isSubWorld()) {
                 Iterator i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator();
@@ -95,7 +92,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     // Probably no need to overwrite because this function is not present in EntityPlayer
-    //@Overwrite
+    // @Overwrite
     public boolean isOnLadder() {
         if (this.isProxyPlayer) {
             return ((EntityPlayerProxy) this).getRealPlayer()
@@ -125,14 +122,14 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     public boolean shouldRenderInPass(int pass) {
-        return ((IMixinWorld) ((EntityPlayer)(Object)this).worldObj).isSubWorld() ? false
+        return ((IMixinWorld) ((EntityPlayer) (Object) this).worldObj).isSubWorld() ? false
             : super.shouldRenderInPass(pass);
     }
-    
+
     // EntityIntermediateClasss
 
     public void setPosition(double par1, double par3, double par5) {
-    	this.setPositionLocal(par1, par3, par5);
+        this.setPositionLocal(par1, par3, par5);
         if (this.tryLockTransformations()) {
             EntityPlayer curProxyPlayer;
             if (this.isPlayerProxy) {
@@ -233,12 +230,16 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     public void moveEntity(double par1, double par3, double par5) {
         super.moveEntity(par1, par3, par5);
         if (this.isPlayerProxy || this.isPlayer()) {
-            ((EntityLivingBase)(Object)this).setPosition(((EntityLivingBase)(Object)this).posX, ((EntityLivingBase)(Object)this).posY, ((EntityLivingBase)(Object)this).posZ);
+            ((EntityLivingBase) (Object) this).setPosition(
+                ((EntityLivingBase) (Object) this).posX,
+                ((EntityLivingBase) (Object) this).posY,
+                ((EntityLivingBase) (Object) this).posZ);
             EntityPlayerProxy curProxyPlayer;
             if (!this.isPlayerProxy) {
                 for (Iterator i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
-                    .iterator(); i$.hasNext(); ((EntityPlayer) curProxyPlayer).onGround = ((EntityLivingBase)(Object)this).onGround) {
+                    .iterator(); i$
+                        .hasNext(); ((EntityPlayer) curProxyPlayer).onGround = ((EntityLivingBase) (Object) this).onGround) {
                     curProxyPlayer = (EntityPlayerProxy) i$.next();
                 }
             }
@@ -418,8 +419,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     private boolean tryLockTransformations() {
-        if ((!((EntityLivingBase)(Object)this).worldObj.isRemote || !isTransformingClient) && (((EntityLivingBase)(Object)this).worldObj.isRemote || !isTransformingServer)) {
-            if (((EntityLivingBase)(Object)this).worldObj.isRemote) {
+        if ((!((EntityLivingBase) (Object) this).worldObj.isRemote || !isTransformingClient)
+            && (((EntityLivingBase) (Object) this).worldObj.isRemote || !isTransformingServer)) {
+            if (((EntityLivingBase) (Object) this).worldObj.isRemote) {
                 isTransformingClient = true;
             } else {
                 isTransformingServer = true;
@@ -432,7 +434,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     private void releaseTransformationLock() {
-        if (((EntityLivingBase)(Object)this).worldObj.isRemote) {
+        if (((EntityLivingBase) (Object) this).worldObj.isRemote) {
             isTransformingClient = false;
         } else {
             isTransformingServer = false;

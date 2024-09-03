@@ -7,9 +7,10 @@ import java.util.ListIterator;
 
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.common.DimensionManager;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldInfo;
+
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import su.sergiusonesimus.metaworlds.api.IMixinWorldInfo;
 
 public class SubWorldImportProgressUpdater {
 

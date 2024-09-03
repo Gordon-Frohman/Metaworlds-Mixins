@@ -4,12 +4,13 @@ import java.io.IOException;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S14PacketEntity;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.server.IMixinS14PacketEntity;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.server.IMixinS14PacketEntity;
 
 @Mixin(S14PacketEntity.class)
 public abstract class MixinS14PacketEntity implements IMixinS14PacketEntity {

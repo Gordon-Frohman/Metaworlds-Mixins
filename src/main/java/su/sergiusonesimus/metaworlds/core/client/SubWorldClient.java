@@ -22,7 +22,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
@@ -31,8 +30,10 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+
+import org.jblas.DoubleMatrix;
+
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
@@ -42,8 +43,6 @@ import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRend
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.patcher.OrientedBB;
 import su.sergiusonesimus.metaworlds.patcher.RenderGlobalSubWorld;
-
-import org.jblas.DoubleMatrix;
 
 public class SubWorldClient extends WorldClient implements SubWorld {
 
@@ -114,8 +113,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     public void removeSubWorld() {
         ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .remove(this);
-        ((IMixinRenderGlobal) Minecraft.getMinecraft().renderGlobal)
-            .unloadRenderersForSubWorld(this.getSubWorldID());
+        ((IMixinRenderGlobal) Minecraft.getMinecraft().renderGlobal).unloadRenderersForSubWorld(this.getSubWorldID());
         if (this.renderGlobalSubWorld != null) {
             this.renderGlobalSubWorld.onWorldRemove();
         }
@@ -636,7 +634,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                             + ((Entity) curEntry.getKey()).rotationYaw) {
                     curEntry = (Entry) i$.next();
                     Entity newPosition = (Entity) curEntry.getKey();
-                    double newEntityPrevRotationYawDiff = ((IMixinEntity)newPosition).getTractionFactor();
+                    double newEntityPrevRotationYawDiff = ((IMixinEntity) newPosition).getTractionFactor();
                     double globalWeight = 1.0D - newEntityPrevRotationYawDiff;
                     Vec3 newPosition1 = this.transformToGlobal((Vec3) curEntry.getValue());
                     ((Entity) curEntry.getKey()).setPosition(
@@ -735,7 +733,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                             / (1.0D - interpolationFactor)) {
                 curEntry = (Entry) i$.next();
                 newPosition = (Entity) curEntry.getKey();
-                curEntity = ((IMixinEntity)newPosition).getTractionFactor();
+                curEntity = ((IMixinEntity) newPosition).getTractionFactor();
                 globalWeight = 1.0D - curEntity;
                 newPosition2 = this.transformToGlobal((Vec3) curEntry.getValue());
                 double curEntityX = newPosition.prevPosX
@@ -806,7 +804,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                     + ((Entity) curEntry1.getKey()).rotationYaw) {
             curEntry1 = (Entry) i$.next();
             Entity newPosition = (Entity) curEntry1.getKey();
-            double newEntityPrevRotationYawDiff = ((IMixinEntity)newPosition).getTractionFactor();
+            double newEntityPrevRotationYawDiff = ((IMixinEntity) newPosition).getTractionFactor();
             double globalWeight = 1.0D - newEntityPrevRotationYawDiff;
             Vec3 newPosition1 = this.transformToGlobal((Vec3) curEntry1.getValue());
             ((Entity) curEntry1.getKey()).setPosition(
@@ -861,8 +859,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
     public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
         ArrayList result = (ArrayList) this.getCollidingBoundingBoxesLocal(par1Entity, par2AxisAlignedBB);
-        AxisAlignedBB globalAABBPar = ((IMixinAxisAlignedBB) par2AxisAlignedBB)
-            .getTransformedToGlobalBoundingBox(this);
+        AxisAlignedBB globalAABBPar = ((IMixinAxisAlignedBB) par2AxisAlignedBB).getTransformedToGlobalBoundingBox(this);
         Iterator i$ = ((IMixinWorld) this.getParentWorld()).getWorlds()
             .iterator();
 
@@ -916,7 +913,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         }
 
         double var14 = 0.25D;
-        List var15 = ((IMixinWorld)this)
+        List var15 = ((IMixinWorld) this)
             .getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB.expand(var14, var14, var14));
 
         for (int var16 = 0; var16 < var15.size(); ++var16) {
@@ -941,8 +938,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         ListIterator iter = result.listIterator();
 
         while (iter.hasNext()) {
-            AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next())
-                .getTransformedToGlobalBoundingBox(this);
+            AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next()).getTransformedToGlobalBoundingBox(this);
             iter.set(replacementBB);
         }
 
@@ -1151,7 +1147,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
     public EntityPlayer getClosestPlayer(double par1, double par3, double par5, double par7) {
         EntityPlayer closestPlayer = super.getClosestPlayer(par1, par3, par5, par7);
-        EntityPlayer localProxyPlayer = ((IMixinEntity)Minecraft.getMinecraft().thePlayer).getProxyPlayer(this);
+        EntityPlayer localProxyPlayer = ((IMixinEntity) Minecraft.getMinecraft().thePlayer).getProxyPlayer(this);
         if (closestPlayer == null) {
             if (par7 < 0.0D || localProxyPlayer.getDistanceSq(par1, par3, par5) < par7 * par7) {
                 closestPlayer = localProxyPlayer;
@@ -1163,23 +1159,23 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return closestPlayer;
     }
 
-	@Override
-	public Vec3 transformToLocal(Entity var1) {
-		return transformToLocal(var1.posX, var1.posY, var1.posZ);
-	}
+    @Override
+    public Vec3 transformToLocal(Entity var1) {
+        return transformToLocal(var1.posX, var1.posY, var1.posZ);
+    }
 
-	@Override
-	public Vec3 transformToGlobal(Entity var1) {
-		return transformToGlobal(var1.posX, var1.posY, var1.posZ);
-	}
+    @Override
+    public Vec3 transformToGlobal(Entity var1) {
+        return transformToGlobal(var1.posX, var1.posY, var1.posZ);
+    }
 
-	@Override
-	public Vec3 transformLocalToOther(World var1, Entity var2) {
-		return transformLocalToOther(var1, var2.posX, var2.posY, var2.posZ);
-	}
+    @Override
+    public Vec3 transformLocalToOther(World var1, Entity var2) {
+        return transformLocalToOther(var1, var2.posX, var2.posY, var2.posZ);
+    }
 
-	@Override
-	public Vec3 transformOtherToLocal(World var1, Entity var2) {
-		return transformOtherToLocal(var1, var2.posX, var2.posY, var2.posZ);
-	}
+    @Override
+    public Vec3 transformOtherToLocal(World var1, Entity var2) {
+        return transformOtherToLocal(var1, var2.posX, var2.posY, var2.posZ);
+    }
 }

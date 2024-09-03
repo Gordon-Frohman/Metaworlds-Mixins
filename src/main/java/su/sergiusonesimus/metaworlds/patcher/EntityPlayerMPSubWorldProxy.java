@@ -3,7 +3,6 @@ package su.sergiusonesimus.metaworlds.patcher;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,9 +21,9 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkWatchEvent;
+
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.player.IMixinEntityPlayer;
 
 public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements EntityPlayerProxy {
@@ -126,89 +125,86 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
      * Called to update the entity's position/logic.
      */
     @Override
-    public void onUpdate()
-    {
+    public void onUpdate() {
         this.theItemInWorldManager.updateBlockRemoving();
         --this.field_147101_bU;
 
-        if (this.hurtResistantTime > 0)
-        {
+        if (this.hurtResistantTime > 0) {
             --this.hurtResistantTime;
         }
 
         this.openContainer.detectAndSendChanges();
 
-        if (!this.worldObj.isRemote && !ForgeHooks.canInteractWith(this, this.openContainer))
-        {
+        if (!this.worldObj.isRemote && !ForgeHooks.canInteractWith(this, this.openContainer)) {
             this.closeScreen();
             this.openContainer = this.inventoryContainer;
         }
 
-        while (!this.destroyedItemsNetCache.isEmpty())
-        {
+        while (!this.destroyedItemsNetCache.isEmpty()) {
             int i = Math.min(this.destroyedItemsNetCache.size(), 127);
             int[] aint = new int[i];
             Iterator iterator = this.destroyedItemsNetCache.iterator();
             int j = 0;
 
-            while (iterator.hasNext() && j < i)
-            {
-                aint[j++] = ((Integer)iterator.next()).intValue();
+            while (iterator.hasNext() && j < i) {
+                aint[j++] = ((Integer) iterator.next()).intValue();
                 iterator.remove();
             }
 
             this.playerNetServerHandler.sendPacket(new S13PacketDestroyEntities(aint));
         }
 
-        if (!this.loadedChunks.isEmpty())
-        {
+        if (!this.loadedChunks.isEmpty()) {
             ArrayList arraylist = new ArrayList();
             Iterator iterator1 = this.loadedChunks.iterator();
             ArrayList arraylist1 = new ArrayList();
             Chunk chunk;
 
-            while (iterator1.hasNext() && arraylist.size() < S26PacketMapChunkBulk.func_149258_c())
-            {
-                ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair)iterator1.next();
+            while (iterator1.hasNext() && arraylist.size() < S26PacketMapChunkBulk.func_149258_c()) {
+                ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator1.next();
 
-                if (chunkcoordintpair != null)
-                {
-                    if (this.worldObj.blockExists(chunkcoordintpair.chunkXPos << 4, 0, chunkcoordintpair.chunkZPos << 4))
-                    {
-                        chunk = this.worldObj.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
+                if (chunkcoordintpair != null) {
+                    if (this.worldObj
+                        .blockExists(chunkcoordintpair.chunkXPos << 4, 0, chunkcoordintpair.chunkZPos << 4)) {
+                        chunk = this.worldObj
+                            .getChunkFromChunkCoords(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
 
-                        if (chunk.func_150802_k())
-                        {
+                        if (chunk.func_150802_k()) {
                             arraylist.add(chunk);
-                            arraylist1.addAll(((WorldServer)this.worldObj).func_147486_a(chunkcoordintpair.chunkXPos * 16, 0, chunkcoordintpair.chunkZPos * 16, chunkcoordintpair.chunkXPos * 16 + 15, 256, chunkcoordintpair.chunkZPos * 16 + 15));
-                            //BugFix: 16 makes it load an extra chunk, which isn't associated with a player, which makes it not unload unless a player walks near it.
+                            arraylist1.addAll(
+                                ((WorldServer) this.worldObj).func_147486_a(
+                                    chunkcoordintpair.chunkXPos * 16,
+                                    0,
+                                    chunkcoordintpair.chunkZPos * 16,
+                                    chunkcoordintpair.chunkXPos * 16 + 15,
+                                    256,
+                                    chunkcoordintpair.chunkZPos * 16 + 15));
+                            // BugFix: 16 makes it load an extra chunk, which isn't associated with a player, which
+                            // makes it not unload unless a player walks near it.
                             iterator1.remove();
                         }
                     }
-                }
-                else
-                {
+                } else {
                     iterator1.remove();
                 }
             }
 
-            if (!arraylist.isEmpty())
-            {
-            	this.playerNetServerHandler.sendPacket(new S26PacketMapChunkBulk(arraylist));
+            if (!arraylist.isEmpty()) {
+                this.playerNetServerHandler.sendPacket(new S26PacketMapChunkBulk(arraylist));
                 Iterator iterator2 = arraylist1.iterator();
 
-                while (iterator2.hasNext())
-                {
-                    TileEntity tileentity = (TileEntity)iterator2.next();
+                while (iterator2.hasNext()) {
+                    TileEntity tileentity = (TileEntity) iterator2.next();
                     this.func_147097_b(tileentity);
                 }
 
                 iterator2 = arraylist.iterator();
 
-                while (iterator2.hasNext())
-                {
-                    chunk = (Chunk)iterator2.next();
-                    this.getServerForPlayer().getEntityTracker().func_85172_a(this, chunk);
+                while (iterator2.hasNext()) {
+                    chunk = (Chunk) iterator2.next();
+                    this.getServerForPlayer()
+                        .getEntityTracker()
+                        .func_85172_a(this, chunk);
                     MinecraftForge.EVENT_BUS.post(new ChunkWatchEvent.Watch(chunk.getChunkCoordIntPair(), this));
                 }
             }

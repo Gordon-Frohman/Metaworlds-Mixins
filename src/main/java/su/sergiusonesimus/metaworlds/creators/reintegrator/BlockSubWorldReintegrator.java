@@ -12,6 +12,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
+
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.core.SubWorldServer;
@@ -29,7 +30,7 @@ public class BlockSubWorldReintegrator extends Block {
     public void onBlockAdded(World par1World, int par2, int par3, int par4) {
         if (!BlockContagiousSubWorldCreator.isBusy) {
             BlockContagiousSubWorldCreator.isBusy = true;
-            if (((IMixinWorld)par1World).isSubWorld()) {
+            if (((IMixinWorld) par1World).isSubWorld()) {
                 SubWorld subWorldPar = (SubWorld) par1World;
                 double oldCenterX = subWorldPar.getCenterX();
                 double oldCenterY = subWorldPar.getCenterY();
@@ -96,7 +97,7 @@ public class BlockSubWorldReintegrator extends Block {
                 } while (margin.size() > 0);
 
                 if (isValid) {
-                    World var31 = ((IMixinWorld)par1World).getParentWorld();
+                    World var31 = ((IMixinWorld) par1World).getParentWorld();
                     Iterator i$ = blocksToTake.iterator();
 
                     BlockSubWorldReintegrator.BlockCoord3 curCoord;
@@ -152,12 +153,13 @@ public class BlockSubWorldReintegrator extends Block {
                 }
 
                 subWorldPar.setCenter(oldCenterX, oldCenterY, oldCenterZ);
-                if(subWorldPar instanceof SubWorldServer && ((SubWorldServer)subWorldPar).isEmpty()) {
-                	SubWorldServer subWorldServer = ((SubWorldServer)subWorldPar);
-                	((IMixinWorld)subWorldServer.getParentWorld()).getSubWorldsMap().remove(subWorldServer.getSubWorldID());
-                	subWorldServer.removeSubWorld();
-                	subWorldServer.flush();
-                	subWorldServer.deleteSubWorldDirectory();
+                if (subWorldPar instanceof SubWorldServer && ((SubWorldServer) subWorldPar).isEmpty()) {
+                    SubWorldServer subWorldServer = ((SubWorldServer) subWorldPar);
+                    ((IMixinWorld) subWorldServer.getParentWorld()).getSubWorldsMap()
+                        .remove(subWorldServer.getSubWorldID());
+                    subWorldServer.removeSubWorld();
+                    subWorldServer.flush();
+                    subWorldServer.deleteSubWorldDirectory();
                 }
             }
             BlockContagiousSubWorldCreator.isBusy = false;
