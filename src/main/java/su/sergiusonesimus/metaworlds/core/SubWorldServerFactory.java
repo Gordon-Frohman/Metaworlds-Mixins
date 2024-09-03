@@ -1,5 +1,8 @@
 package su.sergiusonesimus.metaworlds.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;

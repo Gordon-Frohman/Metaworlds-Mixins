@@ -2,8 +2,11 @@ package su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.world;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,6 +43,7 @@ import su.sergiusonesimus.metaworlds.api.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.api.PlayerManagerSuperClass;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.core.SubWorldServerFactory;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
@@ -112,10 +116,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return null;
         
         World newSubWorld = this.subWorldFactory.CreateSubWorld((World) (Object) this, newSubWorldID); 
-        if (this.childSubWorlds.put(((IMixinWorld)newSubWorld).getSubWorldID(), newSubWorld) != null)
+        if (((IMixinMinecraftServer)MinecraftServer.mcServer).getExistingSubWorlds().put(((IMixinWorld)newSubWorld).getSubWorldID(), newSubWorld) != null)
         {
             throw new IllegalArgumentException("SubWorld with this ID already exists!");
         }
+        else
+        	this.childSubWorlds.put(((IMixinWorld)newSubWorld).getSubWorldID(), newSubWorld);
         
         newSubWorld.worldInfo = this.worldInfo;
         ((WorldServer)newSubWorld).difficultySetting = EnumDifficulty.EASY;//Fixes AI crashes

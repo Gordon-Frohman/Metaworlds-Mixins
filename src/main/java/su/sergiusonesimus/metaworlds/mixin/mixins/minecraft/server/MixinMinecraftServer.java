@@ -3,8 +3,10 @@ package su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.server;
 import java.io.File;
 import java.net.Proxy;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import net.minecraft.command.ICommandManager;
@@ -25,6 +27,7 @@ import net.minecraft.world.storage.ISaveFormat;
 import net.minecraftforge.common.DimensionManager;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.command.server.CommandSetBlockInSubWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
 
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,7 +45,7 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import cpw.mods.fml.common.FMLCommonHandler;
 
 @Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer {
+public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
 
     @Shadow(remap = true)
     public File anvilFile;
@@ -94,6 +97,10 @@ public abstract class MixinMinecraftServer {
 
     @Shadow(remap = true)
     public abstract NetworkSystem func_147137_ag();
+    
+    //TODO
+    
+    private Map<Integer, World> existingSubWorlds = new HashMap<Integer, World>();
     
     // To get an empty MinecraftServer variable
     // Firstly - disable the original constructor
@@ -275,6 +282,10 @@ public abstract class MixinMinecraftServer {
         }
 
         this.theProfiler.endSection();
+    }
+    
+    public Map<Integer, World> getExistingSubWorlds() {
+    	return this.existingSubWorlds;
     }
 
 }

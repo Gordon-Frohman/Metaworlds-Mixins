@@ -49,6 +49,7 @@ import su.sergiusonesimus.metaworlds.api.PlayerManagerSuperClass;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.patcher.ChunkSubWorld;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
@@ -122,6 +123,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
         ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .remove(this);
+        ((IMixinMinecraftServer)MinecraftServer.mcServer).getExistingSubWorlds().remove(this.subWorldID);
 
         try {
             Class[] minecraftexception1 = new Class[] { World.class };
@@ -154,8 +156,8 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public boolean deleteSubWorldDirectory() {
     	String folder = MinecraftServer.mcServer.worldServers[0].getSaveHandler().getWorldDirectoryName();
     	int dimension = this.provider.dimensionId;
-    	if (dimension != 0)
-    		folder += "/DIM" + dimension;
+    	/*if (dimension != 0)
+    		folder += "/DIM" + dimension;*/
     	folder += "/SUBWORLD" + this.subWorldID;
         ISaveFormat isaveformat = MinecraftServer.mcServer.anvilConverterForAnvilFile;
         isaveformat.flushCache();

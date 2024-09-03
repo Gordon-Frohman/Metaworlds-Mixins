@@ -12,6 +12,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.Profiler;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -26,6 +27,8 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.core.SubWorldServerFactory;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
 import su.sergiusonesimus.metaworlds.patcher.UnmodifiableSingleObjPlusCollection;
 
 import org.jblas.DoubleMatrix;
@@ -161,8 +164,8 @@ public abstract class MixinWorld implements IMixinWorld {
     }
     
     public int getUnoccupiedSubworldID() {
-    	Map<Integer, World> subworlds = getSubWorldsMap();
-    	int maxID = getWorldsCount();
+    	Map<Integer, World> subworlds = ((IMixinMinecraftServer)MinecraftServer.mcServer).getExistingSubWorlds();
+    	int maxID = subworlds.size() + 1;
     	for(int i = 1; i < maxID; i++)
     		if(!subworlds.containsKey(i))
     			return i;
