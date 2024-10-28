@@ -6,17 +6,21 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -28,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.core.SubWorldServer;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.patcher.OrientedBB;
@@ -125,7 +130,74 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     @Shadow(remap = true)
     public float width;
 
+    @Shadow(remap = true)
+    public double prevPosX;
+
+    @Shadow(remap = true)
+    public double prevPosY;
+
+    @Shadow(remap = true)
+    public double prevPosZ;
+
+    @Shadow(remap = true)
+    public float rotationYaw;
+
+    @Shadow(remap = true)
+    public float rotationPitch;
+
+    @Shadow(remap = true)
+    public float prevRotationYaw;
+
+    @Shadow(remap = true)
+    public float prevRotationPitch;
+
+    @Shadow(remap = true)
+    protected int portalCounter;
+
+    @Shadow(remap = true)
+    public int timeUntilPortal;
+
+    @Shadow(remap = true)
+    protected boolean inPortal;
+
+    @Shadow(remap = true)
+    protected boolean isImmuneToFire;
+
     // TODO
+
+    @Shadow(remap = true)
+    protected void kill() {}
+
+    @Shadow(remap = true)
+    protected void setOnFireFromLava() {}
+
+    @Shadow(remap = true)
+    public boolean handleLavaMovement() {
+        return false;
+    }
+
+    @Shadow(remap = true)
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        return false;
+    }
+
+    @Shadow(remap = true)
+    public boolean isSprinting() {
+        return false;
+    }
+
+    @Shadow(remap = true)
+    public void travelToDimension(int dimensionId) {}
+
+    @Shadow(remap = true)
+    public int getPortalCooldown() {
+        return 300;
+    }
+
+    @Shadow(remap = true)
+    public int getMaxInPortalTime() {
+        return 0;
+    }
 
     @Shadow(remap = true)
     protected void setFlag(int flag, boolean set) {}
@@ -252,20 +324,20 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
         this.tractionLoss = 0;
         if (newWorldBelowFeet != this.worldBelowFeet) {
             if (this.worldBelowFeet != null && ((IMixinWorld) this.worldBelowFeet).isSubWorld()) {
-                ((SubWorld) this.worldBelowFeet).unregisterEntityToDrag((Entity)(Object)this);
+                ((SubWorld) this.worldBelowFeet).unregisterEntityToDrag((Entity) (Object) this);
             }
 
             this.worldBelowFeet = newWorldBelowFeet;
             if (this.worldBelowFeet != null && ((IMixinWorld) this.worldBelowFeet).isSubWorld()) {
-                ((SubWorld) this.worldBelowFeet).registerEntityToDrag((Entity)(Object)this);
+                ((SubWorld) this.worldBelowFeet).registerEntityToDrag((Entity) (Object) this);
             }
 
             if (this.worldBelowFeet != ((Entity) (Object) this).worldObj
                 && ((IMixinWorld) ((Entity) (Object) this).worldObj).isSubWorld()) {
-                ((SubWorld) ((Entity) (Object) this).worldObj).registerDetachedEntity((Entity)(Object)this);
+                ((SubWorld) ((Entity) (Object) this).worldObj).registerDetachedEntity((Entity) (Object) this);
             } else if (this.worldBelowFeet == ((Entity) (Object) this).worldObj
                 && ((IMixinWorld) ((Entity) (Object) this).worldObj).isSubWorld()) {
-                    ((SubWorld) ((Entity) (Object) this).worldObj).unregisterDetachedEntity((Entity)(Object)this);
+                    ((SubWorld) ((Entity) (Object) this).worldObj).unregisterDetachedEntity((Entity) (Object) this);
                 }
         }
     }
@@ -802,6 +874,185 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             for (World subworld : ((IMixinWorld) this.worldObj).getSubWorlds()) {
                 EntityPlayer proxy = (EntityPlayer) ((IMixinEntity) player).getProxyPlayer(subworld);
                 proxy.setFlag(1, sneaking);
+            }
+        }
+    }
+
+    /**
+     * Gets called every tick from main Entity class
+     */
+    @Overwrite
+    public void onEntityUpdate() {
+        this.worldObj.theProfiler.startSection("entityBaseTick");
+
+        if (this.ridingEntity != null && this.ridingEntity.isDead) {
+            this.ridingEntity = null;
+        }
+
+        this.prevDistanceWalkedModified = this.distanceWalkedModified;
+        this.prevPosX = this.posX;
+        this.prevPosY = this.posY;
+        this.prevPosZ = this.posZ;
+        this.prevRotationPitch = this.rotationPitch;
+        this.prevRotationYaw = this.rotationYaw;
+        int i;
+
+        if (!this.worldObj.isRemote && this.worldObj instanceof WorldServer) {
+            this.worldObj.theProfiler.startSection("portal");
+            MinecraftServer minecraftserver = ((WorldServer) this.worldObj).func_73046_m();
+            i = this.getMaxInPortalTime();
+
+            if (this.inPortal) {
+                if (minecraftserver.getAllowNether()) {
+                    if (this.ridingEntity == null && this.portalCounter++ >= i) {
+                        this.portalCounter = i;
+                        this.timeUntilPortal = this.getPortalCooldown();
+                        byte b0;
+
+                        if (this.worldObj.provider.dimensionId == -1) {
+                            b0 = 0;
+                        } else {
+                            b0 = -1;
+                        }
+
+                        this.travelToDimension(b0);
+                    }
+
+                    this.inPortal = false;
+                }
+            } else {
+                if (this.portalCounter > 0) {
+                    this.portalCounter -= 4;
+                }
+
+                if (this.portalCounter < 0) {
+                    this.portalCounter = 0;
+                }
+            }
+
+            if (this.timeUntilPortal > 0) {
+                --this.timeUntilPortal;
+            }
+
+            this.worldObj.theProfiler.endSection();
+        }
+
+        if (this.isSprinting() && !this.isInWater()) {
+            int j = MathHelper.floor_double(this.posX);
+            i = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double) this.yOffset);
+            int k = MathHelper.floor_double(this.posZ);
+            Block block = this.worldObj.getBlock(j, i, k);
+
+            if (block.getMaterial() != Material.air) {
+                this.worldObj.spawnParticle(
+                    "blockcrack_" + Block.getIdFromBlock(block) + "_" + this.worldObj.getBlockMetadata(j, i, k),
+                    this.posX + ((double) this.rand.nextFloat() - 0.5D) * (double) this.width,
+                    this.boundingBox.minY + 0.1D,
+                    this.posZ + ((double) this.rand.nextFloat() - 0.5D) * (double) this.width,
+                    -this.motionX * 4.0D,
+                    1.5D,
+                    -this.motionZ * 4.0D);
+            }
+        }
+
+        this.handleWaterMovement();
+
+        if (this.worldObj.isRemote) {
+            this.fire = 0;
+        } else if (this.fire > 0) {
+            if (this.isImmuneToFire) {
+                this.fire -= 4;
+
+                if (this.fire < 0) {
+                    this.fire = 0;
+                }
+            } else {
+                if (this.fire % 20 == 0) {
+                    this.attackEntityFrom(DamageSource.onFire, 1.0F);
+                }
+
+                --this.fire;
+            }
+        }
+
+        if (this.handleLavaMovement()) {
+            this.setOnFireFromLava();
+            this.fallDistance *= 0.5F;
+        }
+
+        this.handleSubWorldsInteraction();
+
+        if (this.posY < -64.0D) {
+            this.kill();
+        }
+
+        if (!this.worldObj.isRemote) {
+            this.setFlag(0, this.fire > 0);
+        }
+
+        this.firstUpdate = false;
+        this.worldObj.theProfiler.endSection();
+    }
+
+    public void handleSubWorldsInteraction() {
+        if (this.posX == this.prevPosX && this.posY == this.prevPosY && this.posZ == this.prevPosZ) {
+            for (World world : ((IMixinWorld) this.worldObj).getSubWorlds()) {
+                if (world instanceof SubWorldServer) {
+                    SubWorldServer subworld = (SubWorldServer) world;
+                    if ((subworld.getRotationYawSpeed() != 0 || subworld.getRotationPitchSpeed() != 0
+                        || subworld.getRotationRollSpeed() != 0
+                        || subworld.getMotionX() != 0
+                        || subworld.getMotionY() != 0
+                        || subworld.getMotionZ() != 0) && !subworld.entitiesToDrag.containsKey(this)) {
+                        AxisAlignedBB worldBB = subworld.getMaximumStretchedWorldBB(false, false);
+                        if (this.boundingBox.intersectsWith(worldBB)) {
+                            AxisAlignedBB localEntityBB = ((IMixinAxisAlignedBB) this.boundingBox)
+                                .getTransformedToLocalBoundingBox(subworld);
+                            List<AxisAlignedBB> collidingBBs = subworld
+                                .getCollidingBoundingBoxes((Entity) (Object) this, localEntityBB);
+
+                            double modifierX = 0;
+                            double modifierZ = 0;
+                            int modXcount = 0;
+                            int modZcount = 0;
+                            for (AxisAlignedBB cBB : collidingBBs) {
+                                double dXpos = localEntityBB.minX - cBB.maxX;
+                                double dXneg = cBB.minX - localEntityBB.maxX;
+                                double dZpos = localEntityBB.minZ - cBB.maxZ;
+                                double dZneg = cBB.minZ - localEntityBB.maxZ;
+                                if (dXpos < 0 && dXneg < 0 && dZpos < 0 && dZneg < 0) {
+                                    double modX = -dXpos < -dXneg ? -dXpos : dXneg;
+                                    double modZ = -dZpos < -dZneg ? -dZpos : dZneg;
+                                    if (Math.abs(modX) < Math.abs(modZ)) {
+                                        modifierX += modX;
+                                        modXcount++;
+                                    } else {
+                                        modifierZ += modZ;
+                                        modZcount++;
+                                    }
+                                }
+                            }
+                            if (modXcount > 0) modifierX /= modXcount;
+                            if (modZcount > 0) modifierZ /= modZcount;
+                            Vec3 localPos = subworld.transformToLocal((Entity) (Object) this);
+                            double multiplier = 1;
+                            Vec3 newlocalPos = localPos.addVector(modifierX * multiplier, 0, modifierZ * multiplier);
+                            if (localPos.xCoord != newlocalPos.xCoord || localPos.yCoord != newlocalPos.yCoord
+                                || localPos.zCoord != newlocalPos.zCoord) {
+                                Minecraft.logger.info("Moving " + this.toString() + " locally:");
+                                Minecraft.logger.info("From " + localPos.toString());
+                                Minecraft.logger.info("To " + newlocalPos.toString());
+                            }
+                            Vec3 entityPos = subworld.transformToGlobal(newlocalPos);
+                            if (modXcount + modZcount > 0) this.setPositionAndRotation(
+                                entityPos.xCoord,
+                                entityPos.yCoord,
+                                entityPos.zCoord,
+                                this.rotationYaw - (float) subworld.getRotationYawSpeed(),
+                                this.rotationPitch);
+                        }
+                    }
+                }
             }
         }
     }

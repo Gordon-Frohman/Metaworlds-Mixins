@@ -558,29 +558,25 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     }
 
     public void registerEntityToDrag(Entity targetEntity) {
-        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX)
-            && targetEntity.worldObj != this) {
+        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX) && targetEntity.worldObj != this) {
             this.entitiesToDrag.put(targetEntity, (Vec3) null);
         }
     }
 
     public void unregisterEntityToDrag(Entity targetEntity) {
-        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX)
-            && targetEntity.worldObj != this) {
+        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX) && targetEntity.worldObj != this) {
             this.entitiesToDrag.remove(targetEntity);
         }
     }
 
     public void registerDetachedEntity(Entity targetEntity) {
-        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX)
-            && targetEntity.worldObj == this) {
+        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX) && targetEntity.worldObj == this) {
             this.entitiesToNotDrag.put(targetEntity, (Vec3) null);
         }
     }
 
     public void unregisterDetachedEntity(Entity targetEntity) {
-        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX)
-            && targetEntity.worldObj == this) {
+        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX) && targetEntity.worldObj == this) {
             this.entitiesToNotDrag.remove(targetEntity);
         }
     }

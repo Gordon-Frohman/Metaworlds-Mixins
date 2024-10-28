@@ -69,7 +69,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     private int subWorldID;
     private ArrayList collidingBBCache = new ArrayList();
     private SubWorldTransformationHandler transformationHandler = new SubWorldTransformationHandler(this);
-    private Map<Entity, Vec3> entitiesToDrag = new TreeMap();
+    public Map<Entity, Vec3> entitiesToDrag = new TreeMap();
     private Map<Entity, Vec3> entitiesToNotDrag = new TreeMap();
     private ChunkCoordinates minCoordinates = new ChunkCoordinates();
     private ChunkCoordinates maxCoordinates = new ChunkCoordinates();
@@ -839,6 +839,9 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public void registerEntityToDrag(IMixinEntity targetEntity) {
         if (targetEntity instanceof Entity && ((Entity) targetEntity).worldObj != this) {
             this.entitiesToDrag.put((Entity) targetEntity, (Vec3) null);
+        }
+    }
+
     public void registerEntityToDrag(Entity targetEntity) {
         if (targetEntity instanceof Entity && targetEntity.worldObj != this) {
             this.entitiesToDrag.put(targetEntity, (Vec3) null);
