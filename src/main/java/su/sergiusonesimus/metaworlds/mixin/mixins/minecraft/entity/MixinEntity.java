@@ -12,7 +12,9 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -1037,19 +1039,25 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                             Vec3 localPos = subworld.transformToLocal((Entity) (Object) this);
                             double multiplier = 1;
                             Vec3 newlocalPos = localPos.addVector(modifierX * multiplier, 0, modifierZ * multiplier);
-                            if (localPos.xCoord != newlocalPos.xCoord || localPos.yCoord != newlocalPos.yCoord
-                                || localPos.zCoord != newlocalPos.zCoord) {
-                                Minecraft.logger.info("Moving " + this.toString() + " locally:");
-                                Minecraft.logger.info("From " + localPos.toString());
-                                Minecraft.logger.info("To " + newlocalPos.toString());
-                            }
                             Vec3 entityPos = subworld.transformToGlobal(newlocalPos);
-                            if (modXcount + modZcount > 0) this.setPositionAndRotation(
-                                entityPos.xCoord,
-                                entityPos.yCoord,
-                                entityPos.zCoord,
-                                this.rotationYaw - (float) subworld.getRotationYawSpeed(),
-                                this.rotationPitch);
+                            if ((modXcount + modZcount) > 0) {
+                                Vec3 moveVec = this.getGlobalPos()
+                                    .subtract(entityPos);
+                                if (((Entity) (Object) this) instanceof EntityPlayerMP) {
+                                    ((EntityPlayerMP) (Object) this).playerNetServerHandler.sendPacket(
+                                        new S12PacketEntityVelocity(
+                                            ((Entity) (Object) this).getEntityId(),
+                                            this.motionX + moveVec.xCoord,
+                                            this.motionY + moveVec.yCoord,
+                                            this.motionZ + moveVec.zCoord));
+                                } else {
+                                    ((Entity) (Object) this)
+                                        .addVelocity(moveVec.xCoord, moveVec.yCoord, moveVec.zCoord);
+                                }
+                                this.setRotation(
+                                    this.rotationYaw - (float) subworld.getRotationYawSpeed(),
+                                    this.rotationPitch);
+                            }
                         }
                     }
                 }

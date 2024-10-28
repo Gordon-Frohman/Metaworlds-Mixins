@@ -126,7 +126,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             : super.shouldRenderInPass(pass);
     }
 
-    // EntityIntermediateClasss
+    // EntityIntermediateClass
 
     public void setPosition(double par1, double par3, double par5) {
         this.setPositionLocal(par1, par3, par5);
