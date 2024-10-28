@@ -557,31 +557,31 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return super.spawnEntityInWorld(par1Entity);
     }
 
-    public void registerEntityToDrag(IMixinEntity targetEntity) {
+    public void registerEntityToDrag(Entity targetEntity) {
         if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX)
-            && ((Entity) targetEntity).worldObj != this) {
-            this.entitiesToDrag.put((Entity) targetEntity, (Vec3) null);
+            && targetEntity.worldObj != this) {
+            this.entitiesToDrag.put(targetEntity, (Vec3) null);
         }
     }
 
-    public void unregisterEntityToDrag(IMixinEntity targetEntity) {
+    public void unregisterEntityToDrag(Entity targetEntity) {
         if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX)
-            && ((Entity) targetEntity).worldObj != this) {
-            this.entitiesToDrag.remove((Entity) targetEntity);
+            && targetEntity.worldObj != this) {
+            this.entitiesToDrag.remove(targetEntity);
         }
     }
 
-    public void registerDetachedEntity(IMixinEntity targetEntity) {
+    public void registerDetachedEntity(Entity targetEntity) {
         if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX)
-            && ((Entity) targetEntity).worldObj == this) {
-            this.entitiesToNotDrag.put((Entity) targetEntity, (Vec3) null);
+            && targetEntity.worldObj == this) {
+            this.entitiesToNotDrag.put(targetEntity, (Vec3) null);
         }
     }
 
-    public void unregisterDetachedEntity(IMixinEntity targetEntity) {
+    public void unregisterDetachedEntity(Entity targetEntity) {
         if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX)
-            && ((Entity) targetEntity).worldObj == this) {
-            this.entitiesToNotDrag.remove((Entity) targetEntity);
+            && targetEntity.worldObj == this) {
+            this.entitiesToNotDrag.remove(targetEntity);
         }
     }
 

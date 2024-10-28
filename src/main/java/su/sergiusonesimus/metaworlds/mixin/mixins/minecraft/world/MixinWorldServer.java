@@ -281,7 +281,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     public boolean isAABBInMaterial(AxisAlignedBB par1AxisAlignedBB, Material par2Material) {
-        if (((World) (Object) this).isAABBInMaterial(par1AxisAlignedBB, par2Material)) {
+        if (super.isAABBInMaterial(par1AxisAlignedBB, par2Material)) {
             return true;
         } else {
             if (!((IMixinWorld) this).isSubWorld()) {

@@ -68,6 +68,11 @@ public abstract class MixinWorld implements IMixinWorld {
     // TODO
 
     @Shadow(remap = true)
+    public boolean isAABBInMaterial(AxisAlignedBB p_72830_1_, Material p_72830_2_) {
+        return false;
+    }
+
+    @Shadow(remap = true)
     public abstract GameRules getGameRules();
 
     @SideOnly(Side.CLIENT)

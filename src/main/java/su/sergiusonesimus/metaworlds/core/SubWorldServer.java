@@ -839,24 +839,27 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public void registerEntityToDrag(IMixinEntity targetEntity) {
         if (targetEntity instanceof Entity && ((Entity) targetEntity).worldObj != this) {
             this.entitiesToDrag.put((Entity) targetEntity, (Vec3) null);
+    public void registerEntityToDrag(Entity targetEntity) {
+        if (targetEntity instanceof Entity && targetEntity.worldObj != this) {
+            this.entitiesToDrag.put(targetEntity, (Vec3) null);
         }
     }
 
-    public void unregisterEntityToDrag(IMixinEntity targetEntity) {
-        if (targetEntity instanceof Entity && ((Entity) targetEntity).worldObj != this) {
-            this.entitiesToDrag.remove((Entity) targetEntity);
+    public void unregisterEntityToDrag(Entity targetEntity) {
+        if (targetEntity instanceof Entity && targetEntity.worldObj != this) {
+            this.entitiesToDrag.remove(targetEntity);
         }
     }
 
-    public void registerDetachedEntity(IMixinEntity targetEntity) {
-        if (targetEntity instanceof Entity && ((Entity) targetEntity).worldObj == this) {
-            this.entitiesToNotDrag.put((Entity) targetEntity, (Vec3) null);
+    public void registerDetachedEntity(Entity targetEntity) {
+        if (targetEntity instanceof Entity && targetEntity.worldObj == this) {
+            this.entitiesToNotDrag.put(targetEntity, (Vec3) null);
         }
     }
 
-    public void unregisterDetachedEntity(IMixinEntity targetEntity) {
-        if (targetEntity instanceof Entity && ((Entity) targetEntity).worldObj == this) {
-            this.entitiesToNotDrag.remove((Entity) targetEntity);
+    public void unregisterDetachedEntity(Entity targetEntity) {
+        if (targetEntity instanceof Entity && targetEntity.worldObj == this) {
+            this.entitiesToNotDrag.remove(targetEntity);
         }
     }
 

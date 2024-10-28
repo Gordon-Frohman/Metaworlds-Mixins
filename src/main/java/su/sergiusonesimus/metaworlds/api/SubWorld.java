@@ -191,13 +191,13 @@ public interface SubWorld {
 
     boolean isMaterialInBBGlobal(AxisAlignedBB var1, Material var2);
 
-    void registerEntityToDrag(IMixinEntity var1);
+    void registerEntityToDrag(Entity var1);
 
-    void unregisterEntityToDrag(IMixinEntity var1);
+    void unregisterEntityToDrag(Entity var1);
 
-    void registerDetachedEntity(IMixinEntity var1);
+    void registerDetachedEntity(Entity var1);
 
-    void unregisterDetachedEntity(IMixinEntity var1);
+    void unregisterDetachedEntity(Entity var1);
 
     /** Gets the closest bounding box there is, not accounting for rotation. */
     AxisAlignedBB getMaximumCloseWorldBB();

@@ -252,20 +252,20 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
         this.tractionLoss = 0;
         if (newWorldBelowFeet != this.worldBelowFeet) {
             if (this.worldBelowFeet != null && ((IMixinWorld) this.worldBelowFeet).isSubWorld()) {
-                ((SubWorld) this.worldBelowFeet).unregisterEntityToDrag(this);
+                ((SubWorld) this.worldBelowFeet).unregisterEntityToDrag((Entity)(Object)this);
             }
 
             this.worldBelowFeet = newWorldBelowFeet;
             if (this.worldBelowFeet != null && ((IMixinWorld) this.worldBelowFeet).isSubWorld()) {
-                ((SubWorld) this.worldBelowFeet).registerEntityToDrag(this);
+                ((SubWorld) this.worldBelowFeet).registerEntityToDrag((Entity)(Object)this);
             }
 
             if (this.worldBelowFeet != ((Entity) (Object) this).worldObj
                 && ((IMixinWorld) ((Entity) (Object) this).worldObj).isSubWorld()) {
-                ((SubWorld) ((Entity) (Object) this).worldObj).registerDetachedEntity(this);
+                ((SubWorld) ((Entity) (Object) this).worldObj).registerDetachedEntity((Entity)(Object)this);
             } else if (this.worldBelowFeet == ((Entity) (Object) this).worldObj
                 && ((IMixinWorld) ((Entity) (Object) this).worldObj).isSubWorld()) {
-                    ((SubWorld) ((Entity) (Object) this).worldObj).unregisterDetachedEntity(this);
+                    ((SubWorld) ((Entity) (Object) this).worldObj).unregisterDetachedEntity((Entity)(Object)this);
                 }
         }
     }
