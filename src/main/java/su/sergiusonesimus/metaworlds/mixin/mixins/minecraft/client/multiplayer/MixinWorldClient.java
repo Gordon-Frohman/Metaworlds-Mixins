@@ -434,15 +434,14 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
     public void playSound(double x, double y, double z, String soundName, float volume, float pitch,
         boolean distanceDelay) {
         Vec3 globalPosition = this.transformToGlobal(x, y, z);
-        double d3 = this.mc.renderViewEntity
-            .getDistanceSq(globalPosition.xCoord, globalPosition.yCoord, globalPosition.zCoord);
+        double d3 = this.mc.renderViewEntity.getDistanceSq(x, y, z);
         PositionedSoundRecord positionedsoundrecord = new PositionedSoundRecord(
             new ResourceLocation(soundName),
             volume,
             pitch,
-            (float) x,
-            (float) y,
-            (float) z);
+            (float) globalPosition.xCoord,
+            (float) globalPosition.yCoord,
+            (float) globalPosition.zCoord);
 
         if (distanceDelay && d3 > 100.0D) {
             double d4 = Math.sqrt(d3) / 40.0D;
