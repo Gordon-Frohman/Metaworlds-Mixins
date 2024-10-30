@@ -266,4 +266,56 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
         }
     }
 
+    @Overwrite(remap = false)
+    public void addBlockDestroyEffects(int p_147215_1_, int p_147215_2_, int p_147215_3_, Block p_147215_4_,
+        int p_147215_5_) {
+        if (!p_147215_4_.isAir(worldObj, p_147215_1_, p_147215_2_, p_147215_3_) && !p_147215_4_.addDestroyEffects(
+            worldObj,
+            p_147215_1_,
+            p_147215_2_,
+            p_147215_3_,
+            p_147215_5_,
+            (EffectRenderer) (Object) this)) {
+            byte b0 = 4;
+
+            for (int i1 = 0; i1 < b0; ++i1) {
+                for (int j1 = 0; j1 < b0; ++j1) {
+                    for (int k1 = 0; k1 < b0; ++k1) {
+                        double d0 = (double) p_147215_1_ + ((double) i1 + 0.5D) / (double) b0;
+                        double d1 = (double) p_147215_2_ + ((double) j1 + 0.5D) / (double) b0;
+                        double d2 = (double) p_147215_3_ + ((double) k1 + 0.5D) / (double) b0;
+                        if (worldObj instanceof SubWorld) {
+                            World parentWorld = ((SubWorld) this.worldObj).getParentWorld();
+                            Vec3 globalCoords = ((IMixinWorld) this.worldObj)
+                                .transformToGlobal(Vec3.createVectorHelper(d0, d1, d2));
+                            Minecraft.getMinecraft().effectRenderer.addEffect(
+                                (new EntityDiggingFX(
+                                    parentWorld,
+                                    globalCoords.xCoord,
+                                    globalCoords.yCoord,
+                                    globalCoords.zCoord,
+                                    d0 - (double) p_147215_1_ - 0.5D,
+                                    d1 - (double) p_147215_2_ - 0.5D,
+                                    d2 - (double) p_147215_3_ - 0.5D,
+                                    p_147215_4_,
+                                    p_147215_5_)).applyColourMultiplier(p_147215_1_, p_147215_2_, p_147215_3_));
+                        } else {
+                            this.addEffect(
+                                (new EntityDiggingFX(
+                                    this.worldObj,
+                                    d0,
+                                    d1,
+                                    d2,
+                                    d0 - (double) p_147215_1_ - 0.5D,
+                                    d1 - (double) p_147215_2_ - 0.5D,
+                                    d2 - (double) p_147215_3_ - 0.5D,
+                                    p_147215_4_,
+                                    p_147215_5_)).applyColourMultiplier(p_147215_1_, p_147215_2_, p_147215_3_));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }
