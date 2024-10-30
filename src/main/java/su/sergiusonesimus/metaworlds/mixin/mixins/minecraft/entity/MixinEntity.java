@@ -56,13 +56,13 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     public double posZ;
 
     @Shadow(remap = true)
-    private float yOffset;
+    protected float yOffset;
 
     @Shadow(remap = true)
     public float ySize;
 
     @Shadow(remap = true)
-    private World worldObj;
+    protected World worldObj;
 
     @Shadow(remap = true)
     private boolean isInWeb;
@@ -253,7 +253,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     protected abstract boolean canTriggerWalking();
 
     @Shadow(remap = true)
-    protected abstract void updateFallState(double p_70064_1_, boolean p_70064_3_);
+    protected void updateFallState(double p_70064_1_, boolean p_70064_3_) {}
 
     @Shadow(remap = true)
     public abstract boolean isInWater();
