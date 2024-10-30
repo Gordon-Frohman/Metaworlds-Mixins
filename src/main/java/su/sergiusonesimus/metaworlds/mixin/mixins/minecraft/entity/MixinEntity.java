@@ -11,9 +11,7 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -34,6 +32,7 @@ import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.core.SubWorldServer;
+import su.sergiusonesimus.metaworlds.core.client.SubWorldClient;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.patcher.OrientedBB;
@@ -998,18 +997,21 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     public void handleSubWorldsInteraction() {
         if (this.posX == this.prevPosX && this.posY == this.prevPosY && this.posZ == this.prevPosZ) {
             for (World world : ((IMixinWorld) this.worldObj).getSubWorlds()) {
-                if (world instanceof SubWorldServer) {
-                    SubWorldServer subworld = (SubWorldServer) world;
+                if ((world instanceof SubWorldServer && !((Entity) (Object) this instanceof EntityPlayer))
+                    || (world instanceof SubWorldClient && ((Entity) (Object) this instanceof EntityPlayer))) {
+                    SubWorld subworld = (SubWorld) world;
                     if ((subworld.getRotationYawSpeed() != 0 || subworld.getRotationPitchSpeed() != 0
                         || subworld.getRotationRollSpeed() != 0
                         || subworld.getMotionX() != 0
                         || subworld.getMotionY() != 0
-                        || subworld.getMotionZ() != 0) && !subworld.entitiesToDrag.containsKey(this)) {
+                        || subworld.getMotionZ() != 0)
+                        && !subworld.getEntitiesToDrag()
+                            .containsKey(this)) {
                         AxisAlignedBB worldBB = subworld.getMaximumStretchedWorldBB(false, false);
                         if (this.boundingBox.intersectsWith(worldBB)) {
                             AxisAlignedBB localEntityBB = ((IMixinAxisAlignedBB) this.boundingBox)
-                                .getTransformedToLocalBoundingBox(subworld);
-                            List<AxisAlignedBB> collidingBBs = subworld
+                                .getTransformedToLocalBoundingBox(world);
+                            List<AxisAlignedBB> collidingBBs = world
                                 .getCollidingBoundingBoxes((Entity) (Object) this, localEntityBB);
 
                             double modifierX = 0;
@@ -1042,17 +1044,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                             if ((modXcount + modZcount) > 0) {
                                 Vec3 moveVec = this.getGlobalPos()
                                     .subtract(entityPos);
-                                if (((Entity) (Object) this) instanceof EntityPlayerMP) {
-                                    ((EntityPlayerMP) (Object) this).playerNetServerHandler.sendPacket(
-                                        new S12PacketEntityVelocity(
-                                            ((Entity) (Object) this).getEntityId(),
-                                            this.motionX + moveVec.xCoord,
-                                            this.motionY + moveVec.yCoord,
-                                            this.motionZ + moveVec.zCoord));
-                                } else {
-                                    ((Entity) (Object) this)
-                                        .addVelocity(moveVec.xCoord, moveVec.yCoord, moveVec.zCoord);
-                                }
+                                ((Entity) (Object) this).addVelocity(moveVec.xCoord, moveVec.yCoord, moveVec.zCoord);
                                 this.setRotation(
                                     this.rotationYaw - (float) subworld.getRotationYawSpeed(),
                                     this.rotationPitch);

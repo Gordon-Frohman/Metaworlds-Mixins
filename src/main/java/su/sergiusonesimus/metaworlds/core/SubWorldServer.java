@@ -836,6 +836,10 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             : super.spawnEntityInWorld(par1Entity);
     }
 
+    public Map<Entity, Vec3> getEntitiesToDrag() {
+        return this.entitiesToDrag;
+    }
+
     public void registerEntityToDrag(IMixinEntity targetEntity) {
         if (targetEntity instanceof Entity && ((Entity) targetEntity).worldObj != this) {
             this.entitiesToDrag.put((Entity) targetEntity, (Vec3) null);

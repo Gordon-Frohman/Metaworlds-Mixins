@@ -2,6 +2,7 @@ package su.sergiusonesimus.metaworlds.api;
 
 import java.nio.DoubleBuffer;
 import java.util.List;
+import java.util.Map;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -190,6 +191,8 @@ public interface SubWorld {
     boolean isAABBInMaterialGlobal(AxisAlignedBB var1, Material var2);
 
     boolean isMaterialInBBGlobal(AxisAlignedBB var1, Material var2);
+
+    Map<Entity, Vec3> getEntitiesToDrag();
 
     void registerEntityToDrag(Entity var1);
 

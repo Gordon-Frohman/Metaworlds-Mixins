@@ -557,6 +557,10 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return super.spawnEntityInWorld(par1Entity);
     }
 
+    public Map<Entity, Vec3> getEntitiesToDrag() {
+        return this.entitiesToDrag;
+    }
+
     public void registerEntityToDrag(Entity targetEntity) {
         if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX) && targetEntity.worldObj != this) {
             this.entitiesToDrag.put(targetEntity, (Vec3) null);
