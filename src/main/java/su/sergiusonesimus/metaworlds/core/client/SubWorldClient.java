@@ -1052,22 +1052,37 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     }
 
     public AxisAlignedBB getMaximumCloseWorldBBRotated() {
-        AxisAlignedBB untranslatedBB = this.actuallyRotateBB(
-            AxisAlignedBB.getBoundingBox(
-                this.getMinX(),
-                this.getMinY(),
-                this.getMinZ(),
-                this.getMaxX(),
-                this.getMaxY(),
-                this.getMaxZ()),
-            this.getRotationActualYaw()); // .rotateYaw(this.getRotationActualYaw());
-        return AxisAlignedBB.getBoundingBox(
-            untranslatedBB.minX + this.getTranslationX(),
-            untranslatedBB.minY + this.getTranslationY(),
-            untranslatedBB.minZ + this.getTranslationZ(),
-            untranslatedBB.maxX + this.getTranslationX(),
-            untranslatedBB.maxY + this.getTranslationY(),
-            untranslatedBB.maxZ + this.getTranslationZ());
+        int minX = this.getMinX();
+        int minY = this.getMinY();
+        int minZ = this.getMinZ();
+        int maxX = this.getMaxX();
+        int maxY = this.getMaxY();
+        int maxZ = this.getMaxZ();
+
+        int[] xCoords = { minX, minX, minX, minX, maxX, maxX, maxX, maxX };
+        int[] yCoords = { minY, minY, maxY, maxY, minY, minY, maxY, maxY };
+        int[] zCoords = { minZ, maxZ, minZ, maxZ, minZ, maxZ, minZ, maxZ };
+
+        Vec3 globalCoord = this.transformToGlobal(Vec3.createVectorHelper(xCoords[0], yCoords[0], zCoords[0]));
+
+        double newMinX = globalCoord.xCoord;
+        double newMaxX = globalCoord.xCoord;
+        double newMinY = globalCoord.yCoord;
+        double newMaxY = globalCoord.yCoord;
+        double newMinZ = globalCoord.zCoord;
+        double newMaxZ = globalCoord.zCoord;
+
+        for (int i = 1; i < 8; i++) {
+            globalCoord = this.transformToGlobal(Vec3.createVectorHelper(xCoords[i], yCoords[i], zCoords[i]));
+            if (globalCoord.xCoord < newMinX) newMinX = globalCoord.xCoord;
+            if (globalCoord.xCoord > newMaxX) newMaxX = globalCoord.xCoord;
+            if (globalCoord.yCoord < newMinY) newMinY = globalCoord.yCoord;
+            if (globalCoord.yCoord > newMaxY) newMaxY = globalCoord.yCoord;
+            if (globalCoord.zCoord < newMinZ) newMinZ = globalCoord.zCoord;
+            if (globalCoord.zCoord > newMaxZ) newMaxZ = globalCoord.zCoord;
+        }
+
+        return AxisAlignedBB.getBoundingBox(newMinX, newMinY, newMinZ, newMaxX, newMaxY, newMaxZ);
     }
 
     private AxisAlignedBB actuallyRotateBB(AxisAlignedBB original, double degrees) {

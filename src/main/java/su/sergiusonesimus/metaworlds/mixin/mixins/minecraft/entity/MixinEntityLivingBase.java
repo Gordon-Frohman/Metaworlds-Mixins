@@ -2,6 +2,7 @@ package su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.entity;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.AxisAlignedBB;
@@ -41,7 +42,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 Vec3 globalCoords = Vec3
                     .createVectorHelper(this.posX, this.posY - 0.20000000298023224D - (double) this.yOffset, this.posZ);
                 for (World world : ((IMixinWorld) this.worldObj).getSubWorlds()) {
-                    AxisAlignedBB worldBB = ((SubWorld) world).getMaximumStretchedWorldBB(false, false);
+                    AxisAlignedBB worldBB = ((SubWorld) world).getMaximumCloseWorldBBRotated();
                     if (worldBB.intersectsWith(this.boundingBox)) {
                         Vec3 localCoords = ((IMixinWorld) world).transformToLocal(globalCoords);
                         block = world.getBlock(
