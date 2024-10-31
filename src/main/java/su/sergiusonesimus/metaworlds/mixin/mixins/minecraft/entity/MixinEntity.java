@@ -1007,7 +1007,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                         || subworld.getMotionZ() != 0)
                         && !subworld.getEntitiesToDrag()
                             .containsKey(this)) {
-                        AxisAlignedBB worldBB = subworld.getMaximumStretchedWorldBB(false, false);
+                        AxisAlignedBB worldBB = subworld.getMaximumCloseWorldBBRotated();
                         if (this.boundingBox.intersectsWith(worldBB)) {
                             AxisAlignedBB localEntityBB = ((IMixinAxisAlignedBB) this.boundingBox)
                                 .getTransformedToLocalBoundingBox(world);

@@ -709,17 +709,6 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return super.getBlock(par1, par2, par3);
     }
 
-    public void playAuxSFXAtEntity(EntityPlayer par1EntityPlayer, int par2, int par3, int par4, int par5, int par6) {
-        Vec3 transformedPos = this.transformToGlobal((double) par3, (double) par4, (double) par5);
-        super.playAuxSFXAtEntity(
-            par1EntityPlayer,
-            par2,
-            (int) transformedPos.xCoord,
-            (int) transformedPos.yCoord,
-            (int) transformedPos.zCoord,
-            par6);
-    }
-
     public void tick() {
         super.tick();
         int updateFlags = 0;
