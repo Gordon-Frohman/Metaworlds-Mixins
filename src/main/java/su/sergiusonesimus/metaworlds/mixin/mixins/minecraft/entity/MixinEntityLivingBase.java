@@ -41,7 +41,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                 Vec3 globalCoords = Vec3
                     .createVectorHelper(this.posX, this.posY - 0.20000000298023224D - (double) this.yOffset, this.posZ);
                 for (World world : ((IMixinWorld) this.worldObj).getSubWorlds()) {
-                    AxisAlignedBB worldBB = ((SubWorld) world).getMaximumCloseWorldBBRotated();
+                    AxisAlignedBB worldBB = ((SubWorld) world).getMaximumCloseWorldBBRotated()
+                        .expand(0, 1, 0);
                     if (worldBB.intersectsWith(this.boundingBox)) {
                         Vec3 localCoords = ((IMixinWorld) world).transformToLocal(globalCoords);
                         block = world.getBlock(
