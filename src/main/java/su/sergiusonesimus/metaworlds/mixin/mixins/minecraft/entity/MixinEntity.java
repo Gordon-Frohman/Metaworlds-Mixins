@@ -1014,40 +1014,44 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                             List<AxisAlignedBB> collidingBBs = world
                                 .getCollidingBoundingBoxes((Entity) (Object) this, localEntityBB);
 
-                            double modifierX = 0;
-                            double modifierZ = 0;
-                            int modXcount = 0;
-                            int modZcount = 0;
-                            for (AxisAlignedBB cBB : collidingBBs) {
-                                double dXpos = localEntityBB.minX - cBB.maxX;
-                                double dXneg = cBB.minX - localEntityBB.maxX;
-                                double dZpos = localEntityBB.minZ - cBB.maxZ;
-                                double dZneg = cBB.minZ - localEntityBB.maxZ;
-                                if (dXpos < 0 && dXneg < 0 && dZpos < 0 && dZneg < 0) {
-                                    double modX = -dXpos < -dXneg ? -dXpos : dXneg;
-                                    double modZ = -dZpos < -dZneg ? -dZpos : dZneg;
-                                    if (Math.abs(modX) < Math.abs(modZ)) {
-                                        modifierX += modX;
-                                        modXcount++;
-                                    } else {
-                                        modifierZ += modZ;
-                                        modZcount++;
+                            if (!collidingBBs.isEmpty()) {
+                                double modifierX = 0;
+                                double modifierZ = 0;
+                                int modXcount = 0;
+                                int modZcount = 0;
+                                for (AxisAlignedBB cBB : collidingBBs) {
+                                    double dXpos = localEntityBB.minX - cBB.maxX;
+                                    double dXneg = cBB.minX - localEntityBB.maxX;
+                                    double dZpos = localEntityBB.minZ - cBB.maxZ;
+                                    double dZneg = cBB.minZ - localEntityBB.maxZ;
+                                    if (dXpos < 0 && dXneg < 0 && dZpos < 0 && dZneg < 0) {
+                                        double modX = -dXpos < -dXneg ? -dXpos : dXneg;
+                                        double modZ = -dZpos < -dZneg ? -dZpos : dZneg;
+                                        if (Math.abs(modX) < Math.abs(modZ)) {
+                                            modifierX += modX;
+                                            modXcount++;
+                                        } else {
+                                            modifierZ += modZ;
+                                            modZcount++;
+                                        }
                                     }
                                 }
-                            }
-                            if (modXcount > 0) modifierX /= modXcount;
-                            if (modZcount > 0) modifierZ /= modZcount;
-                            Vec3 localPos = subworld.transformToLocal((Entity) (Object) this);
-                            double multiplier = 1;
-                            Vec3 newlocalPos = localPos.addVector(modifierX * multiplier, 0, modifierZ * multiplier);
-                            Vec3 entityPos = subworld.transformToGlobal(newlocalPos);
-                            if ((modXcount + modZcount) > 0) {
-                                Vec3 moveVec = this.getGlobalPos()
-                                    .subtract(entityPos);
-                                ((Entity) (Object) this).addVelocity(moveVec.xCoord, moveVec.yCoord, moveVec.zCoord);
-                                this.setRotation(
-                                    this.rotationYaw - (float) subworld.getRotationYawSpeed(),
-                                    this.rotationPitch);
+                                if (modXcount > 0) modifierX /= modXcount;
+                                if (modZcount > 0) modifierZ /= modZcount;
+                                Vec3 localPos = subworld.transformToLocal((Entity) (Object) this);
+                                double multiplier = 1;
+                                Vec3 newlocalPos = localPos
+                                    .addVector(modifierX * multiplier, 0, modifierZ * multiplier);
+                                Vec3 entityPos = subworld.transformToGlobal(newlocalPos);
+                                if ((modXcount + modZcount) > 0) {
+                                    Vec3 moveVec = this.getGlobalPos()
+                                        .subtract(entityPos);
+                                    ((Entity) (Object) this)
+                                        .addVelocity(moveVec.xCoord, moveVec.yCoord, moveVec.zCoord);
+                                    this.setRotation(
+                                        this.rotationYaw - (float) subworld.getRotationYawSpeed(),
+                                        this.rotationPitch);
+                                }
                             }
                         }
                     }
