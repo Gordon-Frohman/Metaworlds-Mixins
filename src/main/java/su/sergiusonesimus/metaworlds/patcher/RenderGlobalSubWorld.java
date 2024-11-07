@@ -23,6 +23,7 @@ import net.minecraft.world.World;
 import org.lwjgl.opengl.ARBOcclusionQuery;
 
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
 
 public class RenderGlobalSubWorld extends RenderGlobal {
@@ -126,13 +127,21 @@ public class RenderGlobalSubWorld extends RenderGlobal {
     @Override
     public void spawnParticle(String par1Str, double par2, double par4, double par6, double par8, double par10,
         double par12) {
-        super.spawnParticle(par1Str, par2, par4, par6, par8, par10, par12);
-        /*
-         * WorldClient origWorld = parentRenderGlobal.getWorld();
-         * parentRenderGlobal.setWorld(this.getWorld();
-         * parentRenderGlobal.spawnParticle(par1Str, par2, par4, par6, par8, par10, par12);
-         * parentRenderGlobal.setWorld(origWorld);
-         */
+        SubWorld subworld = ((SubWorld) this.theWorld);
+        if (subworld.getRotationPitch() == 0 && subworld.getRotationRoll() == 0) {
+            super.spawnParticle(par1Str, par2, par4, par6, par8, par10, par12);
+        } else {
+            Vec3 localCoords = Vec3.createVectorHelper(par2, par4, par6);
+            Vec3 globalCoords = ((IMixinWorld) this.theWorld).transformToGlobal(localCoords);
+            parentRenderGlobal.spawnParticle(
+                par1Str,
+                globalCoords.xCoord,
+                globalCoords.yCoord,
+                globalCoords.zCoord,
+                par8,
+                par10,
+                par12);
+        }
     }
 
     /**
