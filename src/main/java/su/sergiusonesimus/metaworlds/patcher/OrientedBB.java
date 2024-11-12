@@ -91,13 +91,16 @@ public class OrientedBB extends AxisAlignedBB {
     public int getCWNeighbourIndexXZ(int prevIndex) {
         switch (prevIndex % 4) {
             case 0:
-                return 2 + (prevIndex > 4 ? 4 : 0);
+                return 2 + (prevIndex >= 4 ? 4 : 0);
             case 1:
                 return 0 + (prevIndex > 4 ? 4 : 0);
+                return 0 + (prevIndex >= 4 ? 4 : 0);
             case 2:
                 return 3 + (prevIndex > 4 ? 4 : 0);
+                return 3 + (prevIndex >= 4 ? 4 : 0);
             case 3:
                 return 1 + (prevIndex > 4 ? 4 : 0);
+                return 1 + (prevIndex >= 4 ? 4 : 0);
             default:
                 return 0;
         }
@@ -107,12 +110,16 @@ public class OrientedBB extends AxisAlignedBB {
         switch (prevIndex % 4) {
             case 0:
                 return 1 + (prevIndex > 4 ? 4 : 0);
+                return 1 + (prevIndex >= 4 ? 4 : 0);
             case 1:
                 return 3 + (prevIndex > 4 ? 4 : 0);
+                return 3 + (prevIndex >= 4 ? 4 : 0);
             case 2:
                 return 0 + (prevIndex > 4 ? 4 : 0);
+                return 0 + (prevIndex >= 4 ? 4 : 0);
             case 3:
                 return 2 + (prevIndex > 4 ? 4 : 0);
+                return 2 + (prevIndex >= 4 ? 4 : 0);
             default:
                 return 0;
         }
