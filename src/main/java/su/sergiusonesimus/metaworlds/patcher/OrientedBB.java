@@ -456,6 +456,19 @@ public class OrientedBB extends AxisAlignedBB {
             int maxIndex2;
             int maxIndex3;
             int neighbourIndex;
+            Line[] corners = {
+                new Line(
+                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
+                new Line(
+                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
+                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)),
+                new Line(
+                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
+                new Line(
+                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
+                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)) };
             if (par2 > 0.0D) {
                 maxY1 = this.getY(0);
                 maxY2 = this.getY(1);
@@ -505,16 +518,9 @@ public class OrientedBB extends AxisAlignedBB {
                     new Vector3D(this.getX(maxIndex1), maxY1, this.getZ(maxIndex1)),
                     new Vector3D(this.getX(maxIndex2), maxY2, this.getZ(maxIndex2)),
                     new Vector3D(this.getX(maxIndex3), maxY3, this.getZ(maxIndex3)));
-                double[][] corners = { { par1AxisAlignedBB.minX, par1AxisAlignedBB.minZ },
-                    { par1AxisAlignedBB.minX, par1AxisAlignedBB.maxZ },
-                    { par1AxisAlignedBB.maxX, par1AxisAlignedBB.minZ },
-                    { par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxZ } };
 
                 for (int i = 0; i < 4; i++) {
-                    Line corner = new Line(
-                        new Vector3D(corners[i][0], par1AxisAlignedBB.minY, corners[i][1]),
-                        new Vector3D(corners[i][0], par1AxisAlignedBB.maxY, corners[i][1]));
-                    Vector3D intersection = blockBottom.intersection(corner);
+                    Vector3D intersection = blockBottom.intersection(corners[i]);
 
                     if (par1AxisAlignedBB.maxY <= intersection.getY() + 0.75D) {
                         var4 = intersection.getY() - par1AxisAlignedBB.maxY - 0.01D;
@@ -574,16 +580,9 @@ public class OrientedBB extends AxisAlignedBB {
                     new Vector3D(this.getX(maxIndex1), maxY1, this.getZ(maxIndex1)),
                     new Vector3D(this.getX(maxIndex2), maxY2, this.getZ(maxIndex2)),
                     new Vector3D(this.getX(maxIndex3), maxY3, this.getZ(maxIndex3)));
-                double[][] corners = { { par1AxisAlignedBB.minX, par1AxisAlignedBB.minZ },
-                    { par1AxisAlignedBB.minX, par1AxisAlignedBB.maxZ },
-                    { par1AxisAlignedBB.maxX, par1AxisAlignedBB.minZ },
-                    { par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxZ } };
 
                 for (int i = 0; i < 4; i++) {
-                    Line corner = new Line(
-                        new Vector3D(corners[i][0], par1AxisAlignedBB.minY, corners[i][1]),
-                        new Vector3D(corners[i][0], par1AxisAlignedBB.maxY, corners[i][1]));
-                    Vector3D intersection = blockTop.intersection(corner);
+                    Vector3D intersection = blockTop.intersection(corners[i]);
 
                     if (par1AxisAlignedBB.minY >= intersection.getY() - 0.75D) {
                         var4 = intersection.getY() - par1AxisAlignedBB.minY + 0.01D;
