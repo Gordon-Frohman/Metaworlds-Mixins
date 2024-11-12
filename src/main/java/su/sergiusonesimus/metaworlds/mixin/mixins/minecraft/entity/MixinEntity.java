@@ -425,9 +425,9 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 this.motionZ = 0.0D;
             }
 
-            double d6 = x;
-            double d7 = y;
-            double d8 = z;
+            double xStored = x;
+            double yStored = y;
+            double zStored = z;
             AxisAlignedBB axisalignedbb = this.boundingBox.copy();
             boolean flag = this.onGround && this.isSneaking() && ((Entity) (Object) this) instanceof EntityPlayer;
 
@@ -438,7 +438,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                     .getCollidingBoundingBoxes(
                         (Entity) (Object) this,
                         this.boundingBox.getOffsetBoundingBox(x, -1.0D, 0.0D))
-                    .isEmpty(); d6 = x) {
+                    .isEmpty(); xStored = x) {
                     if (x < d9 && x >= -d9) {
                         x = 0.0D;
                     } else if (x > 0.0D) {
@@ -452,7 +452,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                     .getCollidingBoundingBoxes(
                         (Entity) (Object) this,
                         this.boundingBox.getOffsetBoundingBox(0.0D, -1.0D, z))
-                    .isEmpty(); d8 = z) {
+                    .isEmpty(); zStored = z) {
                     if (z < d9 && z >= -d9) {
                         z = 0.0D;
                     } else if (z > 0.0D) {
@@ -484,8 +484,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                         z += d9;
                     }
 
-                    d6 = x;
-                    d8 = z;
+                    xStored = x;
+                    zStored = z;
                 }
             }
 
@@ -509,13 +509,13 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
             this.boundingBox.offset(0.0D, y, 0.0D);
 
-            if (!this.field_70135_K && d7 != y) {
+            if (!this.field_70135_K && yStored != y) {
                 z = 0.0D;
                 y = 0.0D;
                 x = 0.0D;
             }
 
-            boolean flag1 = this.onGround || d7 != y && d7 < 0.0D;
+            boolean flag1 = this.onGround || yStored != y && yStored < 0.0D;
             int j;
 
             for (j = 0; j < list.size(); ++j) {
@@ -524,7 +524,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
             this.boundingBox.offset(x, 0.0D, 0.0D);
 
-            if (!this.field_70135_K && d6 != x) {
+            if (!this.field_70135_K && xStored != x) {
                 z = 0.0D;
                 y = 0.0D;
                 x = 0.0D;
@@ -536,28 +536,28 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
             this.boundingBox.offset(0.0D, 0.0D, z);
 
-            if (!this.field_70135_K && d8 != z) {
+            if (!this.field_70135_K && zStored != z) {
                 z = 0.0D;
                 y = 0.0D;
                 x = 0.0D;
             }
 
-            double d10;
-            double d11;
+            double yStoredLocal;
+            double zStoredLocal;
             int k;
-            double d12;
+            double xStoredLocal;
 
-            if (this.stepHeight > 0.0F && flag1 && (flag || this.ySize < 0.05F) && (d6 != x || d8 != z)) {
-                d12 = x;
-                d10 = y;
-                d11 = z;
-                x = d6;
+            if (this.stepHeight > 0.0F && flag1 && (flag || this.ySize < 0.05F) && (xStored != x || zStored != z)) {
+                xStoredLocal = x;
+                yStoredLocal = y;
+                zStoredLocal = z;
+                x = xStored;
                 y = (double) this.stepHeight;
-                z = d8;
+                z = zStored;
                 AxisAlignedBB axisalignedbb1 = this.boundingBox.copy();
                 this.boundingBox.setBB(axisalignedbb);
                 list = this.worldObj
-                    .getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(d6, y, d8));
+                    .getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(xStored, y, zStored));
 
                 for (k = 0; k < list.size(); ++k) {
                     y = ((AxisAlignedBB) list.get(k)).calculateYOffset(this.boundingBox, y);
@@ -565,7 +565,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
                 this.boundingBox.offset(0.0D, y, 0.0D);
 
-                if (!this.field_70135_K && d7 != y) {
+                if (!this.field_70135_K && yStored != y) {
                     z = 0.0D;
                     y = 0.0D;
                     x = 0.0D;
@@ -577,7 +577,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
                 this.boundingBox.offset(x, 0.0D, 0.0D);
 
-                if (!this.field_70135_K && d6 != x) {
+                if (!this.field_70135_K && xStored != x) {
                     z = 0.0D;
                     y = 0.0D;
                     x = 0.0D;
@@ -589,13 +589,13 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
                 this.boundingBox.offset(0.0D, 0.0D, z);
 
-                if (!this.field_70135_K && d8 != z) {
+                if (!this.field_70135_K && zStored != z) {
                     z = 0.0D;
                     y = 0.0D;
                     x = 0.0D;
                 }
 
-                if (!this.field_70135_K && d7 != y) {
+                if (!this.field_70135_K && yStored != y) {
                     z = 0.0D;
                     y = 0.0D;
                     x = 0.0D;
@@ -609,10 +609,11 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                     this.boundingBox.offset(0.0D, y, 0.0D);
                 }
 
-                if (d12 * d12 + d11 * d11 >= x * x + z * z) {
-                    x = d12;
-                    y = d10;
-                    z = d11;
+                if (xStoredLocal * xStoredLocal + zStoredLocal * zStoredLocal >= x * x + z * z && xStoredLocal * x > 0
+                    && zStoredLocal * z > 0) {
+                    x = xStoredLocal;
+                    y = yStoredLocal;
+                    z = zStoredLocal;
                     this.boundingBox.setBB(axisalignedbb1);
                 }
             }
@@ -622,31 +623,31 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             this.posX = (this.boundingBox.minX + this.boundingBox.maxX) / 2.0D;
             this.posY = this.boundingBox.minY + (double) this.yOffset - (double) this.ySize;
             this.posZ = (this.boundingBox.minZ + this.boundingBox.maxZ) / 2.0D;
-            this.isCollidedHorizontally = d6 != x || d8 != z;
-            this.isCollidedVertically = d7 != y;
-            this.onGround = d7 != y && d7 < 0.0D;
+            this.isCollidedHorizontally = xStored != x || zStored != z;
+            this.isCollidedVertically = yStored != y;
+            this.onGround = yStored != y && yStored < 0.0D;
 
             if (this.onGround) this.setWorldBelowFeet(newWorldBelowFeet);
-            else if (d7 != 0.0d) this.slowlyRemoveWorldBelowFeet();
+            else if (yStored != 0.0d) this.slowlyRemoveWorldBelowFeet();
 
             this.isCollided = this.isCollidedHorizontally || this.isCollidedVertically;
             this.updateFallState(y, this.onGround);
 
-            if (d6 != x) {
+            if (xStored != x) {
                 this.motionX = 0.0D;
             }
 
-            if (d7 != y) {
+            if (yStored != y) {
                 this.motionY = 0.0D;
             }
 
-            if (d8 != z) {
+            if (zStored != z) {
                 this.motionZ = 0.0D;
             }
 
-            d12 = this.posX - d3;
-            d10 = this.posY - d4;
-            d11 = this.posZ - d5;
+            xStoredLocal = this.posX - d3;
+            yStoredLocal = this.posY - d4;
+            zStoredLocal = this.posZ - d5;
 
             if (this.canTriggerWalking() && !flag && this.ridingEntity == null) {
                 int j1 = MathHelper.floor_double(this.posX);
@@ -661,13 +662,16 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 }
 
                 if (block != Blocks.ladder) {
-                    d10 = 0.0D;
+                    yStoredLocal = 0.0D;
                 }
 
                 this.distanceWalkedModified = (float) ((double) this.distanceWalkedModified
-                    + (double) MathHelper.sqrt_double(d12 * d12 + d11 * d11) * 0.6D);
+                    + (double) MathHelper.sqrt_double(xStoredLocal * xStoredLocal + zStoredLocal * zStoredLocal)
+                        * 0.6D);
                 this.distanceWalkedOnStepModified = (float) ((double) this.distanceWalkedOnStepModified
-                    + (double) MathHelper.sqrt_double(d12 * d12 + d10 * d10 + d11 * d11) * 0.6D);
+                    + (double) MathHelper.sqrt_double(
+                        xStoredLocal * xStoredLocal + yStoredLocal * yStoredLocal + zStoredLocal * zStoredLocal)
+                        * 0.6D);
 
                 if (this.distanceWalkedOnStepModified > (float) this.nextStepDistance
                     && block.getMaterial() != Material.air) {
