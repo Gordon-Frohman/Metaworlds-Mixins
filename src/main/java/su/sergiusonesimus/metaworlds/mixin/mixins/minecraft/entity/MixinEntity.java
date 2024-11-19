@@ -411,9 +411,9 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
         } else {
             this.worldObj.theProfiler.startSection("move");
             this.ySize *= 0.4F;
-            double d3 = this.posX;
-            double d4 = this.posY;
-            double d5 = this.posZ;
+            double entityX = this.posX;
+            double entityY = this.posY;
+            double entityZ = this.posZ;
 
             if (this.isInWeb) {
                 this.isInWeb = false;
@@ -645,9 +645,9 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 this.motionZ = 0.0D;
             }
 
-            xStoredLocal = this.posX - d3;
-            yStoredLocal = this.posY - d4;
-            zStoredLocal = this.posZ - d5;
+            xStoredLocal = this.posX - entityX;
+            yStoredLocal = this.posY - entityY;
+            zStoredLocal = this.posZ - entityZ;
 
             if (this.canTriggerWalking() && !flag && this.ridingEntity == null) {
                 int j1 = MathHelper.floor_double(this.posX);
