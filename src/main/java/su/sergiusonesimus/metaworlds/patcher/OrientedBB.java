@@ -1,15 +1,21 @@
 package su.sergiusonesimus.metaworlds.patcher;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Plane;
+import org.apache.commons.math3.geometry.euclidean.threed.Segment;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jblas.DoubleMatrix;
 
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
+import su.sergiusonesimus.metaworlds.utility.GeometryHelper;
 
 public class OrientedBB extends AxisAlignedBB {
 
@@ -245,9 +251,14 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public boolean intersectsWith(AxisAlignedBB par1AxisAlignedBB) {
-        return par1AxisAlignedBB instanceof OrientedBB ? this.intersectsWithOBB((OrientedBB) par1AxisAlignedBB)
-            : (!super.intersectsWith(par1AxisAlignedBB) ? false
-                : this.checkIntersectsWithXZdirection2(par1AxisAlignedBB));
+        if (par1AxisAlignedBB instanceof OrientedBB) {
+            return this.intersectsWithOBB((OrientedBB) par1AxisAlignedBB);
+        } else {
+            if (!super.intersectsWith(par1AxisAlignedBB)) return false;
+            else {
+                return this.intersectsWithOBB(((IMixinAxisAlignedBB) par1AxisAlignedBB).getOrientedBB());
+            }
+        }
     }
 
     private boolean checkIntersectsWithXZdirection2(AxisAlignedBB par1AxisAlignedBB) {
@@ -303,10 +314,142 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public boolean intersectsWithOBB(OrientedBB par1OrientedBB) {
-        return par1OrientedBB.maxY > this.minY && par1OrientedBB.minY < this.maxY
-            ? (!this.checkIntersectsWithXZ_OBB_oneDirection(par1OrientedBB) ? false
-                : par1OrientedBB.checkIntersectsWithXZ_OBB_oneDirection(this))
-            : false;
+        // Getting vertices for every face of both OBBs
+        Vector3D[][] faces1 = { { this.getVertice(0), this.getVertice(1), this.getVertice(3), this.getVertice(2) },
+            { this.getVertice(4), this.getVertice(5), this.getVertice(7), this.getVertice(6) },
+            { this.getVertice(0), this.getVertice(1), this.getVertice(5), this.getVertice(4) },
+            { this.getVertice(1), this.getVertice(3), this.getVertice(7), this.getVertice(5) },
+            { this.getVertice(3), this.getVertice(2), this.getVertice(6), this.getVertice(7) },
+            { this.getVertice(2), this.getVertice(0), this.getVertice(4), this.getVertice(6) } };
+        Vector3D[][] faces2 = {
+            { par1OrientedBB.getVertice(0), par1OrientedBB.getVertice(1), par1OrientedBB.getVertice(3),
+                par1OrientedBB.getVertice(2) },
+            { par1OrientedBB.getVertice(4), par1OrientedBB.getVertice(5), par1OrientedBB.getVertice(7),
+                par1OrientedBB.getVertice(6) },
+            { par1OrientedBB.getVertice(0), par1OrientedBB.getVertice(1), par1OrientedBB.getVertice(5),
+                par1OrientedBB.getVertice(4) },
+            { par1OrientedBB.getVertice(1), par1OrientedBB.getVertice(3), par1OrientedBB.getVertice(7),
+                par1OrientedBB.getVertice(5) },
+            { par1OrientedBB.getVertice(3), par1OrientedBB.getVertice(2), par1OrientedBB.getVertice(6),
+                par1OrientedBB.getVertice(7) },
+            { par1OrientedBB.getVertice(2), par1OrientedBB.getVertice(0), par1OrientedBB.getVertice(4),
+                par1OrientedBB.getVertice(6) } };
+
+        // Getting planes for every face
+        Plane[] planeFaces1 = new Plane[6];
+        Plane[] planeFaces2 = new Plane[6];
+        for (int i = 0; i < 6; i++) {
+            planeFaces1[i] = new Plane(faces1[i][0], faces1[i][1], faces1[i][2]);
+            planeFaces2[i] = new Plane(faces2[i][0], faces2[i][1], faces2[i][2]);
+        }
+
+        boolean intersects = false;
+        for (int i = 0; i < 6; i++) {
+            Plane planeFace1 = planeFaces1[i];
+            for (int j = 0; j < 6; j++) {
+                // Are out planes parallel?
+                Line intersectionLine = planeFace1.intersection(planeFaces2[j]);
+                if (intersectionLine != null) {
+                    // No, they are not
+                    // Let's check if all vertices of one face lie on one side of another face, or not
+                    Vector3D[] face2 = faces2[j];
+                    double[] normals = new double[4];
+                    for (int k = 0; k < 4; k++) {
+                        normals[k] = planeFace1.getOffset(face2[k]);
+                    }
+                    if ((normals[0] > 0 && normals[1] > 0 && normals[2] > 0 && normals[3] > 0)
+                        || (normals[0] < 0 && normals[1] < 0 && normals[2] < 0 && normals[3] < 0)) continue;
+                    // Let's now check if our faces intersect on the remaining axis
+
+                    Vector3D[] face1 = faces1[i];
+                    Segment[] segments1 = { GeometryHelper.segmentFromPoints(face1[0], face1[1]),
+                        GeometryHelper.segmentFromPoints(face1[1], face1[2]),
+                        GeometryHelper.segmentFromPoints(face1[2], face1[3]),
+                        GeometryHelper.segmentFromPoints(face1[3], face1[0]) };
+                    Segment[] segments2 = { GeometryHelper.segmentFromPoints(face2[0], face2[1]),
+                        GeometryHelper.segmentFromPoints(face2[1], face2[2]),
+                        GeometryHelper.segmentFromPoints(face2[2], face2[3]),
+                        GeometryHelper.segmentFromPoints(face2[3], face2[0]) };
+                    List<Double> intersection1 = new ArrayList<Double>();
+                    List<Double> intersection2 = new ArrayList<Double>();
+                    for (int k = 0; k < 4; k++) {
+                        if (intersectionLine.contains(segments1[k].getStart())
+                            && intersectionLine.contains(segments1[k].getEnd())) {
+                            intersection1.add(intersectionLine.getAbscissa(segments1[k].getStart()));
+                            intersection1.add(intersectionLine.getAbscissa(segments1[k].getEnd()));
+                        } else {
+                            Vector3D intersection = segments1[k].getLine()
+                                .intersection(intersectionLine);
+                            if (intersection != null && GeometryHelper.pointOnSegment(intersection, segments1[k]))
+                                intersection1.add(intersectionLine.getAbscissa(intersection));
+                        }
+                        if (intersectionLine.contains(segments2[k].getStart())
+                            && intersectionLine.contains(segments2[k].getEnd())) {
+                            intersection2.add(intersectionLine.getAbscissa(segments2[k].getStart()));
+                            intersection2.add(intersectionLine.getAbscissa(segments2[k].getEnd()));
+                        } else {
+                            Vector3D intersection = segments2[k].getLine()
+                                .intersection(intersectionLine);
+                            if (intersection != null && GeometryHelper.pointOnSegment(intersection, segments2[k]))
+                                intersection2.add(intersectionLine.getAbscissa(intersection));
+                        }
+                    }
+                    if (intersection1.isEmpty() || intersection2.isEmpty()) continue;
+                    Object[] intersectionArray1 = intersection1.toArray();
+                    Object[] intersectionArray2 = intersection2.toArray();
+                    if (intersectionArray1.length == 1) {
+                        if (intersectionArray2.length == 1) {
+                            if (intersectionArray1[0] == intersectionArray2[0]) {
+                                intersects = true;
+                                break;
+                            }
+                        } else {
+                            if ((Double) intersectionArray2[0] > (Double) intersectionArray2[1]) {
+                                Double d = (Double) intersectionArray2[0];
+                                intersectionArray2[0] = intersectionArray2[1];
+                                intersectionArray2[1] = d;
+                            }
+                            if (((Double) intersectionArray1[0] >= (Double) intersectionArray2[0]
+                                && (Double) intersectionArray1[0] <= (Double) intersectionArray2[1])) {
+                                intersects = true;
+                                break;
+                            }
+                        }
+                    } else {
+                        if ((Double) intersectionArray1[0] > (Double) intersectionArray1[1]) {
+                            Double d = (Double) intersectionArray1[0];
+                            intersectionArray1[0] = intersectionArray1[1];
+                            intersectionArray1[1] = d;
+                        }
+                        if (intersectionArray2.length == 1) {
+                            if (((Double) intersectionArray2[0] >= (Double) intersectionArray1[0]
+                                && (Double) intersectionArray2[0] <= (Double) intersectionArray1[1])) {
+                                intersects = true;
+                                break;
+                            }
+                        } else {
+                            if ((Double) intersectionArray2[0] > (Double) intersectionArray2[1]) {
+                                Double d = (Double) intersectionArray2[0];
+                                intersectionArray2[0] = intersectionArray2[1];
+                                intersectionArray2[1] = d;
+                            }
+                            if ((((Double) intersectionArray1[0] >= (Double) intersectionArray2[0])
+                                && ((Double) intersectionArray1[0] <= (Double) intersectionArray2[1]))
+                                || (((Double) intersectionArray1[1] >= (Double) intersectionArray2[0])
+                                    && ((Double) intersectionArray1[1] <= (Double) intersectionArray2[1]))
+                                || (((Double) intersectionArray1[0] <= (Double) intersectionArray2[0])
+                                    && ((Double) intersectionArray1[1] >= (Double) intersectionArray2[1]))) {
+                                intersects = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (intersects) break;
+        }
+
+        return intersects;
     }
 
     public boolean checkIntersectsWithXZ_OBB_oneDirection(OrientedBB par1OrientedBB) {
