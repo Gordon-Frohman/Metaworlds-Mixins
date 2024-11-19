@@ -452,54 +452,6 @@ public class OrientedBB extends AxisAlignedBB {
         return intersects;
     }
 
-    public boolean checkIntersectsWithXZ_OBB_oneDirection(OrientedBB par1OrientedBB) {
-        double vertex_x = this.getX(2) - this.getX(0);
-        double vertex_z = this.getZ(2) - this.getZ(0);
-        double curMinProjCoord = 0.0D;
-        double curMaxProjCoord = 0.0D;
-
-        int i;
-        double dotProduct;
-        for (i = 0; i < 4; ++i) {
-            dotProduct = (par1OrientedBB.getX(i) - this.getX(0)) * vertex_x
-                + (par1OrientedBB.getZ(i) - this.getZ(0)) * vertex_z;
-            dotProduct /= this.dimensions.xCoord;
-            if (i == 0) {
-                curMinProjCoord = dotProduct;
-                curMaxProjCoord = dotProduct;
-            } else {
-                curMinProjCoord = Math.min(curMinProjCoord, dotProduct);
-                curMaxProjCoord = Math.max(curMaxProjCoord, dotProduct);
-            }
-        }
-
-        if (curMaxProjCoord > 0.0D && curMinProjCoord < this.dimensions.xCoord) {
-            vertex_x = this.getX(1) - this.getX(0);
-            vertex_z = this.getZ(1) - this.getZ(0);
-
-            for (i = 0; i < 4; ++i) {
-                dotProduct = (par1OrientedBB.getX(i) - this.getX(0)) * vertex_x
-                    + (par1OrientedBB.getZ(i) - this.getZ(0)) * vertex_z;
-                dotProduct /= this.dimensions.zCoord;
-                if (i == 0) {
-                    curMinProjCoord = dotProduct;
-                    curMaxProjCoord = dotProduct;
-                } else {
-                    curMinProjCoord = Math.min(curMinProjCoord, dotProduct);
-                    curMaxProjCoord = Math.max(curMaxProjCoord, dotProduct);
-                }
-            }
-
-            if (curMaxProjCoord > 0.0D && curMinProjCoord < this.dimensions.zCoord) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-
     public boolean isVecInside(Vec3 par1Vec3) {
         return super.isVecInside(par1Vec3);
     }
