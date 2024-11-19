@@ -826,4 +826,8 @@ public class OrientedBB extends AxisAlignedBB {
     public AxisAlignedBB offset(double x0, double x1, double x2) {
         return this.offsetLocal(x0, x1, x2);
     }
+
+    public Vector3D getVertice(int i) {
+        return new Vector3D(this.getX(i), this.getY(i), this.getZ(i));
+    }
 }
