@@ -295,7 +295,7 @@ public class OrientedBB extends AxisAlignedBB {
         for (int i = 0; i < 6; i++) {
             Plane planeFace1 = planeFaces1[i];
             for (int j = 0; j < 6; j++) {
-                // Are out planes parallel?
+                // Are our planes parallel?
                 Line intersectionLine = planeFace1.intersection(planeFaces2[j]);
                 if (intersectionLine != null) {
                     // No, they are not
@@ -525,6 +525,7 @@ public class OrientedBB extends AxisAlignedBB {
                     new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
                     new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
                     new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)) };
+
             if (par2 > 0.0D) {
                 curMaxY = this.getY(0);
                 curMaxIndex = 0;
@@ -555,25 +556,132 @@ public class OrientedBB extends AxisAlignedBB {
                     }
                 }
 
-                Plane blockBottom = new Plane(
-                    new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                    new Vector3D(
-                        this.getX(neighbourIndexes[0]),
-                        this.getY(neighbourIndexes[0]),
-                        this.getZ(neighbourIndexes[0])),
-                    new Vector3D(
-                        this.getX(neighbourIndexes[1]),
-                        this.getY(neighbourIndexes[1]),
-                        this.getZ(neighbourIndexes[1])));
+                if ((this.getY(curMaxIndex) == this.getY(neighbourIndexes[0])
+                    && this.getY(neighbourIndexes[0]) == this.getY(neighbourIndexes[1]))
+                    || (this.getX(curMaxIndex) <= par1AxisAlignedBB.maxX
+                        && this.getX(curMaxIndex) >= par1AxisAlignedBB.minX
+                        && this.getZ(curMaxIndex) <= par1AxisAlignedBB.maxZ
+                        && this.getZ(curMaxIndex) >= par1AxisAlignedBB.minZ)) {
 
-                for (int i = 0; i < 4; i++) {
-                    Vector3D intersection = blockBottom.intersection(corners[i]);
-
-                    if (par1AxisAlignedBB.maxY <= intersection.getY() + 0.75D) {
-                        var4 = intersection.getY() - par1AxisAlignedBB.maxY - 0.01D;
+                    // Either this BB is not rotated around x/z, or
+                    // Target AABB contains the lowest point. It shouldn't go above it
+                    if (par1AxisAlignedBB.maxY <= curMaxY + 0.75D) {
+                        var4 = curMaxY - par1AxisAlignedBB.maxY - 0.01D;
                         if (var4 < par2) {
                             par2 = var4;
                         }
+                    }
+                } else {
+                    // Checking if AABB intersects any bottom edges
+                    List<Line> edges = new ArrayList<Line>();
+                    // Checking the lowest edge anyway
+                    edges.add(
+                        new Line(
+                            new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
+                            new Vector3D(
+                                this.getX(neighbourIndexes[0]),
+                                this.getY(neighbourIndexes[0]),
+                                this.getZ(neighbourIndexes[0]))));
+                    // Checking other two edges only if this BB is rotated around both axises
+                    if (curMaxY != this.getY(neighbourIndexes[0])) {
+                        edges.add(
+                            new Line(
+                                new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
+                                new Vector3D(
+                                    this.getX(neighbourIndexes[1]),
+                                    this.getY(neighbourIndexes[1]),
+                                    this.getZ(neighbourIndexes[1]))));
+                        edges.add(
+                            new Line(
+                                new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
+                                new Vector3D(
+                                    this.getX(neighbourIndexes[2]),
+                                    this.getY(neighbourIndexes[2]),
+                                    this.getZ(neighbourIndexes[2]))));
+                    }
+
+                    double localPar2 = par2;
+                    boolean liesOnEdge = false;
+                    for (Line edge : edges) {
+                        for (Plane wall : walls) {
+                            Vector3D intersection = wall.intersection(edge);
+                            if (intersection != null && intersection.getY() >= curMaxY
+                                && intersection.getX() <= par1AxisAlignedBB.maxX
+                                && intersection.getX() >= par1AxisAlignedBB.minX
+                                && intersection.getZ() <= par1AxisAlignedBB.maxZ
+                                && intersection.getZ() >= par1AxisAlignedBB.minZ) {
+                                liesOnEdge = true;
+                                if (par1AxisAlignedBB.maxY <= intersection.getY() + 0.75D) {
+                                    var4 = curMaxY - par1AxisAlignedBB.maxY - 0.01D;
+                                    if (var4 < localPar2) {
+                                        localPar2 = var4;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (liesOnEdge) {
+                        if (localPar2 != par2) par2 = localPar2;
+                    } else {
+                        // AABB doesn't intersect any edges. Let's check bottom faces then
+                        List<Plane> faces = new ArrayList<Plane>();
+                        // Checking the lowest face anyway
+                        faces.add(
+                            new Plane(
+                                new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
+                                new Vector3D(
+                                    this.getX(neighbourIndexes[0]),
+                                    this.getY(neighbourIndexes[0]),
+                                    this.getZ(neighbourIndexes[0])),
+                                new Vector3D(
+                                    this.getX(neighbourIndexes[1]),
+                                    this.getY(neighbourIndexes[1]),
+                                    this.getZ(neighbourIndexes[1]))));
+                        if (this.getY(neighbourIndexes[1]) != curMaxY) {
+                            // Checking second face if BB is rotated around at least one axis
+                            faces.add(
+                                new Plane(
+                                    new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
+                                    new Vector3D(
+                                        this.getX(neighbourIndexes[0]),
+                                        this.getY(neighbourIndexes[0]),
+                                        this.getZ(neighbourIndexes[0])),
+                                    new Vector3D(
+                                        this.getX(neighbourIndexes[2]),
+                                        this.getY(neighbourIndexes[2]),
+                                        this.getZ(neighbourIndexes[2]))));
+                            if (this.getY(neighbourIndexes[0]) != curMaxY) {
+                                // Checking third face if BB is rotated around both x and z axises
+                                faces.add(
+                                    new Plane(
+                                        new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
+                                        new Vector3D(
+                                            this.getX(neighbourIndexes[1]),
+                                            this.getY(neighbourIndexes[1]),
+                                            this.getZ(neighbourIndexes[1])),
+                                        new Vector3D(
+                                            this.getX(neighbourIndexes[2]),
+                                            this.getY(neighbourIndexes[2]),
+                                            this.getZ(neighbourIndexes[2]))));
+                            }
+                        }
+
+                        localPar2 = par2;
+                        for (Plane face : faces) {
+                            for (int i = 0; i < 4; i++) {
+                                Vector3D intersection = face.intersection(corners[i]);
+
+                                if (intersection.getY() >= curMaxY
+                                    && par1AxisAlignedBB.maxY <= intersection.getY() + 0.75D) {
+                                    var4 = intersection.getY() - par1AxisAlignedBB.maxY - 0.01D;
+                                    if (var4 < localPar2) {
+                                        localPar2 = var4;
+                                    }
+                                }
+                            }
+                        }
+                        if (localPar2 != par2) par2 = localPar2;
                     }
                 }
             }
