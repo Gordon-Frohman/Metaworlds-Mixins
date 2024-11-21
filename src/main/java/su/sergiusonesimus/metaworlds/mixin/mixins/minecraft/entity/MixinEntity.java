@@ -499,7 +499,6 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             for (int i = 0; i < list.size(); ++i) {
                 curAABB = (AxisAlignedBB) list.get(i);
 
-                yOffset = (curAABB).calculateYOffset(this.boundingBox, y);
                 yOffset = (curAABB).calculateYOffset(this.boundingBox.addCoord(x, 0, z), y);
                 if (yOffset != y) {
                     y = yOffset;
