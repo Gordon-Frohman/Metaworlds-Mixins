@@ -405,9 +405,8 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public double calculateXOffset(AxisAlignedBB par1AxisAlignedBB, double par2) {
-        if (par1AxisAlignedBB.maxY > this.minY && par1AxisAlignedBB.minY < this.maxY
-            && par1AxisAlignedBB.maxZ > this.minZ
-            && par1AxisAlignedBB.minZ < this.maxZ) {
+        // Checking for intersection works perfectly here, but it may be too resource-intensive
+        if (this.intersectsWith(par1AxisAlignedBB)) {
             double var4;
             double curMaxX;
             int curMaxIndex;
@@ -989,9 +988,8 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public double calculateZOffset(AxisAlignedBB par1AxisAlignedBB, double par2) {
-        if (par1AxisAlignedBB.maxY > this.minY && par1AxisAlignedBB.minY < this.maxY
-            && par1AxisAlignedBB.maxX > this.minX
-            && par1AxisAlignedBB.minX < this.maxX) {
+        // Checking for intersection works perfectly here, but it may be too resource-intensive
+        if (this.intersectsWith(par1AxisAlignedBB)) {
             double var4;
             double curMaxZ;
             int curMaxIndex;

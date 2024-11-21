@@ -500,6 +500,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 curAABB = (AxisAlignedBB) list.get(i);
 
                 yOffset = (curAABB).calculateYOffset(this.boundingBox, y);
+                yOffset = (curAABB).calculateYOffset(this.boundingBox.addCoord(x, 0, z), y);
                 if (yOffset != y) {
                     y = yOffset;
                     if (curAABB instanceof OrientedBB) newWorldBelowFeet = ((OrientedBB) curAABB).lastTransformedBy;
