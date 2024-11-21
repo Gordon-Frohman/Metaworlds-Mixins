@@ -857,29 +857,11 @@ public class OrientedBB extends AxisAlignedBB {
                     // Checking if AABB intersects any bottom edges
                     List<Line> edges = new ArrayList<Line>();
                     // Checking the lowest edge anyway
-                    edges.add(
-                        new Line(
-                            new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                            new Vector3D(
-                                this.getX(neighbourIndexes[0]),
-                                this.getY(neighbourIndexes[0]),
-                                this.getZ(neighbourIndexes[0]))));
+                    edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[0])));
                     // Checking other two edges only if this BB is rotated around both axises
                     if (curMaxY != this.getY(neighbourIndexes[0])) {
-                        edges.add(
-                            new Line(
-                                new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                new Vector3D(
-                                    this.getX(neighbourIndexes[1]),
-                                    this.getY(neighbourIndexes[1]),
-                                    this.getZ(neighbourIndexes[1]))));
-                        edges.add(
-                            new Line(
-                                new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                new Vector3D(
-                                    this.getX(neighbourIndexes[2]),
-                                    this.getY(neighbourIndexes[2]),
-                                    this.getZ(neighbourIndexes[2]))));
+                        edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[1])));
+                        edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
                     }
 
                     double localPar2 = par2;
@@ -911,41 +893,23 @@ public class OrientedBB extends AxisAlignedBB {
                         // Checking the lowest face anyway
                         faces.add(
                             new Plane(
-                                new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                new Vector3D(
-                                    this.getX(neighbourIndexes[0]),
-                                    this.getY(neighbourIndexes[0]),
-                                    this.getZ(neighbourIndexes[0])),
-                                new Vector3D(
-                                    this.getX(neighbourIndexes[1]),
-                                    this.getY(neighbourIndexes[1]),
-                                    this.getZ(neighbourIndexes[1]))));
+                                this.getVertice(curMaxIndex),
+                                this.getVertice(neighbourIndexes[0]),
+                                this.getVertice(neighbourIndexes[1])));
                         if (this.getY(neighbourIndexes[1]) != curMaxY) {
                             // Checking second face if BB is rotated around at least one axis
                             faces.add(
                                 new Plane(
-                                    new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                    new Vector3D(
-                                        this.getX(neighbourIndexes[0]),
-                                        this.getY(neighbourIndexes[0]),
-                                        this.getZ(neighbourIndexes[0])),
-                                    new Vector3D(
-                                        this.getX(neighbourIndexes[2]),
-                                        this.getY(neighbourIndexes[2]),
-                                        this.getZ(neighbourIndexes[2]))));
+                                    this.getVertice(curMaxIndex),
+                                    this.getVertice(neighbourIndexes[0]),
+                                    this.getVertice(neighbourIndexes[2])));
                             if (this.getY(neighbourIndexes[0]) != curMaxY) {
                                 // Checking third face if BB is rotated around both x and z axises
                                 faces.add(
                                     new Plane(
-                                        new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                        new Vector3D(
-                                            this.getX(neighbourIndexes[1]),
-                                            this.getY(neighbourIndexes[1]),
-                                            this.getZ(neighbourIndexes[1])),
-                                        new Vector3D(
-                                            this.getX(neighbourIndexes[2]),
-                                            this.getY(neighbourIndexes[2]),
-                                            this.getZ(neighbourIndexes[2]))));
+                                        this.getVertice(curMaxIndex),
+                                        this.getVertice(neighbourIndexes[1]),
+                                        this.getVertice(neighbourIndexes[2])));
                             }
                         }
 
@@ -1017,29 +981,11 @@ public class OrientedBB extends AxisAlignedBB {
                     // Checking if AABB intersects any top edges
                     List<Line> edges = new ArrayList<Line>();
                     // Checking the highest edge anyway
-                    edges.add(
-                        new Line(
-                            new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                            new Vector3D(
-                                this.getX(neighbourIndexes[0]),
-                                this.getY(neighbourIndexes[0]),
-                                this.getZ(neighbourIndexes[0]))));
+                    edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[0])));
                     // Checking other two edges only if this BB is rotated around both axises
                     if (curMaxY != this.getY(neighbourIndexes[0])) {
-                        edges.add(
-                            new Line(
-                                new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                new Vector3D(
-                                    this.getX(neighbourIndexes[1]),
-                                    this.getY(neighbourIndexes[1]),
-                                    this.getZ(neighbourIndexes[1]))));
-                        edges.add(
-                            new Line(
-                                new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                new Vector3D(
-                                    this.getX(neighbourIndexes[2]),
-                                    this.getY(neighbourIndexes[2]),
-                                    this.getZ(neighbourIndexes[2]))));
+                        edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[1])));
+                        edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
                     }
 
                     double localPar2 = par2;
@@ -1071,41 +1017,23 @@ public class OrientedBB extends AxisAlignedBB {
                         // Checking the highest face anyway
                         faces.add(
                             new Plane(
-                                new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                new Vector3D(
-                                    this.getX(neighbourIndexes[0]),
-                                    this.getY(neighbourIndexes[0]),
-                                    this.getZ(neighbourIndexes[0])),
-                                new Vector3D(
-                                    this.getX(neighbourIndexes[1]),
-                                    this.getY(neighbourIndexes[1]),
-                                    this.getZ(neighbourIndexes[1]))));
+                                this.getVertice(curMaxIndex),
+                                this.getVertice(neighbourIndexes[0]),
+                                this.getVertice(neighbourIndexes[1])));
                         if (this.getY(neighbourIndexes[1]) != curMaxY) {
                             // Checking second face if BB is rotated around at least one axis
                             faces.add(
                                 new Plane(
-                                    new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                    new Vector3D(
-                                        this.getX(neighbourIndexes[0]),
-                                        this.getY(neighbourIndexes[0]),
-                                        this.getZ(neighbourIndexes[0])),
-                                    new Vector3D(
-                                        this.getX(neighbourIndexes[2]),
-                                        this.getY(neighbourIndexes[2]),
-                                        this.getZ(neighbourIndexes[2]))));
+                                    this.getVertice(curMaxIndex),
+                                    this.getVertice(neighbourIndexes[0]),
+                                    this.getVertice(neighbourIndexes[2])));
                             if (this.getY(neighbourIndexes[0]) != curMaxY) {
                                 // Checking third face if BB is rotated around both x and z axises
                                 faces.add(
                                     new Plane(
-                                        new Vector3D(this.getX(curMaxIndex), curMaxY, this.getZ(curMaxIndex)),
-                                        new Vector3D(
-                                            this.getX(neighbourIndexes[1]),
-                                            this.getY(neighbourIndexes[1]),
-                                            this.getZ(neighbourIndexes[1])),
-                                        new Vector3D(
-                                            this.getX(neighbourIndexes[2]),
-                                            this.getY(neighbourIndexes[2]),
-                                            this.getZ(neighbourIndexes[2]))));
+                                        this.getVertice(curMaxIndex),
+                                        this.getVertice(neighbourIndexes[1]),
+                                        this.getVertice(neighbourIndexes[2])));
                             }
                         }
 
