@@ -405,79 +405,369 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public double calculateXOffset(AxisAlignedBB par1AxisAlignedBB, double par2) {
-        if (par1AxisAlignedBB.maxY > this.minY && par1AxisAlignedBB.minY < this.maxY
-            && par1AxisAlignedBB.maxZ > this.minZ
-            && par1AxisAlignedBB.minZ < this.maxZ) {
-            double var4;
-            double curMaxX;
-            int curMaxIndex;
-            int neighbourIndex;
-            if (par2 > 0.0D) {
-                curMaxX = this.getX(0);
-                curMaxIndex = 0;
+        if (((IMixinWorld) this.lastTransformedBy).getRotationPitch() != 0
+            || ((IMixinWorld) this.lastTransformedBy).getRotationRoll() != 0) {
+            // Checking for intersection works perfectly here, but it may be too resource-intensive
+            if (this.intersectsWith(par1AxisAlignedBB)) {
+                double var4;
+                double curMaxX;
+                int curMaxIndex;
+                int[] neighbourIndexes = new int[3];
+                int neighbourIndex;
+                Line[] corners = {
+                    new Line(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)),
+                    new Line(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                    new Line(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
+                    new Line(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)) };
+                Plane[] walls = {
+                    new Plane(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)),
+                    new Plane(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
+                    new Plane(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                    new Plane(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)) };
 
-                for (neighbourIndex = 1; neighbourIndex < 4; ++neighbourIndex) {
-                    if (this.getX(neighbourIndex) < curMaxX) {
-                        curMaxX = this.getX(neighbourIndex);
-                        curMaxIndex = neighbourIndex;
+                if (par2 > 0.0D) {
+                    curMaxX = this.getX(0);
+                    curMaxIndex = 0;
+
+                    for (neighbourIndex = 1; neighbourIndex < 8; ++neighbourIndex) {
+                        double curX = this.getX(neighbourIndex);
+                        if (curX < curMaxX) {
+                            curMaxX = curX;
+                            curMaxIndex = neighbourIndex;
+                        }
+                    }
+
+                    neighbourIndexes[0] = this.getCCWNeighbourIndexXZ(curMaxIndex);
+                    neighbourIndexes[1] = this.getCWNeighbourIndexXZ(curMaxIndex);
+                    neighbourIndexes[2] = curMaxIndex < 4 ? curMaxIndex + 4 : curMaxIndex - 4;
+
+                    while (!(this.getX(neighbourIndexes[0]) <= this.getX(neighbourIndexes[1])
+                        && this.getX(neighbourIndexes[1]) <= this.getX(neighbourIndexes[2]))) {
+                        if (this.getX(neighbourIndexes[0]) > this.getX(neighbourIndexes[1])) {
+                            int t = neighbourIndexes[0];
+                            neighbourIndexes[0] = neighbourIndexes[1];
+                            neighbourIndexes[1] = t;
+                        }
+                        if (this.getX(neighbourIndexes[1]) > this.getX(neighbourIndexes[2])) {
+                            int t = neighbourIndexes[1];
+                            neighbourIndexes[1] = neighbourIndexes[2];
+                            neighbourIndexes[2] = t;
+                        }
+                    }
+
+                    if ((this.getX(curMaxIndex) == this.getX(neighbourIndexes[0])
+                        && this.getX(neighbourIndexes[0]) == this.getX(neighbourIndexes[1]))
+                        || (this.getY(curMaxIndex) <= par1AxisAlignedBB.maxY
+                            && this.getY(curMaxIndex) >= par1AxisAlignedBB.minY
+                            && this.getZ(curMaxIndex) <= par1AxisAlignedBB.maxZ
+                            && this.getZ(curMaxIndex) >= par1AxisAlignedBB.minZ)) {
+
+                        // Either this BB is not rotated around y/z, or
+                        // Target AABB contains the smallest x point
+                        if (par1AxisAlignedBB.maxX <= curMaxX + 0.75D) {
+                            var4 = curMaxX - par1AxisAlignedBB.maxX - 0.01D;
+                            if (var4 < par2) {
+                                par2 = var4;
+                            }
+                        }
+                    } else {
+                        // Checking if AABB intersects any negative x edges
+                        List<Line> edges = new ArrayList<Line>();
+                        // Checking the closest edge anyway
+                        edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[0])));
+                        // Checking other two edges only if this BB is rotated around both axises
+                        if (curMaxX != this.getX(neighbourIndexes[0])) {
+                            edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[1])));
+                            edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
+                        }
+
+                        double localPar2 = par2;
+                        boolean liesOnEdge = false;
+                        for (Line edge : edges) {
+                            for (Plane wall : walls) {
+                                Vector3D intersection = wall.intersection(edge);
+                                if (intersection != null && intersection.getX() >= curMaxX
+                                    && intersection.getY() <= par1AxisAlignedBB.maxY
+                                    && intersection.getY() >= par1AxisAlignedBB.minY
+                                    && intersection.getZ() <= par1AxisAlignedBB.maxZ
+                                    && intersection.getZ() >= par1AxisAlignedBB.minZ) {
+                                    liesOnEdge = true;
+                                    if (par1AxisAlignedBB.maxX <= intersection.getX() + 0.75D) {
+                                        var4 = curMaxX - par1AxisAlignedBB.maxX - 0.01D;
+                                        if (var4 < localPar2) {
+                                            localPar2 = var4;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (liesOnEdge) {
+                            if (localPar2 != par2) par2 = localPar2;
+                        } else {
+                            // AABB doesn't intersect any edges. Let's check negative x faces then
+                            List<Plane> faces = new ArrayList<Plane>();
+                            // Checking the closest face anyway
+                            faces.add(
+                                new Plane(
+                                    this.getVertice(curMaxIndex),
+                                    this.getVertice(neighbourIndexes[0]),
+                                    this.getVertice(neighbourIndexes[1])));
+                            if (this.getX(neighbourIndexes[1]) != curMaxX) {
+                                // Checking second face if BB is rotated around at least one axis
+                                faces.add(
+                                    new Plane(
+                                        this.getVertice(curMaxIndex),
+                                        this.getVertice(neighbourIndexes[0]),
+                                        this.getVertice(neighbourIndexes[2])));
+                                if (this.getX(neighbourIndexes[0]) != curMaxX) {
+                                    // Checking third face if BB is rotated around both y and z axises
+                                    faces.add(
+                                        new Plane(
+                                            this.getVertice(curMaxIndex),
+                                            this.getVertice(neighbourIndexes[1]),
+                                            this.getVertice(neighbourIndexes[2])));
+                                }
+                            }
+
+                            localPar2 = par2;
+                            for (Plane face : faces) {
+                                for (int i = 0; i < 4; i++) {
+                                    Vector3D intersection = face.intersection(corners[i]);
+
+                                    if (intersection.getX() >= curMaxX
+                                        && par1AxisAlignedBB.maxX <= intersection.getX() + 0.75D) {
+                                        var4 = intersection.getX() - par1AxisAlignedBB.maxX - 0.01D;
+                                        if (var4 < localPar2) {
+                                            localPar2 = var4;
+                                        }
+                                    }
+                                }
+                            }
+                            if (localPar2 != par2) par2 = localPar2;
+                        }
                     }
                 }
 
-                if (this.getZ(curMaxIndex) <= par1AxisAlignedBB.minZ) {
-                    neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
-                    if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
-                        curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
-                            * (par1AxisAlignedBB.minZ - this.getZ(neighbourIndex))
-                            / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
-                    }
-                } else if (this.getZ(curMaxIndex) >= par1AxisAlignedBB.maxZ) {
-                    neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
-                    if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
-                        curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
-                            * (par1AxisAlignedBB.maxZ - this.getZ(neighbourIndex))
-                            / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
-                    }
-                }
+                if (par2 < 0.0D) {
+                    curMaxX = this.getX(0);
+                    curMaxIndex = 0;
 
-                if (par1AxisAlignedBB.maxX <= curMaxX + 0.75D) {
-                    var4 = curMaxX - par1AxisAlignedBB.maxX - 0.01D;
-                    if (var4 < par2) {
-                        par2 = var4;
+                    for (neighbourIndex = 1; neighbourIndex < 8; ++neighbourIndex) {
+                        double curX = this.getX(neighbourIndex);
+                        if (curX > curMaxX) {
+                            curMaxX = curX;
+                            curMaxIndex = neighbourIndex;
+                        }
+                    }
+
+                    neighbourIndexes[0] = this.getCCWNeighbourIndexXZ(curMaxIndex);
+                    neighbourIndexes[1] = this.getCWNeighbourIndexXZ(curMaxIndex);
+                    neighbourIndexes[2] = curMaxIndex < 4 ? curMaxIndex + 4 : curMaxIndex - 4;
+
+                    while (!(this.getX(neighbourIndexes[0]) >= this.getX(neighbourIndexes[1])
+                        && this.getX(neighbourIndexes[1]) >= this.getX(neighbourIndexes[2]))) {
+                        if (this.getX(neighbourIndexes[0]) < this.getX(neighbourIndexes[1])) {
+                            int t = neighbourIndexes[0];
+                            neighbourIndexes[0] = neighbourIndexes[1];
+                            neighbourIndexes[1] = t;
+                        }
+                        if (this.getX(neighbourIndexes[1]) < this.getX(neighbourIndexes[2])) {
+                            int t = neighbourIndexes[1];
+                            neighbourIndexes[1] = neighbourIndexes[2];
+                            neighbourIndexes[2] = t;
+                        }
+                    }
+
+                    if ((this.getX(curMaxIndex) == this.getX(neighbourIndexes[0])
+                        && this.getX(neighbourIndexes[0]) == this.getX(neighbourIndexes[1]))
+                        || (this.getY(curMaxIndex) <= par1AxisAlignedBB.maxY
+                            && this.getY(curMaxIndex) >= par1AxisAlignedBB.minY
+                            && this.getZ(curMaxIndex) <= par1AxisAlignedBB.maxZ
+                            && this.getZ(curMaxIndex) >= par1AxisAlignedBB.minZ)) {
+
+                        // Either this BB is not rotated around y/z, or
+                        // Target AABB contains the biggest x point
+                        if (par1AxisAlignedBB.minX >= curMaxX - 0.75D) {
+                            var4 = curMaxX - par1AxisAlignedBB.minX + 0.01D;
+                            if (var4 > par2) {
+                                par2 = var4;
+                            }
+                        }
+                    } else {
+                        // Checking if AABB intersects any positive x edges
+                        List<Line> edges = new ArrayList<Line>();
+                        // Checking the closest edge anyway
+                        edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[0])));
+                        // Checking other two edges only if this BB is rotated around both axises
+                        if (curMaxX != this.getX(neighbourIndexes[0])) {
+                            edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[1])));
+                            edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
+                        }
+
+                        double localPar2 = par2;
+                        boolean liesOnEdge = false;
+                        for (Line edge : edges) {
+                            for (Plane wall : walls) {
+                                Vector3D intersection = wall.intersection(edge);
+                                if (intersection != null && intersection.getX() <= curMaxX
+                                    && intersection.getY() <= par1AxisAlignedBB.maxY
+                                    && intersection.getY() >= par1AxisAlignedBB.minY
+                                    && intersection.getZ() <= par1AxisAlignedBB.maxZ
+                                    && intersection.getZ() >= par1AxisAlignedBB.minZ) {
+                                    liesOnEdge = true;
+                                    if (par1AxisAlignedBB.minX >= intersection.getX() - 0.75D) {
+                                        var4 = curMaxX - par1AxisAlignedBB.minX + 0.01D;
+                                        if (var4 > localPar2) {
+                                            localPar2 = var4;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (liesOnEdge) {
+                            if (localPar2 != par2) par2 = localPar2;
+                        } else {
+                            // AABB doesn't intersect any edges. Let's check positive x faces then
+                            List<Plane> faces = new ArrayList<Plane>();
+                            // Checking the closest face anyway
+                            faces.add(
+                                new Plane(
+                                    this.getVertice(curMaxIndex),
+                                    this.getVertice(neighbourIndexes[0]),
+                                    this.getVertice(neighbourIndexes[1])));
+                            if (this.getX(neighbourIndexes[1]) != curMaxX) {
+                                // Checking second face if BB is rotated around at least one axis
+                                faces.add(
+                                    new Plane(
+                                        this.getVertice(curMaxIndex),
+                                        this.getVertice(neighbourIndexes[0]),
+                                        this.getVertice(neighbourIndexes[2])));
+                                if (this.getX(neighbourIndexes[0]) != curMaxX) {
+                                    // Checking third face if BB is rotated around both y and z axises
+                                    faces.add(
+                                        new Plane(
+                                            this.getVertice(curMaxIndex),
+                                            this.getVertice(neighbourIndexes[1]),
+                                            this.getVertice(neighbourIndexes[2])));
+                                }
+                            }
+
+                            localPar2 = par2;
+                            for (Plane face : faces) {
+                                for (int i = 0; i < 4; i++) {
+                                    Vector3D intersection = face.intersection(corners[i]);
+
+                                    if (intersection.getX() <= curMaxX
+                                        && par1AxisAlignedBB.minX >= intersection.getX() - 0.75D) {
+                                        var4 = intersection.getX() - par1AxisAlignedBB.minX + 0.01D;
+                                        if (var4 > localPar2) {
+                                            localPar2 = var4;
+                                        }
+                                    }
+                                }
+                            }
+                            if (localPar2 != par2) par2 = localPar2;
+                        }
                     }
                 }
             }
+        } else {
+            if (par1AxisAlignedBB.maxY > this.minY && par1AxisAlignedBB.minY < this.maxY
+                && par1AxisAlignedBB.maxZ > this.minZ
+                && par1AxisAlignedBB.minZ < this.maxZ) {
+                double var4;
+                double curMaxX;
+                int curMaxIndex;
+                int neighbourIndex;
+                if (par2 > 0.0D) {
+                    curMaxX = this.getX(0);
+                    curMaxIndex = 0;
 
-            if (par2 < 0.0D) {
-                curMaxX = this.getX(0);
-                curMaxIndex = 0;
+                    for (neighbourIndex = 1; neighbourIndex < 4; ++neighbourIndex) {
+                        if (this.getX(neighbourIndex) < curMaxX) {
+                            curMaxX = this.getX(neighbourIndex);
+                            curMaxIndex = neighbourIndex;
+                        }
+                    }
 
-                for (neighbourIndex = 1; neighbourIndex < 4; ++neighbourIndex) {
-                    if (this.getX(neighbourIndex) > curMaxX) {
-                        curMaxX = this.getX(neighbourIndex);
-                        curMaxIndex = neighbourIndex;
+                    if (this.getZ(curMaxIndex) <= par1AxisAlignedBB.minZ) {
+                        neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
+                        if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
+                            curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
+                                * (par1AxisAlignedBB.minZ - this.getZ(neighbourIndex))
+                                / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
+                        }
+                    } else if (this.getZ(curMaxIndex) >= par1AxisAlignedBB.maxZ) {
+                        neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
+                        if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
+                            curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
+                                * (par1AxisAlignedBB.maxZ - this.getZ(neighbourIndex))
+                                / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
+                        }
+                    }
+
+                    if (par1AxisAlignedBB.maxX <= curMaxX + 0.75D) {
+                        var4 = curMaxX - par1AxisAlignedBB.maxX - 0.01D;
+                        if (var4 < par2) {
+                            par2 = var4;
+                        }
                     }
                 }
 
-                if (this.getZ(curMaxIndex) <= par1AxisAlignedBB.minZ) {
-                    neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
-                    if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
-                        curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
-                            * (par1AxisAlignedBB.minZ - this.getZ(neighbourIndex))
-                            / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
-                    }
-                } else if (this.getZ(curMaxIndex) >= par1AxisAlignedBB.maxZ) {
-                    neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
-                    if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
-                        curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
-                            * (par1AxisAlignedBB.maxZ - this.getZ(neighbourIndex))
-                            / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
-                    }
-                }
+                if (par2 < 0.0D) {
+                    curMaxX = this.getX(0);
+                    curMaxIndex = 0;
 
-                if (par1AxisAlignedBB.minX >= curMaxX - 0.75D) {
-                    var4 = curMaxX - par1AxisAlignedBB.minX + 0.01D;
-                    if (var4 > par2) {
-                        par2 = var4;
+                    for (neighbourIndex = 1; neighbourIndex < 4; ++neighbourIndex) {
+                        if (this.getX(neighbourIndex) > curMaxX) {
+                            curMaxX = this.getX(neighbourIndex);
+                            curMaxIndex = neighbourIndex;
+                        }
+                    }
+
+                    if (this.getZ(curMaxIndex) <= par1AxisAlignedBB.minZ) {
+                        neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
+                        if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
+                            curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
+                                * (par1AxisAlignedBB.minZ - this.getZ(neighbourIndex))
+                                / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
+                        }
+                    } else if (this.getZ(curMaxIndex) >= par1AxisAlignedBB.maxZ) {
+                        neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
+                        if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
+                            curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
+                                * (par1AxisAlignedBB.maxZ - this.getZ(neighbourIndex))
+                                / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
+                        }
+                    }
+
+                    if (par1AxisAlignedBB.minX >= curMaxX - 0.75D) {
+                        var4 = curMaxX - par1AxisAlignedBB.minX + 0.01D;
+                        if (var4 > par2) {
+                            par2 = var4;
+                        }
                     }
                 }
             }
@@ -779,79 +1069,369 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public double calculateZOffset(AxisAlignedBB par1AxisAlignedBB, double par2) {
-        if (par1AxisAlignedBB.maxY > this.minY && par1AxisAlignedBB.minY < this.maxY
-            && par1AxisAlignedBB.maxX > this.minX
-            && par1AxisAlignedBB.minX < this.maxX) {
-            double var4;
-            double curMaxZ;
-            int curMaxIndex;
-            int neighbourIndex;
-            if (par2 > 0.0D) {
-                curMaxZ = this.getZ(0);
-                curMaxIndex = 0;
+        if (((IMixinWorld) this.lastTransformedBy).getRotationPitch() != 0
+            || ((IMixinWorld) this.lastTransformedBy).getRotationRoll() != 0) {
+            // Checking for intersection works perfectly here, but it may be too resource-intensive
+            if (this.intersectsWith(par1AxisAlignedBB)) {
+                double var4;
+                double curMaxZ;
+                int curMaxIndex;
+                int[] neighbourIndexes = new int[3];
+                int neighbourIndex;
+                Line[] corners = {
+                    new Line(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                    new Line(
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                    new Line(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)),
+                    new Line(
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)) };
+                Plane[] walls = {
+                    new Plane(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                    new Plane(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
+                    new Plane(
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                    new Plane(
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
+                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
+                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)) };
 
-                for (neighbourIndex = 1; neighbourIndex < 4; ++neighbourIndex) {
-                    if (this.getZ(neighbourIndex) < curMaxZ) {
-                        curMaxZ = this.getZ(neighbourIndex);
-                        curMaxIndex = neighbourIndex;
+                if (par2 > 0.0D) {
+                    curMaxZ = this.getZ(0);
+                    curMaxIndex = 0;
+
+                    for (neighbourIndex = 1; neighbourIndex < 8; ++neighbourIndex) {
+                        double curZ = this.getZ(neighbourIndex);
+                        if (curZ < curMaxZ) {
+                            curMaxZ = curZ;
+                            curMaxIndex = neighbourIndex;
+                        }
+                    }
+
+                    neighbourIndexes[0] = this.getCCWNeighbourIndexXZ(curMaxIndex);
+                    neighbourIndexes[1] = this.getCWNeighbourIndexXZ(curMaxIndex);
+                    neighbourIndexes[2] = curMaxIndex < 4 ? curMaxIndex + 4 : curMaxIndex - 4;
+
+                    while (!(this.getZ(neighbourIndexes[0]) <= this.getZ(neighbourIndexes[1])
+                        && this.getZ(neighbourIndexes[1]) <= this.getZ(neighbourIndexes[2]))) {
+                        if (this.getZ(neighbourIndexes[0]) > this.getZ(neighbourIndexes[1])) {
+                            int t = neighbourIndexes[0];
+                            neighbourIndexes[0] = neighbourIndexes[1];
+                            neighbourIndexes[1] = t;
+                        }
+                        if (this.getZ(neighbourIndexes[1]) > this.getZ(neighbourIndexes[2])) {
+                            int t = neighbourIndexes[1];
+                            neighbourIndexes[1] = neighbourIndexes[2];
+                            neighbourIndexes[2] = t;
+                        }
+                    }
+
+                    if ((this.getZ(curMaxIndex) == this.getZ(neighbourIndexes[0])
+                        && this.getZ(neighbourIndexes[0]) == this.getZ(neighbourIndexes[1]))
+                        || (this.getY(curMaxIndex) <= par1AxisAlignedBB.maxY
+                            && this.getY(curMaxIndex) >= par1AxisAlignedBB.minY
+                            && this.getX(curMaxIndex) <= par1AxisAlignedBB.maxX
+                            && this.getX(curMaxIndex) >= par1AxisAlignedBB.minX)) {
+
+                        // Either this BB is not rotated around y/x, or
+                        // Target AABB contains the smallest z point
+                        if (par1AxisAlignedBB.maxZ <= curMaxZ + 0.75D) {
+                            var4 = curMaxZ - par1AxisAlignedBB.maxZ - 0.01D;
+                            if (var4 < par2) {
+                                par2 = var4;
+                            }
+                        }
+                    } else {
+                        // Checking if AABB intersects any negative z edges
+                        List<Line> edges = new ArrayList<Line>();
+                        // Checking the closest edge anyway
+                        edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[0])));
+                        // Checking other two edges only if this BB is rotated around both axises
+                        if (curMaxZ != this.getZ(neighbourIndexes[0])) {
+                            edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[1])));
+                            edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
+                        }
+
+                        double localPar2 = par2;
+                        boolean liesOnEdge = false;
+                        for (Line edge : edges) {
+                            for (Plane wall : walls) {
+                                Vector3D intersection = wall.intersection(edge);
+                                if (intersection != null && intersection.getZ() >= curMaxZ
+                                    && intersection.getY() <= par1AxisAlignedBB.maxY
+                                    && intersection.getY() >= par1AxisAlignedBB.minY
+                                    && intersection.getX() <= par1AxisAlignedBB.maxX
+                                    && intersection.getX() >= par1AxisAlignedBB.minX) {
+                                    liesOnEdge = true;
+                                    if (par1AxisAlignedBB.maxZ <= intersection.getZ() + 0.75D) {
+                                        var4 = curMaxZ - par1AxisAlignedBB.maxZ - 0.01D;
+                                        if (var4 < localPar2) {
+                                            localPar2 = var4;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (liesOnEdge) {
+                            if (localPar2 != par2) par2 = localPar2;
+                        } else {
+                            // AABB doesn't intersect any edges. Let's check negative z faces then
+                            List<Plane> faces = new ArrayList<Plane>();
+                            // Checking the closest face anyway
+                            faces.add(
+                                new Plane(
+                                    this.getVertice(curMaxIndex),
+                                    this.getVertice(neighbourIndexes[0]),
+                                    this.getVertice(neighbourIndexes[1])));
+                            if (this.getZ(neighbourIndexes[1]) != curMaxZ) {
+                                // Checking second face if BB is rotated around at least one axis
+                                faces.add(
+                                    new Plane(
+                                        this.getVertice(curMaxIndex),
+                                        this.getVertice(neighbourIndexes[0]),
+                                        this.getVertice(neighbourIndexes[2])));
+                                if (this.getZ(neighbourIndexes[0]) != curMaxZ) {
+                                    // Checking third face if BB is rotated around both y and x axises
+                                    faces.add(
+                                        new Plane(
+                                            this.getVertice(curMaxIndex),
+                                            this.getVertice(neighbourIndexes[1]),
+                                            this.getVertice(neighbourIndexes[2])));
+                                }
+                            }
+
+                            localPar2 = par2;
+                            for (Plane face : faces) {
+                                for (int i = 0; i < 4; i++) {
+                                    Vector3D intersection = face.intersection(corners[i]);
+
+                                    if (intersection.getZ() >= curMaxZ
+                                        && par1AxisAlignedBB.maxZ <= intersection.getZ() + 0.75D) {
+                                        var4 = intersection.getZ() - par1AxisAlignedBB.maxZ - 0.01D;
+                                        if (var4 < localPar2) {
+                                            localPar2 = var4;
+                                        }
+                                    }
+                                }
+                            }
+                            if (localPar2 != par2) par2 = localPar2;
+                        }
                     }
                 }
 
-                if (this.getX(curMaxIndex) <= par1AxisAlignedBB.minX) {
-                    neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
-                    if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
-                        curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
-                            * (par1AxisAlignedBB.minX - this.getX(neighbourIndex))
-                            / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
-                    }
-                } else if (this.getX(curMaxIndex) >= par1AxisAlignedBB.maxX) {
-                    neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
-                    if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
-                        curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
-                            * (par1AxisAlignedBB.maxX - this.getX(neighbourIndex))
-                            / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
-                    }
-                }
+                if (par2 < 0.0D) {
+                    curMaxZ = this.getZ(0);
+                    curMaxIndex = 0;
 
-                if (par1AxisAlignedBB.maxZ <= curMaxZ + 0.75D) {
-                    var4 = curMaxZ - par1AxisAlignedBB.maxZ - 0.01D;
-                    if (var4 < par2) {
-                        par2 = var4;
+                    for (neighbourIndex = 1; neighbourIndex < 8; ++neighbourIndex) {
+                        double curZ = this.getZ(neighbourIndex);
+                        if (curZ > curMaxZ) {
+                            curMaxZ = curZ;
+                            curMaxIndex = neighbourIndex;
+                        }
+                    }
+
+                    neighbourIndexes[0] = this.getCCWNeighbourIndexXZ(curMaxIndex);
+                    neighbourIndexes[1] = this.getCWNeighbourIndexXZ(curMaxIndex);
+                    neighbourIndexes[2] = curMaxIndex < 4 ? curMaxIndex + 4 : curMaxIndex - 4;
+
+                    while (!(this.getZ(neighbourIndexes[0]) >= this.getZ(neighbourIndexes[1])
+                        && this.getZ(neighbourIndexes[1]) >= this.getZ(neighbourIndexes[2]))) {
+                        if (this.getZ(neighbourIndexes[0]) < this.getZ(neighbourIndexes[1])) {
+                            int t = neighbourIndexes[0];
+                            neighbourIndexes[0] = neighbourIndexes[1];
+                            neighbourIndexes[1] = t;
+                        }
+                        if (this.getZ(neighbourIndexes[1]) < this.getZ(neighbourIndexes[2])) {
+                            int t = neighbourIndexes[1];
+                            neighbourIndexes[1] = neighbourIndexes[2];
+                            neighbourIndexes[2] = t;
+                        }
+                    }
+
+                    if ((this.getZ(curMaxIndex) == this.getZ(neighbourIndexes[0])
+                        && this.getZ(neighbourIndexes[0]) == this.getZ(neighbourIndexes[1]))
+                        || (this.getY(curMaxIndex) <= par1AxisAlignedBB.maxY
+                            && this.getY(curMaxIndex) >= par1AxisAlignedBB.minY
+                            && this.getX(curMaxIndex) <= par1AxisAlignedBB.maxX
+                            && this.getX(curMaxIndex) >= par1AxisAlignedBB.minX)) {
+
+                        // Either this BB is not rotated around y/x, or
+                        // Target AABB contains the biggest z point
+                        if (par1AxisAlignedBB.minZ >= curMaxZ - 0.75D) {
+                            var4 = curMaxZ - par1AxisAlignedBB.minZ + 0.01D;
+                            if (var4 > par2) {
+                                par2 = var4;
+                            }
+                        }
+                    } else {
+                        // Checking if AABB intersects any positive z edges
+                        List<Line> edges = new ArrayList<Line>();
+                        // Checking the closest edge anyway
+                        edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[0])));
+                        // Checking other two edges only if this BB is rotated around both axises
+                        if (curMaxZ != this.getZ(neighbourIndexes[0])) {
+                            edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[1])));
+                            edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
+                        }
+
+                        double localPar2 = par2;
+                        boolean liesOnEdge = false;
+                        for (Line edge : edges) {
+                            for (Plane wall : walls) {
+                                Vector3D intersection = wall.intersection(edge);
+                                if (intersection != null && intersection.getZ() <= curMaxZ
+                                    && intersection.getY() <= par1AxisAlignedBB.maxY
+                                    && intersection.getY() >= par1AxisAlignedBB.minY
+                                    && intersection.getX() <= par1AxisAlignedBB.maxX
+                                    && intersection.getX() >= par1AxisAlignedBB.minX) {
+                                    liesOnEdge = true;
+                                    if (par1AxisAlignedBB.minZ >= intersection.getZ() - 0.75D) {
+                                        var4 = curMaxZ - par1AxisAlignedBB.minZ + 0.01D;
+                                        if (var4 > localPar2) {
+                                            localPar2 = var4;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (liesOnEdge) {
+                            if (localPar2 != par2) par2 = localPar2;
+                        } else {
+                            // AABB doesn't intersect any edges. Let's check positive z faces then
+                            List<Plane> faces = new ArrayList<Plane>();
+                            // Checking the closest face anyway
+                            faces.add(
+                                new Plane(
+                                    this.getVertice(curMaxIndex),
+                                    this.getVertice(neighbourIndexes[0]),
+                                    this.getVertice(neighbourIndexes[1])));
+                            if (this.getZ(neighbourIndexes[1]) != curMaxZ) {
+                                // Checking second face if BB is rotated around at least one axis
+                                faces.add(
+                                    new Plane(
+                                        this.getVertice(curMaxIndex),
+                                        this.getVertice(neighbourIndexes[0]),
+                                        this.getVertice(neighbourIndexes[2])));
+                                if (this.getZ(neighbourIndexes[0]) != curMaxZ) {
+                                    // Checking third face if BB is rotated around both y and x axises
+                                    faces.add(
+                                        new Plane(
+                                            this.getVertice(curMaxIndex),
+                                            this.getVertice(neighbourIndexes[1]),
+                                            this.getVertice(neighbourIndexes[2])));
+                                }
+                            }
+
+                            localPar2 = par2;
+                            for (Plane face : faces) {
+                                for (int i = 0; i < 4; i++) {
+                                    Vector3D intersection = face.intersection(corners[i]);
+
+                                    if (intersection.getZ() <= curMaxZ
+                                        && par1AxisAlignedBB.minZ >= intersection.getZ() - 0.75D) {
+                                        var4 = intersection.getZ() - par1AxisAlignedBB.minZ + 0.01D;
+                                        if (var4 > localPar2) {
+                                            localPar2 = var4;
+                                        }
+                                    }
+                                }
+                            }
+                            if (localPar2 != par2) par2 = localPar2;
+                        }
                     }
                 }
             }
+        } else {
+            if (par1AxisAlignedBB.maxY > this.minY && par1AxisAlignedBB.minY < this.maxY
+                && par1AxisAlignedBB.maxX > this.minX
+                && par1AxisAlignedBB.minX < this.maxX) {
+                double var4;
+                double curMaxZ;
+                int curMaxIndex;
+                int neighbourIndex;
+                if (par2 > 0.0D) {
+                    curMaxZ = this.getZ(0);
+                    curMaxIndex = 0;
 
-            if (par2 < 0.0D) {
-                curMaxZ = this.getZ(0);
-                curMaxIndex = 0;
+                    for (neighbourIndex = 1; neighbourIndex < 4; ++neighbourIndex) {
+                        if (this.getZ(neighbourIndex) < curMaxZ) {
+                            curMaxZ = this.getZ(neighbourIndex);
+                            curMaxIndex = neighbourIndex;
+                        }
+                    }
 
-                for (neighbourIndex = 1; neighbourIndex < 4; ++neighbourIndex) {
-                    if (this.getZ(neighbourIndex) > curMaxZ) {
-                        curMaxZ = this.getZ(neighbourIndex);
-                        curMaxIndex = neighbourIndex;
+                    if (this.getX(curMaxIndex) <= par1AxisAlignedBB.minX) {
+                        neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
+                        if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
+                            curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
+                                * (par1AxisAlignedBB.minX - this.getX(neighbourIndex))
+                                / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
+                        }
+                    } else if (this.getX(curMaxIndex) >= par1AxisAlignedBB.maxX) {
+                        neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
+                        if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
+                            curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
+                                * (par1AxisAlignedBB.maxX - this.getX(neighbourIndex))
+                                / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
+                        }
+                    }
+
+                    if (par1AxisAlignedBB.maxZ <= curMaxZ + 0.75D) {
+                        var4 = curMaxZ - par1AxisAlignedBB.maxZ - 0.01D;
+                        if (var4 < par2) {
+                            par2 = var4;
+                        }
                     }
                 }
 
-                if (this.getX(curMaxIndex) <= par1AxisAlignedBB.minX) {
-                    neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
-                    if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
-                        curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
-                            * (par1AxisAlignedBB.minX - this.getX(neighbourIndex))
-                            / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
-                    }
-                } else if (this.getX(curMaxIndex) >= par1AxisAlignedBB.maxX) {
-                    neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
-                    if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
-                        curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
-                            * (par1AxisAlignedBB.maxX - this.getX(neighbourIndex))
-                            / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
-                    }
-                }
+                if (par2 < 0.0D) {
+                    curMaxZ = this.getZ(0);
+                    curMaxIndex = 0;
 
-                if (par1AxisAlignedBB.minZ >= curMaxZ - 0.75D) {
-                    var4 = curMaxZ - par1AxisAlignedBB.minZ + 0.01D;
-                    if (var4 > par2) {
-                        par2 = var4;
+                    for (neighbourIndex = 1; neighbourIndex < 4; ++neighbourIndex) {
+                        if (this.getZ(neighbourIndex) > curMaxZ) {
+                            curMaxZ = this.getZ(neighbourIndex);
+                            curMaxIndex = neighbourIndex;
+                        }
+                    }
+
+                    if (this.getX(curMaxIndex) <= par1AxisAlignedBB.minX) {
+                        neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
+                        if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
+                            curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
+                                * (par1AxisAlignedBB.minX - this.getX(neighbourIndex))
+                                / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
+                        }
+                    } else if (this.getX(curMaxIndex) >= par1AxisAlignedBB.maxX) {
+                        neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
+                        if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
+                            curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
+                                * (par1AxisAlignedBB.maxX - this.getX(neighbourIndex))
+                                / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
+                        }
+                    }
+
+                    if (par1AxisAlignedBB.minZ >= curMaxZ - 0.75D) {
+                        var4 = curMaxZ - par1AxisAlignedBB.minZ + 0.01D;
+                        if (var4 > par2) {
+                            par2 = var4;
+                        }
                     }
                 }
             }
