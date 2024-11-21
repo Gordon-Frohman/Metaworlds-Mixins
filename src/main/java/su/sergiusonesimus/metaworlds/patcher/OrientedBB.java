@@ -619,7 +619,7 @@ public class OrientedBB extends AxisAlignedBB {
                     // Checking the closest edge anyway
                     edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[0])));
                     // Checking other two edges only if this BB is rotated around both axises
-                    if (curMaxX != this.getZ(neighbourIndexes[0])) {
+                    if (curMaxX != this.getX(neighbourIndexes[0])) {
                         edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[1])));
                         edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
                     }
