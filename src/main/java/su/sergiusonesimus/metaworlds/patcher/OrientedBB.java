@@ -15,7 +15,7 @@ import org.jblas.DoubleMatrix;
 
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
-import su.sergiusonesimus.metaworlds.utility.GeometryHelper;
+import su.sergiusonesimus.metaworlds.util.GeometryHelper;
 
 public class OrientedBB extends AxisAlignedBB {
 

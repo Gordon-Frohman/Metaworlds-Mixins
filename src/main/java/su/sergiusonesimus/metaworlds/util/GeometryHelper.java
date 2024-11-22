@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.utility;
+package su.sergiusonesimus.metaworlds.util;
 
 import net.minecraft.util.Vec3;
 
