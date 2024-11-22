@@ -55,41 +55,29 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public OrientedBB rotateYaw(double targetYaw) {
+        return rotateYaw(targetYaw, (this.minX + this.maxX) * 0.5D, (this.minZ + this.maxZ) * 0.5D);
+    }
+
+    public OrientedBB rotateYaw(double targetYaw, double centerX, double centerZ) {
         if (targetYaw == 0.0D) {
             return this;
         } else {
             double cosYaw = Math.cos(targetYaw * Math.PI / 180.0D);
             double sinYaw = Math.sin(targetYaw * Math.PI / 180.0D);
-            double centerX = (this.minX + this.maxX) * 0.5D;
-            double centerZ = (this.minZ + this.maxZ) * 0.5D;
-            DoubleMatrix centerMatrix = DoubleMatrix.eye(4);
-            DoubleMatrix rotationMatrix = DoubleMatrix.eye(4);
-            DoubleMatrix centerMatrixInverse = DoubleMatrix.eye(4);
-            centerMatrix.data[12] = centerX;
-            centerMatrix.data[14] = centerZ;
-            centerMatrixInverse.data[12] = -centerX;
-            centerMatrixInverse.data[14] = -centerZ;
-            rotationMatrix.data[0] = cosYaw;
-            rotationMatrix.data[8] = sinYaw;
-            rotationMatrix.data[2] = -sinYaw;
-            rotationMatrix.data[10] = cosYaw;
-            DoubleMatrix fullTransformMatrix = centerMatrix.mmuli(rotationMatrix.muli(centerMatrixInverse));
-            fullTransformMatrix.mmuli(this.vertices, this.vertices);
 
-            for (int i = 0; i < 8; ++i) {
-                if (i == 0) {
-                    this.minX = this.getX(i);
-                    this.maxX = this.getX(i);
-                    this.minZ = this.getZ(i);
-                    this.maxZ = this.getZ(i);
-                } else {
-                    this.minX = Math.min(this.minX, this.getX(i));
-                    this.maxX = Math.max(this.maxX, this.getX(i));
-                    this.minZ = Math.min(this.minZ, this.getZ(i));
-                    this.maxZ = Math.max(this.maxZ, this.getZ(i));
-                }
+            for (int i = 0; i < 8; i++) {
+                double translatedX = this.getX(i) - centerX;
+                double translatedZ = this.getZ(i) - centerZ;
+
+                double rotatedX = translatedX * cosYaw - translatedZ * sinYaw;
+                double rotatedZ = translatedX * sinYaw + translatedZ * cosYaw;
+
+                vertices.data[i * 4] = centerX + rotatedX;
+                vertices.data[i * 4 + 2] = centerZ + rotatedZ;
             }
 
+            recalcAABB();
+            dimensions.setComponents(maxX - minX, dimensions.yCoord, maxZ - minZ);
             return this;
         }
     }
