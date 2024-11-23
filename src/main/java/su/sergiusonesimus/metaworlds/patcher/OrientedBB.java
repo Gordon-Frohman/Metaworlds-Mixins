@@ -1473,12 +1473,11 @@ public class OrientedBB extends AxisAlignedBB {
             verticesToModify[3] = 7;
         }
 
-        for (int i = 0; i < 4; i++) {
-            vertices.data[i * 4] += dX.xCoord;
-            vertices.data[i * 4 + 1] += dX.yCoord;
-            vertices.data[i * 4 + 2] += dX.zCoord;
+        if (x != 0) for (int i = 0; i < 4; i++) {
+            vertices.data[verticesToModify[i] * 4] += dX.xCoord;
+            vertices.data[verticesToModify[i] * 4 + 1] += dX.yCoord;
+            vertices.data[verticesToModify[i] * 4 + 2] += dX.zCoord;
         }
-        verticesToModify = new int[4];
 
         if (y < 0.0D) {
             verticesToModify[0] = 0;
@@ -1494,12 +1493,11 @@ public class OrientedBB extends AxisAlignedBB {
             verticesToModify[3] = 7;
         }
 
-        for (int i = 0; i < 4; i++) {
-            vertices.data[i * 4] += dY.xCoord;
-            vertices.data[i * 4 + 1] += dY.yCoord;
-            vertices.data[i * 4 + 2] += dY.zCoord;
+        if (y != 0) for (int i = 0; i < 4; i++) {
+            vertices.data[verticesToModify[i] * 4] += dY.xCoord;
+            vertices.data[verticesToModify[i] * 4 + 1] += dY.yCoord;
+            vertices.data[verticesToModify[i] * 4 + 2] += dY.zCoord;
         }
-        verticesToModify = new int[4];
 
         if (z < 0.0D) {
             verticesToModify[0] = 0;
@@ -1515,10 +1513,10 @@ public class OrientedBB extends AxisAlignedBB {
             verticesToModify[3] = 7;
         }
 
-        for (int i = 0; i < 4; i++) {
-            vertices.data[i * 4] += dZ.xCoord;
-            vertices.data[i * 4 + 1] += dZ.yCoord;
-            vertices.data[i * 4 + 2] += dZ.zCoord;
+        if (z != 0) for (int i = 0; i < 4; i++) {
+            vertices.data[verticesToModify[i] * 4] += dZ.xCoord;
+            vertices.data[verticesToModify[i] * 4 + 1] += dZ.yCoord;
+            vertices.data[verticesToModify[i] * 4 + 2] += dZ.zCoord;
         }
 
         recalcAABB();
