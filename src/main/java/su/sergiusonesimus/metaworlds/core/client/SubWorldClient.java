@@ -932,9 +932,28 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     }
 
     public List getCollidingBoundingBoxesGlobal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
-        List result = this.getCollidingBoundingBoxesLocal(
-            par1Entity,
-            ((IMixinAxisAlignedBB) par2AxisAlignedBB).getTransformedToLocalBoundingBox(this));
+        OrientedBB globalBB = ((IMixinAxisAlignedBB) par2AxisAlignedBB).getOrientedBB();
+        double dX = 0;
+        double dZ = 0;
+        if (par1Entity != null) {
+            AxisAlignedBB actualBB = par1Entity.boundingBox;
+            actualBB.minY = par2AxisAlignedBB.minY;
+            actualBB.maxY = par2AxisAlignedBB.maxY;
+            double dXpos = par2AxisAlignedBB.maxX - actualBB.maxX;
+            double dXneg = par2AxisAlignedBB.minX - actualBB.minX;
+            double dZpos = par2AxisAlignedBB.maxZ - actualBB.maxZ;
+            double dZneg = par2AxisAlignedBB.minZ - actualBB.minZ;
+            globalBB = ((IMixinAxisAlignedBB) actualBB).getOrientedBB();
+            Vec3 moveVec = Vec3.createVectorHelper(dXpos == 0 ? dXneg : dXpos, 0, dZpos == 0 ? dZneg : dZpos);
+            float targetYaw = (float) this.getRotationActualYaw();
+            moveVec.rotateAroundY(targetYaw);
+            dX = moveVec.xCoord;
+            dZ = moveVec.zCoord;
+            globalBB.rotateYaw(targetYaw, par1Entity.posX, par1Entity.posZ);
+        }
+        AxisAlignedBB localBB = globalBB.transformBoundingBoxToLocal(this);
+        localBB.addCoord(dX, 0, dZ);
+        List result = this.getCollidingBoundingBoxesLocal(par1Entity, localBB);
         ListIterator iter = result.listIterator();
 
         while (iter.hasNext()) {

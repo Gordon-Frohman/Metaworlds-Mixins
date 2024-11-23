@@ -1436,4 +1436,94 @@ public class OrientedBB extends AxisAlignedBB {
     public Vector3D getVertice(int i) {
         return new Vector3D(this.getX(i), this.getY(i), this.getZ(i));
     }
+
+    /**
+     * Adds the coordinates to the bounding box extending it if the point lies outside the current ranges. Args: x, y, z
+     */
+    public AxisAlignedBB addCoord(double x, double y, double z) {
+        Vec3 dX = Vec3
+            .createVectorHelper(this.getX(2) - this.getX(0), this.getY(2) - this.getY(0), this.getZ(2) - this.getZ(0));
+        dX.xCoord *= x;
+        dX.yCoord *= x;
+        dX.zCoord *= x;
+        Vec3 dY = Vec3
+            .createVectorHelper(this.getX(4) - this.getX(0), this.getY(4) - this.getY(0), this.getZ(4) - this.getZ(0));
+        dY.xCoord *= y;
+        dY.yCoord *= y;
+        dY.zCoord *= y;
+        Vec3 dZ = Vec3
+            .createVectorHelper(this.getX(1) - this.getX(0), this.getY(1) - this.getY(0), this.getZ(1) - this.getZ(0));
+        dZ.xCoord *= z;
+        dZ.yCoord *= z;
+        dZ.zCoord *= z;
+
+        int[] verticesToModify = new int[4];
+
+        if (x < 0.0D) {
+            verticesToModify[0] = 0;
+            verticesToModify[1] = 1;
+            verticesToModify[2] = 4;
+            verticesToModify[3] = 5;
+        }
+
+        if (x > 0.0D) {
+            verticesToModify[0] = 2;
+            verticesToModify[1] = 3;
+            verticesToModify[2] = 6;
+            verticesToModify[3] = 7;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            vertices.data[i * 4] += dX.xCoord;
+            vertices.data[i * 4 + 1] += dX.yCoord;
+            vertices.data[i * 4 + 2] += dX.zCoord;
+        }
+        verticesToModify = new int[4];
+
+        if (y < 0.0D) {
+            verticesToModify[0] = 0;
+            verticesToModify[1] = 1;
+            verticesToModify[2] = 2;
+            verticesToModify[3] = 3;
+        }
+
+        if (y > 0.0D) {
+            verticesToModify[0] = 4;
+            verticesToModify[1] = 5;
+            verticesToModify[2] = 6;
+            verticesToModify[3] = 7;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            vertices.data[i * 4] += dY.xCoord;
+            vertices.data[i * 4 + 1] += dY.yCoord;
+            vertices.data[i * 4 + 2] += dY.zCoord;
+        }
+        verticesToModify = new int[4];
+
+        if (z < 0.0D) {
+            verticesToModify[0] = 0;
+            verticesToModify[1] = 2;
+            verticesToModify[2] = 4;
+            verticesToModify[3] = 6;
+        }
+
+        if (z > 0.0D) {
+            verticesToModify[0] = 1;
+            verticesToModify[1] = 3;
+            verticesToModify[2] = 5;
+            verticesToModify[3] = 7;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            vertices.data[i * 4] += dZ.xCoord;
+            vertices.data[i * 4 + 1] += dZ.yCoord;
+            vertices.data[i * 4 + 2] += dZ.zCoord;
+        }
+
+        recalcAABB();
+        dimensions.setComponents(maxX - minX, dimensions.yCoord, maxZ - minZ);
+
+        return this;
+    }
 }
