@@ -515,7 +515,7 @@ public class OrientedBB extends AxisAlignedBB {
                                     && intersection.getZ() <= aabb.maxZ
                                     && intersection.getZ() >= aabb.minZ) {
                                     liesOnEdge = true;
-                                    if (aabb.maxX <= intersection.getX() + 0.75D) {
+                                    if (intersection != null && aabb.maxX <= intersection.getX() + 0.75D) {
                                         newXOffset = curMaxX - aabb.maxX - 0.01D;
                                         if (newXOffset < localXOffset) {
                                             localXOffset = newXOffset;
@@ -558,7 +558,8 @@ public class OrientedBB extends AxisAlignedBB {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection.getX() >= curMaxX && aabb.maxX <= intersection.getX() + 0.75D) {
+                                    if (intersection != null && intersection.getX() >= curMaxX
+                                        && aabb.maxX <= intersection.getX() + 0.75D) {
                                         newXOffset = intersection.getX() - aabb.maxX - 0.01D;
                                         if (newXOffset < localXOffset) {
                                             localXOffset = newXOffset;
@@ -637,7 +638,7 @@ public class OrientedBB extends AxisAlignedBB {
                                     && intersection.getZ() <= aabb.maxZ
                                     && intersection.getZ() >= aabb.minZ) {
                                     liesOnEdge = true;
-                                    if (aabb.minX >= intersection.getX() - 0.75D) {
+                                    if (intersection != null && aabb.minX >= intersection.getX() - 0.75D) {
                                         newXOffset = curMaxX - aabb.minX + 0.01D;
                                         if (newXOffset > localXOffset) {
                                             localXOffset = newXOffset;
@@ -680,7 +681,8 @@ public class OrientedBB extends AxisAlignedBB {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection.getX() <= curMaxX && aabb.minX >= intersection.getX() - 0.75D) {
+                                    if (intersection != null && intersection.getX() <= curMaxX
+                                        && aabb.minX >= intersection.getX() - 0.75D) {
                                         newXOffset = intersection.getX() - aabb.minX + 0.01D;
                                         if (newXOffset > localXOffset) {
                                             localXOffset = newXOffset;
@@ -887,7 +889,7 @@ public class OrientedBB extends AxisAlignedBB {
                                 && intersection.getZ() <= aabb.maxZ
                                 && intersection.getZ() >= aabb.minZ) {
                                 liesOnEdge = true;
-                                if (aabb.maxY <= intersection.getY() + 0.75D) {
+                                if (intersection != null && aabb.maxY <= intersection.getY() + 0.75D) {
                                     newYOffset = curMaxY - aabb.maxY - 0.01D;
                                     if (newYOffset < localYOffset) {
                                         localYOffset = newYOffset;
@@ -1010,7 +1012,7 @@ public class OrientedBB extends AxisAlignedBB {
                                 && intersection.getZ() <= aabb.maxZ
                                 && intersection.getZ() >= aabb.minZ) {
                                 liesOnEdge = true;
-                                if (aabb.minY >= intersection.getY() - 0.75D) {
+                                if (intersection != null && aabb.minY >= intersection.getY() - 0.75D) {
                                     newYOffset = curMaxY - aabb.minY + 0.01D;
                                     if (newYOffset > localYOffset) {
                                         localYOffset = newYOffset;
@@ -1189,7 +1191,7 @@ public class OrientedBB extends AxisAlignedBB {
                                     && intersection.getX() <= aabb.maxX
                                     && intersection.getX() >= aabb.minX) {
                                     liesOnEdge = true;
-                                    if (aabb.maxZ <= intersection.getZ() + 0.75D) {
+                                    if (intersection != null && aabb.maxZ <= intersection.getZ() + 0.75D) {
                                         newZOffset = curMaxZ - aabb.maxZ - 0.01D;
                                         if (newZOffset < localZOffset) {
                                             localZOffset = newZOffset;
@@ -1232,7 +1234,8 @@ public class OrientedBB extends AxisAlignedBB {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection.getZ() >= curMaxZ && aabb.maxZ <= intersection.getZ() + 0.75D) {
+                                    if (intersection != null && intersection.getZ() >= curMaxZ
+                                        && aabb.maxZ <= intersection.getZ() + 0.75D) {
                                         newZOffset = intersection.getZ() - aabb.maxZ - 0.01D;
                                         if (newZOffset < localZOffset) {
                                             localZOffset = newZOffset;
@@ -1311,7 +1314,7 @@ public class OrientedBB extends AxisAlignedBB {
                                     && intersection.getX() <= aabb.maxX
                                     && intersection.getX() >= aabb.minX) {
                                     liesOnEdge = true;
-                                    if (aabb.minZ >= intersection.getZ() - 0.75D) {
+                                    if (intersection != null && aabb.minZ >= intersection.getZ() - 0.75D) {
                                         newZOffset = curMaxZ - aabb.minZ + 0.01D;
                                         if (newZOffset > localZOffset) {
                                             localZOffset = newZOffset;
@@ -1354,7 +1357,8 @@ public class OrientedBB extends AxisAlignedBB {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection.getZ() <= curMaxZ && aabb.minZ >= intersection.getZ() - 0.75D) {
+                                    if (intersection != null && intersection.getZ() <= curMaxZ
+                                        && aabb.minZ >= intersection.getZ() - 0.75D) {
                                         newZOffset = intersection.getZ() - aabb.minZ + 0.01D;
                                         if (newZOffset > localZOffset) {
                                             localZOffset = newZOffset;
