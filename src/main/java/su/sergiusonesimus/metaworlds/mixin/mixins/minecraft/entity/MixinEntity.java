@@ -258,9 +258,6 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     @Shadow(remap = true)
     public abstract boolean isInWater();
 
-    @Shadow(remap = true)
-    protected abstract void func_145780_a(int p_145780_1_, int p_145780_2_, int p_145780_3_, Block p_145780_4_);
-
     public World worldBelowFeet;
     protected byte tractionLoss;
     protected boolean losingTraction = false;
@@ -650,15 +647,26 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             zStoredLocal = this.posZ - entityZ;
 
             if (this.canTriggerWalking() && !flag && this.ridingEntity == null) {
-                int j1 = MathHelper.floor_double(this.posX);
-                k = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double) this.yOffset);
-                int l = MathHelper.floor_double(this.posZ);
-                Block block = this.worldObj.getBlock(j1, k, l);
-                int i1 = this.worldObj.getBlock(j1, k - 1, l)
+                double xCoord = this.posX;
+                double yCoord = this.posY - 0.20000000298023224D - (double) this.yOffset;
+                double zCoord = this.posZ;
+                World targetWorld = this.worldBelowFeet == null ? this.worldObj : this.worldBelowFeet;
+                if (targetWorld != this.worldObj) {
+                    Vec3 localCoords = ((IMixinWorld) targetWorld)
+                        .transformToLocal(Vec3.createVectorHelper(xCoord, yCoord, zCoord));
+                    xCoord = localCoords.xCoord;
+                    yCoord = localCoords.yCoord;
+                    zCoord = localCoords.zCoord;
+                }
+                int j1 = MathHelper.floor_double(xCoord);
+                k = MathHelper.floor_double(yCoord);
+                int l = MathHelper.floor_double(zCoord);
+                Block block = targetWorld.getBlock(j1, k, l);
+                int i1 = targetWorld.getBlock(j1, k - 1, l)
                     .getRenderType();
 
                 if (i1 == 11 || i1 == 32 || i1 == 21) {
-                    block = this.worldObj.getBlock(j1, k - 1, l);
+                    block = targetWorld.getBlock(j1, k - 1, l);
                 }
 
                 if (block != Blocks.ladder) {
@@ -694,7 +702,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                     }
 
                     this.func_145780_a(j1, k, l, block);
-                    block.onEntityWalking(this.worldObj, j1, k, l, (Entity) (Object) this);
+                    block.onEntityWalking(targetWorld, j1, k, l, (Entity) (Object) this);
                 }
             }
 
@@ -731,6 +739,20 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
             this.worldObj.theProfiler.endSection();
         }
+    }
+
+    @Overwrite
+    protected void func_145780_a(int x, int y, int z, Block blockIn) {
+        Block.SoundType soundtype = blockIn.stepSound;
+        World targetWorld = this.worldBelowFeet == null ? this.worldObj : this.worldBelowFeet;
+
+        if (targetWorld.getBlock(x, y + 1, z) == Blocks.snow_layer) {
+            soundtype = Blocks.snow_layer.stepSound;
+            this.playSound(soundtype.getStepResourcePath(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
+        } else if (!blockIn.getMaterial()
+            .isLiquid()) {
+                this.playSound(soundtype.getStepResourcePath(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
+            }
     }
 
     @Overwrite
