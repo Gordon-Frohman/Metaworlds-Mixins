@@ -13,6 +13,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.GameRules;
@@ -25,6 +26,7 @@ import net.minecraft.world.storage.WorldInfo;
 
 import org.jblas.DoubleMatrix;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -378,6 +380,51 @@ public abstract class MixinWorld implements IMixinWorld {
         WorldSettings p_i45368_4_, Profiler p_i45368_5_, CallbackInfo ci) {
         childSubWorlds = new TreeMap<Integer, World>();
         allWorlds = new UnmodifiableSingleObjPlusCollection<World>((World) (Object) this, this.childSubWorlds.values());
+    }
+
+    /**
+     * Checks if the specified block is able to see the sky
+     */
+    @Overwrite
+    public boolean canBlockSeeTheSky(int x, int y, int z) {
+        boolean canSee = this.getChunkFromChunkCoords(x >> 4, z >> 4)
+            .canBlockSeeTheSky(x & 15, y, z & 15);
+        if (canSee) {
+            double centerX = x + 0.5;
+            double centerY = y + 0.5;
+            double centerZ = z + 0.5;
+            Collection<World> subworlds = ((IMixinWorld) this.getParentWorld()).getSubWorlds();
+            if (this.isSubWorld) {
+                Vec3 globalCoords = this.transformToGlobal(Vec3.createVectorHelper(centerX, centerY, centerZ));
+                centerX = globalCoords.xCoord;
+                centerY = globalCoords.yCoord;
+                centerZ = globalCoords.zCoord;
+            }
+            for (World subworld : subworlds) {
+                // For now - skipping worlds rotated around x/z. Maybe add this later
+                if (((SubWorld) subworld).getRotationPitch() != 0 || ((SubWorld) subworld).getRotationRoll() != 0)
+                    continue;
+                // "The most important part of every investigation is not to find yourself guilty"
+                if (subworld == (World) (Object) this) continue;
+                AxisAlignedBB worldBB = ((SubWorld) subworld).getMaximumCloseWorldBBRotated();
+                if (centerX >= worldBB.minX && centerX <= worldBB.maxX
+                    && centerZ >= worldBB.minZ
+                    && centerZ <= worldBB.maxZ) {
+                    Vec3 localCoords = ((IMixinWorld) subworld)
+                        .transformToLocal(Vec3.createVectorHelper(centerX, centerY, centerZ));
+                    int localX = MathHelper.floor_double(localCoords.xCoord);
+                    int localY = MathHelper.floor_double(localCoords.yCoord);
+                    int localZ = MathHelper.floor_double(localCoords.zCoord);
+                    Chunk subworldChunk = subworld.getChunkFromChunkCoords(localX >> 4, localZ >> 4);
+                    int subworldHeight = subworldChunk.getHeightValue(localX & 15, localZ & 15);
+                    if (subworldHeight > localY) {
+                        canSee = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return canSee;
     }
 
     /**
