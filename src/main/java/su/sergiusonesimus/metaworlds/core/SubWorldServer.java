@@ -1070,6 +1070,28 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return result;
     }
 
+    public List getCollidingBoundingBoxesGlobalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement) {
+        Vec3 start = Vec3.createVectorHelper(aabb.minX, aabb.minY, aabb.minZ);
+        Vec3 finish = start.addVector(movement.xCoord, movement.yCoord, movement.zCoord);
+        AxisAlignedBB localBB = ((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(this);
+        localBB = AxisAlignedBB
+            .getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
+        start = this.transformToLocal(start);
+        finish = this.transformToLocal(finish);
+        Vec3 localMovement = start.subtract(finish);
+        localBB = localBB.addCoord(localMovement.xCoord, 0, localMovement.zCoord);
+
+        List result = this.getCollidingBoundingBoxesLocal(entity, localBB);
+        ListIterator iter = result.listIterator();
+
+        while (iter.hasNext()) {
+            AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next()).getTransformedToGlobalBoundingBox(this);
+            iter.set(replacementBB);
+        }
+
+        return result;
+    }
+
     public boolean isAnyLiquid(AxisAlignedBB par1AxisAlignedBB) {
         return super.isAnyLiquid(((IMixinAxisAlignedBB) par1AxisAlignedBB).getTransformedToLocalBoundingBox(this));
     }

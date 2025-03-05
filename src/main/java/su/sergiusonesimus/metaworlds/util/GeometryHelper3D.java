@@ -6,7 +6,7 @@ import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Segment;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 
-public class GeometryHelper {
+public class GeometryHelper3D {
 
     public static Vector3D transformVector(Vec3 vector) {
         return new Vector3D(vector.xCoord, vector.yCoord, vector.zCoord);
@@ -24,6 +24,16 @@ public class GeometryHelper {
             return (localPoint >= segmentStart && localPoint <= segmentEnd)
                 || (localPoint <= segmentStart && localPoint >= segmentEnd);
         }
+        return false;
+    }
+
+    public static boolean checkSegmentsIntersection(Segment segment1, Segment segment2) {
+        Vector3D intersection = segment1.getLine()
+            .intersection(segment2.getLine());
+        if (intersection != null) {
+            return pointOnSegment(intersection, segment1) && pointOnSegment(intersection, segment2);
+        }
+
         return false;
     }
 

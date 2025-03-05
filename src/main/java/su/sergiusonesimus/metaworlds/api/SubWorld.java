@@ -188,6 +188,8 @@ public interface SubWorld {
 
     List getCollidingBoundingBoxesGlobal(Entity var1, AxisAlignedBB var2);
 
+    List getCollidingBoundingBoxesGlobalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement);
+
     boolean isAABBInMaterialGlobal(AxisAlignedBB var1, Material var2);
 
     boolean isMaterialInBBGlobal(AxisAlignedBB var1, Material var2);

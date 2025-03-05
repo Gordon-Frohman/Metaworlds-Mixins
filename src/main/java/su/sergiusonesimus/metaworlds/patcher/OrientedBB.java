@@ -11,11 +11,14 @@ import org.apache.commons.math3.geometry.euclidean.threed.Line;
 import org.apache.commons.math3.geometry.euclidean.threed.Plane;
 import org.apache.commons.math3.geometry.euclidean.threed.Segment;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.jblas.DoubleMatrix;
 
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
-import su.sergiusonesimus.metaworlds.util.GeometryHelper;
+import su.sergiusonesimus.metaworlds.util.GeometryHelper2D;
+import su.sergiusonesimus.metaworlds.util.GeometryHelper3D;
+import su.sergiusonesimus.metaworlds.util.Polygon2D;
 
 public class OrientedBB extends AxisAlignedBB {
 
@@ -298,14 +301,14 @@ public class OrientedBB extends AxisAlignedBB {
                     // Let's now check if our faces intersect on the remaining axis
 
                     Vector3D[] face1 = faces1[i];
-                    Segment[] segments1 = { GeometryHelper.segmentFromPoints(face1[0], face1[1]),
-                        GeometryHelper.segmentFromPoints(face1[1], face1[2]),
-                        GeometryHelper.segmentFromPoints(face1[2], face1[3]),
-                        GeometryHelper.segmentFromPoints(face1[3], face1[0]) };
-                    Segment[] segments2 = { GeometryHelper.segmentFromPoints(face2[0], face2[1]),
-                        GeometryHelper.segmentFromPoints(face2[1], face2[2]),
-                        GeometryHelper.segmentFromPoints(face2[2], face2[3]),
-                        GeometryHelper.segmentFromPoints(face2[3], face2[0]) };
+                    Segment[] segments1 = { GeometryHelper3D.segmentFromPoints(face1[0], face1[1]),
+                        GeometryHelper3D.segmentFromPoints(face1[1], face1[2]),
+                        GeometryHelper3D.segmentFromPoints(face1[2], face1[3]),
+                        GeometryHelper3D.segmentFromPoints(face1[3], face1[0]) };
+                    Segment[] segments2 = { GeometryHelper3D.segmentFromPoints(face2[0], face2[1]),
+                        GeometryHelper3D.segmentFromPoints(face2[1], face2[2]),
+                        GeometryHelper3D.segmentFromPoints(face2[2], face2[3]),
+                        GeometryHelper3D.segmentFromPoints(face2[3], face2[0]) };
                     List<Double> intersection1 = new ArrayList<Double>();
                     List<Double> intersection2 = new ArrayList<Double>();
                     for (int k = 0; k < 4; k++) {
@@ -316,7 +319,7 @@ public class OrientedBB extends AxisAlignedBB {
                         } else {
                             Vector3D intersection = segments1[k].getLine()
                                 .intersection(intersectionLine);
-                            if (intersection != null && GeometryHelper.pointOnSegment(intersection, segments1[k]))
+                            if (intersection != null && GeometryHelper3D.pointOnSegment(intersection, segments1[k]))
                                 intersection1.add(intersectionLine.getAbscissa(intersection));
                         }
                         if (intersectionLine.contains(segments2[k].getStart())
@@ -326,7 +329,7 @@ public class OrientedBB extends AxisAlignedBB {
                         } else {
                             Vector3D intersection = segments2[k].getLine()
                                 .intersection(intersectionLine);
-                            if (intersection != null && GeometryHelper.pointOnSegment(intersection, segments2[k]))
+                            if (intersection != null && GeometryHelper3D.pointOnSegment(intersection, segments2[k]))
                                 intersection2.add(intersectionLine.getAbscissa(intersection));
                         }
                     }
@@ -392,48 +395,61 @@ public class OrientedBB extends AxisAlignedBB {
         return super.isVecInside(par1Vec3);
     }
 
-    public double calculateXOffset(AxisAlignedBB par1AxisAlignedBB, double par2) {
-        if (((IMixinWorld) this.lastTransformedBy).getRotationPitch() != 0
-            || ((IMixinWorld) this.lastTransformedBy).getRotationRoll() != 0) {
-            // Checking for intersection works perfectly here, but it may be too resource-intensive
-            if (this.intersectsWith(par1AxisAlignedBB)) {
-                double var4;
+    private static double multiplier = 1;
+
+    public double calculateXOffset(AxisAlignedBB aabb, double xOffset) {
+        double worldRotation = Math.abs(((IMixinWorld) this.lastTransformedBy).getRotationYaw()) % 90;
+        if (worldRotation > 45) worldRotation = 90 - worldRotation;
+        double localBBsize = (aabb.maxX - aabb.minX) * Math.cos(worldRotation / 180 * Math.PI) / 2 * multiplier;
+        Vec3 bbCenter = Vec3.createVectorHelper((aabb.maxX + aabb.minX) / 2, aabb.minY, (aabb.maxZ + aabb.minZ) / 2);
+        aabb = AxisAlignedBB.getBoundingBox(
+            bbCenter.xCoord - localBBsize,
+            aabb.minY,
+            bbCenter.zCoord - localBBsize,
+            bbCenter.xCoord + localBBsize,
+            aabb.maxY,
+            bbCenter.zCoord + localBBsize);
+
+        if (((IMixinWorld) this.lastTransformedBy).getRotationPitch() % 360 != 0
+            || ((IMixinWorld) this.lastTransformedBy).getRotationRoll() % 360 != 0) {
+            if (checkYZoverlap(aabb)) {
+                double newXOffset;
                 double curMaxX;
                 int curMaxIndex;
                 int[] neighbourIndexes = new int[3];
                 int neighbourIndex;
                 Line[] corners = {
                     new Line(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.minZ),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.minZ)),
                     new Line(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.maxZ),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.maxZ)),
                     new Line(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.minZ),
+                        new Vector3D(aabb.maxX, aabb.maxY, aabb.minZ)),
                     new Line(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)) };
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.maxZ),
+                        new Vector3D(aabb.maxX, aabb.maxY, aabb.maxZ)) };
                 Plane[] walls = {
                     new Plane(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.minZ),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.minZ),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.minZ)),
                     new Plane(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.minZ),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.maxZ),
+                        new Vector3D(aabb.maxX, aabb.maxY, aabb.minZ)),
                     new Plane(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.maxZ),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.maxZ),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.maxZ)),
                     new Plane(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)) };
+                        new Vector3D(aabb.minX, aabb.minY, aabb.minZ),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.maxZ),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.minZ)) };
 
-                if (par2 > 0.0D) {
+                if (xOffset > 0.0D) {
                     curMaxX = this.getX(0);
                     curMaxIndex = 0;
 
@@ -465,17 +481,16 @@ public class OrientedBB extends AxisAlignedBB {
 
                     if ((this.getX(curMaxIndex) == this.getX(neighbourIndexes[0])
                         && this.getX(neighbourIndexes[0]) == this.getX(neighbourIndexes[1]))
-                        || (this.getY(curMaxIndex) <= par1AxisAlignedBB.maxY
-                            && this.getY(curMaxIndex) >= par1AxisAlignedBB.minY
-                            && this.getZ(curMaxIndex) <= par1AxisAlignedBB.maxZ
-                            && this.getZ(curMaxIndex) >= par1AxisAlignedBB.minZ)) {
+                        || (this.getY(curMaxIndex) <= aabb.maxY && this.getY(curMaxIndex) >= aabb.minY
+                            && this.getZ(curMaxIndex) <= aabb.maxZ
+                            && this.getZ(curMaxIndex) >= aabb.minZ)) {
 
                         // Either this BB is not rotated around y/z, or
                         // Target AABB contains the smallest x point
-                        if (par1AxisAlignedBB.maxX <= curMaxX + 0.75D) {
-                            var4 = curMaxX - par1AxisAlignedBB.maxX - 0.01D;
-                            if (var4 < par2) {
-                                par2 = var4;
+                        if (aabb.maxX <= curMaxX + 0.75D) {
+                            newXOffset = curMaxX - aabb.maxX - 0.01D;
+                            if (newXOffset < xOffset) {
+                                xOffset = newXOffset;
                             }
                         }
                     } else {
@@ -489,21 +504,21 @@ public class OrientedBB extends AxisAlignedBB {
                             edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
                         }
 
-                        double localPar2 = par2;
+                        double localXOffset = xOffset;
                         boolean liesOnEdge = false;
                         for (Line edge : edges) {
                             for (Plane wall : walls) {
                                 Vector3D intersection = wall.intersection(edge);
                                 if (intersection != null && intersection.getX() >= curMaxX
-                                    && intersection.getY() <= par1AxisAlignedBB.maxY
-                                    && intersection.getY() >= par1AxisAlignedBB.minY
-                                    && intersection.getZ() <= par1AxisAlignedBB.maxZ
-                                    && intersection.getZ() >= par1AxisAlignedBB.minZ) {
+                                    && intersection.getY() <= aabb.maxY
+                                    && intersection.getY() >= aabb.minY
+                                    && intersection.getZ() <= aabb.maxZ
+                                    && intersection.getZ() >= aabb.minZ) {
                                     liesOnEdge = true;
-                                    if (par1AxisAlignedBB.maxX <= intersection.getX() + 0.75D) {
-                                        var4 = curMaxX - par1AxisAlignedBB.maxX - 0.01D;
-                                        if (var4 < localPar2) {
-                                            localPar2 = var4;
+                                    if (aabb.maxX <= intersection.getX() + 0.75D) {
+                                        newXOffset = curMaxX - aabb.maxX - 0.01D;
+                                        if (newXOffset < localXOffset) {
+                                            localXOffset = newXOffset;
                                         }
                                     }
                                 }
@@ -511,7 +526,7 @@ public class OrientedBB extends AxisAlignedBB {
                         }
 
                         if (liesOnEdge) {
-                            if (localPar2 != par2) par2 = localPar2;
+                            if (localXOffset != xOffset) xOffset = localXOffset;
                         } else {
                             // AABB doesn't intersect any edges. Let's check negative x faces then
                             List<Plane> faces = new ArrayList<Plane>();
@@ -538,26 +553,25 @@ public class OrientedBB extends AxisAlignedBB {
                                 }
                             }
 
-                            localPar2 = par2;
+                            localXOffset = xOffset;
                             for (Plane face : faces) {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection.getX() >= curMaxX
-                                        && par1AxisAlignedBB.maxX <= intersection.getX() + 0.75D) {
-                                        var4 = intersection.getX() - par1AxisAlignedBB.maxX - 0.01D;
-                                        if (var4 < localPar2) {
-                                            localPar2 = var4;
+                                    if (intersection.getX() >= curMaxX && aabb.maxX <= intersection.getX() + 0.75D) {
+                                        newXOffset = intersection.getX() - aabb.maxX - 0.01D;
+                                        if (newXOffset < localXOffset) {
+                                            localXOffset = newXOffset;
                                         }
                                     }
                                 }
                             }
-                            if (localPar2 != par2) par2 = localPar2;
+                            if (localXOffset != xOffset) xOffset = localXOffset;
                         }
                     }
                 }
 
-                if (par2 < 0.0D) {
+                if (xOffset < 0.0D) {
                     curMaxX = this.getX(0);
                     curMaxIndex = 0;
 
@@ -589,17 +603,16 @@ public class OrientedBB extends AxisAlignedBB {
 
                     if ((this.getX(curMaxIndex) == this.getX(neighbourIndexes[0])
                         && this.getX(neighbourIndexes[0]) == this.getX(neighbourIndexes[1]))
-                        || (this.getY(curMaxIndex) <= par1AxisAlignedBB.maxY
-                            && this.getY(curMaxIndex) >= par1AxisAlignedBB.minY
-                            && this.getZ(curMaxIndex) <= par1AxisAlignedBB.maxZ
-                            && this.getZ(curMaxIndex) >= par1AxisAlignedBB.minZ)) {
+                        || (this.getY(curMaxIndex) <= aabb.maxY && this.getY(curMaxIndex) >= aabb.minY
+                            && this.getZ(curMaxIndex) <= aabb.maxZ
+                            && this.getZ(curMaxIndex) >= aabb.minZ)) {
 
                         // Either this BB is not rotated around y/z, or
                         // Target AABB contains the biggest x point
-                        if (par1AxisAlignedBB.minX >= curMaxX - 0.75D) {
-                            var4 = curMaxX - par1AxisAlignedBB.minX + 0.01D;
-                            if (var4 > par2) {
-                                par2 = var4;
+                        if (aabb.minX >= curMaxX - 0.75D) {
+                            newXOffset = curMaxX - aabb.minX + 0.01D;
+                            if (newXOffset > xOffset) {
+                                xOffset = newXOffset;
                             }
                         }
                     } else {
@@ -613,21 +626,21 @@ public class OrientedBB extends AxisAlignedBB {
                             edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
                         }
 
-                        double localPar2 = par2;
+                        double localXOffset = xOffset;
                         boolean liesOnEdge = false;
                         for (Line edge : edges) {
                             for (Plane wall : walls) {
                                 Vector3D intersection = wall.intersection(edge);
                                 if (intersection != null && intersection.getX() <= curMaxX
-                                    && intersection.getY() <= par1AxisAlignedBB.maxY
-                                    && intersection.getY() >= par1AxisAlignedBB.minY
-                                    && intersection.getZ() <= par1AxisAlignedBB.maxZ
-                                    && intersection.getZ() >= par1AxisAlignedBB.minZ) {
+                                    && intersection.getY() <= aabb.maxY
+                                    && intersection.getY() >= aabb.minY
+                                    && intersection.getZ() <= aabb.maxZ
+                                    && intersection.getZ() >= aabb.minZ) {
                                     liesOnEdge = true;
-                                    if (par1AxisAlignedBB.minX >= intersection.getX() - 0.75D) {
-                                        var4 = curMaxX - par1AxisAlignedBB.minX + 0.01D;
-                                        if (var4 > localPar2) {
-                                            localPar2 = var4;
+                                    if (aabb.minX >= intersection.getX() - 0.75D) {
+                                        newXOffset = curMaxX - aabb.minX + 0.01D;
+                                        if (newXOffset > localXOffset) {
+                                            localXOffset = newXOffset;
                                         }
                                     }
                                 }
@@ -635,7 +648,7 @@ public class OrientedBB extends AxisAlignedBB {
                         }
 
                         if (liesOnEdge) {
-                            if (localPar2 != par2) par2 = localPar2;
+                            if (localXOffset != xOffset) xOffset = localXOffset;
                         } else {
                             // AABB doesn't intersect any edges. Let's check positive x faces then
                             List<Plane> faces = new ArrayList<Plane>();
@@ -662,34 +675,31 @@ public class OrientedBB extends AxisAlignedBB {
                                 }
                             }
 
-                            localPar2 = par2;
+                            localXOffset = xOffset;
                             for (Plane face : faces) {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection.getX() <= curMaxX
-                                        && par1AxisAlignedBB.minX >= intersection.getX() - 0.75D) {
-                                        var4 = intersection.getX() - par1AxisAlignedBB.minX + 0.01D;
-                                        if (var4 > localPar2) {
-                                            localPar2 = var4;
+                                    if (intersection.getX() <= curMaxX && aabb.minX >= intersection.getX() - 0.75D) {
+                                        newXOffset = intersection.getX() - aabb.minX + 0.01D;
+                                        if (newXOffset > localXOffset) {
+                                            localXOffset = newXOffset;
                                         }
                                     }
                                 }
                             }
-                            if (localPar2 != par2) par2 = localPar2;
+                            if (localXOffset != xOffset) xOffset = localXOffset;
                         }
                     }
                 }
             }
         } else {
-            if (par1AxisAlignedBB.maxY > this.minY && par1AxisAlignedBB.minY < this.maxY
-                && par1AxisAlignedBB.maxZ > this.minZ
-                && par1AxisAlignedBB.minZ < this.maxZ) {
-                double var4;
+            if (aabb.maxY > this.minY && aabb.minY < this.maxY && aabb.maxZ > this.minZ && aabb.minZ < this.maxZ) {
+                double newXOffset;
                 double curMaxX;
                 int curMaxIndex;
                 int neighbourIndex;
-                if (par2 > 0.0D) {
+                if (xOffset > 0.0D) {
                     curMaxX = this.getX(0);
                     curMaxIndex = 0;
 
@@ -700,31 +710,31 @@ public class OrientedBB extends AxisAlignedBB {
                         }
                     }
 
-                    if (this.getZ(curMaxIndex) <= par1AxisAlignedBB.minZ) {
+                    if (this.getZ(curMaxIndex) <= aabb.minZ) {
                         neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
                         if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
                             curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
-                                * (par1AxisAlignedBB.minZ - this.getZ(neighbourIndex))
+                                * (aabb.minZ - this.getZ(neighbourIndex))
                                 / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
                         }
-                    } else if (this.getZ(curMaxIndex) >= par1AxisAlignedBB.maxZ) {
+                    } else if (this.getZ(curMaxIndex) >= aabb.maxZ) {
                         neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
                         if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
                             curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
-                                * (par1AxisAlignedBB.maxZ - this.getZ(neighbourIndex))
+                                * (aabb.maxZ - this.getZ(neighbourIndex))
                                 / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
                         }
                     }
 
-                    if (par1AxisAlignedBB.maxX <= curMaxX + 0.75D) {
-                        var4 = curMaxX - par1AxisAlignedBB.maxX - 0.01D;
-                        if (var4 < par2) {
-                            par2 = var4;
+                    if (aabb.maxX <= curMaxX + 0.75D) {
+                        newXOffset = curMaxX - aabb.maxX - 0.01D;
+                        if (newXOffset < xOffset) {
+                            xOffset = newXOffset;
                         }
                     }
                 }
 
-                if (par2 < 0.0D) {
+                if (xOffset < 0.0D) {
                     curMaxX = this.getX(0);
                     curMaxIndex = 0;
 
@@ -735,76 +745,83 @@ public class OrientedBB extends AxisAlignedBB {
                         }
                     }
 
-                    if (this.getZ(curMaxIndex) <= par1AxisAlignedBB.minZ) {
+                    if (this.getZ(curMaxIndex) <= aabb.minZ) {
                         neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
                         if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
                             curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
-                                * (par1AxisAlignedBB.minZ - this.getZ(neighbourIndex))
+                                * (aabb.minZ - this.getZ(neighbourIndex))
                                 / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
                         }
-                    } else if (this.getZ(curMaxIndex) >= par1AxisAlignedBB.maxZ) {
+                    } else if (this.getZ(curMaxIndex) >= aabb.maxZ) {
                         neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
                         if (this.getZ(neighbourIndex) != this.getZ(curMaxIndex)) {
                             curMaxX = this.getX(neighbourIndex) + (this.getX(curMaxIndex) - this.getX(neighbourIndex))
-                                * (par1AxisAlignedBB.maxZ - this.getZ(neighbourIndex))
+                                * (aabb.maxZ - this.getZ(neighbourIndex))
                                 / (this.getZ(curMaxIndex) - this.getZ(neighbourIndex));
                         }
                     }
 
-                    if (par1AxisAlignedBB.minX >= curMaxX - 0.75D) {
-                        var4 = curMaxX - par1AxisAlignedBB.minX + 0.01D;
-                        if (var4 > par2) {
-                            par2 = var4;
+                    if (aabb.minX >= curMaxX - 0.75D) {
+                        newXOffset = curMaxX - aabb.minX + 0.01D;
+                        if (newXOffset > xOffset) {
+                            xOffset = newXOffset;
                         }
                     }
                 }
             }
         }
 
-        return par2;
+        return xOffset;
     }
 
-    public double calculateYOffset(AxisAlignedBB par1AxisAlignedBB, double par2) {
-        if (par1AxisAlignedBB.maxX > this.minX && par1AxisAlignedBB.minX < this.maxX
-            && par1AxisAlignedBB.maxZ > this.minZ
-            && par1AxisAlignedBB.minZ < this.maxZ) {
-            double var4;
+    public double calculateYOffset(AxisAlignedBB aabb, double yOffset) {
+        double worldRotation = Math.abs(((IMixinWorld) this.lastTransformedBy).getRotationYaw()) % 90;
+        if (worldRotation != 0) {
+            if (worldRotation > 45) worldRotation = 90 - worldRotation;
+            double localBBsize = (aabb.maxX - aabb.minX) * Math.cos(worldRotation / 180 * Math.PI) / 2;
+            Vec3 bbCenter = Vec3
+                .createVectorHelper((aabb.maxX + aabb.minX) / 2, aabb.minY, (aabb.maxZ + aabb.minZ) / 2);
+            aabb = AxisAlignedBB.getBoundingBox(
+                bbCenter.xCoord - localBBsize,
+                aabb.minY,
+                bbCenter.zCoord - localBBsize,
+                bbCenter.xCoord + localBBsize,
+                aabb.maxY,
+                bbCenter.zCoord + localBBsize);
+        }
+
+        if (checkXZoverlap(aabb)) {
+            double newYOffset;
             double curMaxY;
             int curMaxIndex;
             int[] neighbourIndexes = new int[3];
             int neighbourIndex;
             Line[] corners = {
+                new Line(new Vector3D(aabb.minX, aabb.minY, aabb.minZ), new Vector3D(aabb.minX, aabb.maxY, aabb.minZ)),
+                new Line(new Vector3D(aabb.minX, aabb.minY, aabb.maxZ), new Vector3D(aabb.minX, aabb.maxY, aabb.maxZ)),
+                new Line(new Vector3D(aabb.maxX, aabb.minY, aabb.minZ), new Vector3D(aabb.maxX, aabb.maxY, aabb.minZ)),
                 new Line(
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
-                new Line(
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)),
-                new Line(
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
-                new Line(
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)) };
+                    new Vector3D(aabb.maxX, aabb.minY, aabb.maxZ),
+                    new Vector3D(aabb.maxX, aabb.maxY, aabb.maxZ)) };
             Plane[] walls = {
                 new Plane(
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)),
+                    new Vector3D(aabb.minX, aabb.minY, aabb.minZ),
+                    new Vector3D(aabb.minX, aabb.maxY, aabb.minZ),
+                    new Vector3D(aabb.maxX, aabb.minY, aabb.minZ)),
                 new Plane(
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)),
+                    new Vector3D(aabb.minX, aabb.minY, aabb.maxZ),
+                    new Vector3D(aabb.minX, aabb.maxY, aabb.maxZ),
+                    new Vector3D(aabb.minX, aabb.minY, aabb.minZ)),
                 new Plane(
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
-                    new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                    new Vector3D(aabb.maxX, aabb.minY, aabb.maxZ),
+                    new Vector3D(aabb.maxX, aabb.maxY, aabb.maxZ),
+                    new Vector3D(aabb.minX, aabb.minY, aabb.maxZ)),
                 new Plane(
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                    new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)) };
+                    new Vector3D(aabb.maxX, aabb.minY, aabb.minZ),
+                    new Vector3D(aabb.maxX, aabb.maxY, aabb.minZ),
+                    new Vector3D(aabb.maxX, aabb.minY, aabb.maxZ)) };
 
-            if (par2 > 0.0D) {
+            if (yOffset > 0.0D) {
                 curMaxY = this.getY(0);
                 curMaxIndex = 0;
 
@@ -836,17 +853,16 @@ public class OrientedBB extends AxisAlignedBB {
 
                 if ((this.getY(curMaxIndex) == this.getY(neighbourIndexes[0])
                     && this.getY(neighbourIndexes[0]) == this.getY(neighbourIndexes[1]))
-                    || (this.getX(curMaxIndex) <= par1AxisAlignedBB.maxX
-                        && this.getX(curMaxIndex) >= par1AxisAlignedBB.minX
-                        && this.getZ(curMaxIndex) <= par1AxisAlignedBB.maxZ
-                        && this.getZ(curMaxIndex) >= par1AxisAlignedBB.minZ)) {
+                    || (this.getX(curMaxIndex) <= aabb.maxX && this.getX(curMaxIndex) >= aabb.minX
+                        && this.getZ(curMaxIndex) <= aabb.maxZ
+                        && this.getZ(curMaxIndex) >= aabb.minZ)) {
 
                     // Either this BB is not rotated around x/z, or
                     // Target AABB contains the lowest point. It shouldn't go above it
-                    if (par1AxisAlignedBB.maxY <= curMaxY + 0.75D) {
-                        var4 = curMaxY - par1AxisAlignedBB.maxY - 0.01D;
-                        if (var4 < par2) {
-                            par2 = var4;
+                    if (aabb.maxY <= curMaxY + 0.75D) {
+                        newYOffset = curMaxY - aabb.maxY - 0.01D;
+                        if (newYOffset < yOffset) {
+                            yOffset = newYOffset;
                         }
                     }
                 } else {
@@ -860,21 +876,21 @@ public class OrientedBB extends AxisAlignedBB {
                         edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
                     }
 
-                    double localPar2 = par2;
+                    double localYOffset = yOffset;
                     boolean liesOnEdge = false;
                     for (Line edge : edges) {
                         for (Plane wall : walls) {
                             Vector3D intersection = wall.intersection(edge);
                             if (intersection != null && intersection.getY() >= curMaxY
-                                && intersection.getX() <= par1AxisAlignedBB.maxX
-                                && intersection.getX() >= par1AxisAlignedBB.minX
-                                && intersection.getZ() <= par1AxisAlignedBB.maxZ
-                                && intersection.getZ() >= par1AxisAlignedBB.minZ) {
+                                && intersection.getX() <= aabb.maxX
+                                && intersection.getX() >= aabb.minX
+                                && intersection.getZ() <= aabb.maxZ
+                                && intersection.getZ() >= aabb.minZ) {
                                 liesOnEdge = true;
-                                if (par1AxisAlignedBB.maxY <= intersection.getY() + 0.75D) {
-                                    var4 = curMaxY - par1AxisAlignedBB.maxY - 0.01D;
-                                    if (var4 < localPar2) {
-                                        localPar2 = var4;
+                                if (aabb.maxY <= intersection.getY() + 0.75D) {
+                                    newYOffset = curMaxY - aabb.maxY - 0.01D;
+                                    if (newYOffset < localYOffset) {
+                                        localYOffset = newYOffset;
                                     }
                                 }
                             }
@@ -882,7 +898,7 @@ public class OrientedBB extends AxisAlignedBB {
                     }
 
                     if (liesOnEdge) {
-                        if (localPar2 != par2) par2 = localPar2;
+                        if (localYOffset != yOffset) yOffset = localYOffset;
                     } else {
                         // AABB doesn't intersect any edges. Let's check bottom faces then
                         List<Plane> faces = new ArrayList<Plane>();
@@ -909,26 +925,26 @@ public class OrientedBB extends AxisAlignedBB {
                             }
                         }
 
-                        localPar2 = par2;
+                        localYOffset = yOffset;
                         for (Plane face : faces) {
                             for (int i = 0; i < 4; i++) {
                                 Vector3D intersection = face.intersection(corners[i]);
 
-                                if (intersection.getY() >= curMaxY
-                                    && par1AxisAlignedBB.maxY <= intersection.getY() + 0.75D) {
-                                    var4 = intersection.getY() - par1AxisAlignedBB.maxY - 0.01D;
-                                    if (var4 < localPar2) {
-                                        localPar2 = var4;
+                                if (intersection != null && intersection.getY() >= curMaxY
+                                    && aabb.maxY <= intersection.getY() + 0.75D) {
+                                    newYOffset = intersection.getY() - aabb.maxY - 0.01D;
+                                    if (newYOffset < localYOffset) {
+                                        localYOffset = newYOffset;
                                     }
                                 }
                             }
                         }
-                        if (localPar2 != par2) par2 = localPar2;
+                        if (localYOffset != yOffset) yOffset = localYOffset;
                     }
                 }
             }
 
-            if (par2 < 0.0D) {
+            if (yOffset < 0.0D) {
                 curMaxY = this.getY(0);
                 curMaxIndex = 0;
 
@@ -960,17 +976,16 @@ public class OrientedBB extends AxisAlignedBB {
 
                 if ((this.getY(curMaxIndex) == this.getY(neighbourIndexes[0])
                     && this.getY(neighbourIndexes[0]) == this.getY(neighbourIndexes[1]))
-                    || (this.getX(curMaxIndex) <= par1AxisAlignedBB.maxX
-                        && this.getX(curMaxIndex) >= par1AxisAlignedBB.minX
-                        && this.getZ(curMaxIndex) <= par1AxisAlignedBB.maxZ
-                        && this.getZ(curMaxIndex) >= par1AxisAlignedBB.minZ)) {
+                    || (this.getX(curMaxIndex) <= aabb.maxX && this.getX(curMaxIndex) >= aabb.minX
+                        && this.getZ(curMaxIndex) <= aabb.maxZ
+                        && this.getZ(curMaxIndex) >= aabb.minZ)) {
 
                     // Either this BB is not rotated around x/z, or
                     // Target AABB contains the highest point. It should stand right on top of it
-                    if (par1AxisAlignedBB.minY >= curMaxY - 0.75D) {
-                        var4 = curMaxY - par1AxisAlignedBB.minY + 0.01D;
-                        if (var4 > par2) {
-                            par2 = var4;
+                    if (aabb.minY >= curMaxY - 0.75D) {
+                        newYOffset = curMaxY - aabb.minY + 0.01D;
+                        if (newYOffset > yOffset) {
+                            yOffset = newYOffset;
                         }
                     }
                 } else {
@@ -984,21 +999,21 @@ public class OrientedBB extends AxisAlignedBB {
                         edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
                     }
 
-                    double localPar2 = par2;
+                    double localYOffset = yOffset;
                     boolean liesOnEdge = false;
                     for (Line edge : edges) {
                         for (Plane wall : walls) {
                             Vector3D intersection = wall.intersection(edge);
                             if (intersection != null && intersection.getY() <= curMaxY
-                                && intersection.getX() <= par1AxisAlignedBB.maxX
-                                && intersection.getX() >= par1AxisAlignedBB.minX
-                                && intersection.getZ() <= par1AxisAlignedBB.maxZ
-                                && intersection.getZ() >= par1AxisAlignedBB.minZ) {
+                                && intersection.getX() <= aabb.maxX
+                                && intersection.getX() >= aabb.minX
+                                && intersection.getZ() <= aabb.maxZ
+                                && intersection.getZ() >= aabb.minZ) {
                                 liesOnEdge = true;
-                                if (par1AxisAlignedBB.minY >= intersection.getY() - 0.75D) {
-                                    var4 = curMaxY - par1AxisAlignedBB.minY + 0.01D;
-                                    if (var4 > localPar2) {
-                                        localPar2 = var4;
+                                if (aabb.minY >= intersection.getY() - 0.75D) {
+                                    newYOffset = curMaxY - aabb.minY + 0.01D;
+                                    if (newYOffset > localYOffset) {
+                                        localYOffset = newYOffset;
                                     }
                                 }
                             }
@@ -1006,7 +1021,7 @@ public class OrientedBB extends AxisAlignedBB {
                     }
 
                     if (liesOnEdge) {
-                        if (localPar2 != par2) par2 = localPar2;
+                        if (localYOffset != yOffset) yOffset = localYOffset;
                     } else {
                         // AABB doesn't intersect any edges. Let's check top faces then
                         List<Plane> faces = new ArrayList<Plane>();
@@ -1033,71 +1048,82 @@ public class OrientedBB extends AxisAlignedBB {
                             }
                         }
 
-                        localPar2 = par2;
+                        localYOffset = yOffset;
                         for (Plane face : faces) {
                             for (int i = 0; i < 4; i++) {
                                 Vector3D intersection = face.intersection(corners[i]);
 
-                                if (intersection.getY() <= curMaxY
-                                    && par1AxisAlignedBB.minY >= intersection.getY() - 0.75D) {
-                                    var4 = intersection.getY() - par1AxisAlignedBB.minY + 0.01D;
-                                    if (var4 > localPar2) {
-                                        localPar2 = var4;
+                                if (intersection != null && intersection.getY() <= curMaxY
+                                    && aabb.minY >= intersection.getY() - 0.75D) {
+                                    newYOffset = intersection.getY() - aabb.minY + 0.01D;
+                                    if (newYOffset > localYOffset) {
+                                        localYOffset = newYOffset;
                                     }
                                 }
                             }
                         }
-                        if (localPar2 != par2) par2 = localPar2;
+                        if (localYOffset != yOffset) yOffset = localYOffset;
                     }
                 }
             }
         }
 
-        return par2;
+        return yOffset;
     }
 
-    public double calculateZOffset(AxisAlignedBB par1AxisAlignedBB, double par2) {
-        if (((IMixinWorld) this.lastTransformedBy).getRotationPitch() != 0
-            || ((IMixinWorld) this.lastTransformedBy).getRotationRoll() != 0) {
-            // Checking for intersection works perfectly here, but it may be too resource-intensive
-            if (this.intersectsWith(par1AxisAlignedBB)) {
-                double var4;
+    public double calculateZOffset(AxisAlignedBB aabb, double zOffset) {
+        double worldRotation = Math.abs(((IMixinWorld) this.lastTransformedBy).getRotationYaw()) % 90;
+        if (worldRotation > 45) worldRotation = 90 - worldRotation;
+        double localBBsize = (aabb.maxX - aabb.minX) * Math.cos(worldRotation / 180 * Math.PI) / 2 * multiplier;
+        Vec3 bbCenter = Vec3.createVectorHelper((aabb.maxX + aabb.minX) / 2, aabb.minY, (aabb.maxZ + aabb.minZ) / 2);
+        aabb = AxisAlignedBB.getBoundingBox(
+            bbCenter.xCoord - localBBsize,
+            aabb.minY,
+            bbCenter.zCoord - localBBsize,
+            bbCenter.xCoord + localBBsize,
+            aabb.maxY,
+            bbCenter.zCoord + localBBsize);
+
+        if (((IMixinWorld) this.lastTransformedBy).getRotationPitch() % 360 != 0
+            || ((IMixinWorld) this.lastTransformedBy).getRotationRoll() % 360 != 0) {
+            if (checkXYoverlap(aabb)) {
+                double newZOffset;
                 double curMaxZ;
                 int curMaxIndex;
                 int[] neighbourIndexes = new int[3];
                 int neighbourIndex;
                 Line[] corners = {
                     new Line(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.minZ),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.maxZ)),
                     new Line(
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.minZ),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.maxZ)),
                     new Line(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.minZ),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.maxZ)),
                     new Line(
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ)) };
+                        new Vector3D(aabb.maxX, aabb.maxY, aabb.minZ),
+                        new Vector3D(aabb.maxX, aabb.maxY, aabb.maxZ)) };
                 Plane[] walls = {
                     new Plane(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.minZ),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.minZ),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.maxZ)),
                     new Plane(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.maxZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ)),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.minZ),
+                        new Vector3D(aabb.minX, aabb.maxY, aabb.maxZ),
+                        new Vector3D(aabb.maxX, aabb.maxY, aabb.minZ)),
                     new Plane(
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.maxY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ)),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.minZ),
+                        new Vector3D(aabb.maxX, aabb.maxY, aabb.minZ),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.maxZ)),
                     new Plane(
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ),
-                        new Vector3D(par1AxisAlignedBB.minX, par1AxisAlignedBB.minY, par1AxisAlignedBB.maxZ),
-                        new Vector3D(par1AxisAlignedBB.maxX, par1AxisAlignedBB.minY, par1AxisAlignedBB.minZ)) };
+                        new Vector3D(aabb.minX, aabb.minY, aabb.minZ),
+                        new Vector3D(aabb.minX, aabb.minY, aabb.maxZ),
+                        new Vector3D(aabb.maxX, aabb.minY, aabb.minZ)) };
 
-                if (par2 > 0.0D) {
+                if (zOffset > 0.0D) {
                     curMaxZ = this.getZ(0);
                     curMaxIndex = 0;
 
@@ -1129,17 +1155,16 @@ public class OrientedBB extends AxisAlignedBB {
 
                     if ((this.getZ(curMaxIndex) == this.getZ(neighbourIndexes[0])
                         && this.getZ(neighbourIndexes[0]) == this.getZ(neighbourIndexes[1]))
-                        || (this.getY(curMaxIndex) <= par1AxisAlignedBB.maxY
-                            && this.getY(curMaxIndex) >= par1AxisAlignedBB.minY
-                            && this.getX(curMaxIndex) <= par1AxisAlignedBB.maxX
-                            && this.getX(curMaxIndex) >= par1AxisAlignedBB.minX)) {
+                        || (this.getY(curMaxIndex) <= aabb.maxY && this.getY(curMaxIndex) >= aabb.minY
+                            && this.getX(curMaxIndex) <= aabb.maxX
+                            && this.getX(curMaxIndex) >= aabb.minX)) {
 
                         // Either this BB is not rotated around y/x, or
                         // Target AABB contains the smallest z point
-                        if (par1AxisAlignedBB.maxZ <= curMaxZ + 0.75D) {
-                            var4 = curMaxZ - par1AxisAlignedBB.maxZ - 0.01D;
-                            if (var4 < par2) {
-                                par2 = var4;
+                        if (aabb.maxZ <= curMaxZ + 0.75D) {
+                            newZOffset = curMaxZ - aabb.maxZ - 0.01D;
+                            if (newZOffset < zOffset) {
+                                zOffset = newZOffset;
                             }
                         }
                     } else {
@@ -1153,21 +1178,21 @@ public class OrientedBB extends AxisAlignedBB {
                             edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
                         }
 
-                        double localPar2 = par2;
+                        double localZOffset = zOffset;
                         boolean liesOnEdge = false;
                         for (Line edge : edges) {
                             for (Plane wall : walls) {
                                 Vector3D intersection = wall.intersection(edge);
                                 if (intersection != null && intersection.getZ() >= curMaxZ
-                                    && intersection.getY() <= par1AxisAlignedBB.maxY
-                                    && intersection.getY() >= par1AxisAlignedBB.minY
-                                    && intersection.getX() <= par1AxisAlignedBB.maxX
-                                    && intersection.getX() >= par1AxisAlignedBB.minX) {
+                                    && intersection.getY() <= aabb.maxY
+                                    && intersection.getY() >= aabb.minY
+                                    && intersection.getX() <= aabb.maxX
+                                    && intersection.getX() >= aabb.minX) {
                                     liesOnEdge = true;
-                                    if (par1AxisAlignedBB.maxZ <= intersection.getZ() + 0.75D) {
-                                        var4 = curMaxZ - par1AxisAlignedBB.maxZ - 0.01D;
-                                        if (var4 < localPar2) {
-                                            localPar2 = var4;
+                                    if (aabb.maxZ <= intersection.getZ() + 0.75D) {
+                                        newZOffset = curMaxZ - aabb.maxZ - 0.01D;
+                                        if (newZOffset < localZOffset) {
+                                            localZOffset = newZOffset;
                                         }
                                     }
                                 }
@@ -1175,7 +1200,7 @@ public class OrientedBB extends AxisAlignedBB {
                         }
 
                         if (liesOnEdge) {
-                            if (localPar2 != par2) par2 = localPar2;
+                            if (localZOffset != zOffset) zOffset = localZOffset;
                         } else {
                             // AABB doesn't intersect any edges. Let's check negative z faces then
                             List<Plane> faces = new ArrayList<Plane>();
@@ -1202,26 +1227,25 @@ public class OrientedBB extends AxisAlignedBB {
                                 }
                             }
 
-                            localPar2 = par2;
+                            localZOffset = zOffset;
                             for (Plane face : faces) {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection.getZ() >= curMaxZ
-                                        && par1AxisAlignedBB.maxZ <= intersection.getZ() + 0.75D) {
-                                        var4 = intersection.getZ() - par1AxisAlignedBB.maxZ - 0.01D;
-                                        if (var4 < localPar2) {
-                                            localPar2 = var4;
+                                    if (intersection.getZ() >= curMaxZ && aabb.maxZ <= intersection.getZ() + 0.75D) {
+                                        newZOffset = intersection.getZ() - aabb.maxZ - 0.01D;
+                                        if (newZOffset < localZOffset) {
+                                            localZOffset = newZOffset;
                                         }
                                     }
                                 }
                             }
-                            if (localPar2 != par2) par2 = localPar2;
+                            if (localZOffset != zOffset) zOffset = localZOffset;
                         }
                     }
                 }
 
-                if (par2 < 0.0D) {
+                if (zOffset < 0.0D) {
                     curMaxZ = this.getZ(0);
                     curMaxIndex = 0;
 
@@ -1253,17 +1277,16 @@ public class OrientedBB extends AxisAlignedBB {
 
                     if ((this.getZ(curMaxIndex) == this.getZ(neighbourIndexes[0])
                         && this.getZ(neighbourIndexes[0]) == this.getZ(neighbourIndexes[1]))
-                        || (this.getY(curMaxIndex) <= par1AxisAlignedBB.maxY
-                            && this.getY(curMaxIndex) >= par1AxisAlignedBB.minY
-                            && this.getX(curMaxIndex) <= par1AxisAlignedBB.maxX
-                            && this.getX(curMaxIndex) >= par1AxisAlignedBB.minX)) {
+                        || (this.getY(curMaxIndex) <= aabb.maxY && this.getY(curMaxIndex) >= aabb.minY
+                            && this.getX(curMaxIndex) <= aabb.maxX
+                            && this.getX(curMaxIndex) >= aabb.minX)) {
 
                         // Either this BB is not rotated around y/x, or
                         // Target AABB contains the biggest z point
-                        if (par1AxisAlignedBB.minZ >= curMaxZ - 0.75D) {
-                            var4 = curMaxZ - par1AxisAlignedBB.minZ + 0.01D;
-                            if (var4 > par2) {
-                                par2 = var4;
+                        if (aabb.minZ >= curMaxZ - 0.75D) {
+                            newZOffset = curMaxZ - aabb.minZ + 0.01D;
+                            if (newZOffset > zOffset) {
+                                zOffset = newZOffset;
                             }
                         }
                     } else {
@@ -1277,21 +1300,21 @@ public class OrientedBB extends AxisAlignedBB {
                             edges.add(new Line(this.getVertice(curMaxIndex), this.getVertice(neighbourIndexes[2])));
                         }
 
-                        double localPar2 = par2;
+                        double localZOffset = zOffset;
                         boolean liesOnEdge = false;
                         for (Line edge : edges) {
                             for (Plane wall : walls) {
                                 Vector3D intersection = wall.intersection(edge);
                                 if (intersection != null && intersection.getZ() <= curMaxZ
-                                    && intersection.getY() <= par1AxisAlignedBB.maxY
-                                    && intersection.getY() >= par1AxisAlignedBB.minY
-                                    && intersection.getX() <= par1AxisAlignedBB.maxX
-                                    && intersection.getX() >= par1AxisAlignedBB.minX) {
+                                    && intersection.getY() <= aabb.maxY
+                                    && intersection.getY() >= aabb.minY
+                                    && intersection.getX() <= aabb.maxX
+                                    && intersection.getX() >= aabb.minX) {
                                     liesOnEdge = true;
-                                    if (par1AxisAlignedBB.minZ >= intersection.getZ() - 0.75D) {
-                                        var4 = curMaxZ - par1AxisAlignedBB.minZ + 0.01D;
-                                        if (var4 > localPar2) {
-                                            localPar2 = var4;
+                                    if (aabb.minZ >= intersection.getZ() - 0.75D) {
+                                        newZOffset = curMaxZ - aabb.minZ + 0.01D;
+                                        if (newZOffset > localZOffset) {
+                                            localZOffset = newZOffset;
                                         }
                                     }
                                 }
@@ -1299,7 +1322,7 @@ public class OrientedBB extends AxisAlignedBB {
                         }
 
                         if (liesOnEdge) {
-                            if (localPar2 != par2) par2 = localPar2;
+                            if (localZOffset != zOffset) zOffset = localZOffset;
                         } else {
                             // AABB doesn't intersect any edges. Let's check positive z faces then
                             List<Plane> faces = new ArrayList<Plane>();
@@ -1326,34 +1349,31 @@ public class OrientedBB extends AxisAlignedBB {
                                 }
                             }
 
-                            localPar2 = par2;
+                            localZOffset = zOffset;
                             for (Plane face : faces) {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection.getZ() <= curMaxZ
-                                        && par1AxisAlignedBB.minZ >= intersection.getZ() - 0.75D) {
-                                        var4 = intersection.getZ() - par1AxisAlignedBB.minZ + 0.01D;
-                                        if (var4 > localPar2) {
-                                            localPar2 = var4;
+                                    if (intersection.getZ() <= curMaxZ && aabb.minZ >= intersection.getZ() - 0.75D) {
+                                        newZOffset = intersection.getZ() - aabb.minZ + 0.01D;
+                                        if (newZOffset > localZOffset) {
+                                            localZOffset = newZOffset;
                                         }
                                     }
                                 }
                             }
-                            if (localPar2 != par2) par2 = localPar2;
+                            if (localZOffset != zOffset) zOffset = localZOffset;
                         }
                     }
                 }
             }
         } else {
-            if (par1AxisAlignedBB.maxY > this.minY && par1AxisAlignedBB.minY < this.maxY
-                && par1AxisAlignedBB.maxX > this.minX
-                && par1AxisAlignedBB.minX < this.maxX) {
-                double var4;
+            if (aabb.maxY > this.minY && aabb.minY < this.maxY && aabb.maxX > this.minX && aabb.minX < this.maxX) {
+                double newZOffset;
                 double curMaxZ;
                 int curMaxIndex;
                 int neighbourIndex;
-                if (par2 > 0.0D) {
+                if (zOffset > 0.0D) {
                     curMaxZ = this.getZ(0);
                     curMaxIndex = 0;
 
@@ -1364,31 +1384,31 @@ public class OrientedBB extends AxisAlignedBB {
                         }
                     }
 
-                    if (this.getX(curMaxIndex) <= par1AxisAlignedBB.minX) {
+                    if (this.getX(curMaxIndex) <= aabb.minX) {
                         neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
                         if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
                             curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
-                                * (par1AxisAlignedBB.minX - this.getX(neighbourIndex))
+                                * (aabb.minX - this.getX(neighbourIndex))
                                 / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
                         }
-                    } else if (this.getX(curMaxIndex) >= par1AxisAlignedBB.maxX) {
+                    } else if (this.getX(curMaxIndex) >= aabb.maxX) {
                         neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
                         if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
                             curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
-                                * (par1AxisAlignedBB.maxX - this.getX(neighbourIndex))
+                                * (aabb.maxX - this.getX(neighbourIndex))
                                 / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
                         }
                     }
 
-                    if (par1AxisAlignedBB.maxZ <= curMaxZ + 0.75D) {
-                        var4 = curMaxZ - par1AxisAlignedBB.maxZ - 0.01D;
-                        if (var4 < par2) {
-                            par2 = var4;
+                    if (aabb.maxZ <= curMaxZ + 0.75D) {
+                        newZOffset = curMaxZ - aabb.maxZ - 0.01D;
+                        if (newZOffset < zOffset) {
+                            zOffset = newZOffset;
                         }
                     }
                 }
 
-                if (par2 < 0.0D) {
+                if (zOffset < 0.0D) {
                     curMaxZ = this.getZ(0);
                     curMaxIndex = 0;
 
@@ -1399,33 +1419,108 @@ public class OrientedBB extends AxisAlignedBB {
                         }
                     }
 
-                    if (this.getX(curMaxIndex) <= par1AxisAlignedBB.minX) {
+                    if (this.getX(curMaxIndex) <= aabb.minX) {
                         neighbourIndex = this.getCCWNeighbourIndexXZ(curMaxIndex);
                         if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
                             curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
-                                * (par1AxisAlignedBB.minX - this.getX(neighbourIndex))
+                                * (aabb.minX - this.getX(neighbourIndex))
                                 / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
                         }
-                    } else if (this.getX(curMaxIndex) >= par1AxisAlignedBB.maxX) {
+                    } else if (this.getX(curMaxIndex) >= aabb.maxX) {
                         neighbourIndex = this.getCWNeighbourIndexXZ(curMaxIndex);
                         if (this.getX(neighbourIndex) != this.getX(curMaxIndex)) {
                             curMaxZ = this.getZ(neighbourIndex) + (this.getZ(curMaxIndex) - this.getZ(neighbourIndex))
-                                * (par1AxisAlignedBB.maxX - this.getX(neighbourIndex))
+                                * (aabb.maxX - this.getX(neighbourIndex))
                                 / (this.getX(curMaxIndex) - this.getX(neighbourIndex));
                         }
                     }
 
-                    if (par1AxisAlignedBB.minZ >= curMaxZ - 0.75D) {
-                        var4 = curMaxZ - par1AxisAlignedBB.minZ + 0.01D;
-                        if (var4 > par2) {
-                            par2 = var4;
+                    if (aabb.minZ >= curMaxZ - 0.75D) {
+                        newZOffset = curMaxZ - aabb.minZ + 0.01D;
+                        if (newZOffset > zOffset) {
+                            zOffset = newZOffset;
                         }
                     }
                 }
             }
         }
 
-        return par2;
+        return zOffset;
+    }
+
+    public boolean checkYZoverlap(AxisAlignedBB aabb) {
+        List<Vector2D> points = new ArrayList<Vector2D>();
+        for (int i = 0; i < 8; i++) {
+            Vector2D newPoint = new Vector2D(this.getY(i), this.getZ(i));
+            boolean shouldAdd = true;
+            for (Vector2D point : points) {
+                if (newPoint.getX() == point.getX() && newPoint.getY() == point.getY()) {
+                    shouldAdd = false;
+                    break;
+                }
+            }
+            if (shouldAdd) points.add(newPoint);
+        }
+        Polygon2D polygon1 = GeometryHelper2D.getConvexPolygon(points);
+
+        points.clear();
+        points.add(new Vector2D(aabb.minY, aabb.minZ));
+        points.add(new Vector2D(aabb.minY, aabb.maxZ));
+        points.add(new Vector2D(aabb.maxY, aabb.maxZ));
+        points.add(new Vector2D(aabb.maxY, aabb.minZ));
+        Polygon2D polygon2 = new Polygon2D(points);
+
+        return polygon1.intersects(polygon2);
+    }
+
+    public boolean checkXZoverlap(AxisAlignedBB aabb) {
+        List<Vector2D> points = new ArrayList<Vector2D>();
+        for (int i = 0; i < 8; i++) {
+            Vector2D newPoint = new Vector2D(this.getX(i), this.getZ(i));
+            boolean shouldAdd = true;
+            for (Vector2D point : points) {
+                if (newPoint.getX() == point.getX() && newPoint.getY() == point.getY()) {
+                    shouldAdd = false;
+                    break;
+                }
+            }
+            if (shouldAdd) points.add(newPoint);
+        }
+        Polygon2D polygon1 = GeometryHelper2D.getConvexPolygon(points);
+
+        points.clear();
+        points.add(new Vector2D(aabb.minX, aabb.minZ));
+        points.add(new Vector2D(aabb.minX, aabb.maxZ));
+        points.add(new Vector2D(aabb.maxX, aabb.maxZ));
+        points.add(new Vector2D(aabb.maxX, aabb.minZ));
+        Polygon2D polygon2 = new Polygon2D(points);
+
+        return polygon1.intersects(polygon2);
+    }
+
+    public boolean checkXYoverlap(AxisAlignedBB aabb) {
+        List<Vector2D> points = new ArrayList<Vector2D>();
+        for (int i = 0; i < 8; i++) {
+            Vector2D newPoint = new Vector2D(this.getX(i), this.getY(i));
+            boolean shouldAdd = true;
+            for (Vector2D point : points) {
+                if (newPoint.getX() == point.getX() && newPoint.getY() == point.getY()) {
+                    shouldAdd = false;
+                    break;
+                }
+            }
+            if (shouldAdd) points.add(newPoint);
+        }
+        Polygon2D polygon1 = GeometryHelper2D.getConvexPolygon(points);
+
+        points.clear();
+        points.add(new Vector2D(aabb.minX, aabb.minY));
+        points.add(new Vector2D(aabb.minX, aabb.maxY));
+        points.add(new Vector2D(aabb.maxX, aabb.maxY));
+        points.add(new Vector2D(aabb.maxX, aabb.minY));
+        Polygon2D polygon2 = new Polygon2D(points);
+
+        return polygon1.intersects(polygon2);
     }
 
     @Override
@@ -1435,5 +1530,33 @@ public class OrientedBB extends AxisAlignedBB {
 
     public Vector3D getVertice(int i) {
         return new Vector3D(this.getX(i), this.getY(i), this.getZ(i));
+    }
+
+    public int getYneighbourIndex(int currentIndex) {
+        return currentIndex < 4 ? currentIndex + 4 : currentIndex + 4;
+    }
+
+    // First vertice should always be between second and third
+    public Integer getFourthVerticeIndex(int i1, int i2, int i3) {
+        if (i1 == i2 || i1 == i3 || i2 == i3) return null;
+        else {
+            int cwxz = this.getCWNeighbourIndexXZ(i1);
+            int ccwxz = this.getCCWNeighbourIndexXZ(i1);
+            if ((cwxz == i2 && ccwxz == i3) || (cwxz == i3 && ccwxz == i2)) {
+                // All points lay in XZ plane
+                return this.getCWNeighbourIndexXZ(cwxz);
+            } else {
+                if (cwxz == i2 || ccwxz == i2) {
+                    if (this.getYneighbourIndex(i1) == i3) return this.getYneighbourIndex(i2);
+                    else return null;
+                } else {
+                    if (cwxz == i3 || ccwxz == i3) {
+                        if (this.getYneighbourIndex(i1) == i2) return this.getYneighbourIndex(i3);
+                        else return null;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

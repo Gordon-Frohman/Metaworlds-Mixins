@@ -17,5 +17,7 @@ public interface IMixinAxisAlignedBB {
 
     public OrientedBB rotateYaw(double targetYaw);
 
+    public OrientedBB rotateYaw(double targetYaw, double centerX, double centerZ);
+
     public OrientedBB getOrientedBB();
 }

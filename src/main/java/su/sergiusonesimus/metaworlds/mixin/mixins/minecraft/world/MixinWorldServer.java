@@ -236,17 +236,36 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return super.func_147447_a(par1Vec3, par2Vec3, par3, par4, par5);
     }
 
-    public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+    public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB aabb) {
         this.collidingBBCacheIntermediate.clear();
-        this.collidingBBCacheIntermediate = (ArrayList) this
-            .getCollidingBoundingBoxesLocal(par1Entity, par2AxisAlignedBB);
+        this.collidingBBCacheIntermediate = (ArrayList) this.getCollidingBoundingBoxesLocal(par1Entity, aabb);
         Iterator i$ = ((IMixinWorld) this).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
             World curSubWorld = (World) i$.next();
-            this.collidingBBCacheIntermediate
-                .addAll(((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobal(par1Entity, par2AxisAlignedBB));
+            double worldRotation = ((IMixinWorld) curSubWorld).getRotationYaw() % 360;
+            if (worldRotation != 0) {
+                double dxPos = aabb.maxX - par1Entity.posX;
+                double dxNeg = par1Entity.posX - aabb.minX;
+                double dzPos = aabb.maxZ - par1Entity.posZ;
+                double dzNeg = par1Entity.posZ - aabb.minZ;
+                Vec3 moveVec = Vec3.createVectorHelper(dxPos - dxNeg, 0, dzPos - dzNeg);
+                double xHalf = dxPos < dxNeg ? dxPos : dxNeg;
+                double zHalf = dzPos < dzNeg ? dzPos : dzNeg;
+                AxisAlignedBB localBB = ((IMixinAxisAlignedBB) AxisAlignedBB.getBoundingBox(
+                    par1Entity.posX - xHalf,
+                    aabb.minY,
+                    par1Entity.posZ - zHalf,
+                    par1Entity.posX + xHalf,
+                    aabb.maxY,
+                    par1Entity.posZ + zHalf)).rotateYaw(-worldRotation, par1Entity.posX, par1Entity.posZ);
+                this.collidingBBCacheIntermediate.addAll(
+                    ((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobalWithMovement(par1Entity, localBB, moveVec));
+            } else {
+                this.collidingBBCacheIntermediate
+                    .addAll(((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobal(par1Entity, aabb));
+            }
         }
 
         return this.collidingBBCacheIntermediate;

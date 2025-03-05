@@ -77,6 +77,11 @@ public abstract class MixinAxisAlignedBB implements IMixinAxisAlignedBB {
             .rotateYaw(targetYaw);
     }
 
+    public OrientedBB rotateYaw(double targetYaw, double centerX, double centerZ) {
+        return OBBPool.createOBB((AxisAlignedBB) (Object) this)
+            .rotateYaw(targetYaw, centerX, centerZ);
+    }
+
     public OrientedBB getOrientedBB() {
         return OBBPool.createOBB((AxisAlignedBB) (Object) this);
     }

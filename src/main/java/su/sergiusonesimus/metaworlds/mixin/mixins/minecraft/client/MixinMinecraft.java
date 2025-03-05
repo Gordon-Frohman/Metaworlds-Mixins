@@ -461,10 +461,7 @@ public abstract class MixinMinecraft {
             && resourcePackDir == null
             && version == null
             && twitchDetails == null
-            && assetsJsonVersion == null) {
-            // logger.info("Empty Minecraft object created");
-        } else {
-            // logger.info("Normal Minecraft object created");
+            && assetsJsonVersion == null) {} else {
             Minecraft.theMinecraft = (Minecraft) (Object) this;
             this.mcDataDir = dataDir;
             this.fileAssets = assetsDir;
@@ -481,7 +478,6 @@ public abstract class MixinMinecraft {
                     .toString())).createMinecraftSessionService();
             this.startTimerHackThread();
             this.session = sessionIn;
-            logger.info("Setting user: " + sessionIn.getUsername());
             this.isDemo = isDemo;
             this.displayWidth = displayWidth;
             this.displayHeight = displayHeight;
