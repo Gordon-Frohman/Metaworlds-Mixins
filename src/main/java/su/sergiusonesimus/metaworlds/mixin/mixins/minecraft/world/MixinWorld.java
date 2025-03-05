@@ -426,41 +426,4 @@ public abstract class MixinWorld implements IMixinWorld {
         }
         return canSee;
     }
-
-    /**
-     * Sets the light value either into the sky map or block map depending on if enumSkyBlock is set to sky or block.
-     * Args: enumSkyBlock, x, y, z, lightValue
-     */
-    /*
-     * @Overwrite
-     * public void setLightValue(EnumSkyBlock p_72915_1_, int p_72915_2_, int p_72915_3_, int p_72915_4_, int
-     * p_72915_5_)
-     * {
-     * Collection<World> worldsList = ((IMixinWorld)this).isSubWorld()?
-     * ((IMixinWorld)((IMixinWorld)this).getParentWorld()).getSubWorlds() : ((IMixinWorld)this).getWorlds();
-     * for(World world : worldsList) {
-     * Vec3 localCoords = ((IMixinWorld)world).transformToLocal(p_72915_2_, p_72915_3_, p_72915_4_);
-     * if (localCoords.xCoord >= -30000000 && localCoords.zCoord >= -30000000 && localCoords.xCoord < 30000000 &&
-     * localCoords.zCoord < 30000000)
-     * {
-     * if (localCoords.yCoord >= 0)
-     * {
-     * if (localCoords.yCoord < 256)
-     * {
-     * if (world.chunkExists((int) localCoords.xCoord >> 4, (int) localCoords.zCoord >> 4))
-     * {
-     * Chunk chunk = world.getChunkFromChunkCoords((int) localCoords.xCoord >> 4, (int) localCoords.zCoord >> 4);
-     * chunk.setLightValue(p_72915_1_, (int) localCoords.xCoord & 15, (int) localCoords.yCoord, (int) localCoords.zCoord
-     * & 15, p_72915_5_);
-     * for (int i1 = 0; i1 < world.worldAccesses.size(); ++i1)
-     * {
-     * ((IWorldAccess)world.worldAccesses.get(i1)).markBlockForRenderUpdate(p_72915_2_, p_72915_3_, p_72915_4_);
-     * }
-     * }
-     * }
-     * }
-     * }
-     * }
-     * }
-     */
 }
