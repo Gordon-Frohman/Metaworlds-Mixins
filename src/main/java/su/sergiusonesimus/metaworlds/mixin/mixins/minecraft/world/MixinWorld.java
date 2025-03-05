@@ -16,6 +16,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
@@ -30,6 +31,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import cpw.mods.fml.relauncher.Side;
@@ -68,6 +70,16 @@ public abstract class MixinWorld implements IMixinWorld {
     protected List worldAccesses;
 
     // TODO
+
+    @Shadow(remap = true)
+    public int getSavedLightValue(EnumSkyBlock p_72972_1_, int p_72972_2_, int p_72972_3_, int p_72972_4_) {
+        return 0;
+    }
+
+    @Shadow(remap = true)
+    public int getBlockLightValue_do(int p_72849_1_, int p_72849_2_, int p_72849_3_, boolean p_72849_4_) {
+        return 0;
+    }
 
     @Shadow(remap = true)
     public boolean isAABBInMaterial(AxisAlignedBB p_72830_1_, Material p_72830_2_) {
@@ -417,7 +429,8 @@ public abstract class MixinWorld implements IMixinWorld {
                     int localZ = MathHelper.floor_double(localCoords.zCoord);
                     Chunk subworldChunk = subworld.getChunkFromChunkCoords(localX >> 4, localZ >> 4);
                     int subworldHeight = subworldChunk.getHeightValue(localX & 15, localZ & 15);
-                    if (subworldHeight > localY) {
+                    Vec3 globalSubworldHeight = this.transformToGlobal(Vec3.createVectorHelper(0, subworldHeight, 0));
+                    if (globalSubworldHeight.yCoord > y) {
                         canSee = false;
                         break;
                     }
@@ -428,39 +441,65 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     /**
-     * Sets the light value either into the sky map or block map depending on if enumSkyBlock is set to sky or block.
-     * Args: enumSkyBlock, x, y, z, lightValue
+     * Gets the light value of a block location
      */
-    /*
-     * @Overwrite
-     * public void setLightValue(EnumSkyBlock p_72915_1_, int p_72915_2_, int p_72915_3_, int p_72915_4_, int
-     * p_72915_5_)
-     * {
-     * Collection<World> worldsList = ((IMixinWorld)this).isSubWorld()?
-     * ((IMixinWorld)((IMixinWorld)this).getParentWorld()).getSubWorlds() : ((IMixinWorld)this).getWorlds();
-     * for(World world : worldsList) {
-     * Vec3 localCoords = ((IMixinWorld)world).transformToLocal(p_72915_2_, p_72915_3_, p_72915_4_);
-     * if (localCoords.xCoord >= -30000000 && localCoords.zCoord >= -30000000 && localCoords.xCoord < 30000000 &&
-     * localCoords.zCoord < 30000000)
-     * {
-     * if (localCoords.yCoord >= 0)
-     * {
-     * if (localCoords.yCoord < 256)
-     * {
-     * if (world.chunkExists((int) localCoords.xCoord >> 4, (int) localCoords.zCoord >> 4))
-     * {
-     * Chunk chunk = world.getChunkFromChunkCoords((int) localCoords.xCoord >> 4, (int) localCoords.zCoord >> 4);
-     * chunk.setLightValue(p_72915_1_, (int) localCoords.xCoord & 15, (int) localCoords.yCoord, (int) localCoords.zCoord
-     * & 15, p_72915_5_);
-     * for (int i1 = 0; i1 < world.worldAccesses.size(); ++i1)
-     * {
-     * ((IWorldAccess)world.worldAccesses.get(i1)).markBlockForRenderUpdate(p_72915_2_, p_72915_3_, p_72915_4_);
-     * }
-     * }
-     * }
-     * }
-     * }
-     * }
-     * }
-     */
+    @Overwrite
+    public int getBlockLightValue(int x, int y, int z) {
+        Vec3 globalCenter = Vec3.createVectorHelper(x + 0.5, y + 0.5, z + 0.5);
+        if (this.isSubWorld) globalCenter = this.transformToGlobal(globalCenter);
+        int totalLight = this.getParentWorld()
+            .getBlockLightValue_do(
+                MathHelper.floor_double(globalCenter.xCoord),
+                MathHelper.floor_double(globalCenter.yCoord),
+                MathHelper.floor_double(globalCenter.zCoord),
+                true);
+        for (World subworld : ((IMixinWorld)this.getParentWorld()).getSubWorlds()) {
+            AxisAlignedBB worldBB = ((SubWorld) subworld).getMaximumCloseWorldBBRotated();
+            if (globalCenter.xCoord >= worldBB.minX && globalCenter.xCoord <= worldBB.maxX
+                && globalCenter.yCoord >= worldBB.minY
+                && globalCenter.yCoord <= worldBB.maxY
+                && globalCenter.zCoord >= worldBB.minZ
+                && globalCenter.zCoord <= worldBB.maxZ) {
+                Vec3 localCenter = ((IMixinWorld) subworld).transformToLocal(globalCenter);
+                int localX = MathHelper.floor_double(localCenter.xCoord);
+                int localY = MathHelper.floor_double(localCenter.yCoord);
+                int localZ = MathHelper.floor_double(localCenter.zCoord);
+                int localLight = subworld.getBlockLightValue_do(localX, localY, localZ, true);
+                if (localLight > totalLight) totalLight = localLight;
+            }
+        }
+        return totalLight;
+    }
+
+    @Redirect(
+        method = "updateLightByType(Lnet/minecraft/world/EnumSkyBlock;III)Z",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/World;computeLightValue(IIILnet/minecraft/world/EnumSkyBlock;)I"))
+    private int computeTotalLightValue(World world, int x, int y, int z, EnumSkyBlock esb) {
+        Vec3 globalCenter = Vec3.createVectorHelper(x + 0.5, y + 0.5, z + 0.5);
+        if (this.isSubWorld) globalCenter = this.transformToGlobal(globalCenter);
+        int totalLight = this.getParentWorld()
+            .computeLightValue(
+                MathHelper.floor_double(globalCenter.xCoord),
+                MathHelper.floor_double(globalCenter.yCoord),
+                MathHelper.floor_double(globalCenter.zCoord),
+                esb);
+        for (World subworld : ((IMixinWorld)this.getParentWorld()).getSubWorlds()) {
+            AxisAlignedBB worldBB = ((SubWorld) subworld).getMaximumCloseWorldBBRotated();
+            if (globalCenter.xCoord >= worldBB.minX && globalCenter.xCoord <= worldBB.maxX
+                && globalCenter.yCoord >= worldBB.minY
+                && globalCenter.yCoord <= worldBB.maxY
+                && globalCenter.zCoord >= worldBB.minZ
+                && globalCenter.zCoord <= worldBB.maxZ) {
+                Vec3 localCenter = ((IMixinWorld) subworld).transformToLocal(globalCenter);
+                int localX = MathHelper.floor_double(localCenter.xCoord);
+                int localY = MathHelper.floor_double(localCenter.yCoord);
+                int localZ = MathHelper.floor_double(localCenter.zCoord);
+                int localLight = subworld.computeLightValue(localX, localY, localZ, esb);
+                if (localLight > totalLight) totalLight = localLight;
+            }
+        }
+        return totalLight;
+    }
 }
