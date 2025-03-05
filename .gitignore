@@ -38,3 +38,4 @@ addon.late.local.gradle.kts
 layout.json
 /docs
 /README.md
+src/main/java/su/sergiusonesimus/debug/Breakpoint.java
