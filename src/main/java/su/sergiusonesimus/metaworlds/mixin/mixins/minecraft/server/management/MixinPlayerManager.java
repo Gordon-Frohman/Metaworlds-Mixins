@@ -15,10 +15,13 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.management.IMixinPlayerManager;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
 
 @Mixin(PlayerManager.class)
