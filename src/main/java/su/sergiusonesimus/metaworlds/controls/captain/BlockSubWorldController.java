@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
+
 import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;

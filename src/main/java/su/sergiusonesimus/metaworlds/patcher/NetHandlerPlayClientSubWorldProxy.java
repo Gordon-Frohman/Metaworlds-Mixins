@@ -2,6 +2,7 @@ package su.sergiusonesimus.metaworlds.patcher;
 
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
+
 import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 
 public class NetHandlerPlayClientSubWorldProxy extends NetHandlerPlayClient {
