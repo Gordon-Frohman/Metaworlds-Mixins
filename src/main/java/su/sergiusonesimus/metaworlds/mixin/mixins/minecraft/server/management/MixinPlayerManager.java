@@ -60,12 +60,12 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
      * Adds an EntityPlayerMP to the PlayerManager.
      */
     @Overwrite
-    public void addPlayer(EntityPlayerMP p_72683_1_) {
+    public void addPlayer(EntityPlayerMP player) {
 
-        int i = (int) p_72683_1_.posX >> 4;
-        int j = (int) p_72683_1_.posZ >> 4;
-        p_72683_1_.managedPosX = p_72683_1_.posX;
-        p_72683_1_.managedPosZ = p_72683_1_.posZ;
+        int i = (int) player.posX >> 4;
+        int j = (int) player.posZ >> 4;
+        player.managedPosX = player.posX;
+        player.managedPosZ = player.posZ;
         // Load nearby chunks first
         List<ChunkCoordIntPair> chunkList = new ArrayList<ChunkCoordIntPair>();
 
@@ -75,22 +75,22 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
             }
         }
 
-        java.util.Collections.sort(chunkList, new net.minecraftforge.common.util.ChunkCoordComparator(p_72683_1_));
+        java.util.Collections.sort(chunkList, new net.minecraftforge.common.util.ChunkCoordComparator(player));
 
         for (ChunkCoordIntPair pair : chunkList) {
             if (((IMixinWorld) (Object) this.theWorldServer).isChunkWatchable(pair.chunkXPos, pair.chunkZPos))
                 this.getOrCreateChunkWatcher(pair.chunkXPos, pair.chunkZPos, true)
-                    .addPlayer(p_72683_1_);
+                    .addPlayer(player);
         }
 
-        this.players.add(p_72683_1_);
-        ((PlayerManager) (Object) this).filterChunkLoadQueue(p_72683_1_);
+        this.players.add(player);
+        ((PlayerManager) (Object) this).filterChunkLoadQueue(player);
 
         for (World curSubWorld : ((IMixinWorld) (Object) this.theWorldServer).getSubWorlds()) {
             EntityPlayer proxyPlayer = ((IMixinEntity) (Object) p_72683_1_).getProxyPlayer(curSubWorld);
 
             if (proxyPlayer == null) {
-                proxyPlayer = new EntityPlayerMPSubWorldProxy(p_72683_1_, curSubWorld);
+                proxyPlayer = new EntityPlayerMPSubWorldProxy(player, curSubWorld);
                 // TODO: newManager.setGameType(this.getGameType()); make this synchronized over all proxies and the
                 // real player
                 ((EntityPlayerMP) proxyPlayer).theItemInWorldManager.setWorld((WorldServer) curSubWorld);
