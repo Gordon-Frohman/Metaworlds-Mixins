@@ -87,15 +87,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.core.client.SubWorldClient;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinDestroyBlockProgress;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRenderList;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinWorldRenderer;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.patcher.OrientedBB;

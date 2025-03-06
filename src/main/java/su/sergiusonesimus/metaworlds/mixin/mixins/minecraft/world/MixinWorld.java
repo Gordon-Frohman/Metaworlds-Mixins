@@ -34,9 +34,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.patcher.UnmodifiableSingleObjPlusCollection;
 
 @Mixin(World.class)

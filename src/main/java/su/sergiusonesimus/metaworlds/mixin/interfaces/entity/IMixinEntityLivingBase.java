@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.api;
+package su.sergiusonesimus.metaworlds.mixin.interfaces.entity;
 
 public interface IMixinEntityLivingBase {
 

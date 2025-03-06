@@ -45,15 +45,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jblas.DoubleMatrix;
 
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldInfo;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldIntermediate;
-import su.sergiusonesimus.metaworlds.api.PlayerManagerSuperClass;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.IMixinMinecraftServer;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.management.IMixinPlayerManager;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorldIntermediate;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.patcher.ChunkSubWorld;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
@@ -601,7 +601,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                         this.getMaxZ());
                 }
 
-                ((PlayerManagerSuperClass) this.getPlayerManager()).addWatchableChunks(chunksToRemoveFromWatch);
+                ((IMixinPlayerManager) this.getPlayerManager()).addWatchableChunks(chunksToRemoveFromWatch);
             }
 
             if (!this.isEmpty) {
@@ -620,7 +620,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                         maxZ);
                 }
 
-                ((PlayerManagerSuperClass) this.getPlayerManager()).removeWatchableChunks(chunksToRemoveFromWatch);
+                ((IMixinPlayerManager) this.getPlayerManager()).removeWatchableChunks(chunksToRemoveFromWatch);
             }
 
             this.minCoordinates.posX = minX;

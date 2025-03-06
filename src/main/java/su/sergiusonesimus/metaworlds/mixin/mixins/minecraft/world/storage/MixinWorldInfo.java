@@ -22,10 +22,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.google.common.primitives.Ints;
 
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldInfo;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorldIntermediate;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 import su.sergiusonesimus.metaworlds.patcher.SubWorldInfoHolder;
 
 @Mixin(WorldInfo.class)

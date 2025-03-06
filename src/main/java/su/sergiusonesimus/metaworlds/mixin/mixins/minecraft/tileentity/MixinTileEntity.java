@@ -5,9 +5,9 @@ import net.minecraft.util.Vec3;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import su.sergiusonesimus.metaworlds.api.IMixinTileEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.tileentity.IMixinTileEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 
 @Mixin(TileEntity.class)
 public abstract class MixinTileEntity implements IMixinTileEntity {

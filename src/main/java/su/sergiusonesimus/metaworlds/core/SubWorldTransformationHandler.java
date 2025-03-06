@@ -4,11 +4,10 @@ import java.nio.DoubleBuffer;
 
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 
 import org.jblas.DoubleMatrix;
 import org.lwjgl.BufferUtils;
-
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 
 public class SubWorldTransformationHandler {
 

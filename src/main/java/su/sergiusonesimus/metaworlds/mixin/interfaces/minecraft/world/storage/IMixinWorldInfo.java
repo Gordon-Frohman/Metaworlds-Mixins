@@ -1,7 +1,8 @@
-package su.sergiusonesimus.metaworlds.api;
+package su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.storage;
 
 import java.util.Collection;
 
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.patcher.SubWorldInfoHolder;
 
 public interface IMixinWorldInfo {

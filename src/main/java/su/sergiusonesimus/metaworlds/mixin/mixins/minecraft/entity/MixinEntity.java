@@ -28,11 +28,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.core.SubWorldServer;
 import su.sergiusonesimus.metaworlds.core.client.SubWorldClient;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.patcher.OrientedBB;

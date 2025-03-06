@@ -40,8 +40,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import cpw.mods.fml.common.eventhandler.Event;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.client.IMixinC03PacketPlayer;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 

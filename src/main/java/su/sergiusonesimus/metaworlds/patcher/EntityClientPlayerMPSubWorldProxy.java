@@ -9,10 +9,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
-
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldIntermediate;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 
 public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP implements EntityPlayerProxy {
 

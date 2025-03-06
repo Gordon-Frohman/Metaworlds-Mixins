@@ -22,9 +22,9 @@ import net.minecraft.world.World;
 
 import org.lwjgl.opengl.ARBOcclusionQuery;
 
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 
 public class RenderGlobalSubWorld extends RenderGlobal {
 

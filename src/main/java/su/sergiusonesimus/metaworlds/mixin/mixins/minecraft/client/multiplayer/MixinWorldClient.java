@@ -37,13 +37,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldIntermediate;
-import su.sergiusonesimus.metaworlds.api.PlayerManagerSuperClass;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.core.SubWorldClientFactory;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.management.IMixinPlayerManager;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.mixin.mixins.minecraft.world.MixinWorld;
@@ -416,7 +416,7 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
                 EntityPlayer proxyPlayer = ((IMixinEntity) par1Entity).getProxyPlayer(curSubWorld);
                 if (proxyPlayer != null) {
                     curSubWorld.removeEntity(proxyPlayer);
-                    if (!((PlayerManagerSuperClass) ((WorldServer) curSubWorld).getPlayerManager()).getPlayers()
+                    if (!((IMixinPlayerManager) ((WorldServer) curSubWorld).getPlayerManager()).getPlayers()
                         .contains(proxyPlayer)) {
                         ((IMixinEntity) par1Entity).getPlayerProxyMap()
                             .remove(Integer.valueOf(((IMixinWorld) curSubWorld).getSubWorldID()));
@@ -437,7 +437,7 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
                 World curSubWorld = (World) i$.next();
                 EntityPlayer proxyPlayer = ((IMixinEntity) par1Entity).getProxyPlayer(curSubWorld);
                 curSubWorld.removeEntity(proxyPlayer);
-                if (!((PlayerManagerSuperClass) ((WorldServer) curSubWorld).getPlayerManager()).getPlayers()
+                if (!((IMixinPlayerManager) ((WorldServer) curSubWorld).getPlayerManager()).getPlayers()
                     .contains(proxyPlayer)) {
                     ((IMixinEntity) par1Entity).getPlayerProxyMap()
                         .remove(Integer.valueOf(((IMixinWorld) curSubWorld).getSubWorldID()));

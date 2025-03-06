@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinWorldRenderer;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 
 @Mixin(WorldRenderer.class)

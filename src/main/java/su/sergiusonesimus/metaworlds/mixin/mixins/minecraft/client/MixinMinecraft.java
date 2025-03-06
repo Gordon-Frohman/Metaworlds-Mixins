@@ -64,10 +64,10 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.compat.CompatUtil;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.multiplayer.IMixinPlayerControllerMP;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.patcher.EntityClientPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.patcher.MinecraftSubWorldProxy;

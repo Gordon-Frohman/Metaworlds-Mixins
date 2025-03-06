@@ -16,7 +16,7 @@ import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import cpw.mods.fml.relauncher.Side;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerProxy;
 
 public class CSubWorldProxyPacket extends MetaWorldsPacket {

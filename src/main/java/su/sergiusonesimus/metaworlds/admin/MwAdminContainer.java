@@ -23,11 +23,11 @@ import net.minecraftforge.common.DimensionManager;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
 
 import cpw.mods.fml.client.FMLClientHandler;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldInfo;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiInitPacket;
 import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiSubWorldInfosPacket;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 import su.sergiusonesimus.metaworlds.patcher.SubWorldInfoHolder;
 
 public class MwAdminContainer extends Container {

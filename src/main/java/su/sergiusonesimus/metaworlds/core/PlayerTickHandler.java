@@ -2,11 +2,10 @@ package su.sergiusonesimus.metaworlds.core;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
-
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.PlayerTickEvent;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 
 public class PlayerTickHandler {
 

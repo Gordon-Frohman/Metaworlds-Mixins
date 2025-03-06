@@ -12,11 +12,10 @@ import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
-
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.core.SubWorldServer;
 import su.sergiusonesimus.metaworlds.creators.contagious.BlockContagiousSubWorldCreator;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 
 public class BlockSubWorldReintegrator extends Block {
 

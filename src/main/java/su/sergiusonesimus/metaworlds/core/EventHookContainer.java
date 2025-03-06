@@ -13,10 +13,10 @@ import net.minecraftforge.event.world.WorldEvent.Load;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.IMixinWorldInfo;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 
 public class EventHookContainer {
 

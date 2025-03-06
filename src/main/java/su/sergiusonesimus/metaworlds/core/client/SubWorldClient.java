@@ -34,12 +34,12 @@ import net.minecraft.world.WorldSettings;
 
 import org.jblas.DoubleMatrix;
 
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
 import su.sergiusonesimus.metaworlds.core.SubWorldTransformationHandler;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.client.renderer.IMixinRenderGlobal;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.patcher.OrientedBB;
 import su.sergiusonesimus.metaworlds.patcher.RenderGlobalSubWorld;

@@ -1,10 +1,10 @@
-package su.sergiusonesimus.metaworlds.api;
+package su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.management;
 
 import java.util.List;
 
 import net.minecraft.world.ChunkCoordIntPair;
 
-public interface PlayerManagerSuperClass {
+public interface IMixinPlayerManager {
 
     public void addWatchableChunks(List<ChunkCoordIntPair> chunksToAdd);
 

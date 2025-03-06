@@ -18,11 +18,11 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import su.sergiusonesimus.metaworlds.api.IMixinEntity;
 import su.sergiusonesimus.metaworlds.api.IMixinWorld;
-import su.sergiusonesimus.metaworlds.api.PlayerManagerSuperClass;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.server.management.IMixinPlayerManager;
 import su.sergiusonesimus.metaworlds.patcher.EntityPlayerMPSubWorldProxy;
 
 @Mixin(PlayerManager.class)
-public abstract class MixinPlayerManager implements PlayerManagerSuperClass {
+public abstract class MixinPlayerManager implements IMixinPlayerManager {
 
     @Shadow(remap = true)
     public static Logger field_152627_a;
@@ -133,16 +133,16 @@ public abstract class MixinPlayerManager implements PlayerManagerSuperClass {
      * Update which chunks the player needs info on.
      */
     @Overwrite
-    public void updatePlayerPertinentChunks(EntityPlayerMP p_72685_1_) {
-        int i = (int) p_72685_1_.posX >> 4;
-        int j = (int) p_72685_1_.posZ >> 4;
-        double d0 = p_72685_1_.managedPosX - p_72685_1_.posX;
-        double d1 = p_72685_1_.managedPosZ - p_72685_1_.posZ;
+    public void updatePlayerPertinentChunks(EntityPlayerMP player) {
+        int i = (int) player.posX >> 4;
+        int j = (int) player.posZ >> 4;
+        double d0 = player.managedPosX - player.posX;
+        double d1 = player.managedPosZ - player.posZ;
         double d2 = d0 * d0 + d1 * d1;
 
         if (d2 >= 64.0D) {
-            int k = (int) p_72685_1_.managedPosX >> 4;
-            int l = (int) p_72685_1_.managedPosZ >> 4;
+            int k = (int) player.managedPosX >> 4;
+            int l = (int) player.managedPosZ >> 4;
             int i1 = this.playerViewRadius;
             int j1 = i - k;
             int k1 = j - l;
@@ -162,28 +162,27 @@ public abstract class MixinPlayerManager implements PlayerManagerSuperClass {
                                 .getOrCreateChunkWatcher(l1 - j1, i2 - k1, false);
 
                             if (playerinstance != null) {
-                                playerinstance.removePlayer(p_72685_1_);
+                                playerinstance.removePlayer(player);
                             }
                         }
                     }
                 }
 
-                ((PlayerManager) (Object) this).filterChunkLoadQueue(p_72685_1_);
-                p_72685_1_.managedPosX = p_72685_1_.posX;
-                p_72685_1_.managedPosZ = p_72685_1_.posZ;
+                ((PlayerManager) (Object) this).filterChunkLoadQueue(player);
+                player.managedPosX = player.posX;
+                player.managedPosZ = player.posZ;
                 // send nearest chunks first
                 java.util.Collections
-                    .sort(chunksToLoad, new net.minecraftforge.common.util.ChunkCoordComparator(p_72685_1_));
+                    .sort(chunksToLoad, new net.minecraftforge.common.util.ChunkCoordComparator(player));
 
                 for (ChunkCoordIntPair pair : chunksToLoad) {
                     this.getOrCreateChunkWatcher(pair.chunkXPos, pair.chunkZPos, true)
-                        .addPlayer(p_72685_1_);
+                        .addPlayer(player);
                 }
 
                 if (i1 > 1 || i1 < -1 || j1 > 1 || j1 < -1) {
-                    java.util.Collections.sort(
-                        p_72685_1_.loadedChunks,
-                        new net.minecraftforge.common.util.ChunkCoordComparator(p_72685_1_));
+                    java.util.Collections
+                        .sort(player.loadedChunks, new net.minecraftforge.common.util.ChunkCoordComparator(player));
                 }
             }
         }

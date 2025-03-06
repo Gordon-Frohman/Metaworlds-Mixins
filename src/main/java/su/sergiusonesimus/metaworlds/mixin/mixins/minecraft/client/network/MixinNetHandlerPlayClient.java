@@ -19,8 +19,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import io.netty.util.concurrent.GenericFutureListener;
-import su.sergiusonesimus.metaworlds.api.IMixinEntity;
-import su.sergiusonesimus.metaworlds.api.IMixinWorld;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.PacketHandler;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.server.IMixinS14PacketEntity;
 import su.sergiusonesimus.metaworlds.mixin.interfaces.network.play.server.IMixinS18PacketEntityTeleport;
