@@ -160,7 +160,6 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
                             && ((IMixinWorld) this.theWorldServer).isChunkWatchable(l1 - j1, i2 - k1)) {
                             PlayerManager.PlayerInstance playerinstance = this
                                 .getOrCreateChunkWatcher(l1 - j1, i2 - k1, false);
-
                             if (playerinstance != null) {
                                 playerinstance.removePlayer(player);
                             }
@@ -189,7 +188,16 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
 
         for (World curSubWorld : ((IMixinWorld) this.theWorldServer).getSubWorlds()) {
             ((WorldServer) curSubWorld).getPlayerManager()
-                .updatePlayerPertinentChunks((EntityPlayerMP) ((IMixinEntity) p_72685_1_).getProxyPlayer(curSubWorld));
+                .updatePlayerPertinentChunks((EntityPlayerMP) ((IMixinEntity) player).getProxyPlayer(curSubWorld));
+        }
+    }
+
+    // Changing player view radius for every subworld as well
+    @Inject(at = @At(value = "TAIL"), method = "func_152622_a(I)V")
+    public void func_152622_a(int newPlayerViewRadius, CallbackInfo info) {
+        for (World curSubWorld : ((IMixinWorld) this.theWorldServer).getSubWorlds()) {
+            ((WorldServer) curSubWorld).getPlayerManager()
+                .func_152622_a(newPlayerViewRadius);
         }
     }
 
