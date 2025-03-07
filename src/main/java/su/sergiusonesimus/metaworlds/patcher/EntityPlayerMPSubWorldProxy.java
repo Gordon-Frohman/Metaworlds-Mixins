@@ -169,6 +169,8 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
                         chunk = this.worldObj
                             .getChunkFromChunkCoords(chunkcoordintpair.chunkXPos, chunkcoordintpair.chunkZPos);
 
+                        // IDK what this field does, but with it set to false the game won't load subworld chunks properly
+                        chunk.field_150815_m = true;
                         if (chunk.func_150802_k()) {
                             arraylist.add(chunk);
                             arraylist1.addAll(
