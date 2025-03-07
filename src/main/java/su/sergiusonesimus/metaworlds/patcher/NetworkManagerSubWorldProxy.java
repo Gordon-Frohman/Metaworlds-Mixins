@@ -34,19 +34,19 @@ public class NetworkManagerSubWorldProxy extends NetworkManager {
         this.netHandlerProxy = nethandler;
     }
 
-    public void scheduleOutboundPacket(Packet p_150725_1_, GenericFutureListener... p_150725_2_) {
+    public void scheduleOutboundPacket(Packet packet, GenericFutureListener... p_150725_2_) {
         GeneralPacketPipeline pipeline = MetaworldsMod.instance.networkHandler;
 
         if (clientSide) {
             CSubWorldProxyPacket proxyPacket = new CSubWorldProxyPacket(
                 this.subWorldID,
-                p_150725_1_,
+                packet,
                 this.parentNetworkManager);
             pipeline.sendToServer(proxyPacket);
         } else {
             SSubWorldProxyPacket proxyPacket = new SSubWorldProxyPacket(
                 this.subWorldID,
-                p_150725_1_,
+                packet,
                 this.parentNetworkManager);
             EntityPlayerMP player = ((NetHandlerPlayServer) this.parentNetworkManager.getNetHandler()).playerEntity;
             pipeline.sendTo(proxyPacket, player);
