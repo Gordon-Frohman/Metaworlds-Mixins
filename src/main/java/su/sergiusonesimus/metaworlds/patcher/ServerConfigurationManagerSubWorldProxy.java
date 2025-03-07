@@ -22,4 +22,13 @@ public class ServerConfigurationManagerSubWorldProxy extends ServerConfiguration
             .getConfigurationManager()
             .getHostPlayerData();
     }
+
+    /**
+     * Gets the View Distance.
+     */
+    public int getViewDistance() {
+        return this.mcServerProxy.getRealServer()
+            .getConfigurationManager()
+            .getViewDistance();
+    }
 }
