@@ -3,6 +3,7 @@ package su.sergiusonesimus.metaworlds.patcher;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
@@ -273,19 +274,27 @@ public class OrientedBB extends AxisAlignedBB {
                 par1OrientedBB.getVertice(7) },
             { par1OrientedBB.getVertice(2), par1OrientedBB.getVertice(0), par1OrientedBB.getVertice(4),
                 par1OrientedBB.getVertice(6) } };
+        Vector3D v1 = this.getVertice(0);
+        Vector3D v2 = this.getVertice(4);
+        boolean obb1Flat = (v1.getX() == v2.getX()) && (v1.getY() == v2.getY()) && (v1.getZ() == v2.getZ());
+        v1 = par1OrientedBB.getVertice(0);
+        v2 = par1OrientedBB.getVertice(4);
+        boolean obb2Flat = (v1.getX() == v2.getX()) && (v1.getY() == v2.getY()) && (v1.getZ() == v2.getZ());
 
         // Getting planes for every face
-        Plane[] planeFaces1 = new Plane[6];
-        Plane[] planeFaces2 = new Plane[6];
+        Plane[] planeFaces1 = new Plane[obb1Flat?1:6];
+        Plane[] planeFaces2 = new Plane[obb2Flat?1:6];
         for (int i = 0; i < 6; i++) {
-            planeFaces1[i] = new Plane(faces1[i][0], faces1[i][1], faces1[i][2]);
-            planeFaces2[i] = new Plane(faces2[i][0], faces2[i][1], faces2[i][2]);
+        	if(!obb1Flat || i == 0)
+        		planeFaces1[i] = new Plane(faces1[i][0], faces1[i][1], faces1[i][2]);
+        	if(!obb2Flat || i == 0)
+        		planeFaces2[i] = new Plane(faces2[i][0], faces2[i][1], faces2[i][2]);
         }
 
         boolean intersects = false;
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < planeFaces1.length; i++) {
             Plane planeFace1 = planeFaces1[i];
-            for (int j = 0; j < 6; j++) {
+            for (int j = 0; j < planeFaces2.length; j++) {
                 // Are our planes parallel?
                 Line intersectionLine = planeFace1.intersection(planeFaces2[j]);
                 if (intersectionLine != null) {
