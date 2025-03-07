@@ -87,7 +87,7 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
         ((PlayerManager) (Object) this).filterChunkLoadQueue(player);
 
         for (World curSubWorld : ((IMixinWorld) (Object) this.theWorldServer).getSubWorlds()) {
-            EntityPlayer proxyPlayer = ((IMixinEntity) (Object) p_72683_1_).getProxyPlayer(curSubWorld);
+            EntityPlayer proxyPlayer = ((IMixinEntity) (Object) player).getProxyPlayer(curSubWorld);
 
             if (proxyPlayer == null) {
                 proxyPlayer = new EntityPlayerMPSubWorldProxy(player, curSubWorld);
