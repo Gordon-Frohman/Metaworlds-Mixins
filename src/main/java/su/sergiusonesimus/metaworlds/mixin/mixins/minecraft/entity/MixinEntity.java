@@ -163,7 +163,15 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     @Shadow(remap = true)
     protected boolean isImmuneToFire;
 
+    @Shadow(remap = true)
+    public int hurtResistantTime;
+
     // TODO
+
+    @Shadow(remap = true)
+    public boolean isEntityInvulnerable() {
+        return false;
+    }
 
     @Shadow(remap = true)
     protected void kill() {}

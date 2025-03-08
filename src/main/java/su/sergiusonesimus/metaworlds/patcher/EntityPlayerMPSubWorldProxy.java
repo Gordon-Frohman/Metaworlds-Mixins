@@ -11,6 +11,7 @@ import net.minecraft.network.play.server.S13PacketDestroyEntities;
 import net.minecraft.network.play.server.S26PacketMapChunkBulk;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -209,5 +210,13 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
                 }
             }
         }
+    }
+
+    /**
+     * Called when the entity is attacked.
+     */
+    @Override
+    public boolean attackEntityFrom(DamageSource source, float amount) {
+        return this.realPlayer.attackEntityFrom(source, amount);
     }
 }
