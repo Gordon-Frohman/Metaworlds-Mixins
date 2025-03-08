@@ -10,5 +10,7 @@ tile.subWorldReintegrator.name=Реинтегратор Метамира
 tile.subWorldHingeJoint.name=Шарнир Метамира
 tile.floatingWoodBlock.name=Плавучие доски
 
+itemGroup.metaworlds=Метамиры
+
 item.emptyWorldBottle.name=Пустая бутылка для мира
 item.bottledWorld.name=Мир в бутылке

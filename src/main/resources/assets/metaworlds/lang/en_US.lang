@@ -10,5 +10,7 @@ tile.subWorldReintegrator.name=SubWorld Reintegrator
 tile.subWorldHingeJoint.name=SubWorld Hinge Joint
 tile.floatingWoodBlock.name=Floating Wood
 
+itemGroup.metaworlds=MetaWorlds
+
 item.emptyWorldBottle.name=Empty World Bottle
 item.bottledWorld.name=Bottled World

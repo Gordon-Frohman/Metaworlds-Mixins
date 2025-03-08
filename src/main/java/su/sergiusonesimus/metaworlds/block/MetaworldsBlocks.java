@@ -1,7 +1,6 @@
 package su.sergiusonesimus.metaworlds.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.creativetab.CreativeTabs;
 
 import cpw.mods.fml.common.registry.GameRegistry;
 
@@ -31,30 +30,27 @@ public class MetaworldsBlocks {
             .setBlockName("subWorldAligner")
             .setBlockTextureName("metaworlds:tile.subWorldAligner");
         subWorldController = new BlockSubWorldController().setHardness(0.5F)
-            .setStepSound(Block.soundTypeGravel)
+            .setStepSound(Block.soundTypeStone)
             .setBlockName("subWorldController")
             .setBlockTextureName("metaworlds:tile.subWorldController");
         flipSubWorldBlock = new BlockFlipSubWorld().setHardness(0.5F)
-            .setStepSound(Block.soundTypeStone)
+            .setStepSound(Block.soundTypeWood)
             .setBlockName("flipSubWorldBlock")
             .setBlockTextureName("planks_oak");
         blankSubWorldCreator = new BlockBlankSubWorldCreator().setHardness(3.0F)
             .setResistance(15.0F)
-            .setStepSound(Block.soundTypeStone)
+            .setStepSound(Block.soundTypeWood)
             .setBlockName("blankSubWorldCreator")
-            .setCreativeTab(CreativeTabs.tabBlock)
             .setBlockTextureName("metaworlds:tile.blankSubWorldCreator");
         contagiousSubWorldCreator = new BlockContagiousSubWorldCreator().setHardness(3.0F)
             .setResistance(15.0F)
-            .setStepSound(Block.soundTypeStone)
+            .setStepSound(Block.soundTypeGravel)
             .setBlockName("contagiousSubWorldCreator")
-            .setCreativeTab(CreativeTabs.tabBlock)
             .setBlockTextureName("metaworlds:tile.contagiousSubWorldCreator");
         subWorldReintegrator = new BlockSubWorldReintegrator().setHardness(3.0F)
             .setResistance(15.0F)
-            .setStepSound(Block.soundTypeStone)
+            .setStepSound(Block.soundTypeWood)
             .setBlockName("subWorldReintegrator")
-            .setCreativeTab(CreativeTabs.tabBlock)
             .setBlockTextureName("planks_oak");
         dummyBlock = new BlockDummyReobfTracker();
         ((BlockDummyReobfTracker) dummyBlock).initialize();

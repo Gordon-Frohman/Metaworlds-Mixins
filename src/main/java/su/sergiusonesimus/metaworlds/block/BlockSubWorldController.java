@@ -3,12 +3,12 @@ package su.sergiusonesimus.metaworlds.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
 import su.sergiusonesimus.metaworlds.entity.EntitySubWorldController;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
+import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -18,7 +18,7 @@ public class BlockSubWorldController extends Block {
 
     public BlockSubWorldController() {
         super(Material.ground);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(MetaworldsItems.creativeTab);
     }
 
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer,

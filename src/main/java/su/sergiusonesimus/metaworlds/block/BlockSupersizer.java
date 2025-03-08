@@ -2,16 +2,16 @@ package su.sergiusonesimus.metaworlds.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.world.World;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 
 public class BlockSupersizer extends Block {
 
     public BlockSupersizer() {
         super(Material.wood);
-        this.setCreativeTab(CreativeTabs.tabBlock);
+        this.setCreativeTab(MetaworldsItems.creativeTab);
     }
 
     public void onBlockAdded(World par1World, int par2, int par3, int par4) {
