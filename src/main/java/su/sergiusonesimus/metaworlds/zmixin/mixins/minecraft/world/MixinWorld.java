@@ -70,6 +70,11 @@ public abstract class MixinWorld implements IMixinWorld {
     // TODO
 
     @Shadow(remap = true)
+    public Chunk getChunkFromBlockCoords(int p_72938_1_, int p_72938_2_) {
+        return null;
+    }
+
+    @Shadow(remap = true)
     public boolean isAABBInMaterial(AxisAlignedBB p_72830_1_, Material p_72830_2_) {
         return false;
     }
@@ -380,6 +385,52 @@ public abstract class MixinWorld implements IMixinWorld {
         WorldSettings p_i45368_4_, Profiler p_i45368_5_, CallbackInfo ci) {
         childSubWorlds = new TreeMap<Integer, World>();
         allWorlds = new UnmodifiableSingleObjPlusCollection<World>((World) (Object) this, this.childSubWorlds.values());
+    }
+
+    /**
+     * Gets the height to which rain/snow will fall. Calculates it if not already stored.
+     */
+    @Overwrite
+    public int getPrecipitationHeight(int x, int z) {
+        int precHeight = this.getChunkFromBlockCoords(x, z)
+            .getPrecipitationHeight(x & 15, z & 15);
+
+        double centerX = x + 0.5;
+        double centerY = precHeight + 0.5;
+        double centerZ = z + 0.5;
+        Collection<World> subworlds = ((IMixinWorld) this.getParentWorld()).getSubWorlds();
+        if (this.isSubWorld) {
+            Vec3 globalCoords = this.transformToGlobal(Vec3.createVectorHelper(centerX, centerY, centerZ));
+            centerX = globalCoords.xCoord;
+            centerY = globalCoords.yCoord;
+            centerZ = globalCoords.zCoord;
+        }
+        for (World subworld : subworlds) {
+            // For now - skipping worlds rotated around x/z. Maybe add this later
+            if (((SubWorld) subworld).getRotationPitch() != 0 || ((SubWorld) subworld).getRotationRoll() != 0) continue;
+            // "The most important part of every investigation is not to find yourself guilty"
+            if (subworld == (World) (Object) this) continue;
+            AxisAlignedBB worldBB = ((SubWorld) subworld).getMaximumCloseWorldBBRotated();
+            if (centerX >= worldBB.minX && centerX <= worldBB.maxX
+                && centerZ >= worldBB.minZ
+                && centerZ <= worldBB.maxZ) {
+                Vec3 localCoords = ((IMixinWorld) subworld)
+                    .transformToLocal(Vec3.createVectorHelper(centerX, centerY, centerZ));
+                int localX = MathHelper.floor_double(localCoords.xCoord);
+                int localY = MathHelper.floor_double(localCoords.yCoord);
+                int localZ = MathHelper.floor_double(localCoords.zCoord);
+                Chunk subworldChunk = subworld.getChunkFromChunkCoords(localX >> 4, localZ >> 4);
+                int subworldHeight = subworldChunk.getPrecipitationHeight(localX & 15, localZ & 15);
+                if (subworldHeight > localY) {
+                    localCoords.yCoord = subworldHeight + 0.5;
+                    Vec3 globalCoords = this.transformToGlobal(localCoords);
+                    centerY = globalCoords.yCoord;
+                }
+            }
+        }
+        precHeight = MathHelper.floor_double(centerY);
+
+        return precHeight > 255 ? 255 : precHeight;
     }
 
     /**
