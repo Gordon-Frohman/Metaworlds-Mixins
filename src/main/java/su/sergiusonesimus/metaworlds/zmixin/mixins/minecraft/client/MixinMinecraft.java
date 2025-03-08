@@ -726,8 +726,6 @@ public abstract class MixinMinecraft {
                 crashreportcategory = crashreport.makeCategory("Affected screen");
                 crashreportcategory.addCrashSectionCallable("Screen name", new Callable() {
 
-                    private static final String __OBFID = "CL_00000640";
-
                     public String call() {
                         return Minecraft.getMinecraft().currentScreen.getClass()
                             .getCanonicalName();
@@ -743,8 +741,6 @@ public abstract class MixinMinecraft {
                     crashreport = CrashReport.makeCrashReport(throwable, "Ticking screen");
                     crashreportcategory = crashreport.makeCategory("Affected screen");
                     crashreportcategory.addCrashSectionCallable("Screen name", new Callable() {
-
-                        private static final String __OBFID = "CL_00000642";
 
                         public String call() {
                             return Minecraft.getMinecraft().currentScreen.getClass()

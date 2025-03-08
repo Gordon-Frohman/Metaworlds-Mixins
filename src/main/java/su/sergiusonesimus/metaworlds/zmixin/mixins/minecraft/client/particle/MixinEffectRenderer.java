@@ -149,15 +149,11 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
                         CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being rendered");
                         crashreportcategory.addCrashSectionCallable("Particle", new Callable() {
 
-                            private static final String __OBFID = "CL_00000918";
-
                             public String call() {
                                 return entityfx.toString();
                             }
                         });
                         crashreportcategory.addCrashSectionCallable("Particle Type", new Callable() {
-
-                            private static final String __OBFID = "CL_00000919";
 
                             public String call() {
                                 return i == 0 ? "MISC_TEXTURE"

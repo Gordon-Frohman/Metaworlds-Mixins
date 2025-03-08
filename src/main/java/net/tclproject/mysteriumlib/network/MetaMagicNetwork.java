@@ -3,7 +3,14 @@ package net.tclproject.mysteriumlib.network;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import su.sergiusonesimus.metaworlds.compat.packet.*;
+import su.sergiusonesimus.metaworlds.compat.packet.ControllerKeyUpdatePacket;
+import su.sergiusonesimus.metaworlds.compat.packet.MwAdminClientActionPacket;
+import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiInitPacket;
+import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiSubWorldInfosPacket;
+import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
+import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
+import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
+import su.sergiusonesimus.metaworlds.compat.packet.UpdateServerHealthPacket;
 
 public final class MetaMagicNetwork {
 
