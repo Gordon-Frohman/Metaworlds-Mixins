@@ -14,8 +14,12 @@ import java.util.TreeMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.particle.EntityFX;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
@@ -819,10 +823,25 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
     public void setWorldTime(long par1) {}
 
-    public boolean spawnEntityInWorld(Entity par1Entity) {
-        return par1Entity.worldObj != null && par1Entity.worldObj != this
-            ? par1Entity.worldObj.spawnEntityInWorld(par1Entity)
-            : super.spawnEntityInWorld(par1Entity);
+    public boolean spawnEntityInWorld(Entity entity) {
+        if (!isEntityAllowed(entity) && entity.worldObj != null && entity.worldObj instanceof SubWorld) {
+            Vec3 globalCoords = ((IMixinWorld) entity.worldObj).transformToGlobal(entity);
+            entity.posX = entity.prevPosX = globalCoords.xCoord;
+            entity.posY = entity.prevPosY = globalCoords.yCoord;
+            entity.posZ = entity.prevPosZ = globalCoords.zCoord;
+            entity.worldObj = ((IMixinWorld) entity.worldObj).getParentWorld();
+            return entity.worldObj.spawnEntityInWorld(entity);
+        } else {
+            return super.spawnEntityInWorld(entity);
+        }
+    }
+
+    private boolean isEntityAllowed(Entity entity) {
+        return entity instanceof EntityFX || entity instanceof EntityHanging
+            || entity instanceof EntityMinecart
+            || entity instanceof EntityPlayer
+            || entity instanceof EntityPositionTrackerSubWorld
+            || entity instanceof EntityItem;
     }
 
     public Map<Entity, Vec3> getEntitiesToDrag() {
