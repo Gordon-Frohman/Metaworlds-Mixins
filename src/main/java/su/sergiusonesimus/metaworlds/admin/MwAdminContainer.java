@@ -26,9 +26,9 @@ import cpw.mods.fml.client.FMLClientHandler;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiInitPacket;
 import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiSubWorldInfosPacket;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
-import su.sergiusonesimus.metaworlds.patcher.SubWorldInfoHolder;
+import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 
 public class MwAdminContainer extends Container {
 

@@ -25,7 +25,7 @@ import org.apache.commons.io.FileUtils;
 
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.common.registry.GameData;
-import su.sergiusonesimus.metaworlds.patcher.SubWorldInfoHolder;
+import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 
 public class SubWorldImporterThread extends Thread {
 

@@ -7,7 +7,7 @@ import su.sergiusonesimus.metaworlds.compat.packet.*;
 
 public final class MetaMagicNetwork {
 
-    public static final SimpleNetworkWrapper dispatcher = NetworkRegistry.INSTANCE.newSimpleChannel("mwcore");
+    public static final SimpleNetworkWrapper dispatcher = NetworkRegistry.INSTANCE.newSimpleChannel("metaworlds");
 
     public static boolean registered = false;
 

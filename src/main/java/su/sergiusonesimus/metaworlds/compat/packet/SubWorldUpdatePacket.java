@@ -12,9 +12,9 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import su.sergiusonesimus.metaworlds.core.SubWorldServer;
-import su.sergiusonesimus.metaworlds.core.client.SubWorldClient;
-import su.sergiusonesimus.metaworlds.mixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
+import su.sergiusonesimus.metaworlds.world.SubWorldServer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class SubWorldUpdatePacket implements IMessage {
 

@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8.5-GTNH",
-  "package": "su.sergiusonesimus.metaworlds.mixin.mixins",
+  "package": "su.sergiusonesimus.metaworlds.zmixin.mixins",
   "refmap": "mixins.metaworlds.refmap.json",
   "target": "@env(DEFAULT)",
   "compatibilityLevel": "JAVA_8",
