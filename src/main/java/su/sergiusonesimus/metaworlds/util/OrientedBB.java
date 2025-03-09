@@ -272,25 +272,39 @@ public class OrientedBB extends AxisAlignedBB {
                 par1OrientedBB.getVertice(6) } };
         Vector3D v1 = this.getVertice(0);
         Vector3D v2 = this.getVertice(4);
-        boolean obb1Flat = (v1.getX() == v2.getX()) && (v1.getY() == v2.getY()) && (v1.getZ() == v2.getZ());
+        Vector3D v3 = this.getVertice(1);
+        Vector3D v4 = this.getVertice(2);
+        boolean obb1FlatX = (v1.getX() == v3.getX()) && (v1.getY() == v3.getY()) && (v1.getZ() == v3.getZ());
+        boolean obb1FlatY = (v1.getX() == v2.getX()) && (v1.getY() == v2.getY()) && (v1.getZ() == v2.getZ());
+        boolean obb1FlatZ = (v1.getX() == v4.getX()) && (v1.getY() == v4.getY()) && (v1.getZ() == v4.getZ());
         v1 = par1OrientedBB.getVertice(0);
         v2 = par1OrientedBB.getVertice(4);
-        boolean obb2Flat = (v1.getX() == v2.getX()) && (v1.getY() == v2.getY()) && (v1.getZ() == v2.getZ());
+        v3 = par1OrientedBB.getVertice(1);
+        v4 = par1OrientedBB.getVertice(2);
+        boolean obb2FlatX = (v1.getX() == v3.getX()) && (v1.getY() == v3.getY()) && (v1.getZ() == v3.getZ());
+        boolean obb2FlatY = (v1.getX() == v2.getX()) && (v1.getY() == v2.getY()) && (v1.getZ() == v2.getZ());
+        boolean obb2FlatZ = (v1.getX() == v4.getX()) && (v1.getY() == v4.getY()) && (v1.getZ() == v4.getZ());
 
         // Getting planes for every face
-        Plane[] planeFaces1 = new Plane[obb1Flat ? 1 : 6];
-        Plane[] planeFaces2 = new Plane[obb2Flat ? 1 : 6];
+        List<Plane> planeFaces1 = new ArrayList<Plane>();
+        List<Plane> planeFaces2 = new ArrayList<Plane>();
         for (int i = 0; i < 6; i++) {
-            if (!obb1Flat || i == 0) planeFaces1[i] = new Plane(faces1[i][0], faces1[i][1], faces1[i][2]);
-            if (!obb2Flat || i == 0) planeFaces2[i] = new Plane(faces2[i][0], faces2[i][1], faces2[i][2]);
+            if ((obb1FlatY && i == 0) || (obb1FlatX && i == 2)
+                || (obb1FlatZ && i == 5)
+                || (!obb1FlatY && !obb1FlatX && !obb1FlatZ))
+                planeFaces1.add(new Plane(faces1[i][0], faces1[i][1], faces1[i][2]));
+            if ((obb2FlatY && i == 0) || (obb2FlatX && i == 2)
+                || (obb2FlatZ && i == 5)
+                || (!obb2FlatY && !obb2FlatX && !obb2FlatZ))
+                planeFaces2.add(new Plane(faces2[i][0], faces2[i][1], faces2[i][2]));
         }
 
         boolean intersects = false;
-        for (int i = 0; i < planeFaces1.length; i++) {
-            Plane planeFace1 = planeFaces1[i];
-            for (int j = 0; j < planeFaces2.length; j++) {
+        for (int i = 0; i < planeFaces1.size(); i++) {
+            Plane planeFace1 = planeFaces1.get(i);
+            for (int j = 0; j < planeFaces2.size(); j++) {
                 // Are our planes parallel?
-                Line intersectionLine = planeFace1.intersection(planeFaces2[j]);
+                Line intersectionLine = planeFace1.intersection(planeFaces2.get(j));
                 if (intersectionLine != null) {
                     // No, they are not
                     // Let's check if all vertices of one face lie on one side of another face, or not

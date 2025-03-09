@@ -35,6 +35,7 @@ import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.world.SubWorldServer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinAxisAlignedBB;
 
 @Mixin(Entity.class)
@@ -1034,21 +1035,35 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 if ((world instanceof SubWorldServer && !((Entity) (Object) this instanceof EntityPlayer))
                     || (world instanceof SubWorldClient && ((Entity) (Object) this instanceof EntityPlayer))) {
                     SubWorld subworld = (SubWorld) world;
-                    if ((subworld.getRotationYawSpeed() != 0 || subworld.getRotationPitchSpeed() != 0
-                        || subworld.getRotationRollSpeed() != 0
-                        || subworld.getMotionX() != 0
-                        || subworld.getMotionY() != 0
-                        || subworld.getMotionZ() != 0)
-                        && !subworld.getEntitiesToDrag()
-                            .containsKey(this)) {
+                    if (!subworld.getEntitiesToDrag()
+                        .containsKey(this)
+                        && (subworld.getRotationYawSpeed() != 0 || subworld.getRotationPitchSpeed() != 0
+                            || subworld.getRotationRollSpeed() != 0
+                            || subworld.getMotionX() != 0
+                            || subworld.getMotionY() != 0
+                            || subworld.getMotionZ() != 0)) {
                         AxisAlignedBB worldBB = subworld.getMaximumCloseWorldBBRotated();
                         if (this.boundingBox.intersectsWith(worldBB)) {
+                            double expansion = 0.1;
                             AxisAlignedBB localEntityBB = ((IMixinAxisAlignedBB) this.boundingBox)
                                 .getTransformedToLocalBoundingBox(world);
-                            List<AxisAlignedBB> collidingBBs = world
-                                .getCollidingBoundingBoxes((Entity) (Object) this, localEntityBB);
+                            localEntityBB = AxisAlignedBB
+                                .getBoundingBox(
+                                    localEntityBB.minX,
+                                    localEntityBB.minY,
+                                    localEntityBB.minZ,
+                                    localEntityBB.maxX,
+                                    localEntityBB.maxY,
+                                    localEntityBB.maxZ)
+                                .expand(expansion, expansion, expansion);
+                            List<AxisAlignedBB> collidingBBs = subworld
+                                .getCollidingBoundingBoxesLocal((Entity) (Object) this, localEntityBB);
 
                             if (!collidingBBs.isEmpty()) {
+                                for (Object aabb : ((IMixinWorldIntermediate) ((SubWorld) world).getParentWorld())
+                                    .getCollidingBoundingBoxesLocal((Entity) (Object) this, this.boundingBox))
+                                    collidingBBs
+                                        .add(((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(world));
                                 double modifierX = 0;
                                 double modifierZ = 0;
                                 int modXcount = 0;
@@ -1080,8 +1095,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                                 if ((modXcount + modZcount) > 0) {
                                     Vec3 moveVec = this.getGlobalPos()
                                         .subtract(entityPos);
-                                    ((Entity) (Object) this)
-                                        .addVelocity(moveVec.xCoord, moveVec.yCoord, moveVec.zCoord);
+                                    ((Entity) (Object) this).addVelocity(moveVec.xCoord, 0, moveVec.zCoord);
                                     this.setRotation(
                                         this.rotationYaw - (float) subworld.getRotationYawSpeed(),
                                         this.rotationPitch);

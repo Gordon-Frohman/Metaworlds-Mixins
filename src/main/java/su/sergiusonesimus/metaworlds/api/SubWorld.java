@@ -186,7 +186,11 @@ public interface SubWorld {
 
     DoubleMatrix rotateYawToLocal(DoubleMatrix var1);
 
+    List getCollidingBoundingBoxesLocal(Entity var1, AxisAlignedBB var2);
+
     List getCollidingBoundingBoxesGlobal(Entity var1, AxisAlignedBB var2);
+
+    List getCollidingBoundingBoxesLocalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement);
 
     List getCollidingBoundingBoxesGlobalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement);
 

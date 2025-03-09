@@ -236,9 +236,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return super.func_147447_a(par1Vec3, par2Vec3, par3, par4, par5);
     }
 
-    public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB aabb) {
+    public List getCollidingBoundingBoxes(Entity entity, AxisAlignedBB aabb) {
         this.collidingBBCacheIntermediate.clear();
-        this.collidingBBCacheIntermediate = (ArrayList) this.getCollidingBoundingBoxesLocal(par1Entity, aabb);
+        this.collidingBBCacheIntermediate = (ArrayList) this.getCollidingBoundingBoxesLocal(entity, aabb);
         Iterator i$ = ((IMixinWorld) this).getSubWorlds()
             .iterator();
 
@@ -246,25 +246,25 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             World curSubWorld = (World) i$.next();
             double worldRotation = ((IMixinWorld) curSubWorld).getRotationYaw() % 360;
             if (worldRotation != 0) {
-                double dxPos = aabb.maxX - par1Entity.posX;
-                double dxNeg = par1Entity.posX - aabb.minX;
-                double dzPos = aabb.maxZ - par1Entity.posZ;
-                double dzNeg = par1Entity.posZ - aabb.minZ;
+                double dxPos = aabb.maxX - entity.posX;
+                double dxNeg = entity.posX - aabb.minX;
+                double dzPos = aabb.maxZ - entity.posZ;
+                double dzNeg = entity.posZ - aabb.minZ;
                 Vec3 moveVec = Vec3.createVectorHelper(dxPos - dxNeg, 0, dzPos - dzNeg);
                 double xHalf = dxPos < dxNeg ? dxPos : dxNeg;
                 double zHalf = dzPos < dzNeg ? dzPos : dzNeg;
                 AxisAlignedBB localBB = ((IMixinAxisAlignedBB) AxisAlignedBB.getBoundingBox(
-                    par1Entity.posX - xHalf,
+                    entity.posX - xHalf,
                     aabb.minY,
-                    par1Entity.posZ - zHalf,
-                    par1Entity.posX + xHalf,
+                    entity.posZ - zHalf,
+                    entity.posX + xHalf,
                     aabb.maxY,
-                    par1Entity.posZ + zHalf)).rotateYaw(-worldRotation, par1Entity.posX, par1Entity.posZ);
+                    entity.posZ + zHalf)).rotateYaw(-worldRotation, entity.posX, entity.posZ);
                 this.collidingBBCacheIntermediate.addAll(
-                    ((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobalWithMovement(par1Entity, localBB, moveVec));
+                    ((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobalWithMovement(entity, localBB, moveVec));
             } else {
                 this.collidingBBCacheIntermediate
-                    .addAll(((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobal(par1Entity, aabb));
+                    .addAll(((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobal(entity, aabb));
             }
         }
 

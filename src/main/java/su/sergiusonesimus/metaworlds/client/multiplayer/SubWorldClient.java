@@ -945,18 +945,23 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return result;
     }
 
-    public List getCollidingBoundingBoxesGlobalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement) {
-        Vec3 start = Vec3.createVectorHelper(aabb.minX, aabb.minY, aabb.minZ);
-        Vec3 finish = start.addVector(movement.xCoord, movement.yCoord, movement.zCoord);
+    public List getCollidingBoundingBoxesLocalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement) {
         AxisAlignedBB localBB = ((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(this);
         localBB = AxisAlignedBB
             .getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
-        start = this.transformToLocal(start);
-        finish = this.transformToLocal(finish);
-        Vec3 localMovement = start.subtract(finish);
-        localBB = localBB.addCoord(localMovement.xCoord, 0, localMovement.zCoord);
+        if (movement != null && movement.lengthVector() != 0) {
+            Vec3 start = Vec3.createVectorHelper(aabb.minX, aabb.minY, aabb.minZ);
+            Vec3 finish = start.addVector(movement.xCoord, movement.yCoord, movement.zCoord);
+            start = this.transformToLocal(start);
+            finish = this.transformToLocal(finish);
+            Vec3 localMovement = start.subtract(finish);
+            localBB = localBB.addCoord(localMovement.xCoord, localMovement.yCoord, localMovement.zCoord);
+        }
+        return this.getCollidingBoundingBoxesLocal(entity, localBB);
+    }
 
-        List result = this.getCollidingBoundingBoxesLocal(entity, localBB);
+    public List getCollidingBoundingBoxesGlobalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement) {
+        List result = this.getCollidingBoundingBoxesLocalWithMovement(entity, aabb, movement);
         ListIterator iter = result.listIterator();
 
         while (iter.hasNext()) {
