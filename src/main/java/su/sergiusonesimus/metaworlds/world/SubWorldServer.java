@@ -1185,20 +1185,20 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             par2Material);
     }
 
-    public boolean setBlock(int par1, int par2, int par3, Block par4, int par5, int par6) {
-        boolean result = super.setBlock(par1, par2, par3, par4, par5, par6);
+    public boolean setBlock(int x, int y, int z, Block block, int meta, int flags) {
+        boolean result = super.setBlock(x, y, z, block, meta, flags);
         if (result) {
-            if (par4 != Blocks.air) {
+            if (block != Blocks.air) {
                 if (this.isEmpty) {
-                    this.setBoundaries(par1, par2, par3, par1 + 1, par2 + 1, par3 + 1);
+                    this.setBoundaries(x, y, z, x + 1, y + 1, z + 1);
                 } else {
                     this.setBoundaries(
-                        Math.min(this.minCoordinates.posX, par1),
-                        Math.min(this.minCoordinates.posY, par2),
-                        Math.min(this.minCoordinates.posZ, par3),
-                        Math.max(this.maxCoordinates.posX, par1 + 1),
-                        Math.max(this.maxCoordinates.posY, par2 + 1),
-                        Math.max(this.maxCoordinates.posZ, par3 + 1));
+                        Math.min(this.minCoordinates.posX, x),
+                        Math.min(this.minCoordinates.posY, y),
+                        Math.min(this.minCoordinates.posZ, z),
+                        Math.max(this.maxCoordinates.posX, x + 1),
+                        Math.max(this.maxCoordinates.posY, y + 1),
+                        Math.max(this.maxCoordinates.posZ, z + 1));
                 }
             } else if (!this.isEmpty) {
                 int minX = this.getMinX();
@@ -1208,23 +1208,23 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                 int maxY = this.getMaxY();
                 int maxZ = this.getMaxZ();
                 boolean nowEmpty = this.isEmpty();
-                int foundBlockAtZ;
-                int curZ;
+                int foundBlockCoord;
+                ChunkSubWorld curChunk;
                 int curChunkX;
-                int curChunk;
-                Chunk inChunkZ;
+                int curChunkZ;
                 int inChunkX;
+                int inChunkZ;
                 int curX;
-                int curX1;
-                int inChunkZ1;
-                if (par2 == maxY - 1) {
-                    foundBlockAtZ = minY - 1;
-                    curZ = par2;
+                int curY;
+                int curZ;
+                if (y == maxY - 1) {
+                    foundBlockCoord = minY - 1;
+                    curY = y;
 
                     for (curChunkX = minX >> 4; curChunkX <= maxX - 1 >> 4; ++curChunkX) {
-                        for (curChunk = minZ >> 4; curChunk <= maxZ - 1 >> 4; ++curChunk) {
-                            inChunkZ = this.getChunkFromChunkCoords(curChunkX, curChunk);
-                            if (!inChunkZ.getAreLevelsEmpty(minY, curZ)) {
+                        for (curChunkZ = minZ >> 4; curChunkZ <= maxZ - 1 >> 4; ++curChunkZ) {
+                            curChunk = (ChunkSubWorld) this.getChunkFromChunkCoords(curChunkX, curChunkZ);
+                            if (!curChunk.getAreLevelsEmpty(minY, curY)) {
                                 for (inChunkX = 0; inChunkX < 16; ++inChunkX) {
                                     curX = (curChunkX << 4) + inChunkX;
                                     if (curX >= minX) {
@@ -1232,169 +1232,131 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                                             break;
                                         }
 
-                                        for (curX1 = 0; curX1 < 16; ++curX1) {
-                                            inChunkZ1 = (curChunk << 4) + curX1;
-                                            if (inChunkZ1 >= minZ) {
-                                                if (inChunkZ1 >= maxZ) {
+                                        for (inChunkZ = 0; inChunkZ < 16; ++inChunkZ) {
+                                            curZ = (curChunkZ << 4) + inChunkZ;
+                                            if (curZ >= minZ) {
+                                                if (curZ >= maxZ) {
                                                     break;
                                                 }
 
-                                                int heightValue = inChunkZ.getHeightValue(inChunkX, curX1) - 1;
-                                                Block blockAbove = inChunkZ.getBlock(inChunkX, heightValue + 1, curX1);
-                                                if (inChunkZ.getBlock(inChunkX, heightValue + 1, curX1) != Blocks.air)
-                                                    heightValue++;
-
-                                                foundBlockAtZ = Math.max(foundBlockAtZ, heightValue);
-                                                if (foundBlockAtZ >= maxY - 1) {
+                                                int heightValue = curChunk.getCollisionLimitYPos(inChunkX, inChunkZ)
+                                                    - 1;
+                                                foundBlockCoord = Math.max(foundBlockCoord, heightValue);
+                                                if (foundBlockCoord >= maxY - 1) {
                                                     break;
                                                 }
                                             }
                                         }
 
-                                        if (foundBlockAtZ >= maxY - 1) {
+                                        if (foundBlockCoord >= maxY - 1) {
                                             break;
                                         }
                                     }
                                 }
 
-                                if (foundBlockAtZ >= maxY - 1) {
+                                if (foundBlockCoord >= maxY - 1) {
                                     break;
                                 }
                             }
                         }
 
-                        if (foundBlockAtZ >= maxY - 1) {
+                        if (foundBlockCoord >= maxY - 1) {
                             break;
                         }
                     }
 
-                    if (foundBlockAtZ == minY - 1) {
+                    if (foundBlockCoord == minY - 1) {
                         nowEmpty = true;
                     }
 
-                    if (foundBlockAtZ + 1 != maxY) {
+                    if (foundBlockCoord + 1 != maxY) {
                         this.boundariesChanged = true;
                     }
 
-                    maxY = foundBlockAtZ + 1;
-                } else if (par2 == minY) {
-                    foundBlockAtZ = maxY;
+                    maxY = foundBlockCoord + 1;
+                } else if (y == minY) {
+                    foundBlockCoord = maxY;
 
-                    for (curZ = par2; curZ < maxY && foundBlockAtZ == maxY; ++curZ) {
+                    for (curY = y; curY < maxY && foundBlockCoord == maxY; ++curY) {
                         for (curChunkX = minX >> 4; curChunkX <= maxX - 1 >> 4; ++curChunkX) {
-                            for (curChunk = minZ >> 4; curChunk <= maxZ - 1 >> 4; ++curChunk) {
-                                inChunkZ = this.getChunkFromChunkCoords(curChunkX, curChunk);
-                                if (!inChunkZ.getAreLevelsEmpty(curZ, curZ)) {
-                                    ExtendedBlockStorage var27 = inChunkZ.getBlockStorageArray()[curZ >> 4];
+                            for (curChunkZ = minZ >> 4; curChunkZ <= maxZ - 1 >> 4; ++curChunkZ) {
+                                curChunk = (ChunkSubWorld) this.getChunkFromChunkCoords(curChunkX, curChunkZ);
+                                if (!curChunk.getAreLevelsEmpty(curY, curY)) {
+                                    ExtendedBlockStorage var27 = curChunk.getBlockStorageArray()[curY >> 4];
 
-                                    for (curX = 0; curX < 16; ++curX) {
-                                        curX1 = (curChunkX << 4) + curX;
-                                        if (curX1 >= minX) {
-                                            if (curX1 >= maxX) {
+                                    for (inChunkX = 0; inChunkX < 16; ++inChunkX) {
+                                        curX = (curChunkX << 4) + inChunkX;
+                                        if (curX >= minX) {
+                                            if (curX >= maxX) {
                                                 break;
                                             }
 
-                                            for (inChunkZ1 = 0; inChunkZ1 < 16; ++inChunkZ1) {
-                                                int curZ1 = (curChunk << 4) + inChunkZ1;
-                                                if (curZ1 >= minZ) {
-                                                    if (curZ1 >= maxZ) {
+                                            for (inChunkZ = 0; inChunkZ < 16; ++inChunkZ) {
+                                                curZ = (curChunkZ << 4) + inChunkZ;
+                                                if (curZ >= minZ) {
+                                                    if (curZ >= maxZ) {
                                                         break;
                                                     }
 
-                                                    if (var27.getBlockByExtId(curX, curZ & 15, inChunkZ1)
+                                                    if (var27.getBlockByExtId(inChunkX, curY & 15, inChunkZ)
                                                         != Blocks.air) {
-                                                        foundBlockAtZ = curZ;
+                                                        foundBlockCoord = curY;
                                                         break;
                                                     }
                                                 }
                                             }
 
-                                            if (foundBlockAtZ != maxY) {
+                                            if (foundBlockCoord != maxY) {
                                                 break;
                                             }
                                         }
                                     }
 
-                                    if (foundBlockAtZ != maxY) {
+                                    if (foundBlockCoord != maxY) {
                                         break;
                                     }
                                 }
                             }
 
-                            if (foundBlockAtZ != maxY) {
+                            if (foundBlockCoord != maxY) {
                                 break;
                             }
                         }
 
-                        if (foundBlockAtZ != maxY) {
+                        if (foundBlockCoord != maxY) {
                             break;
                         }
                     }
 
-                    if (foundBlockAtZ == maxY) {
+                    if (foundBlockCoord == maxY) {
                         nowEmpty = true;
                     }
 
-                    if (foundBlockAtZ != minZ) {
+                    if (foundBlockCoord != minZ) {
                         this.boundariesChanged = true;
                     }
 
-                    minY = foundBlockAtZ;
+                    minY = foundBlockCoord;
                 }
 
-                Chunk var25;
-                int var26;
-                if (!nowEmpty && par1 == minX) {
-                    foundBlockAtZ = maxX;
+                if (!nowEmpty && x == minX) {
+                    foundBlockCoord = maxX;
 
-                    for (curZ = par1; curZ < maxX && foundBlockAtZ == maxX; ++curZ) {
-                        for (curChunkX = minZ >> 4; curChunkX <= maxZ - 1 >> 4 && foundBlockAtZ == maxX; ++curChunkX) {
-                            var25 = this.getChunkFromChunkCoords(curZ >> 4, curChunkX);
-                            var26 = curZ & 15;
+                    for (curX = x; curX < maxX && foundBlockCoord == maxX; ++curX) {
+                        for (curChunkZ = minZ >> 4; curChunkZ <= maxZ - 1 >> 4
+                            && foundBlockCoord == maxX; ++curChunkZ) {
+                            curChunk = (ChunkSubWorld) this.getChunkFromChunkCoords(curX >> 4, curChunkZ);
+                            inChunkX = curX & 15;
 
-                            for (inChunkX = 0; inChunkX < 16; ++inChunkX) {
-                                curX = (curChunkX << 4) + inChunkX;
-                                if (curX >= minZ) {
-                                    if (curX > maxZ - 1) {
+                            for (inChunkZ = 0; inChunkZ < 16; ++inChunkZ) {
+                                curZ = (curChunkZ << 4) + inChunkZ;
+                                if (curZ >= minZ) {
+                                    if (curZ > maxZ - 1) {
                                         break;
                                     }
 
-                                    if (var25.getHeightValue(var26, inChunkX) > 0) {
-                                        foundBlockAtZ = curZ;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (foundBlockAtZ == maxX) {
-                        nowEmpty = true;
-                    }
-
-                    if (foundBlockAtZ != minX) {
-                        this.boundariesChanged = true;
-                    }
-
-                    minX = foundBlockAtZ;
-                } else if (!nowEmpty && par1 == maxX - 1) {
-                    foundBlockAtZ = minX - 1;
-
-                    for (curZ = par1; curZ >= minX && foundBlockAtZ == minX - 1; --curZ) {
-                        for (curChunkX = minZ >> 4; curChunkX <= maxZ - 1 >> 4
-                            && foundBlockAtZ == minX - 1; ++curChunkX) {
-                            var25 = this.getChunkFromChunkCoords(curZ >> 4, curChunkX);
-                            var26 = curZ & 15;
-
-                            for (inChunkX = 0; inChunkX < 16; ++inChunkX) {
-                                curX = (curChunkX << 4) + inChunkX;
-                                if (curX >= minZ) {
-                                    if (curX > maxZ - 1) {
-                                        break;
-                                    }
-
-                                    if (var25.getHeightValue(var26, inChunkX) > 0) {
-                                        foundBlockAtZ = curZ;
+                                    if (curChunk.getCollisionLimitYPos(inChunkX, inChunkZ) > 0) {
+                                        foundBlockCoord = curX;
                                         break;
                                     }
                                 }
@@ -1402,58 +1364,59 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                         }
                     }
 
-                    if (foundBlockAtZ == minX - 1) {
+                    if (foundBlockCoord == maxX) {
                         nowEmpty = true;
                     }
 
-                    if (foundBlockAtZ + 1 != maxX) {
+                    if (foundBlockCoord != minX) {
                         this.boundariesChanged = true;
                     }
 
-                    maxX = foundBlockAtZ + 1;
+                    minX = foundBlockCoord;
+                } else if (!nowEmpty && x == maxX - 1) {
+                    foundBlockCoord = minX - 1;
+
+                    for (curX = x; curX >= minX && foundBlockCoord == minX - 1; --curX) {
+                        for (curChunkZ = minZ >> 4; curChunkZ <= maxZ - 1 >> 4
+                            && foundBlockCoord == minX - 1; ++curChunkZ) {
+                            curChunk = (ChunkSubWorld) this.getChunkFromChunkCoords(curX >> 4, curChunkZ);
+                            curChunkX = curX & 15;
+
+                            for (inChunkZ = 0; inChunkZ < 16; ++inChunkZ) {
+                                curZ = (curChunkZ << 4) + inChunkZ;
+                                if (curZ >= minZ) {
+                                    if (curZ > maxZ - 1) {
+                                        break;
+                                    }
+
+                                    if (curChunk.getCollisionLimitYPos(curChunkX, inChunkZ) > 0) {
+                                        foundBlockCoord = curX;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (foundBlockCoord == minX - 1) {
+                        nowEmpty = true;
+                    }
+
+                    if (foundBlockCoord + 1 != maxX) {
+                        this.boundariesChanged = true;
+                    }
+
+                    maxX = foundBlockCoord + 1;
                 }
 
-                if (!nowEmpty && par3 == minZ) {
-                    foundBlockAtZ = maxZ;
+                if (!nowEmpty && z == minZ) {
+                    foundBlockCoord = maxZ;
 
-                    for (curZ = par3; curZ < maxZ && foundBlockAtZ == maxZ; ++curZ) {
-                        for (curChunkX = minX >> 4; curChunkX <= maxX - 1 >> 4 && foundBlockAtZ == maxZ; ++curChunkX) {
-                            var25 = this.getChunkFromChunkCoords(curChunkX, curZ >> 4);
-                            var26 = curZ & 15;
-
-                            for (inChunkX = 0; inChunkX < 16; ++inChunkX) {
-                                curX = (curChunkX << 4) + inChunkX;
-                                if (curX >= minX) {
-                                    if (curX > maxX - 1) {
-                                        break;
-                                    }
-
-                                    if (var25.getHeightValue(inChunkX, var26) > 0) {
-                                        foundBlockAtZ = curZ;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (foundBlockAtZ == maxZ) {
-                        nowEmpty = true;
-                    }
-
-                    if (foundBlockAtZ != minZ) {
-                        this.boundariesChanged = true;
-                    }
-
-                    minZ = foundBlockAtZ;
-                } else if (!nowEmpty && par3 == maxZ - 1) {
-                    foundBlockAtZ = minZ - 1;
-
-                    for (curZ = par3; curZ >= minZ && foundBlockAtZ == minZ - 1; --curZ) {
+                    for (curZ = z; curZ < maxZ && foundBlockCoord == maxZ; ++curZ) {
                         for (curChunkX = minX >> 4; curChunkX <= maxX - 1 >> 4
-                            && foundBlockAtZ == minZ - 1; ++curChunkX) {
-                            var25 = this.getChunkFromChunkCoords(curChunkX, curZ >> 4);
-                            var26 = curZ & 15;
+                            && foundBlockCoord == maxZ; ++curChunkX) {
+                            curChunk = (ChunkSubWorld) this.getChunkFromChunkCoords(curChunkX, curZ >> 4);
+                            inChunkZ = curZ & 15;
 
                             for (inChunkX = 0; inChunkX < 16; ++inChunkX) {
                                 curX = (curChunkX << 4) + inChunkX;
@@ -1462,8 +1425,8 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                                         break;
                                     }
 
-                                    if (var25.getHeightValue(inChunkX, var26) > 0) {
-                                        foundBlockAtZ = curZ;
+                                    if (curChunk.getCollisionLimitYPos(inChunkX, inChunkZ) > 0) {
+                                        foundBlockCoord = curZ;
                                         break;
                                     }
                                 }
@@ -1471,15 +1434,49 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                         }
                     }
 
-                    if (foundBlockAtZ == minZ - 1) {
+                    if (foundBlockCoord == maxZ) {
                         nowEmpty = true;
                     }
 
-                    if (foundBlockAtZ + 1 != maxZ) {
+                    if (foundBlockCoord != minZ) {
                         this.boundariesChanged = true;
                     }
 
-                    maxZ = foundBlockAtZ + 1;
+                    minZ = foundBlockCoord;
+                } else if (!nowEmpty && z == maxZ - 1) {
+                    foundBlockCoord = minZ - 1;
+
+                    for (curZ = z; curZ >= minZ && foundBlockCoord == minZ - 1; --curZ) {
+                        for (curChunkX = minX >> 4; curChunkX <= maxX - 1 >> 4
+                            && foundBlockCoord == minZ - 1; ++curChunkX) {
+                            curChunk = (ChunkSubWorld) this.getChunkFromChunkCoords(curChunkX, curZ >> 4);
+                            inChunkZ = curZ & 15;
+
+                            for (inChunkX = 0; inChunkX < 16; ++inChunkX) {
+                                curX = (curChunkX << 4) + inChunkX;
+                                if (curX >= minX) {
+                                    if (curX > maxX - 1) {
+                                        break;
+                                    }
+
+                                    if (curChunk.getCollisionLimitYPos(inChunkX, inChunkZ) > 0) {
+                                        foundBlockCoord = curZ;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (foundBlockCoord == minZ - 1) {
+                        nowEmpty = true;
+                    }
+
+                    if (foundBlockCoord + 1 != maxZ) {
+                        this.boundariesChanged = true;
+                    }
+
+                    maxZ = foundBlockCoord + 1;
                 }
 
                 this.setBoundaries(minX, minY, minZ, maxX, maxY, maxZ);

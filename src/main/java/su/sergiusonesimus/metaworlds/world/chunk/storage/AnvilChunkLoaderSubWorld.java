@@ -1,6 +1,7 @@
 package su.sergiusonesimus.metaworlds.world.chunk.storage;
 
 import java.io.File;
+import java.util.Arrays;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -11,27 +12,27 @@ import su.sergiusonesimus.metaworlds.world.chunk.ChunkSubWorld;
 
 public class AnvilChunkLoaderSubWorld extends AnvilChunkLoader {
 
-    public AnvilChunkLoaderSubWorld(File par1File) {
-        super(par1File);
+    public AnvilChunkLoaderSubWorld(File file) {
+        super(file);
     }
 
-    protected void writeChunkToNBT(Chunk par1Chunk, World par2World, NBTTagCompound par3NBTTagCompound) {
-        super.writeChunkToNBT(par1Chunk, par2World, par3NBTTagCompound);
+    protected void writeChunkToNBT(Chunk chunk, World world, NBTTagCompound tagCompound) {
+        super.writeChunkToNBT(chunk, world, tagCompound);
+
+        ChunkSubWorld subworldChunk = (ChunkSubWorld) chunk;
+        tagCompound.setIntArray("CollisionLimitsMapYPos", subworldChunk.collisionLimitsMapYPos);
     }
 
-    public Chunk readChunkFromNBT(World par1World, NBTTagCompound par2NBTTagCompound) {
-        /*
-         * ChunkSubWorld subWorldChunk = null;
-         * try {
-         * subWorldChunk = (ChunkSubWorld) super.readChunkFromNBT(par1World, par2NBTTagCompound);
-         * } catch (Exception var5) {
-         * var5.printStackTrace();
-         * }
-         * return subWorldChunk;
-         */
+    public Chunk readChunkFromNBT(World world, NBTTagCompound tagCompound) {
+        Chunk chunk = super.readChunkFromNBT(world, tagCompound);
+        ChunkSubWorld subworldChunk = chunk instanceof ChunkSubWorld ? (ChunkSubWorld) chunk : new ChunkSubWorld(chunk);
 
-        Chunk chunk = super.readChunkFromNBT(par1World, par2NBTTagCompound);
-        if (chunk instanceof ChunkSubWorld) return (ChunkSubWorld) chunk;
-        else return chunk;
+        if (tagCompound.hasKey("CollisionLimitsMapYPos"))
+            subworldChunk.collisionLimitsMapYPos = tagCompound.getIntArray("CollisionLimitsMapYPos");
+        else {
+            subworldChunk.collisionLimitsMapYPos = new int[256];
+            Arrays.fill(subworldChunk.collisionLimitsMapYPos, -999);
+        }
+        return subworldChunk;
     }
 }
