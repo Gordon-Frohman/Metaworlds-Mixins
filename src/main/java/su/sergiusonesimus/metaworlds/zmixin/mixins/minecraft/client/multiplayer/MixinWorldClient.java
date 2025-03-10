@@ -225,6 +225,8 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
 
         while (i$.hasNext()) {
             World curSubWorld = (World) i$.next();
+            if (!((SubWorld) curSubWorld).getMaximumCloseWorldBBRotated()
+                .intersectsWith(aabb)) continue;
             double worldRotation = ((IMixinWorld) curSubWorld).getRotationYaw() % 360;
             if (worldRotation != 0) {
                 double dxPos = aabb.maxX - par1Entity.posX;
