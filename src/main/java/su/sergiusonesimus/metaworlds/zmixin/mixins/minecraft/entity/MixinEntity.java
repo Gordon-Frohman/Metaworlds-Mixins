@@ -35,7 +35,6 @@ import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.world.SubWorldServer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinAxisAlignedBB;
 
 @Mixin(Entity.class)
@@ -439,7 +438,6 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
             if (flag) {
                 double d9;
-
                 for (d9 = 0.05D; x != 0.0D && this.worldObj
                     .getCollidingBoundingBoxes(
                         (Entity) (Object) this,
@@ -1044,26 +1042,19 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                             || subworld.getMotionZ() != 0)) {
                         AxisAlignedBB worldBB = subworld.getMaximumCloseWorldBBRotated();
                         if (this.boundingBox.intersectsWith(worldBB)) {
-                            double expansion = 0.1;
                             AxisAlignedBB localEntityBB = ((IMixinAxisAlignedBB) this.boundingBox)
                                 .getTransformedToLocalBoundingBox(world);
-                            localEntityBB = AxisAlignedBB
-                                .getBoundingBox(
-                                    localEntityBB.minX,
-                                    localEntityBB.minY,
-                                    localEntityBB.minZ,
-                                    localEntityBB.maxX,
-                                    localEntityBB.maxY,
-                                    localEntityBB.maxZ)
-                                .expand(expansion, expansion, expansion);
-                            List<AxisAlignedBB> collidingBBs = subworld
-                                .getCollidingBoundingBoxesLocal((Entity) (Object) this, localEntityBB);
+                            localEntityBB = AxisAlignedBB.getBoundingBox(
+                                localEntityBB.minX,
+                                localEntityBB.minY,
+                                localEntityBB.minZ,
+                                localEntityBB.maxX,
+                                localEntityBB.maxY,
+                                localEntityBB.maxZ);
+                            List<AxisAlignedBB> collidingBBs = world
+                                .getCollidingBoundingBoxes((Entity) (Object) this, localEntityBB);
 
                             if (!collidingBBs.isEmpty()) {
-                                for (Object aabb : ((IMixinWorldIntermediate) ((SubWorld) world).getParentWorld())
-                                    .getCollidingBoundingBoxesLocal((Entity) (Object) this, this.boundingBox))
-                                    collidingBBs
-                                        .add(((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(world));
                                 double modifierX = 0;
                                 double modifierZ = 0;
                                 int modXcount = 0;

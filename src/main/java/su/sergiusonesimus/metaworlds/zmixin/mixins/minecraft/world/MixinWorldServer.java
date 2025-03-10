@@ -248,20 +248,38 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 .intersectsWith(aabb)) continue;
             double worldRotationY = ((IMixinWorld) curSubWorld).getRotationYaw() % 360;
             if (worldRotationY != 0) {
-                double dxPos = aabb.maxX - entity.posX;
-                double dxNeg = entity.posX - aabb.minX;
-                double dzPos = aabb.maxZ - entity.posZ;
-                double dzNeg = entity.posZ - aabb.minZ;
-                Vec3 moveVec = Vec3.createVectorHelper(dxPos - dxNeg, 0, dzPos - dzNeg);
-                double xHalf = dxPos < dxNeg ? dxPos : dxNeg;
-                double zHalf = dzPos < dzNeg ? dzPos : dzNeg;
-                AxisAlignedBB localBB = ((IMixinAxisAlignedBB) AxisAlignedBB.getBoundingBox(
-                    entity.posX - xHalf,
-                    aabb.minY,
-                    entity.posZ - zHalf,
-                    entity.posX + xHalf,
-                    aabb.maxY,
-                    entity.posZ + zHalf)).rotateYaw(-worldRotationY, entity.posX, entity.posZ);
+                Vec3 rotationPoint;
+                AxisAlignedBB localBB;
+                Vec3 moveVec;
+                if (aabb.maxX - aabb.minX == entity.boundingBox.maxX - entity.boundingBox.minX) {
+                    // BB was moved, not expanded
+                    rotationPoint = Vec3.createVectorHelper(
+                        (aabb.maxX + aabb.minX) / 2,
+                        (aabb.maxY + aabb.minY) / 2,
+                        (aabb.maxZ + aabb.minZ) / 2);
+                    localBB = aabb;
+                    moveVec = Vec3.createVectorHelper(0, 0, 0);
+                } else {
+                    // BB was expanded, so we'll have to regenerate it
+                    double dxPos = aabb.maxX - entity.posX;
+                    double dxNeg = entity.posX - aabb.minX;
+                    double dzPos = aabb.maxZ - entity.posZ;
+                    double dzNeg = entity.posZ - aabb.minZ;
+                    moveVec = Vec3.createVectorHelper(dxPos - dxNeg, 0, dzPos - dzNeg);
+                    double xHalf = dxPos < dxNeg ? dxPos : dxNeg;
+                    double zHalf = dzPos < dzNeg ? dzPos : dzNeg;
+                    localBB = AxisAlignedBB.getBoundingBox(
+                        entity.posX - xHalf,
+                        aabb.minY,
+                        entity.posZ - zHalf,
+                        entity.posX + xHalf,
+                        aabb.maxY,
+                        entity.posZ + zHalf);
+                    rotationPoint = Vec3.createVectorHelper(entity.posX, (aabb.maxY + aabb.minY) / 2, entity.posZ);
+                }
+
+                localBB = ((IMixinAxisAlignedBB) localBB)
+                    .rotateYaw(-worldRotationY, rotationPoint.xCoord, rotationPoint.zCoord);
                 this.collidingBBCacheIntermediate.addAll(
                     ((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobalWithMovement(entity, localBB, moveVec));
             } else {
