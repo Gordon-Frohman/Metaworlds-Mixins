@@ -857,26 +857,35 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         this.lastTickScaling = this.getScaling();
     }
 
-    public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
-        ArrayList result = (ArrayList) this.getCollidingBoundingBoxesLocal(par1Entity, par2AxisAlignedBB);
-        AxisAlignedBB globalAABBPar = ((IMixinAxisAlignedBB) par2AxisAlignedBB).getTransformedToGlobalBoundingBox(this);
-        Iterator i$ = ((IMixinWorld) this.getParentWorld()).getWorlds()
+    public List getCollidingBoundingBoxes(Entity entity, AxisAlignedBB aabb) {
+    	ArrayList result = (ArrayList) this.getCollidingBoundingBoxesLocal(entity, aabb);
+        Iterator i$ = ((IMixinWorld) this).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
             World curSubWorld = (World) i$.next();
-            if (((IMixinWorld) curSubWorld).getSubWorldID() != this.getSubWorldID()) {
-                List curResult = ((IMixinWorld) curSubWorld).getCollidingBoundingBoxesGlobal(par1Entity, globalAABBPar);
-                ListIterator iter = curResult.listIterator();
-
-                while (iter.hasNext()) {
-                    AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next())
-                        .getTransformedToLocalBoundingBox(this);
-                    ((OrientedBB) replacementBB).lastTransformedBy = curSubWorld;
-                    iter.set(replacementBB);
-                }
-
-                result.addAll(curResult);
+            if(!((SubWorld)curSubWorld).getMaximumCloseWorldBBRotated().intersectsWith(aabb)) continue;
+            double worldRotationY = ((IMixinWorld) curSubWorld).getRotationYaw() % 360;
+            if (worldRotationY != 0) {
+                double dxPos = aabb.maxX - entity.posX;
+                double dxNeg = entity.posX - aabb.minX;
+                double dzPos = aabb.maxZ - entity.posZ;
+                double dzNeg = entity.posZ - aabb.minZ;
+                Vec3 moveVec = Vec3.createVectorHelper(dxPos - dxNeg, 0, dzPos - dzNeg);
+                double xHalf = dxPos < dxNeg ? dxPos : dxNeg;
+                double zHalf = dzPos < dzNeg ? dzPos : dzNeg;
+                AxisAlignedBB localBB = ((IMixinAxisAlignedBB) AxisAlignedBB.getBoundingBox(
+                    entity.posX - xHalf,
+                    aabb.minY,
+                    entity.posZ - zHalf,
+                    entity.posX + xHalf,
+                    aabb.maxY,
+                    entity.posZ + zHalf)).rotateYaw(-worldRotationY, entity.posX, entity.posZ);
+                result.addAll(
+                    ((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobalWithMovement(entity, localBB, moveVec));
+            } else {
+            	result
+                    .addAll(((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobal(entity, aabb));
             }
         }
 
