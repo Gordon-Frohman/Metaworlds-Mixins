@@ -37,7 +37,6 @@ import org.jblas.DoubleMatrix;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.renderer.RenderGlobalSubWorld;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
-import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.util.SubWorldTransformationHandler;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinRenderGlobal;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
@@ -858,13 +857,14 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     }
 
     public List getCollidingBoundingBoxes(Entity entity, AxisAlignedBB aabb) {
-    	ArrayList result = (ArrayList) this.getCollidingBoundingBoxesLocal(entity, aabb);
+        ArrayList result = (ArrayList) this.getCollidingBoundingBoxesLocal(entity, aabb);
         Iterator i$ = ((IMixinWorld) this).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
             World curSubWorld = (World) i$.next();
-            if(!((SubWorld)curSubWorld).getMaximumCloseWorldBBRotated().intersectsWith(aabb)) continue;
+            if (!((SubWorld) curSubWorld).getMaximumCloseWorldBBRotated()
+                .intersectsWith(aabb)) continue;
             double worldRotationY = ((IMixinWorld) curSubWorld).getRotationYaw() % 360;
             if (worldRotationY != 0) {
                 double dxPos = aabb.maxX - entity.posX;
@@ -884,8 +884,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                 result.addAll(
                     ((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobalWithMovement(entity, localBB, moveVec));
             } else {
-            	result
-                    .addAll(((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobal(entity, aabb));
+                result.addAll(((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobal(entity, aabb));
             }
         }
 
