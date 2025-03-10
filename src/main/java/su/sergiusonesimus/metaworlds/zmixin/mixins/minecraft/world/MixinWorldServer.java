@@ -244,8 +244,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         while (i$.hasNext()) {
             World curSubWorld = (World) i$.next();
-            double worldRotation = ((IMixinWorld) curSubWorld).getRotationYaw() % 360;
-            if (worldRotation != 0) {
+            if(!((SubWorld)curSubWorld).getMaximumCloseWorldBBRotated().intersectsWith(aabb)) continue;
+            double worldRotationY = ((IMixinWorld) curSubWorld).getRotationYaw() % 360;
+            if (worldRotationY != 0) {
                 double dxPos = aabb.maxX - entity.posX;
                 double dxNeg = entity.posX - aabb.minX;
                 double dzPos = aabb.maxZ - entity.posZ;
@@ -259,7 +260,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     entity.posZ - zHalf,
                     entity.posX + xHalf,
                     aabb.maxY,
-                    entity.posZ + zHalf)).rotateYaw(-worldRotation, entity.posX, entity.posZ);
+                    entity.posZ + zHalf)).rotateYaw(-worldRotationY, entity.posX, entity.posZ);
                 this.collidingBBCacheIntermediate.addAll(
                     ((SubWorld) curSubWorld).getCollidingBoundingBoxesGlobalWithMovement(entity, localBB, moveVec));
             } else {
