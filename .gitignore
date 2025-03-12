@@ -39,3 +39,4 @@ layout.json
 /docs
 /README.md
 src/main/java/su/sergiusonesimus/debug/Breakpoint.java
+/heap dumps/
