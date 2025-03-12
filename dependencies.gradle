@@ -34,6 +34,6 @@
  * For more details, see https://docs.gradle.org/8.0.1/userguide/java_library_plugin.html#sec:java_library_configurations_graph
  */
 dependencies {
-	compile group: 'org.jblas', name: 'jblas', version: '1.2.4'
-	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
+	shadowCompile group: 'org.jblas', name: 'jblas', version: '1.2.4'
+	shadowImplementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
 }
