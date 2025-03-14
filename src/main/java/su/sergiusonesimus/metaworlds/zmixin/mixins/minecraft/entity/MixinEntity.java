@@ -501,8 +501,15 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 }
             }
 
-            List list = this.worldObj
-                .getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(x, y, z));
+            double expander = 0;
+            if ((Entity) (Object) this instanceof EntityLivingBase && ((EntityLivingBase) (Object) this).isOnLadder()) {
+                // By expanding entity's BB we allow smooth interaction with ladders
+                expander = 0.1;
+            }
+            List list = this.worldObj.getCollidingBoundingBoxes(
+                (Entity) (Object) this,
+                this.boundingBox.addCoord(x, y, z)
+                    .expand(expander, 0, expander));
 
             World newWorldBelowFeet = this.worldObj;
             double yOffset;
