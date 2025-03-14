@@ -91,8 +91,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
     }
 
-    // Probably no need to overwrite because this function is not present in EntityPlayer
-    // @Overwrite
     public boolean isOnLadder() {
         if (this.isProxyPlayer) {
             return ((EntityPlayerProxy) this).getRealPlayer()
@@ -111,8 +109,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 }
 
                 curPlayerProxy = (EntityPlayerProxy) i$.next();
-            } while (!((MixinEntityPlayer) curPlayerProxy).isOnLadderLocal());
-
+            } while (!((IMixinEntityPlayer) curPlayerProxy).isOnLadderLocal());
+            this.worldBelowFeet = ((EntityPlayer) curPlayerProxy).worldObj;
             return true;
         }
     }

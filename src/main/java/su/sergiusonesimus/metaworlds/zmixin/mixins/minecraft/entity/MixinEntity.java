@@ -68,16 +68,16 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     private boolean isInWeb;
 
     @Shadow(remap = true)
-    private double motionX;
+    protected double motionX;
 
     @Shadow(remap = true)
-    private double motionY;
+    protected double motionY;
 
     @Shadow(remap = true)
-    private double motionZ;
+    protected double motionZ;
 
     @Shadow(remap = true)
-    private boolean onGround;
+    protected boolean onGround;
 
     @Shadow(remap = true)
     public boolean field_70135_K;
@@ -167,6 +167,14 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     public int hurtResistantTime;
 
     // TODO
+
+    @Shadow(remap = true)
+    public boolean isOffsetPositionInLiquid(double x, double y, double z) {
+        return false;
+    }
+
+    @Shadow(remap = true)
+    public void moveFlying(float strafe, float forward, float friction) {}
 
     @Shadow(remap = true)
     public boolean isEntityInvulnerable() {
@@ -493,8 +501,15 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 }
             }
 
-            List list = this.worldObj
-                .getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(x, y, z));
+            double expander = 0;
+            if ((Entity) (Object) this instanceof EntityLivingBase && ((EntityLivingBase) (Object) this).isOnLadder()) {
+                // By expanding entity's BB we allow smooth interaction with ladders
+                expander = 0.1;
+            }
+            List list = this.worldObj.getCollidingBoundingBoxes(
+                (Entity) (Object) this,
+                this.boundingBox.addCoord(x, y, z)
+                    .expand(expander, 0, expander));
 
             World newWorldBelowFeet = this.worldObj;
             double yOffset;
@@ -503,7 +518,14 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             for (int i = 0; i < list.size(); ++i) {
                 curAABB = (AxisAlignedBB) list.get(i);
 
-                yOffset = (curAABB).calculateYOffset(this.boundingBox.addCoord(x, 0, z), y);
+                AxisAlignedBB offsetBB = this.boundingBox;
+                if (curAABB instanceof OrientedBB
+                    && (((IMixinWorld) ((OrientedBB) curAABB).lastTransformedBy).getRotationPitch() % 360 != 0
+                        || ((IMixinWorld) ((OrientedBB) curAABB).lastTransformedBy).getRotationRoll() % 360 != 0)) {
+                    offsetBB = offsetBB.addCoord(x, 0, z);
+                }
+
+                yOffset = (curAABB).calculateYOffset(offsetBB, y);
                 if (yOffset != y) {
                     y = yOffset;
                     if (curAABB instanceof OrientedBB) newWorldBelowFeet = ((OrientedBB) curAABB).lastTransformedBy;
@@ -770,6 +792,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
         for (World curSubWorld : ((IMixinWorld) ((IMixinWorld) this.worldObj).getParentWorld()).getWorlds()) {
             AxisAlignedBB localBB = ((IMixinAxisAlignedBB) globalBB).getTransformedToLocalBoundingBox(curSubWorld);
+            localBB = AxisAlignedBB
+                .getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
 
             if (((IMixinWorld) curSubWorld).isSubWorld()) {
                 SubWorld curSubWorldObj = (SubWorld) curSubWorld;
