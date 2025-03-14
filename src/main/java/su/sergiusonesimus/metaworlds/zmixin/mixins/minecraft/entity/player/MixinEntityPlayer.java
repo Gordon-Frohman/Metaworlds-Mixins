@@ -5,7 +5,6 @@ import java.util.Iterator;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Vec3;
 
@@ -18,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import su.sergiusonesimus.debug.Breakpoint;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntityLivingBase;
@@ -112,7 +110,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                 curPlayerProxy = (EntityPlayerProxy) i$.next();
             } while (!((IMixinEntityPlayer) curPlayerProxy).isOnLadderLocal());
-            //this.worldBelowFeet = ((EntityPlayer)curPlayerProxy).worldObj;
+            this.worldBelowFeet = ((EntityPlayer) curPlayerProxy).worldObj;
             return true;
         }
     }

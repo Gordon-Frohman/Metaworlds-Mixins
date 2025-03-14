@@ -16,15 +16,17 @@ public class GeometryHelper2D {
             .contains(point)) {
             Vector2D segmentStart = segment.getStart();
             Vector2D segmentEnd = segment.getEnd();
-            boolean x1 = point.getX() >= segmentStart.getX() && point.getX() <= segmentEnd.getX();
-            boolean x2 = point.getX() <= segmentStart.getX() && point.getX() >= segmentEnd.getX();
-            boolean x3 = Math.round(segmentStart.getX() * 1000000) / 1000000
-                == Math.round(segmentEnd.getX() * 1000000) / 1000000;
-            boolean y1 = point.getY() >= segmentStart.getY() && point.getY() <= segmentEnd.getY();
-            boolean y2 = point.getY() <= segmentStart.getY() && point.getY() >= segmentEnd.getY();
-            boolean y3 = Math.round(segmentStart.getY() * 1000000) / 1000000
-                == Math.round(segmentEnd.getY() * 1000000) / 1000000;
-            return (x1 || x2 || x3) && (y1 || y2 || y3);
+            double pointX = Math.round(point.getX() * 1000000) / 1000000d;
+            double pointY = Math.round(point.getY() * 1000000) / 1000000d;
+            double startX = Math.round(segmentStart.getX() * 1000000) / 1000000d;
+            double startY = Math.round(segmentStart.getY() * 1000000) / 1000000d;
+            double endX = Math.round(segmentEnd.getX() * 1000000) / 1000000d;
+            double endY = Math.round(segmentEnd.getY() * 1000000) / 1000000d;
+            boolean x1 = pointX >= startX && pointX <= endX;
+            boolean x2 = pointX <= startX && pointX >= endX;
+            boolean y1 = pointY >= startY && pointY <= endY;
+            boolean y2 = pointY <= startY && pointY >= endY;
+            return (x1 || x2) && (y1 || y2);
         }
         return false;
     }

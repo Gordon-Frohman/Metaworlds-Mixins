@@ -796,8 +796,9 @@ public class OrientedBB extends AxisAlignedBB {
     public double calculateYOffset(AxisAlignedBB aabb, double yOffset) {
         double worldRotation = Math.abs(((IMixinWorld) this.lastTransformedBy).getRotationYaw()) % 90;
         if (worldRotation != 0) {
-            if (worldRotation > 45) worldRotation = 90 - worldRotation;
-            double localBBsize = (aabb.maxX - aabb.minX) * Math.cos(worldRotation / 180 * Math.PI) / 2;
+            worldRotation *= Math.PI / 180;
+            double globalBBsize = aabb.maxX - aabb.minX;
+            double localBBsize = globalBBsize / (Math.cos(worldRotation) + Math.sin(worldRotation)) / 2;
             Vec3 bbCenter = Vec3
                 .createVectorHelper((aabb.maxX + aabb.minX) / 2, aabb.minY, (aabb.maxZ + aabb.minZ) / 2);
             aabb = AxisAlignedBB.getBoundingBox(

@@ -6,13 +6,11 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
@@ -30,7 +28,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import su.sergiusonesimus.debug.Breakpoint;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
@@ -71,7 +68,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     private boolean isInWeb;
 
     @Shadow(remap = true)
-	protected double motionX;
+    protected double motionX;
 
     @Shadow(remap = true)
     protected double motionY;
@@ -80,7 +77,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     protected double motionZ;
 
     @Shadow(remap = true)
-	protected boolean onGround;
+    protected boolean onGround;
 
     @Shadow(remap = true)
     public boolean field_70135_K;
@@ -173,7 +170,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
     @Shadow(remap = true)
     public boolean isOffsetPositionInLiquid(double x, double y, double z) {
-    	return false;
+        return false;
     }
 
     @Shadow(remap = true)
@@ -507,9 +504,6 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             List list = this.worldObj
                 .getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(x, y, z));
 
-        	if(((Entity)(Object)this) instanceof EntityPlayerMP && y > 0/* && !list.isEmpty()*/)
-        		Breakpoint.breakpoint();
-
             World newWorldBelowFeet = this.worldObj;
             double yOffset;
             AxisAlignedBB curAABB;
@@ -517,7 +511,14 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             for (int i = 0; i < list.size(); ++i) {
                 curAABB = (AxisAlignedBB) list.get(i);
 
-                yOffset = (curAABB).calculateYOffset(this.boundingBox.addCoord(x, 0, z), y);
+                AxisAlignedBB offsetBB = this.boundingBox;
+                if (curAABB instanceof OrientedBB
+                    && (((IMixinWorld) ((OrientedBB) curAABB).lastTransformedBy).getRotationPitch() % 360 != 0
+                        || ((IMixinWorld) ((OrientedBB) curAABB).lastTransformedBy).getRotationRoll() % 360 != 0)) {
+                    offsetBB = offsetBB.addCoord(x, 0, z);
+                }
+
+                yOffset = (curAABB).calculateYOffset(offsetBB, y);
                 if (yOffset != y) {
                     y = yOffset;
                     if (curAABB instanceof OrientedBB) newWorldBelowFeet = ((OrientedBB) curAABB).lastTransformedBy;
@@ -692,11 +693,6 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
                 if (block != Blocks.ladder) {
                     yStoredLocal = 0.0D;
-                    if((Entity)(Object)this instanceof EntityPlayer)
-                    	Minecraft.logger.info("Player is not on ladder, setting y movement to 0");
-                } else {
-                    if((Entity)(Object)this instanceof EntityPlayer)
-                    	Minecraft.logger.info("Current player's y movement: " + yStoredLocal);
                 }
 
                 this.distanceWalkedModified = (float) ((double) this.distanceWalkedModified
@@ -789,7 +785,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
         for (World curSubWorld : ((IMixinWorld) ((IMixinWorld) this.worldObj).getParentWorld()).getWorlds()) {
             AxisAlignedBB localBB = ((IMixinAxisAlignedBB) globalBB).getTransformedToLocalBoundingBox(curSubWorld);
-            localBB = AxisAlignedBB.getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
+            localBB = AxisAlignedBB
+                .getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
 
             if (((IMixinWorld) curSubWorld).isSubWorld()) {
                 SubWorld curSubWorldObj = (SubWorld) curSubWorld;
