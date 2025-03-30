@@ -108,11 +108,11 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     }
 
     public World CreateSubWorld() {
-        return ((IMixinWorld) this.m_parentWorld).CreateSubWorld();
+        return ((IMixinWorld) this.m_parentWorld).createSubWorld();
     }
 
     public World CreateSubWorld(int newSubWorldID) {
-        return ((IMixinWorld) this.m_parentWorld).CreateSubWorld(newSubWorldID);
+        return ((IMixinWorld) this.m_parentWorld).createSubWorld(newSubWorldID);
     }
 
     public void removeSubWorld() {
@@ -831,12 +831,6 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
     public Map<Entity, Vec3> getEntitiesToDrag() {
         return this.entitiesToDrag;
-    }
-
-    public void registerEntityToDrag(IMixinEntity targetEntity) {
-        if (targetEntity instanceof Entity && ((Entity) targetEntity).worldObj != this) {
-            this.entitiesToDrag.put((Entity) targetEntity, (Vec3) null);
-        }
     }
 
     public void registerEntityToDrag(Entity targetEntity) {

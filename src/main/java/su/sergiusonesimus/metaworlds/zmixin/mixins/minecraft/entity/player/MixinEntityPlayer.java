@@ -110,7 +110,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                 curPlayerProxy = (EntityPlayerProxy) i$.next();
             } while (!((IMixinEntityPlayer) curPlayerProxy).isOnLadderLocal());
-            this.worldBelowFeet = ((EntityPlayer) curPlayerProxy).worldObj;
+            this.setWorldBelowFeet(((EntityPlayer) curPlayerProxy).worldObj);
             return true;
         }
     }
@@ -126,8 +126,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     // EntityIntermediateClass
 
-    public void setPosition(double par1, double par3, double par5) {
-        this.setPositionLocal(par1, par3, par5);
+    public void setPosition(double x, double y, double z) {
+        this.setPositionLocal(x, y, z);
         if (this.tryLockTransformations()) {
             EntityPlayer curProxyPlayer;
             if (this.isPlayerProxy) {
@@ -165,8 +165,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 while (i$1.hasNext()) {
                     EntityPlayerProxy curProxy2 = (EntityPlayerProxy) i$1.next();
                     curProxyPlayer = (EntityPlayer) curProxy2;
-                    Vec3 transformedToLocalPos2 = ((IMixinWorld) curProxyPlayer.worldObj)
-                        .transformToLocal(par1, par3, par5);
+                    Vec3 transformedToLocalPos2 = ((IMixinWorld) curProxyPlayer.worldObj).transformToLocal(x, y, z);
                     ((IMixinEntityLivingBase) curProxyPlayer).setPositionLocal(
                         transformedToLocalPos2.xCoord,
                         transformedToLocalPos2.yCoord,

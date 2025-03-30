@@ -2,10 +2,12 @@ package su.sergiusonesimus.metaworlds;
 
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ServerCommandManager;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
 
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -15,8 +17,10 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.event.FMLServerStoppingEvent;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
+import cpw.mods.fml.relauncher.Side;
 import su.sergiusonesimus.metaworlds.admin.MwAdminGuiHandler;
 import su.sergiusonesimus.metaworlds.admin.SubWorldImportProgressUpdater;
 import su.sergiusonesimus.metaworlds.block.MetaworldsBlocks;
@@ -144,5 +148,27 @@ public class MetaworldsMod {
         ServerCommandManager manager = (ServerCommandManager) command;
         manager.registerCommand(new CommandTPWorlds());
         manager.registerCommand(new CommandMWAdmin());
+    }
+
+    @EventHandler
+    public void onServerStopping(FMLServerStoppingEvent event) {
+        if (FMLCommonHandler.instance()
+            .getSide() == Side.CLIENT) {
+            // Do stuff only for Single Player / integrated server
+            MinecraftServer mc = FMLClientHandler.instance()
+                .getServer();
+            String allNames[] = mc.getAllUsernames()
+                .clone();
+            for (int i = 0; i < allNames.length; i++) {
+                // For 1.7.10, func_152612_a = getPlayerForUsername
+                EntityPlayerMP player = MinecraftServer.getServer()
+                    .getConfigurationManager()
+                    .func_152612_a(allNames[i]);
+                MWCorePlayerTracker.savePlayerData(player);
+            }
+        } else {
+            // Do stuff only for dedicated server *shutdown*, for individual players logging out hook
+            // PlayerLoggedOutEvent in an EventBus subscription instead
+        }
     }
 }

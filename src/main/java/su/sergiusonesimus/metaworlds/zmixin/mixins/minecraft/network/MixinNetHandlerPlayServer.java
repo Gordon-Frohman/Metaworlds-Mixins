@@ -28,8 +28,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -43,6 +41,7 @@ import cpw.mods.fml.common.eventhandler.Event;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.PacketHandler;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.client.IMixinC03PacketPlayer;
 
 @Mixin(NetHandlerPlayServer.class)
@@ -85,34 +84,34 @@ public abstract class MixinNetHandlerPlayServer {
     public abstract void sendPacket(final Packet packetIn);
 
     @Shadow(remap = true)
-    public abstract void setPlayerLocation(double lastPosX2, double lastPosY2, double lastPosZ2, float rotationYaw,
-        float rotationPitch);
-
-    @Shadow(remap = true)
     public abstract void kickPlayerFromServer(String string);
+
+    /**
+     * Moves the player to the specified destination and rotation
+     */
+    @Overwrite
+    public void setPlayerLocation(double x, double y, double z, float yaw, float pitch) {
+        this.hasMoved = false;
+        this.lastPosX = x;
+        this.lastPosY = y;
+        this.lastPosZ = z;
+        this.playerEntity.setPositionAndRotation(x, y, z, yaw, pitch);
+        this.playerEntity.playerNetServerHandler.sendPacket(
+            PacketHandler.getS08PacketPlayerPosLook(
+                x,
+                y + 1.6200000047683716D,
+                z,
+                yaw,
+                pitch,
+                false,
+                ((IMixinWorld) ((IMixinEntity) this.playerEntity).getWorldBelowFeet()).getSubWorldID()));
+    }
 
     /**
      * Processes clients perspective on player positioning and/or orientation
      */
     @Overwrite
     public void processPlayer(C03PacketPlayer packetPlayer) {
-        World coordWorld = ((IMixinWorld) this.playerEntity.worldObj)
-            .getSubWorld(((IMixinC03PacketPlayer) packetPlayer).getSubWorldBelowFeetId());
-        if (this.playerEntity.ridingEntity == null
-            && ((IMixinC03PacketPlayer) packetPlayer).getSubWorldBelowFeetId() != 0
-            && coordWorld != null
-            && packetPlayer.func_149466_j()) {
-            Vec3 transformedPos = ((IMixinWorld) coordWorld).transformToGlobal(
-                packetPlayer.func_149464_c(),
-                packetPlayer.func_149471_f(),
-                packetPlayer.func_149472_e());
-            ((IMixinC03PacketPlayer) packetPlayer).setXPosition(transformedPos.xCoord);
-            ((IMixinC03PacketPlayer) packetPlayer).setStance(transformedPos.yCoord);
-            ((IMixinC03PacketPlayer) packetPlayer).setZPosition(transformedPos.zCoord);
-            ((IMixinC03PacketPlayer) packetPlayer)
-                .setYPosition(packetPlayer.func_149467_d() + packetPlayer.func_149471_f());
-        }
-
         WorldServer worldserver = this.serverController.worldServerForDimension(this.playerEntity.dimension);
         this.field_147366_g = true;
 
@@ -294,6 +293,7 @@ public abstract class MixinNetHandlerPlayServer {
                 for (EntityPlayerProxy curPlayerProxy : curPlayerProxies) {
                     ((EntityPlayer) curPlayerProxy).onGround = this.playerEntity.onGround;
                 }
+
                 ((IMixinEntity) this.playerEntity).setWorldBelowFeet(
                     ((IMixinWorld) this.playerEntity.worldObj)
                         .getSubWorld(((IMixinC03PacketPlayer) packetPlayer).getSubWorldBelowFeetId()));

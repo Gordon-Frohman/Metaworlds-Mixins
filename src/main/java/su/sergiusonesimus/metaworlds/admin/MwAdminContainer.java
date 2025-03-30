@@ -183,7 +183,7 @@ public class MwAdminContainer extends Container {
             this.sendSubWorldInfos();
         } else {
             if (info != null && !info.isSpawned) {
-                World restoredWorld = ((IMixinWorld) this.player.worldObj).CreateSubWorld(subWorldId);
+                World restoredWorld = ((IMixinWorld) this.player.worldObj).createSubWorld(subWorldId);
                 info.isSpawned = true;
                 info.dimensionId = ((WorldServer) restoredWorld).provider.dimensionId;
                 MetaMagicNetwork.dispatcher

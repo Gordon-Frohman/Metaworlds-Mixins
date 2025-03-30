@@ -13,6 +13,7 @@ import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraft.network.play.server.S14PacketEntity;
 import net.minecraft.network.play.server.S18PacketEntityTeleport;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -22,6 +23,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.PacketHandler;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS08PacketPlayerPosLook;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS14PacketEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS18PacketEntityTeleport;
 
@@ -172,30 +174,43 @@ public abstract class MixinNetHandlerPlayClient {
      * player positioning
      */
     @Overwrite
-    public void handlePlayerPosLook(S08PacketPlayerPosLook p_147258_1_) {
+    public void handlePlayerPosLook(S08PacketPlayerPosLook s08) {
         EntityClientPlayerMP entityclientplayermp = this.gameController.thePlayer;
-        double d0 = p_147258_1_.func_148932_c();
-        double d1 = p_147258_1_.func_148928_d();
-        double d2 = p_147258_1_.func_148933_e();
-        float f = p_147258_1_.func_148931_f();
-        float f1 = p_147258_1_.func_148930_g();
+        double d0 = s08.func_148932_c();
+        double d1 = s08.func_148928_d();
+        double d2 = s08.func_148933_e();
+        float f = s08.func_148931_f();
+        float f1 = s08.func_148930_g();
         entityclientplayermp.ySize = 0.0F;
         entityclientplayermp.motionX = entityclientplayermp.motionY = entityclientplayermp.motionZ = 0.0D;
         entityclientplayermp.setPositionAndRotation(d0, d1, d2, f, f1);
+
+        int subWorldID = ((IMixinS08PacketPlayerPosLook) s08).getSubWorldBelowFeetID();
+        World subworld = ((IMixinWorld) entityclientplayermp.worldObj).getSubWorldsMap()
+            .get(subWorldID);
+        if (subworld == null && subWorldID != 0) {
+            ((IMixinWorld) entityclientplayermp.worldObj).createSubWorld(subWorldID);
+            subworld = ((IMixinWorld) entityclientplayermp.worldObj).getSubWorldsMap()
+                .get(subWorldID);
+        }
+        ((IMixinEntity) entityclientplayermp).setWorldBelowFeet(subworld);
+
+        World worldBelowFeet = ((IMixinEntity) entityclientplayermp).getWorldBelowFeet();
+
         this.netManager.scheduleOutboundPacket(
             PacketHandler.getC06PacketPlayerPosLook(
                 entityclientplayermp.posX,
                 entityclientplayermp.boundingBox.minY,
                 entityclientplayermp.posY,
                 entityclientplayermp.posZ,
-                p_147258_1_.func_148931_f(),
-                p_147258_1_.func_148930_g(),
-                p_147258_1_.func_148929_h(),
+                s08.func_148931_f(),
+                s08.func_148930_g(),
+                s08.func_148929_h(),
                 /*
                  * entityclientplayermp.getWorldBelowFeet().getSubWorldID() COORDS WOULD NEED TO BE IN SUBWORLD
                  * COORDSYSTEM
                  */
-                ((IMixinWorld) entityclientplayermp.worldObj).getSubWorldID(),
+                ((IMixinWorld) worldBelowFeet).getSubWorldID(),
                 ((IMixinEntity) entityclientplayermp).getTractionLossTicks(),
                 ((IMixinEntity) entityclientplayermp).isLosingTraction()),
             new GenericFutureListener[0]);

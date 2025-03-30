@@ -56,7 +56,7 @@ public class SubWorldCreatePacket implements IMessage {
 
                 for (int i$ = 0; i$ < len$; ++i$) {
                     Integer curSubWorldID = arr$[i$];
-                    World newSubWorld = ((IMixinWorld) player.worldObj).CreateSubWorld(curSubWorldID.intValue());
+                    World newSubWorld = ((IMixinWorld) player.worldObj).createSubWorld(curSubWorldID.intValue());
                 }
             }
             return null;

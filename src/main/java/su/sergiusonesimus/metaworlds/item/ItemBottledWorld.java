@@ -28,7 +28,7 @@ public class ItemBottledWorld extends Item {
                 .hasKey("subWorldID")) {
                 int storedSubWorldID = par1ItemStack.getTagCompound()
                     .getInteger("subWorldID");
-                World restoredWorld = ((IMixinWorld) par2EntityPlayer.worldObj).CreateSubWorld(storedSubWorldID);
+                World restoredWorld = ((IMixinWorld) par2EntityPlayer.worldObj).createSubWorld(storedSubWorldID);
                 SubWorld restoredSubWorld = (SubWorld) restoredWorld;
                 Vec3 destPos = ((IMixinWorld) par3World).transformToGlobal(
                     (double) ((float) par4 + par8),

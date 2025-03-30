@@ -1,6 +1,10 @@
 package su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play;
 
+import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition;
+import net.minecraft.network.play.client.C03PacketPlayer.C05PacketPlayerLook;
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook;
+import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S14PacketEntity;
 import net.minecraft.network.play.server.S14PacketEntity.S15PacketEntityRelMove;
 import net.minecraft.network.play.server.S14PacketEntity.S16PacketEntityLook;
@@ -10,10 +14,44 @@ import net.minecraft.network.play.server.S18PacketEntityTeleport;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.client.IMixinC03PacketPlayer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS08PacketPlayerPosLook;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS14PacketEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS18PacketEntityTeleport;
 
 public class PacketHandler {
+
+    @SideOnly(Side.CLIENT)
+    public static C03PacketPlayer getC03PacketPlayer(boolean p_i45256_1_, int worldBelowFeetId, byte parTractionLoss,
+        boolean parLosingTraction) {
+        C03PacketPlayer c03 = new C03PacketPlayer(p_i45256_1_);
+        return (C03PacketPlayer) ((IMixinC03PacketPlayer) (Object) c03).setSubWorldBelowFeetId(worldBelowFeetId)
+            .setTractionLoss(parTractionLoss)
+            .setLosingTraction(parLosingTraction);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static C04PacketPlayerPosition getC04PacketPlayerPosition(double p_i45253_1_, double p_i45253_3_,
+        double p_i45253_5_, double p_i45253_7_, boolean p_i45253_9_, int worldBelowFeetId, byte parTractionLoss,
+        boolean parLosingTraction) {
+        C04PacketPlayerPosition c04 = new C04PacketPlayerPosition(
+            p_i45253_1_,
+            p_i45253_3_,
+            p_i45253_5_,
+            p_i45253_7_,
+            p_i45253_9_);
+        return (C04PacketPlayerPosition) ((IMixinC03PacketPlayer) (Object) c04).setSubWorldBelowFeetId(worldBelowFeetId)
+            .setTractionLoss(parTractionLoss)
+            .setLosingTraction(parLosingTraction);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static C05PacketPlayerLook getC05PacketPlayerLook(float p_i45255_1_, float p_i45255_2_, boolean p_i45255_3_,
+        int worldBelowFeetId, byte parTractionLoss, boolean parLosingTraction) {
+        C05PacketPlayerLook c05 = new C05PacketPlayerLook(p_i45255_1_, p_i45255_2_, p_i45255_3_);
+        return (C05PacketPlayerLook) ((IMixinC03PacketPlayer) (Object) c05).setSubWorldBelowFeetId(worldBelowFeetId)
+            .setTractionLoss(parTractionLoss)
+            .setLosingTraction(parLosingTraction);
+    }
 
     @SideOnly(Side.CLIENT)
     public static C06PacketPlayerPosLook getC06PacketPlayerPosLook(double p_i45254_1_, double p_i45254_3_,
@@ -27,9 +65,23 @@ public class PacketHandler {
             p_i45254_9_,
             p_i45254_10_,
             p_i45254_11_);
+        if (worldBelowFeetId == 0) {
+            int x = 0;
+        }
         return (C06PacketPlayerPosLook) ((IMixinC03PacketPlayer) (Object) c06).setSubWorldBelowFeetId(worldBelowFeetId)
             .setTractionLoss(parTractionLoss)
             .setLosingTraction(parLosingTraction);
+    }
+
+    public static S08PacketPlayerPosLook getS08PacketPlayerPosLook(double p_i45164_1_, double p_i45164_3_,
+        double p_i45164_5_, float p_i45164_7_, float p_i45164_8_, boolean p_i45164_9_, int subWorldBelowFeetID) {
+        return ((IMixinS08PacketPlayerPosLook) new S08PacketPlayerPosLook(
+            p_i45164_1_,
+            p_i45164_3_,
+            p_i45164_5_,
+            p_i45164_7_,
+            p_i45164_8_,
+            p_i45164_9_)).setSubWorldBelowFeetID(subWorldBelowFeetID);
     }
 
     public static S14PacketEntity getS14PacketEntity(int p_i45206_1_, int parSubWorldBelowFeetId, byte parTractionLoss,

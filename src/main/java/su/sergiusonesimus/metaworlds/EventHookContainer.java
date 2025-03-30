@@ -39,7 +39,7 @@ public class EventHookContainer {
                         Integer curSubWorldID = (Integer) i$.next();
                         if (((IMixinWorld) event.world).getSubWorldsMap()
                             .get(curSubWorldID) == null)
-                            ((IMixinWorld) event.world).CreateSubWorld(curSubWorldID.intValue());
+                            ((IMixinWorld) event.world).createSubWorld(curSubWorldID.intValue());
                     }
                 }
             }

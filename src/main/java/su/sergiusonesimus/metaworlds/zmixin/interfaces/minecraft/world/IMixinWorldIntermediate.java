@@ -16,9 +16,9 @@ import su.sergiusonesimus.metaworlds.world.SubWorldFactory;
 
 public interface IMixinWorldIntermediate {
 
-    public World CreateSubWorld();
+    public World createSubWorld();
 
-    public World CreateSubWorld(int newSubWorldID);
+    public World createSubWorld(int newSubWorldID);
 
     public Minecraft getMinecraft();
 

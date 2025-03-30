@@ -441,7 +441,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             double xStored = x;
             double yStored = y;
             double zStored = z;
-            AxisAlignedBB axisalignedbb = this.boundingBox.copy();
+            AxisAlignedBB bbStored = this.boundingBox.copy();
             boolean flag = this.onGround && this.isSneaking() && ((Entity) (Object) this) instanceof EntityPlayer;
 
             if (flag) {
@@ -518,7 +518,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
             for (int i = 0; i < list.size(); ++i) {
                 curAABB = (AxisAlignedBB) list.get(i);
 
-                AxisAlignedBB offsetBB = this.boundingBox;
+                AxisAlignedBB offsetBB = this.boundingBox.copy();
                 if (curAABB instanceof OrientedBB
                     && (((IMixinWorld) ((OrientedBB) curAABB).lastTransformedBy).getRotationPitch() % 360 != 0
                         || ((IMixinWorld) ((OrientedBB) curAABB).lastTransformedBy).getRotationRoll() % 360 != 0)) {
@@ -580,8 +580,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 x = xStored;
                 y = (double) this.stepHeight;
                 z = zStored;
-                AxisAlignedBB axisalignedbb1 = this.boundingBox.copy();
-                this.boundingBox.setBB(axisalignedbb);
+                AxisAlignedBB bbStoredLocal = this.boundingBox.copy();
+                this.boundingBox.setBB(bbStored);
                 list = this.worldObj
                     .getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(xStored, y, zStored));
 
@@ -635,12 +635,14 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                     this.boundingBox.offset(0.0D, y, 0.0D);
                 }
 
-                if (xStoredLocal * xStoredLocal + zStoredLocal * zStoredLocal >= x * x + z * z && xStoredLocal * x > 0
-                    && zStoredLocal * z > 0) {
+                if (xStoredLocal * xStoredLocal + zStoredLocal * zStoredLocal >= x * x + z * z/*
+                                                                                               * && xStoredLocal * x > 0
+                                                                                               * && zStoredLocal * z > 0
+                                                                                               */) {
                     x = xStoredLocal;
                     y = yStoredLocal;
                     z = zStoredLocal;
-                    this.boundingBox.setBB(axisalignedbb1);
+                    this.boundingBox.setBB(bbStoredLocal);
                 }
             }
 
@@ -679,10 +681,9 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 double xCoord = this.posX;
                 double yCoord = this.posY - 0.20000000298023224D - (double) this.yOffset;
                 double zCoord = this.posZ;
-                World targetWorld = this.worldBelowFeet == null ? this.worldObj : this.worldBelowFeet;
+                World targetWorld = this.getWorldBelowFeet();
                 if (targetWorld != this.worldObj) {
-                    Vec3 localCoords = ((IMixinWorld) targetWorld)
-                        .transformToLocal(Vec3.createVectorHelper(xCoord, yCoord, zCoord));
+                    Vec3 localCoords = ((IMixinWorld) targetWorld).transformToLocal(xCoord, yCoord, zCoord);
                     xCoord = localCoords.xCoord;
                     yCoord = localCoords.yCoord;
                     zCoord = localCoords.zCoord;
@@ -773,7 +774,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     @Overwrite
     protected void func_145780_a(int x, int y, int z, Block blockIn) {
         Block.SoundType soundtype = blockIn.stepSound;
-        World targetWorld = this.worldBelowFeet == null ? this.worldObj : this.worldBelowFeet;
+        World targetWorld = this.getWorldBelowFeet();
 
         if (targetWorld.getBlock(x, y + 1, z) == Blocks.snow_layer) {
             soundtype = Blocks.snow_layer.stepSound;

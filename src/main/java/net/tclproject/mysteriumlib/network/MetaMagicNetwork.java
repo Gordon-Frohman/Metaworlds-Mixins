@@ -9,6 +9,7 @@ import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiInitPacket;
 import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiSubWorldInfosPacket;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
+import su.sergiusonesimus.metaworlds.compat.packet.SubWorldSpawnPositionPacket;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
 import su.sergiusonesimus.metaworlds.compat.packet.UpdateServerHealthPacket;
 
@@ -47,6 +48,11 @@ public final class MetaMagicNetwork {
             dispatcher
                 .registerMessage(SubWorldDestroyPacket.Handler.class, SubWorldDestroyPacket.class, 7, Side.CLIENT);
             dispatcher.registerMessage(SubWorldUpdatePacket.Handler.class, SubWorldUpdatePacket.class, 8, Side.CLIENT);
+            dispatcher.registerMessage(
+                SubWorldSpawnPositionPacket.Handler.class,
+                SubWorldSpawnPositionPacket.class,
+                9,
+                Side.CLIENT);
 
             registered = true;
         }

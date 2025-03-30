@@ -81,11 +81,11 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
         if (subWorldFactory == null) subWorldFactory = new SubWorldClientFactory();
     }
 
-    public World CreateSubWorld() {
-        return this.CreateSubWorld(((IMixinWorld) this).getWorldsCount());
+    public World createSubWorld() {
+        return this.createSubWorld(((IMixinWorld) this).getWorldsCount());
     }
 
-    public World CreateSubWorld(int newSubWorldID) {
+    public World createSubWorld(int newSubWorldID) {
         if (this.subWorldFactory == null) return null;
         World newSubWorld = this.subWorldFactory.CreateSubWorld(((World) (Object) this), newSubWorldID);
         if (((IMixinWorld) this).getSubWorldsMap()

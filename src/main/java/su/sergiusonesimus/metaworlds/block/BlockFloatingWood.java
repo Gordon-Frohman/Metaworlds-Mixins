@@ -17,7 +17,7 @@ public class BlockFloatingWood extends Block {
 
     public void onBlockAdded(World par1World, int par2, int par3, int par4) {
         if (!((IMixinWorld) par1World).isSubWorld()) {
-            World newWorld = ((IMixinWorld) par1World).CreateSubWorld();
+            World newWorld = ((IMixinWorld) par1World).createSubWorld();
             SubWorld newSubWorld = (SubWorld) newWorld;
             newSubWorld.setSubWorldType(1);
             newSubWorld.setTranslation((double) par2, newSubWorld.getTranslationY(), (double) par4);

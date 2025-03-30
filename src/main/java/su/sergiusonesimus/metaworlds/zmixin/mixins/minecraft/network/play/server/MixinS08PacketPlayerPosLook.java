@@ -6,6 +6,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -14,6 +15,11 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixi
 
 @Mixin(S08PacketPlayerPosLook.class)
 public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlayerPosLook {
+
+    @Shadow(remap = true)
+    private double field_148939_c;
+
+    // TODO
 
     private int subWorldBelowFeetID;
 

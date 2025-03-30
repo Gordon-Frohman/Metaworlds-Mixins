@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -12,8 +13,11 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.world.SubWorldServer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.entity.IMixinEntityClientPlayerMP;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class SubWorldUpdatePacket implements IMessage {
@@ -197,7 +201,16 @@ public class SubWorldUpdatePacket implements IMessage {
 
             targetSubWorld.lastServerTickReceived = this.serverTick;
             if ((this.flags & 4) != 0) {
-                targetSubWorld.setCenter(this.centerX, this.centerY, this.centerZ);
+                targetSubWorld.setCenterOnCreate(this.centerX, this.centerY, this.centerZ);
+                if (!targetSubWorld.canUpdate && targetSubWorld == ((IMixinEntity) player).getWorldBelowFeet()) {
+                    ((SubWorld) targetSubWorld).registerEntityToDrag(player);
+                    Vec3 transformedPos = ((IMixinWorld) targetSubWorld).transformToGlobal(
+                        ((IMixinEntityClientPlayerMP) player).getSubworldSpawnX(),
+                        ((IMixinEntityClientPlayerMP) player).getSubworldSpawnY(),
+                        ((IMixinEntityClientPlayerMP) player).getSubworldSpawnZ());
+                    player.setPositionAndUpdate(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord);
+                }
+                targetSubWorld.canUpdate = true;
             }
 
             if ((this.flags & 1) != 0) {

@@ -1,9 +1,9 @@
 package su.sergiusonesimus.metaworlds;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -20,23 +20,6 @@ public class MWCorePlayerTracker {
 
     @SubscribeEvent
     public void onPlayerLogin(PlayerLoggedInEvent event) {
-        NBTTagCompound entityData = event.player.getEntityData();
-        if (entityData.hasKey("SubWorldInfo")) {
-            NBTTagCompound subWorldData = entityData.getCompoundTag("SubWorldInfo");
-            int worldBelowFeetId = subWorldData.getInteger("WorldBelowFeetId");
-            World newWorldBelowFeet = ((IMixinWorld) ((IMixinWorld) event.player.worldObj).getParentWorld())
-                .getSubWorld(worldBelowFeetId);
-            if (worldBelowFeetId != 0 && newWorldBelowFeet != null) {
-                double posXOnSubWorld = subWorldData.getDouble("posXOnSubWorld");
-                double posYOnSubWorld = subWorldData.getDouble("posYOnSubWorld");
-                double posZOnSubWorld = subWorldData.getDouble("posZOnSubWorld");
-                ((IMixinEntity) event.player).setWorldBelowFeet(newWorldBelowFeet);
-                Vec3 transformedPos = ((IMixinWorld) newWorldBelowFeet)
-                    .transformToGlobal(posXOnSubWorld, posYOnSubWorld, posZOnSubWorld);
-                event.player.setPositionAndUpdate(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord);
-            }
-        }
-
         MetaMagicNetwork.dispatcher.sendTo(
             new SubWorldCreatePacket(
                 ((IMixinWorld) event.player.worldObj).getSubWorlds()
@@ -49,13 +32,17 @@ public class MWCorePlayerTracker {
 
     @SubscribeEvent
     public void onPlayerLogout(PlayerLoggedOutEvent event) {
-        NBTTagCompound entityData = event.player.getEntityData();
+        // This only works on dedicated servers
+        savePlayerData(event.player);
+    }
+
+    public static void savePlayerData(EntityPlayer player) {
+        NBTTagCompound entityData = player.getEntityData();
         NBTTagCompound subWorldData = new NBTTagCompound();
         subWorldData.setInteger(
             "WorldBelowFeetId",
-            ((IMixinWorld) ((IMixinEntity) event.player).getWorldBelowFeet()).getSubWorldID());
-        Vec3 transformedPos = ((IMixinEntity) event.player)
-            .getLocalPos(((IMixinEntity) event.player).getWorldBelowFeet());
+            ((IMixinWorld) ((IMixinEntity) player).getWorldBelowFeet()).getSubWorldID());
+        Vec3 transformedPos = ((IMixinEntity) player).getLocalPos(((IMixinEntity) player).getWorldBelowFeet());
         subWorldData.setDouble("posXOnSubWorld", transformedPos.xCoord);
         subWorldData.setDouble("posYOnSubWorld", transformedPos.yCoord);
         subWorldData.setDouble("posZOnSubWorld", transformedPos.zCoord);

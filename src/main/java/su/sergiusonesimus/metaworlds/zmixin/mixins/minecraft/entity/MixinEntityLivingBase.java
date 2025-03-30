@@ -411,13 +411,31 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                     this.motionY = 0.2D;
                 }
 
-                if (this.worldObj.isRemote && (!this.worldObj.blockExists((int) this.posX, 0, (int) this.posZ)
-                    || !this.worldObj.getChunkFromBlockCoords((int) this.posX, (int) this.posZ).isChunkLoaded)) {
-                    if (this.posY > 0.0D) {
-                        this.motionY = -0.1D;
-                    } else {
-                        this.motionY = 0.0D;
+                if (this.worldObj.isRemote) {
+                    boolean decreaseMotion = true;
+                    if ((!this.worldObj.blockExists((int) this.posX, 0, (int) this.posZ)
+                        || !this.worldObj.getChunkFromBlockCoords((int) this.posX, (int) this.posZ).isChunkLoaded)) {
+                        if (this.posY > 0.0D) {
+                            this.motionY = -0.1D;
+                        } else {
+                            this.motionY = 0.0D;
+                        }
+                        decreaseMotion = false;
                     }
+                    World worldBelowFeet = getWorldBelowFeet();
+                    if (worldBelowFeet instanceof SubWorld) {
+                        Vec3 localPos = ((IMixinWorld) worldBelowFeet).transformToLocal((Entity) (Object) this);
+                        if ((!worldBelowFeet.blockExists((int) localPos.xCoord, 0, (int) localPos.zCoord)
+                            || !worldBelowFeet
+                                .getChunkFromBlockCoords((int) localPos.xCoord, (int) localPos.zCoord).isChunkLoaded)) {
+                            this.motionX = 0.0D;
+                            this.motionY = 0.0D;
+                            this.motionZ = 0.0D;
+                            ((SubWorld) worldBelowFeet).registerEntityToDrag((Entity) (Object) this);
+                            decreaseMotion = false;
+                        }
+                    }
+                    if (decreaseMotion) this.motionY -= 0.08D;
                 } else {
                     this.motionY -= 0.08D;
                 }

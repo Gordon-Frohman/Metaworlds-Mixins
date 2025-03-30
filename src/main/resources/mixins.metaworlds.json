@@ -7,6 +7,7 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
   	"minecraft.client.MixinMinecraft",
+  	"minecraft.client.entity.MixinEntityClientPlayerMP",
   	"minecraft.client.multiplayer.MixinPlayerControllerMP",
   	"minecraft.client.multiplayer.MixinWorldClient",
   	"minecraft.client.network.MixinNetHandlerPlayClient",
@@ -37,6 +38,7 @@
   	"minecraft.network.play.server.MixinS18PacketEntityTeleport",
   	"minecraft.server.MixinMinecraftServer",
   	"minecraft.server.management.MixinPlayerManager",
+  	"minecraft.server.management.MixinServerConfigurationManager",
   	"minecraft.tileentity.MixinTileEntity",
   	"minecraft.util.MixinAxisAlignedBB",
   	"minecraft.util.MixinMovingObjectPosition",

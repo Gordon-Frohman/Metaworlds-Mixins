@@ -400,7 +400,7 @@ public abstract class MixinWorld implements IMixinWorld {
         double centerZ = z + 0.5;
         Collection<World> subworlds = ((IMixinWorld) this.getParentWorld()).getSubWorlds();
         if (this.isSubWorld) {
-            Vec3 globalCoords = this.transformToGlobal(Vec3.createVectorHelper(centerX, centerY, centerZ));
+            Vec3 globalCoords = this.transformToGlobal(centerX, centerY, centerZ);
             centerX = globalCoords.xCoord;
             centerY = globalCoords.yCoord;
             centerZ = globalCoords.zCoord;

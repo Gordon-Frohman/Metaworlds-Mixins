@@ -55,7 +55,7 @@ public class BlockContagiousSubWorldCreator extends Block {
             } while (margin.size() > 0);
 
             if (isValid) {
-                World newWorld1 = ((IMixinWorld) par1World).CreateSubWorld();
+                World newWorld1 = ((IMixinWorld) par1World).createSubWorld();
                 SubWorld newSubWorld = (SubWorld) newWorld1;
                 Iterator i$ = blocksToTake.iterator();
 

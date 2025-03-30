@@ -128,16 +128,18 @@ public class SubWorldTransformationHandler {
     }
 
     public void setTranslation(double newX, double newY, double newZ) {
-        this.translationX = newX;
-        this.translationY = newY;
-        this.translationZ = newZ;
-        this.matrixTranslation.data[12] = newX;
-        this.matrixTranslation.data[13] = newY;
-        this.matrixTranslation.data[14] = newZ;
-        this.matrixTranslationInverse.data[12] = -newX;
-        this.matrixTranslationInverse.data[13] = -newY;
-        this.matrixTranslationInverse.data[14] = -newZ;
-        this.needTransformationRecalc = true;
+        if (this.translationX != newX || this.translationY != newY || this.translationZ != newZ) {
+            this.translationX = newX;
+            this.translationY = newY;
+            this.translationZ = newZ;
+            this.matrixTranslation.data[12] = newX;
+            this.matrixTranslation.data[13] = newY;
+            this.matrixTranslation.data[14] = newZ;
+            this.matrixTranslationInverse.data[12] = -newX;
+            this.matrixTranslationInverse.data[13] = -newY;
+            this.matrixTranslationInverse.data[14] = -newZ;
+            this.needTransformationRecalc = true;
+        }
     }
 
     public void setCenter(Vec3 newCenter) {
@@ -145,70 +147,103 @@ public class SubWorldTransformationHandler {
     }
 
     public void setCenter(double newX, double newY, double newZ) {
-        Vec3 oldGlobalPos = this.transformToGlobal(0.0D, 0.0D, 0.0D);
-        this.centerX = newX;
-        this.centerY = newY;
-        this.centerZ = newZ;
-        this.matrixCenterTranslation.data[12] = -newX;
-        this.matrixCenterTranslation.data[13] = -newY;
-        this.matrixCenterTranslation.data[14] = -newZ;
-        this.matrixCenterTranslationInverse.data[12] = newX;
-        this.matrixCenterTranslationInverse.data[13] = newY;
-        this.matrixCenterTranslationInverse.data[14] = newZ;
-        this.needTransformationRecalc = true;
-        Vec3 newGlobalPos = this.transformToGlobal(0.0D, 0.0D, 0.0D);
-        this.setTranslation(
-            this.getTranslationX() + oldGlobalPos.xCoord - newGlobalPos.xCoord,
-            this.getTranslationY() + oldGlobalPos.yCoord - newGlobalPos.yCoord,
-            this.getTranslationZ() + oldGlobalPos.zCoord - newGlobalPos.zCoord);
+        if ((int) Math.round(newX * 10) == -1795 && (int) Math.round(newY * 10) == 665
+            && (int) Math.round(newZ * 10) == 5
+            && this.holderWorld.isRemote) {
+            int x = 0;
+        }
+        if (this.centerX != newX || this.centerY != newY || this.centerZ != newZ) {
+            Vec3 oldGlobalPos = this.transformToGlobal(0.0D, 0.0D, 0.0D);
+            this.centerX = newX;
+            this.centerY = newY;
+            this.centerZ = newZ;
+            this.matrixCenterTranslation.data[12] = -newX;
+            this.matrixCenterTranslation.data[13] = -newY;
+            this.matrixCenterTranslation.data[14] = -newZ;
+            this.matrixCenterTranslationInverse.data[12] = newX;
+            this.matrixCenterTranslationInverse.data[13] = newY;
+            this.matrixCenterTranslationInverse.data[14] = newZ;
+            this.needTransformationRecalc = true;
+            Vec3 newGlobalPos = this.transformToGlobal(0.0D, 0.0D, 0.0D);
+            this.setTranslation(
+                this.getTranslationX() + oldGlobalPos.xCoord - newGlobalPos.xCoord,
+                this.getTranslationY() + oldGlobalPos.yCoord - newGlobalPos.yCoord,
+                this.getTranslationZ() + oldGlobalPos.zCoord - newGlobalPos.zCoord);
+        }
+    }
+
+    public void setCenterOnCreate(double newX, double newY, double newZ) {
+        if ((int) Math.round(newX * 10) == -1795 && (int) Math.round(newY * 10) == 665
+            && (int) Math.round(newZ * 10) == 5
+            && this.holderWorld.isRemote) {
+            int x = 0;
+        }
+        if (this.centerX != newX || this.centerY != newY || this.centerZ != newZ) {
+            this.centerX = newX;
+            this.centerY = newY;
+            this.centerZ = newZ;
+            this.matrixCenterTranslation.data[12] = -newX;
+            this.matrixCenterTranslation.data[13] = -newY;
+            this.matrixCenterTranslation.data[14] = -newZ;
+            this.matrixCenterTranslationInverse.data[12] = newX;
+            this.matrixCenterTranslationInverse.data[13] = newY;
+            this.matrixCenterTranslationInverse.data[14] = newZ;
+            this.needTransformationRecalc = true;
+        }
     }
 
     public void setRotationYaw(double newYaw) {
-        this.rotationYaw = newYaw;
-        this.cosRotationYaw = Math.cos(newYaw * Math.PI / 180.0D);
-        this.sinRotationYaw = Math.sin(newYaw * Math.PI / 180.0D);
-        this.matrixRotationYaw.data[0] = this.cosRotationYaw;
-        this.matrixRotationYaw.data[8] = this.sinRotationYaw;
-        this.matrixRotationYaw.data[2] = -this.sinRotationYaw;
-        this.matrixRotationYaw.data[10] = this.cosRotationYaw;
-        this.matrixRotationYawInverse.data[0] = this.cosRotationYaw;
-        this.matrixRotationYawInverse.data[8] = -this.sinRotationYaw;
-        this.matrixRotationYawInverse.data[2] = this.sinRotationYaw;
-        this.matrixRotationYawInverse.data[10] = this.cosRotationYaw;
-        this.needRotationRecalc = true;
-        this.needTransformationRecalc = true;
+        if (this.rotationYaw != newYaw) {
+            this.rotationYaw = newYaw;
+            this.cosRotationYaw = Math.cos(newYaw * Math.PI / 180.0D);
+            this.sinRotationYaw = Math.sin(newYaw * Math.PI / 180.0D);
+            this.matrixRotationYaw.data[0] = this.cosRotationYaw;
+            this.matrixRotationYaw.data[8] = this.sinRotationYaw;
+            this.matrixRotationYaw.data[2] = -this.sinRotationYaw;
+            this.matrixRotationYaw.data[10] = this.cosRotationYaw;
+            this.matrixRotationYawInverse.data[0] = this.cosRotationYaw;
+            this.matrixRotationYawInverse.data[8] = -this.sinRotationYaw;
+            this.matrixRotationYawInverse.data[2] = this.sinRotationYaw;
+            this.matrixRotationYawInverse.data[10] = this.cosRotationYaw;
+            this.needRotationRecalc = true;
+            this.needTransformationRecalc = true;
+        }
     }
 
     public void setRotationPitch(double newPitch) {
-        this.rotationPitch = newPitch;
-        this.cosRotationPitch = Math.cos(newPitch * Math.PI / 180.0D);
-        this.sinRotationPitch = Math.sin(newPitch * Math.PI / 180.0D);
-        this.matrixRotationPitch.data[0] = this.cosRotationPitch;
-        this.matrixRotationPitch.data[1] = this.sinRotationPitch;
-        this.matrixRotationPitch.data[4] = -this.sinRotationPitch;
-        this.matrixRotationPitch.data[5] = this.cosRotationPitch;
-        this.matrixRotationPitchInverse.data[0] = this.cosRotationPitch;
-        this.matrixRotationPitchInverse.data[1] = -this.sinRotationPitch;
-        this.matrixRotationPitchInverse.data[4] = this.sinRotationPitch;
-        this.matrixRotationPitchInverse.data[5] = this.cosRotationPitch;
-        this.needRotationRecalc = true;
-        this.needTransformationRecalc = true;
+        if (this.rotationPitch != newPitch) {
+            this.rotationPitch = newPitch;
+            this.cosRotationPitch = Math.cos(newPitch * Math.PI / 180.0D);
+            this.sinRotationPitch = Math.sin(newPitch * Math.PI / 180.0D);
+            this.matrixRotationPitch.data[0] = this.cosRotationPitch;
+            this.matrixRotationPitch.data[1] = this.sinRotationPitch;
+            this.matrixRotationPitch.data[4] = -this.sinRotationPitch;
+            this.matrixRotationPitch.data[5] = this.cosRotationPitch;
+            this.matrixRotationPitchInverse.data[0] = this.cosRotationPitch;
+            this.matrixRotationPitchInverse.data[1] = -this.sinRotationPitch;
+            this.matrixRotationPitchInverse.data[4] = this.sinRotationPitch;
+            this.matrixRotationPitchInverse.data[5] = this.cosRotationPitch;
+            this.needRotationRecalc = true;
+            this.needTransformationRecalc = true;
+        }
     }
 
     public void setRotationRoll(double newRoll) {
-        this.rotationRoll = newRoll;
-        this.cosRotationRoll = Math.cos(newRoll * Math.PI / 180.0D);
-        this.sinRotationRoll = Math.sin(newRoll * Math.PI / 180.0D);
-        this.matrixRotationRoll.data[5] = this.cosRotationRoll;
-        this.matrixRotationRoll.data[6] = this.sinRotationRoll;
-        this.matrixRotationRoll.data[9] = -this.sinRotationRoll;
-        this.matrixRotationRoll.data[10] = this.cosRotationRoll;
-        this.matrixRotationRollInverse.data[5] = this.cosRotationRoll;
-        this.matrixRotationRollInverse.data[6] = -this.sinRotationRoll;
-        this.matrixRotationRollInverse.data[9] = this.sinRotationRoll;
-        this.matrixRotationRollInverse.data[10] = this.cosRotationRoll;
-        this.needRotationRecalc = true;
-        this.needTransformationRecalc = true;
+        if (this.rotationRoll != newRoll) {
+            this.rotationRoll = newRoll;
+            this.cosRotationRoll = Math.cos(newRoll * Math.PI / 180.0D);
+            this.sinRotationRoll = Math.sin(newRoll * Math.PI / 180.0D);
+            this.matrixRotationRoll.data[5] = this.cosRotationRoll;
+            this.matrixRotationRoll.data[6] = this.sinRotationRoll;
+            this.matrixRotationRoll.data[9] = -this.sinRotationRoll;
+            this.matrixRotationRoll.data[10] = this.cosRotationRoll;
+            this.matrixRotationRollInverse.data[5] = this.cosRotationRoll;
+            this.matrixRotationRollInverse.data[6] = -this.sinRotationRoll;
+            this.matrixRotationRollInverse.data[9] = this.sinRotationRoll;
+            this.matrixRotationRollInverse.data[10] = this.cosRotationRoll;
+            this.needRotationRecalc = true;
+            this.needTransformationRecalc = true;
+        }
     }
 
     public void setScaling(double newScaling) {
@@ -216,14 +251,16 @@ public class SubWorldTransformationHandler {
             newScaling = 1.0E-4D;
         }
 
-        this.scaling = newScaling;
-        this.matrixScaling.data[0] = this.scaling;
-        this.matrixScaling.data[5] = this.scaling;
-        this.matrixScaling.data[10] = this.scaling;
-        this.matrixScalingInverse.data[0] = 1.0D / this.scaling;
-        this.matrixScalingInverse.data[5] = 1.0D / this.scaling;
-        this.matrixScalingInverse.data[10] = 1.0D / this.scaling;
-        this.needTransformationRecalc = true;
+        if (this.scaling != newScaling) {
+            this.scaling = newScaling;
+            this.matrixScaling.data[0] = this.scaling;
+            this.matrixScaling.data[5] = this.scaling;
+            this.matrixScaling.data[10] = this.scaling;
+            this.matrixScalingInverse.data[0] = 1.0D / this.scaling;
+            this.matrixScalingInverse.data[5] = 1.0D / this.scaling;
+            this.matrixScalingInverse.data[10] = 1.0D / this.scaling;
+            this.needTransformationRecalc = true;
+        }
     }
 
     public void recalcRotationMatrix() {
@@ -344,6 +381,8 @@ public class SubWorldTransformationHandler {
     public Vec3 transformToLocal(Vec3 globalVec) {
         return this.transformToLocal(globalVec.xCoord, globalVec.yCoord, globalVec.zCoord);
     }
+
+    private Vec3 storedLocalPos = null;
 
     public Vec3 transformToLocal(double globalX, double globalY, double globalZ) {
         DoubleMatrix tempVector = new DoubleMatrix(new double[] { globalX, globalY, globalZ, 1.0D });
