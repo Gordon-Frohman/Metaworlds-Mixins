@@ -1,8 +1,10 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.network;
 
 import java.util.Collection;
+import java.util.List;
 
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -38,7 +40,9 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import cpw.mods.fml.common.eventhandler.Event;
+import su.sergiusonesimus.debug.Breakpoint;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
+import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.PacketHandler;
@@ -110,6 +114,7 @@ public abstract class MixinNetHandlerPlayServer {
     /**
      * Processes clients perspective on player positioning and/or orientation
      */
+    @SuppressWarnings("unchecked")
     @Overwrite
     public void processPlayer(C03PacketPlayer packetPlayer) {
         WorldServer worldserver = this.serverController.worldServerForDimension(this.playerEntity.dimension);
@@ -328,15 +333,69 @@ public abstract class MixinNetHandlerPlayServer {
                 }
 
                 this.playerEntity.setPositionAndRotation(d1, d2, d3, f1, f2);
-                boolean flag2 = worldserver
-                    .getCollidingBoundingBoxes(
-                        this.playerEntity,
-                        this.playerEntity.boundingBox.copy()
-                            .contract((double) f3, (double) f3, (double) f3))
-                    .isEmpty();
+
+                // Since different algorithms are used when getting colliding BBs and when getting offsets for player
+                // movement, we have to check this flag differently
+                boolean flag2 = true;
+                List<AxisAlignedBB> collidingBBs = worldserver.getCollidingBoundingBoxes(
+                    this.playerEntity,
+                    this.playerEntity.boundingBox.copy()
+                        .contract((double) f3, (double) f3, (double) f3));
+                if (!collidingBBs.isEmpty()) {
+                    // PLayer's BB intersects with some blocks
+                    // Let's check if there're any main world blocks there
+                    boolean subWorldsOnly = true;
+                    IMixinWorld collidedSubworld = null;
+                    for (AxisAlignedBB aabb : collidingBBs) {
+                        if (!(aabb instanceof OrientedBB)) {
+                            subWorldsOnly = false;
+                            break;
+                        } else {
+                            collidedSubworld = (IMixinWorld) ((OrientedBB) aabb).lastTransformedBy;
+                        }
+                    }
+                    if (!subWorldsOnly) {
+                        // Player is collided with at least one main world block
+                        // Therefore the collision is valid
+                        flag2 = false;
+                    } else {
+                        // Player is only collided with subworld blocks
+                        // Let's check if the collision persists with contracted player's BB
+                        double worldRotation = collidedSubworld.getRotationYaw() % 360;
+                        if (worldRotation == 0) {
+                            // The subworld is parallel with the main world.
+                            // Therefore all collisions with it are valid
+                            flag2 = false;
+                        } else {
+                            Breakpoint.breakpoint();
+                            worldRotation = Math.abs(worldRotation) % 90;
+                            if (worldRotation > 45) worldRotation = 90 - worldRotation;
+                            worldRotation = Math.toRadians(worldRotation);
+                            double modifier = (1 - 1 / (Math.sin(worldRotation) + Math.cos(worldRotation))) / 2;
+                            collidingBBs = worldserver.getCollidingBoundingBoxes(
+                                this.playerEntity,
+                                this.playerEntity.boundingBox.copy()
+                                    .contract(
+                                        (double) f3
+                                            + (this.playerEntity.boundingBox.maxX - this.playerEntity.boundingBox.minX)
+                                                * modifier,
+                                        (double) f3,
+                                        (double) f3
+                                            + (this.playerEntity.boundingBox.maxZ - this.playerEntity.boundingBox.minZ)
+                                                * modifier));
+                            flag2 = collidingBBs.isEmpty();
+                        }
+                    }
+                }
 
                 if (flag && (flag1 || !flag2) && !this.playerEntity.isPlayerSleeping() && !this.playerEntity.noClip) {
                     this.setPlayerLocation(this.lastPosX, this.lastPosY, this.lastPosZ, f1, f2);
+                    Minecraft.logger.info(
+                        "Setting player position back to " + this.lastPosX
+                            + ", "
+                            + this.lastPosY
+                            + ", "
+                            + this.lastPosZ);
                     return;
                 }
 

@@ -412,12 +412,15 @@ public class OrientedBB extends AxisAlignedBB {
         return super.isVecInside(par1Vec3);
     }
 
-    private static double multiplier = 1;
+    private static double subworldExpander = 0.5;
+    private static double subworldExtenderHorizontal = 0.01;
 
     public double calculateXOffset(AxisAlignedBB aabb, double xOffset) {
         double worldRotation = Math.abs(((IMixinWorld) this.lastTransformedBy).getRotationYaw()) % 90;
         if (worldRotation > 45) worldRotation = 90 - worldRotation;
-        double localBBsize = (aabb.maxX - aabb.minX) * Math.cos(worldRotation / 180 * Math.PI) / 2 * multiplier;
+        worldRotation *= Math.PI / 180;
+        double globalBBsize = aabb.maxX - aabb.minX;
+        double localBBsize = globalBBsize / (Math.cos(worldRotation) + Math.sin(worldRotation)) / 2;
         Vec3 bbCenter = Vec3.createVectorHelper((aabb.maxX + aabb.minX) / 2, aabb.minY, (aabb.maxZ + aabb.minZ) / 2);
         aabb = AxisAlignedBB.getBoundingBox(
             bbCenter.xCoord - localBBsize,
@@ -504,8 +507,8 @@ public class OrientedBB extends AxisAlignedBB {
 
                         // Either this BB is not rotated around y/z, or
                         // Target AABB contains the smallest x point
-                        if (aabb.maxX <= curMaxX + 0.75D) {
-                            newXOffset = curMaxX - aabb.maxX - 0.01D;
+                        if (aabb.maxX <= curMaxX + subworldExpander) {
+                            newXOffset = curMaxX - aabb.maxX - subworldExtenderHorizontal;
                             if (newXOffset < xOffset) {
                                 xOffset = newXOffset;
                             }
@@ -532,8 +535,8 @@ public class OrientedBB extends AxisAlignedBB {
                                     && intersection.getZ() <= aabb.maxZ
                                     && intersection.getZ() >= aabb.minZ) {
                                     liesOnEdge = true;
-                                    if (intersection != null && aabb.maxX <= intersection.getX() + 0.75D) {
-                                        newXOffset = curMaxX - aabb.maxX - 0.01D;
+                                    if (intersection != null && aabb.maxX <= intersection.getX() + subworldExpander) {
+                                        newXOffset = curMaxX - aabb.maxX - subworldExtenderHorizontal;
                                         if (newXOffset < localXOffset) {
                                             localXOffset = newXOffset;
                                         }
@@ -576,8 +579,8 @@ public class OrientedBB extends AxisAlignedBB {
                                     Vector3D intersection = face.intersection(corners[i]);
 
                                     if (intersection != null && intersection.getX() >= curMaxX
-                                        && aabb.maxX <= intersection.getX() + 0.75D) {
-                                        newXOffset = intersection.getX() - aabb.maxX - 0.01D;
+                                        && aabb.maxX <= intersection.getX() + subworldExpander) {
+                                        newXOffset = intersection.getX() - aabb.maxX - subworldExtenderHorizontal;
                                         if (newXOffset < localXOffset) {
                                             localXOffset = newXOffset;
                                         }
@@ -627,8 +630,8 @@ public class OrientedBB extends AxisAlignedBB {
 
                         // Either this BB is not rotated around y/z, or
                         // Target AABB contains the biggest x point
-                        if (aabb.minX >= curMaxX - 0.75D) {
-                            newXOffset = curMaxX - aabb.minX + 0.01D;
+                        if (aabb.minX >= curMaxX - subworldExpander) {
+                            newXOffset = curMaxX - aabb.minX + subworldExtenderHorizontal;
                             if (newXOffset > xOffset) {
                                 xOffset = newXOffset;
                             }
@@ -655,8 +658,8 @@ public class OrientedBB extends AxisAlignedBB {
                                     && intersection.getZ() <= aabb.maxZ
                                     && intersection.getZ() >= aabb.minZ) {
                                     liesOnEdge = true;
-                                    if (intersection != null && aabb.minX >= intersection.getX() - 0.75D) {
-                                        newXOffset = curMaxX - aabb.minX + 0.01D;
+                                    if (intersection != null && aabb.minX >= intersection.getX() - subworldExpander) {
+                                        newXOffset = curMaxX - aabb.minX + subworldExtenderHorizontal;
                                         if (newXOffset > localXOffset) {
                                             localXOffset = newXOffset;
                                         }
@@ -699,8 +702,8 @@ public class OrientedBB extends AxisAlignedBB {
                                     Vector3D intersection = face.intersection(corners[i]);
 
                                     if (intersection != null && intersection.getX() <= curMaxX
-                                        && aabb.minX >= intersection.getX() - 0.75D) {
-                                        newXOffset = intersection.getX() - aabb.minX + 0.01D;
+                                        && aabb.minX >= intersection.getX() - subworldExpander) {
+                                        newXOffset = intersection.getX() - aabb.minX + subworldExtenderHorizontal;
                                         if (newXOffset > localXOffset) {
                                             localXOffset = newXOffset;
                                         }
@@ -745,8 +748,8 @@ public class OrientedBB extends AxisAlignedBB {
                         }
                     }
 
-                    if (aabb.maxX <= curMaxX + 0.75D) {
-                        newXOffset = curMaxX - aabb.maxX - 0.01D;
+                    if (aabb.maxX <= curMaxX + subworldExpander) {
+                        newXOffset = curMaxX - aabb.maxX - subworldExtenderHorizontal;
                         if (newXOffset < xOffset) {
                             xOffset = newXOffset;
                         }
@@ -780,8 +783,8 @@ public class OrientedBB extends AxisAlignedBB {
                         }
                     }
 
-                    if (aabb.minX >= curMaxX - 0.75D) {
-                        newXOffset = curMaxX - aabb.minX + 0.01D;
+                    if (aabb.minX >= curMaxX - subworldExpander) {
+                        newXOffset = curMaxX - aabb.minX + subworldExtenderHorizontal;
                         if (newXOffset > xOffset) {
                             xOffset = newXOffset;
                         }
@@ -879,7 +882,7 @@ public class OrientedBB extends AxisAlignedBB {
 
                     // Either this BB is not rotated around x/z, or
                     // Target AABB contains the lowest point. It shouldn't go above it
-                    if (aabb.maxY <= curMaxY + 0.75D) {
+                    if (aabb.maxY <= curMaxY + subworldExpander) {
                         newYOffset = curMaxY - aabb.maxY - 0.01D;
                         if (newYOffset < yOffset) {
                             yOffset = newYOffset;
@@ -907,7 +910,7 @@ public class OrientedBB extends AxisAlignedBB {
                                 && intersection.getZ() <= aabb.maxZ
                                 && intersection.getZ() >= aabb.minZ) {
                                 liesOnEdge = true;
-                                if (intersection != null && aabb.maxY <= intersection.getY() + 0.75D) {
+                                if (intersection != null && aabb.maxY <= intersection.getY() + subworldExpander) {
                                     newYOffset = curMaxY - aabb.maxY - 0.01D;
                                     if (newYOffset < localYOffset) {
                                         localYOffset = newYOffset;
@@ -951,7 +954,7 @@ public class OrientedBB extends AxisAlignedBB {
                                 Vector3D intersection = face.intersection(corners[i]);
 
                                 if (intersection != null && intersection.getY() >= curMaxY
-                                    && aabb.maxY <= intersection.getY() + 0.75D) {
+                                    && aabb.maxY <= intersection.getY() + subworldExpander) {
                                     newYOffset = intersection.getY() - aabb.maxY - 0.01D;
                                     if (newYOffset < localYOffset) {
                                         localYOffset = newYOffset;
@@ -1002,7 +1005,7 @@ public class OrientedBB extends AxisAlignedBB {
 
                     // Either this BB is not rotated around x/z, or
                     // Target AABB contains the highest point. It should stand right on top of it
-                    if (aabb.minY >= curMaxY - 0.75D) {
+                    if (aabb.minY >= curMaxY - subworldExpander) {
                         newYOffset = curMaxY - aabb.minY + 0.01D;
                         if (newYOffset > yOffset) {
                             yOffset = newYOffset;
@@ -1030,7 +1033,7 @@ public class OrientedBB extends AxisAlignedBB {
                                 && intersection.getZ() <= aabb.maxZ
                                 && intersection.getZ() >= aabb.minZ) {
                                 liesOnEdge = true;
-                                if (intersection != null && aabb.minY >= intersection.getY() - 0.75D) {
+                                if (intersection != null && aabb.minY >= intersection.getY() - subworldExpander) {
                                     newYOffset = curMaxY - aabb.minY + 0.01D;
                                     if (newYOffset > localYOffset) {
                                         localYOffset = newYOffset;
@@ -1074,7 +1077,7 @@ public class OrientedBB extends AxisAlignedBB {
                                 Vector3D intersection = face.intersection(corners[i]);
 
                                 if (intersection != null && intersection.getY() <= curMaxY
-                                    && aabb.minY >= intersection.getY() - 0.75D) {
+                                    && aabb.minY >= intersection.getY() - subworldExpander) {
                                     newYOffset = intersection.getY() - aabb.minY + 0.01D;
                                     if (newYOffset > localYOffset) {
                                         localYOffset = newYOffset;
@@ -1094,7 +1097,9 @@ public class OrientedBB extends AxisAlignedBB {
     public double calculateZOffset(AxisAlignedBB aabb, double zOffset) {
         double worldRotation = Math.abs(((IMixinWorld) this.lastTransformedBy).getRotationYaw()) % 90;
         if (worldRotation > 45) worldRotation = 90 - worldRotation;
-        double localBBsize = (aabb.maxX - aabb.minX) * Math.cos(worldRotation / 180 * Math.PI) / 2 * multiplier;
+        worldRotation *= Math.PI / 180;
+        double globalBBsize = aabb.maxX - aabb.minX;
+        double localBBsize = globalBBsize / (Math.cos(worldRotation) + Math.sin(worldRotation)) / 2;
         Vec3 bbCenter = Vec3.createVectorHelper((aabb.maxX + aabb.minX) / 2, aabb.minY, (aabb.maxZ + aabb.minZ) / 2);
         aabb = AxisAlignedBB.getBoundingBox(
             bbCenter.xCoord - localBBsize,
@@ -1181,8 +1186,8 @@ public class OrientedBB extends AxisAlignedBB {
 
                         // Either this BB is not rotated around y/x, or
                         // Target AABB contains the smallest z point
-                        if (aabb.maxZ <= curMaxZ + 0.75D) {
-                            newZOffset = curMaxZ - aabb.maxZ - 0.01D;
+                        if (aabb.maxZ <= curMaxZ + subworldExpander) {
+                            newZOffset = curMaxZ - aabb.maxZ - subworldExtenderHorizontal;
                             if (newZOffset < zOffset) {
                                 zOffset = newZOffset;
                             }
@@ -1209,8 +1214,8 @@ public class OrientedBB extends AxisAlignedBB {
                                     && intersection.getX() <= aabb.maxX
                                     && intersection.getX() >= aabb.minX) {
                                     liesOnEdge = true;
-                                    if (intersection != null && aabb.maxZ <= intersection.getZ() + 0.75D) {
-                                        newZOffset = curMaxZ - aabb.maxZ - 0.01D;
+                                    if (intersection != null && aabb.maxZ <= intersection.getZ() + subworldExpander) {
+                                        newZOffset = curMaxZ - aabb.maxZ - subworldExtenderHorizontal;
                                         if (newZOffset < localZOffset) {
                                             localZOffset = newZOffset;
                                         }
@@ -1253,8 +1258,8 @@ public class OrientedBB extends AxisAlignedBB {
                                     Vector3D intersection = face.intersection(corners[i]);
 
                                     if (intersection != null && intersection.getZ() >= curMaxZ
-                                        && aabb.maxZ <= intersection.getZ() + 0.75D) {
-                                        newZOffset = intersection.getZ() - aabb.maxZ - 0.01D;
+                                        && aabb.maxZ <= intersection.getZ() + subworldExpander) {
+                                        newZOffset = intersection.getZ() - aabb.maxZ - subworldExtenderHorizontal;
                                         if (newZOffset < localZOffset) {
                                             localZOffset = newZOffset;
                                         }
@@ -1304,8 +1309,8 @@ public class OrientedBB extends AxisAlignedBB {
 
                         // Either this BB is not rotated around y/x, or
                         // Target AABB contains the biggest z point
-                        if (aabb.minZ >= curMaxZ - 0.75D) {
-                            newZOffset = curMaxZ - aabb.minZ + 0.01D;
+                        if (aabb.minZ >= curMaxZ - subworldExpander) {
+                            newZOffset = curMaxZ - aabb.minZ + subworldExtenderHorizontal;
                             if (newZOffset > zOffset) {
                                 zOffset = newZOffset;
                             }
@@ -1332,8 +1337,8 @@ public class OrientedBB extends AxisAlignedBB {
                                     && intersection.getX() <= aabb.maxX
                                     && intersection.getX() >= aabb.minX) {
                                     liesOnEdge = true;
-                                    if (intersection != null && aabb.minZ >= intersection.getZ() - 0.75D) {
-                                        newZOffset = curMaxZ - aabb.minZ + 0.01D;
+                                    if (intersection != null && aabb.minZ >= intersection.getZ() - subworldExpander) {
+                                        newZOffset = curMaxZ - aabb.minZ + subworldExtenderHorizontal;
                                         if (newZOffset > localZOffset) {
                                             localZOffset = newZOffset;
                                         }
@@ -1376,8 +1381,8 @@ public class OrientedBB extends AxisAlignedBB {
                                     Vector3D intersection = face.intersection(corners[i]);
 
                                     if (intersection != null && intersection.getZ() <= curMaxZ
-                                        && aabb.minZ >= intersection.getZ() - 0.75D) {
-                                        newZOffset = intersection.getZ() - aabb.minZ + 0.01D;
+                                        && aabb.minZ >= intersection.getZ() - subworldExpander) {
+                                        newZOffset = intersection.getZ() - aabb.minZ + subworldExtenderHorizontal;
                                         if (newZOffset > localZOffset) {
                                             localZOffset = newZOffset;
                                         }
@@ -1422,8 +1427,8 @@ public class OrientedBB extends AxisAlignedBB {
                         }
                     }
 
-                    if (aabb.maxZ <= curMaxZ + 0.75D) {
-                        newZOffset = curMaxZ - aabb.maxZ - 0.01D;
+                    if (aabb.maxZ <= curMaxZ + subworldExpander) {
+                        newZOffset = curMaxZ - aabb.maxZ - subworldExtenderHorizontal;
                         if (newZOffset < zOffset) {
                             zOffset = newZOffset;
                         }
@@ -1457,8 +1462,8 @@ public class OrientedBB extends AxisAlignedBB {
                         }
                     }
 
-                    if (aabb.minZ >= curMaxZ - 0.75D) {
-                        newZOffset = curMaxZ - aabb.minZ + 0.01D;
+                    if (aabb.minZ >= curMaxZ - subworldExpander) {
+                        newZOffset = curMaxZ - aabb.minZ + subworldExtenderHorizontal;
                         if (newZOffset > zOffset) {
                             zOffset = newZOffset;
                         }

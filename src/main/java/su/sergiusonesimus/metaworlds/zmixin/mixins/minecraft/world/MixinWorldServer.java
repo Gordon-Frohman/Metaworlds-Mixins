@@ -251,7 +251,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 Vec3 rotationPoint;
                 AxisAlignedBB localBB;
                 Vec3 moveVec;
-                if (aabb.maxX - aabb.minX == entity.boundingBox.maxX - entity.boundingBox.minX && aabb.maxZ - aabb.minZ == entity.boundingBox.maxZ - entity.boundingBox.minZ) {
+                if (aabb.maxX - aabb.minX == entity.boundingBox.maxX - entity.boundingBox.minX
+                    && aabb.maxZ - aabb.minZ == entity.boundingBox.maxZ - entity.boundingBox.minZ) {
                     // BB was moved, not expanded
                     rotationPoint = Vec3.createVectorHelper(
                         (aabb.maxX + aabb.minX) / 2,

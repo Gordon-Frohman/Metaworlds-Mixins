@@ -950,14 +950,14 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return result;
     }
 
-    public List getCollidingBoundingBoxesLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+    public List getCollidingBoundingBoxesLocal(Entity entity, AxisAlignedBB aabb) {
         this.collidingBBCache.clear();
-        int i = MathHelper.floor_double(Math.max(par2AxisAlignedBB.minX, (double) this.getMinX()));
-        int j = MathHelper.floor_double(Math.min(par2AxisAlignedBB.maxX + 1.0D, (double) this.getMaxX()));
-        int k = MathHelper.floor_double(Math.max(par2AxisAlignedBB.minY, (double) this.getMinY()));
-        int l = MathHelper.floor_double(Math.min(par2AxisAlignedBB.maxY + 1.0D, (double) this.getMaxY()));
-        int i1 = MathHelper.floor_double(Math.max(par2AxisAlignedBB.minZ, (double) this.getMinZ()));
-        int j1 = MathHelper.floor_double(Math.min(par2AxisAlignedBB.maxZ + 1.0D, (double) this.getMaxZ()));
+        int i = MathHelper.floor_double(Math.max(aabb.minX, (double) this.getMinX()));
+        int j = MathHelper.floor_double(Math.min(aabb.maxX + 1.0D, (double) this.getMaxX()));
+        int k = MathHelper.floor_double(Math.max(aabb.minY, (double) this.getMinY()));
+        int l = MathHelper.floor_double(Math.min(aabb.maxY + 1.0D, (double) this.getMaxY()));
+        int i1 = MathHelper.floor_double(Math.max(aabb.minZ, (double) this.getMinZ()));
+        int j1 = MathHelper.floor_double(Math.min(aabb.maxZ + 1.0D, (double) this.getMaxZ()));
 
         for (int d0 = i; d0 < j; ++d0) {
             for (int l1 = i1; l1 < j1; ++l1) {
@@ -965,14 +965,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                     for (int list = k - 1; list < l; ++list) {
                         Block j2 = this.getBlock(d0, list, l1);
                         if (j2 != Blocks.air) {
-                            j2.addCollisionBoxesToList(
-                                this,
-                                d0,
-                                list,
-                                l1,
-                                par2AxisAlignedBB,
-                                this.collidingBBCache,
-                                par1Entity);
+                            j2.addCollisionBoxesToList(this, d0, list, l1, aabb, this.collidingBBCache, entity);
                         }
                     }
                 }
@@ -981,16 +974,16 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
         double var14 = 0.25D;
         List var15 = ((IMixinWorld) this)
-            .getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB.expand(var14, var14, var14));
+            .getEntitiesWithinAABBExcludingEntityLocal(entity, aabb.expand(var14, var14, var14));
 
         for (int var16 = 0; var16 < var15.size(); ++var16) {
             AxisAlignedBB axisalignedbb1 = ((Entity) var15.get(var16)).getBoundingBox();
-            if (axisalignedbb1 != null && axisalignedbb1.intersectsWith(par2AxisAlignedBB)) {
+            if (axisalignedbb1 != null && axisalignedbb1.intersectsWith(aabb)) {
                 this.collidingBBCache.add(axisalignedbb1);
             }
 
-            axisalignedbb1 = par1Entity.getCollisionBox((Entity) var15.get(var16));
-            if (axisalignedbb1 != null && axisalignedbb1.intersectsWith(par2AxisAlignedBB)) {
+            axisalignedbb1 = entity.getCollisionBox((Entity) var15.get(var16));
+            if (axisalignedbb1 != null && axisalignedbb1.intersectsWith(aabb)) {
                 this.collidingBBCache.add(axisalignedbb1);
             }
         }
@@ -998,10 +991,10 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.collidingBBCache;
     }
 
-    public List getCollidingBoundingBoxesGlobal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+    public List getCollidingBoundingBoxesGlobal(Entity entity, AxisAlignedBB aabb) {
         List result = this.getCollidingBoundingBoxesLocal(
-            par1Entity,
-            ((IMixinAxisAlignedBB) par2AxisAlignedBB).getTransformedToLocalBoundingBox(this));
+            entity,
+            ((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(this));
         ListIterator iter = result.listIterator();
 
         while (iter.hasNext()) {
