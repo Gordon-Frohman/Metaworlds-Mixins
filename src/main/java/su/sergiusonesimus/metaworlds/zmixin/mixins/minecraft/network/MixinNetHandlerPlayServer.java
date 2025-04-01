@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -390,12 +389,6 @@ public abstract class MixinNetHandlerPlayServer {
 
                 if (flag && (flag1 || !flag2) && !this.playerEntity.isPlayerSleeping() && !this.playerEntity.noClip) {
                     this.setPlayerLocation(this.lastPosX, this.lastPosY, this.lastPosZ, f1, f2);
-                    Minecraft.logger.info(
-                        "Setting player position back to " + this.lastPosX
-                            + ", "
-                            + this.lastPosY
-                            + ", "
-                            + this.lastPosZ);
                     return;
                 }
 

@@ -51,29 +51,23 @@ public class MWCorePlayerTracker {
 
     @SubscribeEvent
     public void onPlayerChangedDimension(PlayerChangedDimensionEvent event) {
-        MetaMagicNetwork.dispatcher
-            .sendTo(new SubWorldDestroyPacket(-1, (Integer[]) null), (EntityPlayerMP) event.player);
-        MetaMagicNetwork.dispatcher.sendTo(
-            new SubWorldCreatePacket(
-                ((IMixinWorld) event.player.worldObj).getSubWorlds()
-                    .size(),
-                (Integer[]) ((IMixinWorld) event.player.worldObj).getSubWorldsMap()
-                    .keySet()
-                    .toArray(new Integer[0])),
-            (EntityPlayerMP) event.player);
+        regenerateSubworlds(event.player);
     }
 
     @SubscribeEvent
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-        MetaMagicNetwork.dispatcher
-            .sendTo(new SubWorldDestroyPacket(-1, (Integer[]) null), (EntityPlayerMP) event.player);
+        regenerateSubworlds(event.player);
+    }
+
+    private void regenerateSubworlds(EntityPlayer player) {
+        MetaMagicNetwork.dispatcher.sendTo(new SubWorldDestroyPacket(-1, (Integer[]) null), (EntityPlayerMP) player);
         MetaMagicNetwork.dispatcher.sendTo(
             new SubWorldCreatePacket(
-                ((IMixinWorld) event.player.worldObj).getSubWorlds()
+                ((IMixinWorld) player.worldObj).getSubWorlds()
                     .size(),
-                (Integer[]) ((IMixinWorld) event.player.worldObj).getSubWorldsMap()
+                (Integer[]) ((IMixinWorld) player.worldObj).getSubWorldsMap()
                     .keySet()
                     .toArray(new Integer[0])),
-            (EntityPlayerMP) event.player);
+            (EntityPlayerMP) player);
     }
 }
