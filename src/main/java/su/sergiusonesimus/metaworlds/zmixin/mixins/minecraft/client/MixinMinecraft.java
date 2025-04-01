@@ -530,7 +530,7 @@ public abstract class MixinMinecraft {
     }
 
     @Overwrite
-    private void func_147116_af() {
+    public void func_147116_af() {
         if (this.leftClickCounter <= 0) {
             this.thePlayer.swingItem();
 
@@ -573,7 +573,7 @@ public abstract class MixinMinecraft {
     }
 
     @Overwrite
-    private void func_147121_ag() {
+    public void func_147121_ag() {
         this.rightClickDelayTimer = 4;
         boolean flag = true;
         ItemStack itemstack = this.thePlayer.inventory.getCurrentItem();
@@ -1069,7 +1069,7 @@ public abstract class MixinMinecraft {
     }
 
     @Overwrite
-    private void func_147112_ai() {
+    public void func_147112_ai() {
         if (this.objectMouseOver != null) {
             boolean flag = this.thePlayer.capabilities.isCreativeMode;
             int j;
@@ -1099,13 +1099,15 @@ public abstract class MixinMinecraft {
         at = { @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;func_147120_f()V") })
     public void toggleFullscreen(CallbackInfo ci) {
         Minecraft mc = Minecraft.getMinecraft();
-        for (World subworld : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
-            EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) mc.thePlayer)
-                .getProxyPlayer(subworld);
-            MinecraftSubWorldProxy proxyMC = (MinecraftSubWorldProxy) proxy.getMinecraft();
-            proxyMC.fullscreen = mc.fullscreen;
-            proxyMC.displayWidth = mc.displayWidth;
-            proxyMC.displayHeight = mc.displayHeight;
+        if (mc.theWorld != null) {
+            for (World subworld : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
+                EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) mc.thePlayer)
+                    .getProxyPlayer(subworld);
+                MinecraftSubWorldProxy proxyMC = (MinecraftSubWorldProxy) proxy.getMinecraft();
+                proxyMC.fullscreen = mc.fullscreen;
+                proxyMC.displayWidth = mc.displayWidth;
+                proxyMC.displayHeight = mc.displayHeight;
+            }
         }
     }
 

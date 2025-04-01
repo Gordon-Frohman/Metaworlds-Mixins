@@ -16,7 +16,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinWor
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinAxisAlignedBB;
 
-@Mixin(WorldRenderer.class)
+@Mixin(value = WorldRenderer.class, priority = 800)
 public abstract class MixinWorldRenderer implements IMixinWorldRenderer {
 
     @Shadow(remap = true)

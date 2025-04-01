@@ -263,8 +263,8 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
     }
 
     @Overwrite(remap = false)
-    public void addBlockDestroyEffects(int p_147215_1_, int p_147215_2_, int p_147215_3_, Block p_147215_4_,
-        int p_147215_5_) {
+    // addBlockDestroyEffects
+    public void func_147215_a(int p_147215_1_, int p_147215_2_, int p_147215_3_, Block p_147215_4_, int p_147215_5_) {
         if (!p_147215_4_.isAir(worldObj, p_147215_1_, p_147215_2_, p_147215_3_) && !p_147215_4_.addDestroyEffects(
             worldObj,
             p_147215_1_,

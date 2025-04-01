@@ -147,22 +147,25 @@ public class MixinServerConfigurationManager {
         nethandlerplayserver.sendPacket(new S39PacketPlayerAbilities(player.capabilities));
         nethandlerplayserver.sendPacket(new S09PacketHeldItemChange(player.inventory.currentItem));
 
-        NBTTagCompound entityData = nbttagcompound.getCompoundTag("ForgeData");
-        if (entityData.hasKey("SubWorldInfo")) {
-            NBTTagCompound subWorldData = entityData.getCompoundTag("SubWorldInfo");
-            int worldBelowFeetId = subWorldData.getInteger("WorldBelowFeetId");
-            World newWorldBelowFeet = ((IMixinWorld) ((IMixinWorld) player.worldObj).getParentWorld())
-                .getSubWorld(worldBelowFeetId);
-            if (worldBelowFeetId != 0 && newWorldBelowFeet != null) {
-                double posXOnSubWorld = subWorldData.getDouble("posXOnSubWorld");
-                double posYOnSubWorld = subWorldData.getDouble("posYOnSubWorld");
-                double posZOnSubWorld = subWorldData.getDouble("posZOnSubWorld");
-                MetaMagicNetwork.dispatcher
-                    .sendTo(new SubWorldSpawnPositionPacket(posXOnSubWorld, posYOnSubWorld, posZOnSubWorld), player);
-                ((IMixinEntity) player).setWorldBelowFeet(newWorldBelowFeet);
-                Vec3 transformedPos = ((IMixinWorld) newWorldBelowFeet)
-                    .transformToGlobal(posXOnSubWorld, posYOnSubWorld, posZOnSubWorld);
-                player.setPosition(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord);
+        if (nbttagcompound != null) {
+            NBTTagCompound entityData = nbttagcompound.getCompoundTag("ForgeData");
+            if (entityData.hasKey("SubWorldInfo")) {
+                NBTTagCompound subWorldData = entityData.getCompoundTag("SubWorldInfo");
+                int worldBelowFeetId = subWorldData.getInteger("WorldBelowFeetId");
+                World newWorldBelowFeet = ((IMixinWorld) ((IMixinWorld) player.worldObj).getParentWorld())
+                    .getSubWorld(worldBelowFeetId);
+                if (worldBelowFeetId != 0 && newWorldBelowFeet != null) {
+                    double posXOnSubWorld = subWorldData.getDouble("posXOnSubWorld");
+                    double posYOnSubWorld = subWorldData.getDouble("posYOnSubWorld");
+                    double posZOnSubWorld = subWorldData.getDouble("posZOnSubWorld");
+                    MetaMagicNetwork.dispatcher.sendTo(
+                        new SubWorldSpawnPositionPacket(posXOnSubWorld, posYOnSubWorld, posZOnSubWorld),
+                        player);
+                    ((IMixinEntity) player).setWorldBelowFeet(newWorldBelowFeet);
+                    Vec3 transformedPos = ((IMixinWorld) newWorldBelowFeet)
+                        .transformToGlobal(posXOnSubWorld, posYOnSubWorld, posZOnSubWorld);
+                    player.setPosition(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord);
+                }
             }
         }
 

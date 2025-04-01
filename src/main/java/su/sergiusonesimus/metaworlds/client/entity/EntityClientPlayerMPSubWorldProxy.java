@@ -64,19 +64,19 @@ public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP impl
     }
 
     public int hashCode() {
-        return this.realPlayer.hashCode();
+        return this.realPlayer == null ? null : this.realPlayer.hashCode();
     }
 
     public NBTTagCompound getEntityData() {
-        return this.realPlayer.getEntityData();
+        return this.realPlayer == null ? null : this.realPlayer.getEntityData();
     }
 
     public String registerExtendedProperties(String identifier, IExtendedEntityProperties properties) {
-        return this.realPlayer.registerExtendedProperties(identifier, properties);
+        return this.realPlayer == null ? null : this.realPlayer.registerExtendedProperties(identifier, properties);
     }
 
     public IExtendedEntityProperties getExtendedProperties(String identifier) {
-        return this.realPlayer.getExtendedProperties(identifier);
+        return this.realPlayer == null ? null : this.realPlayer.getExtendedProperties(identifier);
     }
 
     @Override
