@@ -51,7 +51,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.world.MixinWorld;
 
-@Mixin(value = WorldClient.class, priority = 800)
+@Mixin(value = WorldClient.class)
 public abstract class MixinWorldClient extends MixinWorld implements IMixinWorldIntermediate {
 
     private ArrayList collidingBBCacheIntermediate = new ArrayList();

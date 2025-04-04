@@ -100,7 +100,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWor
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinMovingObjectPosition;
 
-@Mixin(value = RenderGlobal.class, priority = 800)
+@Mixin(value = RenderGlobal.class)
 public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     private List<WorldRenderer> worldRenderersList = new ArrayList<WorldRenderer>();

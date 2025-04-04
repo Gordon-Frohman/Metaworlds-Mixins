@@ -72,7 +72,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinMovingObjectPosition;
 
-@Mixin(value = Minecraft.class, priority = 800)
+@Mixin(value = Minecraft.class)
 public abstract class MixinMinecraft {
 
     @Shadow(remap = true)
