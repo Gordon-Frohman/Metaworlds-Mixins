@@ -30,6 +30,7 @@ import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -1518,5 +1519,14 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     @Override
     public Vec3 transformOtherToLocal(World var1, Entity var2) {
         return transformOtherToLocal(var1, var2.posX, var2.posY, var2.posZ);
+    }
+
+    @Override
+    public BiomeGenBase getBiomeGenForCoordsBody(final int x, final int z) {
+        Vec3 globalCoords = this.transformToGlobal(x + 0.5d, 128.5d, z + 0.5d);
+        return this.getParentWorld()
+            .getBiomeGenForCoordsBody(
+                MathHelper.floor_double(globalCoords.xCoord),
+                MathHelper.floor_double(globalCoords.zCoord));
     }
 }
