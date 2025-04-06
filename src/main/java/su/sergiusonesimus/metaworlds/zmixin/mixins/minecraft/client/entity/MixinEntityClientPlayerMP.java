@@ -2,11 +2,12 @@ package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.client.entity;
 
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.network.play.client.C03PacketPlayer;
+import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition;
 import net.minecraft.network.play.client.C03PacketPlayer.C05PacketPlayerLook;
-import net.minecraft.network.play.client.C0BPacketEntityAction;
+import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -74,114 +75,62 @@ public abstract class MixinEntityClientPlayerMP extends MixinEntityPlayer implem
             this.isLosingTraction());
     }
 
-    /**
-     * Send updated motion and position information to the server
-     */
-    @Overwrite
-    public void sendMotionUpdates() {
-        boolean flag = this.isSprinting();
+    @Redirect(
+        method = "sendMotionUpdates()V",
+        at = @At(value = "NEW", target = "Lnet/minecraft/network/play/client/C03PacketPlayer;"))
+    private C03PacketPlayer redirectC03PacketPlayer(boolean isOnGround) {
+        return PacketHandler.getC03PacketPlayer(
+            isOnGround,
+            ((IMixinWorld) this.getWorldBelowFeet()).getSubWorldID(),
+            this.getTractionLossTicks(),
+            this.isLosingTraction());
+    }
 
-        if (flag != this.wasSprinting) {
-            if (flag) {
-                this.sendQueue.addToSendQueue(new C0BPacketEntityAction((EntityClientPlayerMP) (Object) this, 4));
-            } else {
-                this.sendQueue.addToSendQueue(new C0BPacketEntityAction((EntityClientPlayerMP) (Object) this, 5));
-            }
+    @Redirect(
+        method = "sendMotionUpdates()V",
+        at = @At(value = "NEW", target = "Lnet/minecraft/network/play/client/C03PacketPlayer$C04PacketPlayerPosition;"))
+    private C04PacketPlayerPosition redirectC04PacketPlayerPosition(double x, double minY, double y, double z,
+        boolean isOnGround) {
+        return PacketHandler.getC04PacketPlayerPosition(
+            x,
+            minY,
+            y,
+            z,
+            isOnGround,
+            ((IMixinWorld) this.getWorldBelowFeet()).getSubWorldID(),
+            this.getTractionLossTicks(),
+            this.isLosingTraction());
+    }
 
-            this.wasSprinting = flag;
-        }
+    @Redirect(
+        method = "sendMotionUpdates()V",
+        at = @At(value = "NEW", target = "Lnet/minecraft/network/play/client/C03PacketPlayer$C05PacketPlayerLook;"))
+    private C05PacketPlayerLook redirectC05PacketPlayerLook(float yaw, float pitch, boolean isOnGround) {
+        return PacketHandler.getC05PacketPlayerLook(
+            yaw,
+            pitch,
+            isOnGround,
+            ((IMixinWorld) this.getWorldBelowFeet()).getSubWorldID(),
+            this.getTractionLossTicks(),
+            this.isLosingTraction());
+    }
 
-        boolean flag1 = this.isSneaking();
-
-        if (flag1 != this.wasSneaking) {
-            if (flag1) {
-                this.sendQueue.addToSendQueue(new C0BPacketEntityAction((EntityClientPlayerMP) (Object) this, 1));
-            } else {
-                this.sendQueue.addToSendQueue(new C0BPacketEntityAction((EntityClientPlayerMP) (Object) this, 2));
-            }
-
-            this.wasSneaking = flag1;
-        }
-
-        double d0 = this.posX - this.oldPosX;
-        double d1 = this.boundingBox.minY - this.oldMinY;
-        double d2 = this.posZ - this.oldPosZ;
-        double d3 = (double) (this.rotationYaw - this.oldRotationYaw);
-        double d4 = (double) (this.rotationPitch - this.oldRotationPitch);
-        boolean flag2 = d0 * d0 + d1 * d1 + d2 * d2 > 9.0E-4D || this.ticksSinceMovePacket >= 20;
-        boolean flag3 = d3 != 0.0D || d4 != 0.0D;
-
-        if (this.ridingEntity != null) {
-            this.sendQueue.addToSendQueue(
-                PacketHandler.getC06PacketPlayerPosLook(
-                    this.motionX,
-                    -999.0D,
-                    -999.0D,
-                    this.motionZ,
-                    this.rotationYaw,
-                    this.rotationPitch,
-                    this.onGround,
-                    ((IMixinWorld) this.getWorldBelowFeet()).getSubWorldID(),
-                    this.getTractionLossTicks(),
-                    this.isLosingTraction()));
-            flag2 = false;
-        } else if (flag2 && flag3) {
-            this.sendQueue.addToSendQueue(
-                PacketHandler.getC06PacketPlayerPosLook(
-                    this.posX,
-                    this.boundingBox.minY,
-                    this.posY,
-                    this.posZ,
-                    this.rotationYaw,
-                    this.rotationPitch,
-                    this.onGround,
-                    ((IMixinWorld) this.getWorldBelowFeet()).getSubWorldID(),
-                    this.getTractionLossTicks(),
-                    this.isLosingTraction()));
-        } else if (flag2) {
-            this.sendQueue.addToSendQueue(
-                PacketHandler.getC04PacketPlayerPosition(
-                    this.posX,
-                    this.boundingBox.minY,
-                    this.posY,
-                    this.posZ,
-                    this.onGround,
-                    ((IMixinWorld) this.getWorldBelowFeet()).getSubWorldID(),
-                    this.getTractionLossTicks(),
-                    this.isLosingTraction()));
-        } else if (flag3) {
-            this.sendQueue.addToSendQueue(
-                PacketHandler.getC05PacketPlayerLook(
-                    this.rotationYaw,
-                    this.rotationPitch,
-                    this.onGround,
-                    ((IMixinWorld) this.getWorldBelowFeet()).getSubWorldID(),
-                    this.getTractionLossTicks(),
-                    this.isLosingTraction()));
-        } else {
-            this.sendQueue.addToSendQueue(
-                PacketHandler.getC03PacketPlayer(
-                    this.onGround,
-                    ((IMixinWorld) this.getWorldBelowFeet()).getSubWorldID(),
-                    this.getTractionLossTicks(),
-                    this.isLosingTraction()));
-        }
-
-        ++this.ticksSinceMovePacket;
-        this.wasOnGround = this.onGround;
-
-        if (flag2) {
-            this.oldPosX = this.posX;
-            this.oldMinY = this.boundingBox.minY;
-            this.oldPosY = this.posY;
-            this.oldPosZ = this.posZ;
-            this.ticksSinceMovePacket = 0;
-        }
-
-        if (flag3) {
-            this.oldRotationYaw = this.rotationYaw;
-            this.oldRotationPitch = this.rotationPitch;
-        }
+    @Redirect(
+        method = "sendMotionUpdates()V",
+        at = @At(value = "NEW", target = "Lnet/minecraft/network/play/client/C03PacketPlayer$C06PacketPlayerPosLook;"))
+    private C06PacketPlayerPosLook redirectC06PacketPlayerPosLook(double x, double minY, double y, double z, float yaw,
+        float pitch, boolean isOnGround) {
+        return PacketHandler.getC06PacketPlayerPosLook(
+            x,
+            minY,
+            y,
+            z,
+            yaw,
+            pitch,
+            isOnGround,
+            ((IMixinWorld) this.getWorldBelowFeet()).getSubWorldID(),
+            this.getTractionLossTicks(),
+            this.isLosingTraction());
     }
 
     public double getSubworldSpawnX() {
