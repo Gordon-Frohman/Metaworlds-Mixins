@@ -635,8 +635,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                     this.boundingBox.offset(0.0D, y, 0.0D);
                 }
 
-                if (xStoredLocal * xStoredLocal + zStoredLocal * zStoredLocal >= x * x + z * z && xStoredLocal * x > 0
-                    && zStoredLocal * z > 0) {
+                if (xStoredLocal * xStoredLocal + zStoredLocal * zStoredLocal >= x * x + z * z) {
                     x = xStoredLocal;
                     y = yStoredLocal;
                     z = zStoredLocal;
