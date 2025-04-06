@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import cpw.mods.fml.common.eventhandler.Event;
-import su.sergiusonesimus.debug.Breakpoint;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
@@ -366,7 +365,6 @@ public abstract class MixinNetHandlerPlayServer {
                             // Therefore all collisions with it are valid
                             flag2 = false;
                         } else {
-                            Breakpoint.breakpoint();
                             worldRotation = Math.abs(worldRotation) % 90;
                             if (worldRotation > 45) worldRotation = 90 - worldRotation;
                             worldRotation = Math.toRadians(worldRotation);
