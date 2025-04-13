@@ -3,7 +3,7 @@
         "modid": "metaworlds",
         "name": "MetaWorlds (Mixins Version)",
         "description": "A Mod for Minecraft that enables the user to position extra worlds inside other worlds, possibly transposed, scaled and/or rotated. This is the Forge + Mixins based version. Uses JBLAS (http://jblas.org/).",
-        "version": "1.0.1-Mixins",
+        "version": "1.0.2-Mixins",
         "mcversion": "1.7.10",
         "url": "",
         "updateUrl": "",

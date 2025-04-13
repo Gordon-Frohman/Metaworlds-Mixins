@@ -1233,7 +1233,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     }
 
     @Overwrite
-    private void checkOcclusionQueryResult(int p_72720_1_, int p_72720_2_) {
+    public void checkOcclusionQueryResult(int p_72720_1_, int p_72720_2_) {
         for (int k = p_72720_1_; k < p_72720_2_; ++k) {
             WorldRenderer curRenderer = this.sortedWorldRenderersList.get(k);
             if (curRenderer.isWaitingOnOcclusionQuery) {
@@ -1261,7 +1261,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
      * partialTickTime
      */
     @Overwrite
-    private int renderSortedRenderers(int par1, int par2, int par3, double par4) {
+    public int renderSortedRenderers(int par1, int par2, int par3, double par4) {
         this.glRenderLists.clear();
         int l = 0;
         int i1 = par1;
