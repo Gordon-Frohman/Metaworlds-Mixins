@@ -1,6 +1,5 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.client.particle;
 
-import java.util.List;
 import java.util.Random;
 
 import net.minecraft.block.Block;
@@ -9,22 +8,24 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.particle.EntityDiggingFX;
 import net.minecraft.client.particle.EntityFX;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
@@ -39,15 +40,6 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
 
     @Shadow(remap = true)
     protected World worldObj;
-
-    @Shadow(remap = true)
-    private List[] fxLayers = new List[4];
-
-    @Shadow(remap = true)
-    private TextureManager renderer;
-
-    @Shadow(remap = true)
-    private static ResourceLocation particleTextures;
 
     @Shadow(remap = true)
     private Random rand;
@@ -198,66 +190,91 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
         }
     }
 
-    @Overwrite(remap = false)
-    public void addBlockHitEffects(int x, int y, int z, MovingObjectPosition target) {
-        Block block = ((IMixinMovingObjectPosition) target).getWorld()
-            .getBlock(x, y, z);
-        if (block != null && !block
-            .addHitEffects(((IMixinMovingObjectPosition) target).getWorld(), target, (EffectRenderer) (Object) this)) {
-            ((IMixinEffectRenderer) this)
-                .addBlockHitEffects(x, y, z, target.sideHit, ((IMixinMovingObjectPosition) target).getWorld());
-        }
+    // addBlockHitEffects
+
+    private MovingObjectPosition storedTarget;
+
+    @Inject(
+        method = "addBlockHitEffects(IIILnet/minecraft/util/MovingObjectPosition;)V",
+        remap = false,
+        at = { @At(value = "HEAD") })
+    private void captureTarget(int x, int y, int z, MovingObjectPosition target, CallbackInfo ci) {
+        this.storedTarget = target;
     }
 
-    @Overwrite(remap = false)
-    // addBlockDestroyEffects
-    public void func_147215_a(int p_147215_1_, int p_147215_2_, int p_147215_3_, Block p_147215_4_, int p_147215_5_) {
-        if (!p_147215_4_.isAir(worldObj, p_147215_1_, p_147215_2_, p_147215_3_) && !p_147215_4_.addDestroyEffects(
-            worldObj,
-            p_147215_1_,
-            p_147215_2_,
-            p_147215_3_,
-            p_147215_5_,
-            (EffectRenderer) (Object) this)) {
-            byte b0 = 4;
+    @Redirect(
+        method = "addBlockHitEffects(IIILnet/minecraft/util/MovingObjectPosition;)V",
+        remap = false,
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/particle/EffectRenderer;worldObj:Lnet/minecraft/world/World;",
+            opcode = Opcodes.GETFIELD))
+    private World getWorldObj(EffectRenderer effectRenderer) {
+        return ((IMixinMovingObjectPosition) storedTarget).getWorld();
+    }
 
-            for (int i1 = 0; i1 < b0; ++i1) {
-                for (int j1 = 0; j1 < b0; ++j1) {
-                    for (int k1 = 0; k1 < b0; ++k1) {
-                        double d0 = (double) p_147215_1_ + ((double) i1 + 0.5D) / (double) b0;
-                        double d1 = (double) p_147215_2_ + ((double) j1 + 0.5D) / (double) b0;
-                        double d2 = (double) p_147215_3_ + ((double) k1 + 0.5D) / (double) b0;
-                        if (worldObj instanceof SubWorld) {
-                            World parentWorld = ((SubWorld) this.worldObj).getParentWorld();
-                            Vec3 globalCoords = ((IMixinWorld) this.worldObj)
-                                .transformToGlobal(Vec3.createVectorHelper(d0, d1, d2));
-                            Minecraft.getMinecraft().effectRenderer.addEffect(
-                                (new EntityDiggingFX(
-                                    parentWorld,
-                                    globalCoords.xCoord,
-                                    globalCoords.yCoord,
-                                    globalCoords.zCoord,
-                                    d0 - (double) p_147215_1_ - 0.5D,
-                                    d1 - (double) p_147215_2_ - 0.5D,
-                                    d2 - (double) p_147215_3_ - 0.5D,
-                                    p_147215_4_,
-                                    p_147215_5_)).applyColourMultiplier(p_147215_1_, p_147215_2_, p_147215_3_));
-                        } else {
-                            this.addEffect(
-                                (new EntityDiggingFX(
-                                    this.worldObj,
-                                    d0,
-                                    d1,
-                                    d2,
-                                    d0 - (double) p_147215_1_ - 0.5D,
-                                    d1 - (double) p_147215_2_ - 0.5D,
-                                    d2 - (double) p_147215_3_ - 0.5D,
-                                    p_147215_4_,
-                                    p_147215_5_)).applyColourMultiplier(p_147215_1_, p_147215_2_, p_147215_3_));
-                        }
-                    }
-                }
-            }
+    @Redirect(
+        method = "addBlockHitEffects(IIILnet/minecraft/util/MovingObjectPosition;)V",
+        remap = false,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/EffectRenderer;addBlockHitEffects(IIII)V"))
+    private void addBlockHitEffects(EffectRenderer effectRenderer, int x, int y, int z, int side) {
+        ((IMixinEffectRenderer) this)
+            .addBlockHitEffects(x, y, z, side, ((IMixinMovingObjectPosition) storedTarget).getWorld());
+    }
+
+    // addBlockDestroyEffects
+
+    private double storedD0;
+    private double storedD1;
+    private double storedD2;
+    private int storedX;
+    private int storedY;
+    private int storedZ;
+    private Block storedBlock;
+    private int storedMeta;
+
+    @Inject(
+        method = "func_147215_a(IIILnet/minecraft/block/Block;I)V",
+        remap = false,
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/particle/EffectRenderer;addEffect(Lnet/minecraft/client/particle/EntityFX;)V"))
+    private void storeData(int x, int y, int z, Block block, int meta, CallbackInfo ci, @Local(name = "d0") double d0,
+        @Local(name = "d1") double d1, @Local(name = "d2") double d2) {
+        storedD0 = d0;
+        storedD1 = d1;
+        storedD2 = d2;
+        storedX = x;
+        storedY = y;
+        storedZ = z;
+        storedBlock = block;
+        storedMeta = meta;
+    }
+
+    @WrapOperation(
+        method = "func_147215_a(IIILnet/minecraft/block/Block;I)V",
+        remap = false,
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/particle/EffectRenderer;addEffect(Lnet/minecraft/client/particle/EntityFX;)V"))
+    private void wrapAddEffect(EffectRenderer instance, EntityFX value, Operation<Void> original) {
+        if (worldObj instanceof SubWorld) {
+            World parentWorld = ((SubWorld) this.worldObj).getParentWorld();
+            Vec3 globalCoords = ((IMixinWorld) this.worldObj)
+                .transformToGlobal(Vec3.createVectorHelper(storedD0, storedD1, storedD2));
+            Minecraft.getMinecraft().effectRenderer.addEffect(
+                (new EntityDiggingFX(
+                    parentWorld,
+                    globalCoords.xCoord,
+                    globalCoords.yCoord,
+                    globalCoords.zCoord,
+                    storedD0 - (double) storedX - 0.5D,
+                    storedD1 - (double) storedY - 0.5D,
+                    storedD2 - (double) storedZ - 0.5D,
+                    storedBlock,
+                    storedMeta)).applyColourMultiplier(storedX, storedY, storedZ));
+        } else {
+            original.call(instance, value);
         }
     }
 

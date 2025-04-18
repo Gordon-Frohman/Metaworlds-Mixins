@@ -111,15 +111,6 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     private Map<Integer, WorldRenderer> worldRenderersMap = new HashMap<Integer, WorldRenderer>();
 
     @Shadow(remap = true)
-    public int starGLCallList;
-
-    @Shadow(remap = true)
-    public int glSkyList;
-
-    @Shadow(remap = true)
-    public int glSkyList2;
-
-    @Shadow(remap = true)
     public Map damagedBlocks;
 
     @Shadow(remap = true)
@@ -359,7 +350,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
             value = "FIELD",
             target = "Lnet/minecraft/client/renderer/RenderGlobal;occlusionEnabled:Z",
             opcode = Opcodes.GETFIELD))
-    private boolean wrapGetOcclusionEnabled(RenderGlobal instance, Operation<Boolean> original) {
+    private boolean wrapOcclusionEnabled(RenderGlobal instance, Operation<Boolean> original) {
         if (generateEmpty) return false;
         else return original.call(instance);
     }
@@ -407,7 +398,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
             value = "FIELD",
             target = "Lnet/minecraft/client/renderer/Tessellator;instance:Lnet/minecraft/client/renderer/Tessellator;",
             opcode = Opcodes.GETSTATIC))
-    private Tessellator wrapGetTessellator(Operation<Tessellator> original) {
+    private Tessellator wrapTessellatorInstance(Operation<Tessellator> original) {
         if (generateEmpty) return null;
         else return original.call();
     }
