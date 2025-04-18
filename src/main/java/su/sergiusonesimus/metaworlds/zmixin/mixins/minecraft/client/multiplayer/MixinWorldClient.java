@@ -7,7 +7,6 @@ import java.util.Set;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
@@ -21,7 +20,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
@@ -29,12 +27,18 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
@@ -135,33 +139,25 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
         }
     }
 
-    /**
-     * Returns the Entity with the given ID, or null if it doesn't exist in this World.
-     */
-    @Overwrite
-    public Entity getEntityByID(int par1) {
-        if (par1 == this.mc.thePlayer.getEntityId()) return this.mc.thePlayer;
-        Entity result = (Entity) this.entityHashSet.lookup(par1);
+    @WrapOperation(
+        method = "getEntityByID",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/util/IntHashMap;lookup(I)Ljava/lang/Object;"))
+    private Object wrapEntityHashSetLookup(IntHashMap instance, int value, Operation<Object> original) {
+        Entity result = (Entity) original.call(instance, value);
         if (result == null && !((IMixinWorld) this).isSubWorld())
             for (World curWorld : ((IMixinWorld) this).getSubWorlds()) {
-                result = curWorld.getEntityByID(par1);
+                result = curWorld.getEntityByID(value);
                 if (result != null) return result;
             }
         return result;
     }
 
-    @Overwrite
-    public Entity removeEntityFromWorld(int p_73028_1_) {
-        Entity entity = (Entity) this.entityHashSet.removeObject(p_73028_1_);
-
-        if (entity != null) {
-            this.entityList.remove(entity);
-            this.removeEntity(entity);
-        } else if (!((IMixinWorld) this).isSubWorld()) {
+    @Inject(method = "removeEntityFromWorld", at = { @At(value = "RETURN") })
+    public void injectRemoveEntityFromWorld(int entityId, CallbackInfoReturnable<Entity> ci, @Local Entity entity) {
+        if (entity == null && !((IMixinWorld) this).isSubWorld()) {
             for (World curSubWorld : ((IMixinWorld) this).getSubWorlds())
-                ((WorldClient) curSubWorld).removeEntityFromWorld(p_73028_1_);
+                ((WorldClient) curSubWorld).removeEntityFromWorld(entityId);
         }
-        return entity;
     }
 
     @Inject(method = "doVoidFogParticles", at = @At("TAIL"))
@@ -406,13 +402,11 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
         return result;
     }
 
-    /**
-     * Schedule the entity for removal during the next tick. Marks the entity dead in anticipation.
-     */
-    @Overwrite
-    public void removeEntity(Entity p_72900_1_) {
-        removeEntityIntermediate(p_72900_1_);
-        this.entityList.remove(p_72900_1_);
+    @Redirect(
+        method = "removeEntity",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;removeEntity(Lnet/minecraft/entity/Entity;)V"))
+    public void removeEntity(World world, Entity entity) {
+        removeEntityIntermediate(entity);
     }
 
     public void removeEntityIntermediate(Entity par1Entity) {
@@ -457,30 +451,16 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
         }
     }
 
-    /**
-     * par8 is loudness, all pars passed to minecraftInstance.sndManager.playSound
-     */
-    @Overwrite
-    public void playSound(double x, double y, double z, String soundName, float volume, float pitch,
-        boolean distanceDelay) {
-        Vec3 globalPosition = this.transformToGlobal(x, y, z);
-        double d3 = this.mc.renderViewEntity.getDistanceSq(x, y, z);
-        PositionedSoundRecord positionedsoundrecord = new PositionedSoundRecord(
-            new ResourceLocation(soundName),
-            volume,
-            pitch,
-            (float) globalPosition.xCoord,
-            (float) globalPosition.yCoord,
-            (float) globalPosition.zCoord);
-
-        if (distanceDelay && d3 > 100.0D) {
-            double d4 = Math.sqrt(d3) / 40.0D;
-            this.mc.getSoundHandler()
-                .playDelayedSound(positionedsoundrecord, (int) (d4 * 20.0D));
-        } else {
-            this.mc.getSoundHandler()
-                .playSound(positionedsoundrecord);
-        }
+    @ModifyArgs(
+        method = "playSound",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/audio/PositionedSoundRecord;<init>(Lnet/minecraft/util/ResourceLocation;FFFFF)V"))
+    private void modifyPositionedSoundRecord(Args args) {
+        Vec3 globalPosition = this.transformToGlobal((float) args.get(3), (float) args.get(4), (float) args.get(5));
+        args.set(3, (float) globalPosition.xCoord);
+        args.set(4, (float) globalPosition.yCoord);
+        args.set(5, (float) globalPosition.zCoord);
     }
 
 }

@@ -1,13 +1,16 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.client.renderer.tileentity;
 
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.tileentity.TileEntity;
 
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.tileentity.IMixinTileEntity;
@@ -40,34 +43,37 @@ public abstract class MixinTileEntityRendererDispatcher {
     public abstract void renderTileEntityAt(TileEntity p_147549_1_, double p_147549_2_, double p_147549_4_,
         double p_147549_6_, float p_147549_8_);
 
-    @Overwrite
-    public void renderTileEntity(TileEntity p_147544_1_, float p_147544_2_) {
-        if (((IMixinTileEntity) p_147544_1_)
-            .getDistanceFromGlobal(this.field_147560_j, this.field_147561_k, this.field_147558_l)
-            < p_147544_1_.getMaxRenderDistanceSquared()) {
-            int i = p_147544_1_.getWorldObj()
-                .getLightBrightnessForSkyBlocks(p_147544_1_.xCoord, p_147544_1_.yCoord, p_147544_1_.zCoord, 0);
-            int j = i % 65536;
-            int k = i / 65536;
-            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j / 1.0F, (float) k / 1.0F);
-            GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-            GL11.glPushMatrix();
-            if (p_147544_1_.hasWorldObj() && ((IMixinWorld) p_147544_1_.getWorldObj()).isSubWorld()) {
-                GL11.glTranslated(-staticPlayerX, -staticPlayerY, -staticPlayerZ);
+    // renderTileEntity
 
-                SubWorld parentSubWorld = (SubWorld) p_147544_1_.getWorldObj();
-                GL11.glMultMatrix(parentSubWorld.getTransformToGlobalMatrixDirectBuffer());
+    @Redirect(
+        method = "renderTileEntity(Lnet/minecraft/tileentity/TileEntity;F)V",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;getDistanceFrom(DDD)D"))
+    private double redirectGetDistanceFromGlobal(TileEntity tileEntity, double x, double y, double z) {
+        return ((IMixinTileEntity) tileEntity).getDistanceFromGlobal(x, y, z);
+    }
 
-                GL11.glTranslated(staticPlayerX, staticPlayerY, staticPlayerZ);
-            }
-            this.renderTileEntityAt(
-                p_147544_1_,
-                (double) p_147544_1_.xCoord - staticPlayerX,
-                (double) p_147544_1_.yCoord - staticPlayerY,
-                (double) p_147544_1_.zCoord - staticPlayerZ,
-                p_147544_2_);
+    @Inject(
+        method = "renderTileEntity(Lnet/minecraft/tileentity/TileEntity;F)V",
+        at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glColor4f(FFFF)V", shift = Shift.AFTER))
+    private void injectRenderTileEntity1(TileEntity p_147544_1_, float p_147544_2_, CallbackInfo ci) {
+        GL11.glPushMatrix();
+        if (p_147544_1_.hasWorldObj() && ((IMixinWorld) p_147544_1_.getWorldObj()).isSubWorld()) {
+            GL11.glTranslated(-staticPlayerX, -staticPlayerY, -staticPlayerZ);
 
-            GL11.glPopMatrix();
+            SubWorld parentSubWorld = (SubWorld) p_147544_1_.getWorldObj();
+            GL11.glMultMatrix(parentSubWorld.getTransformToGlobalMatrixDirectBuffer());
+
+            GL11.glTranslated(staticPlayerX, staticPlayerY, staticPlayerZ);
         }
+    }
+
+    @Inject(
+        method = "renderTileEntity(Lnet/minecraft/tileentity/TileEntity;F)V",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher;renderTileEntityAt(Lnet/minecraft/tileentity/TileEntity;DDDF)V",
+            shift = Shift.AFTER))
+    private void injectRenderTileEntity2(TileEntity p_147544_1_, float p_147544_2_, CallbackInfo ci) {
+        GL11.glPopMatrix();
     }
 }
