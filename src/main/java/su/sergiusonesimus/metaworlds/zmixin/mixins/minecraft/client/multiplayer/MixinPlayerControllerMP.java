@@ -8,24 +8,24 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
-import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerDestroyItemEvent;
 
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.compat.CompatUtil;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.multiplayer.IMixinPlayerControllerMP;
@@ -188,27 +188,27 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
         }
     }
 
-    /**
-     * Resets current block damage and field_78778_j
-     */
-    @Overwrite
-    public void resetBlockRemoving() {
-        if (this.isHittingBlock) {
-            NetHandlerPlayClient netHandler = ((EntityClientPlayerMP) ((IMixinEntity) (Object) this.mc.thePlayer)
-                .getProxyPlayer(this.currentBlockSubWorldID)).sendQueue;
-            netHandler.addToSendQueue(
-                new C07PacketPlayerDigging(1, this.currentBlockX, this.currentBlockY, this.currentblockZ, -1));
-        }
+    // Class constructor
 
-        this.isHittingBlock = false;
-        this.curBlockDamageMP = 0.0F;
-        ((IMixinWorld) this.mc.theWorld).getSubWorld(this.currentBlockSubWorldID)
-            .destroyBlockInWorldPartially(
-                this.mc.thePlayer.getEntityId(),
-                this.currentBlockX,
-                this.currentBlockY,
-                this.currentblockZ,
-                -1);
+    @Redirect(
+        method = "resetBlockRemoving",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
+            opcode = Opcodes.GETFIELD))
+    private NetHandlerPlayClient getNetClientHandlerInit(PlayerControllerMP instance) {
+        return ((EntityClientPlayerMP) ((IMixinEntity) (Object) this.mc.thePlayer)
+            .getProxyPlayer(this.currentBlockSubWorldID)).sendQueue;
+    }
+
+    @Redirect(
+        method = "resetBlockRemoving",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/Minecraft;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;",
+            opcode = Opcodes.GETFIELD))
+    private WorldClient getTheWorld(Minecraft instance) {
+        return (WorldClient) ((IMixinWorld) instance.theWorld).getSubWorld(this.currentBlockSubWorldID);
     }
 
     /**
@@ -293,86 +293,61 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
             && flag;
     }
 
-    /**
-     * Handles a players right click. Args: player, world, x, y, z, side, hitVec
-     */
-    @Overwrite
-    public boolean onPlayerRightClick(EntityPlayer par1EntityPlayer, World par2World, ItemStack par3ItemStack, int par4,
-        int par5, int par6, int par7, Vec3 par8Vec3) {
-        this.syncCurrentPlayItem();
-        Vec3 transformedVec = ((IMixinWorld) par2World).transformToLocal(par8Vec3);
-        float f = (float) transformedVec.xCoord - (float) par4;
-        float f1 = (float) transformedVec.yCoord - (float) par5;
-        float f2 = (float) transformedVec.zCoord - (float) par6;
-        boolean flag = false;
+    // onPlayerRightClick
 
-        if (par3ItemStack != null && par3ItemStack.getItem() != null
-            && par3ItemStack.getItem()
-                .onItemUseFirst(par3ItemStack, par1EntityPlayer, par2World, par4, par5, par6, par7, f, f1, f2)) {
-            return true;
-        }
+    Vec3 transformedVec;
+    World storedWorld;
 
-        if (!par1EntityPlayer.isSneaking() || par1EntityPlayer.getHeldItem() == null
-            || par1EntityPlayer.getHeldItem()
-                .getItem()
-                .doesSneakBypassUse(par2World, par4, par5, par6, par1EntityPlayer)) {
-            flag = par2World.getBlock(par4, par5, par6)
-                .onBlockActivated(par2World, par4, par5, par6, par1EntityPlayer, par7, f, f1, f2);
-        }
-
-        if (!flag && par3ItemStack != null && par3ItemStack.getItem() instanceof ItemBlock) {
-            ItemBlock itemblock = (ItemBlock) par3ItemStack.getItem();
-
-            if (!itemblock.func_150936_a(par2World, par4, par5, par6, par7, par1EntityPlayer, par3ItemStack)) {
-                return false;
-            }
-        }
-
-        NetHandlerPlayClient netHandler = ((EntityClientPlayerMP) ((IMixinEntity) par1EntityPlayer)
-            .getProxyPlayer(par2World)).sendQueue;
-        netHandler.addToSendQueue(
-            new C08PacketPlayerBlockPlacement(
-                par4,
-                par5,
-                par6,
-                par7,
-                par1EntityPlayer.inventory.getCurrentItem(),
-                f,
-                f1,
-                f2));
-
-        if (flag) {
-            return true;
-        } else if (par3ItemStack == null) {
-            return false;
-        } else if (this.currentGameType.isCreative()) {
-            int j1 = par3ItemStack.getItemDamage();
-            int i1 = par3ItemStack.stackSize;
-            boolean flag1 = par3ItemStack
-                .tryPlaceItemIntoWorld(par1EntityPlayer, par2World, par4, par5, par6, par7, f, f1, f2);
-            par3ItemStack.setItemDamage(j1);
-            par3ItemStack.stackSize = i1;
-            return flag1;
-        } else {
-            if (!par3ItemStack.tryPlaceItemIntoWorld(par1EntityPlayer, par2World, par4, par5, par6, par7, f, f1, f2)) {
-                return false;
-            }
-            if (par3ItemStack.stackSize <= 0) {
-                MinecraftForge.EVENT_BUS.post(new PlayerDestroyItemEvent(par1EntityPlayer, par3ItemStack));
-            }
-            return true;
-        }
+    @Inject(method = "onPlayerRightClick", at = { @At(value = "HEAD") })
+    private void injectOnPlayerRightClick(EntityPlayer player, World worldIn, ItemStack itemStackIn, int x, int y,
+        int z, int side, Vec3 hitVector, CallbackInfoReturnable<Boolean> ci) {
+        transformedVec = ((IMixinWorld) worldIn).transformToLocal(hitVector);
+        storedWorld = worldIn;
     }
 
-    /**
-     * Send packet to server - player is interacting with another entity (left click)
-     */
-    @Overwrite
-    public boolean interactWithEntitySendPacket(EntityPlayer p_78768_1_, Entity p_78768_2_) {
-        this.syncCurrentPlayItem();
-        ((EntityClientPlayerMP) p_78768_1_).sendQueue
-            .addToSendQueue(new C02PacketUseEntity(p_78768_2_, C02PacketUseEntity.Action.INTERACT));
-        return p_78768_1_.interactWith(p_78768_2_);
+    @Redirect(
+        method = "onPlayerRightClick",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;xCoord:D", opcode = Opcodes.GETFIELD))
+    private double getXcoord(Vec3 instance) {
+        return transformedVec.xCoord;
+    }
+
+    @Redirect(
+        method = "onPlayerRightClick",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;yCoord:D", opcode = Opcodes.GETFIELD))
+    private double getYcoord(Vec3 instance) {
+        return transformedVec.yCoord;
+    }
+
+    @Redirect(
+        method = "onPlayerRightClick",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;zCoord:D", opcode = Opcodes.GETFIELD))
+    private double getZcoord(Vec3 instance) {
+        return transformedVec.zCoord;
+    }
+
+    @Redirect(
+        method = "onPlayerRightClick",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
+            opcode = Opcodes.GETFIELD))
+    private NetHandlerPlayClient getNetClientHandlerOnPlayerRightClick(PlayerControllerMP instance) {
+        return ((EntityClientPlayerMP) ((IMixinEntity) (Object) this.mc.thePlayer)
+            .getProxyPlayer(storedWorld)).sendQueue;
+    }
+
+    // interactWithEntitySendPacket
+
+    @Redirect(
+        method = "interactWithEntitySendPacket",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
+            opcode = Opcodes.GETFIELD))
+    private NetHandlerPlayClient getNetClientHandlerInteractWithEntitySendPacket(PlayerControllerMP instance,
+        @Local EntityPlayer player) {
+        return ((EntityClientPlayerMP) player).sendQueue;
     }
 
 }
