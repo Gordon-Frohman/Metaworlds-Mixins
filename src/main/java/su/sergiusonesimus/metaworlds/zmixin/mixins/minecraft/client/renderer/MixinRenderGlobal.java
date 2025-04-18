@@ -44,6 +44,8 @@ import net.minecraft.client.particle.EntitySuspendFX;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.EntitySorter;
+import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.OpenGlCapsChecker;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderGlobal;
@@ -55,6 +57,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.util.RenderDistanceSorter;
 import net.minecraft.entity.Entity;
@@ -71,6 +74,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.client.MinecraftForgeClient;
 
 import org.lwjgl.opengl.ARBOcclusionQuery;
 import org.lwjgl.opengl.GL11;
@@ -79,14 +83,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
@@ -269,8 +268,168 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     private void renderStars() {}
 
     // To get an empty RenderGlobal variable
+    // Firstly - disable the original constructor
 
-    private boolean generateEmpty = false;
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;mc:Lnet/minecraft/client/Minecraft;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableMc(RenderGlobal renderGlobal, Minecraft value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/Minecraft;getTextureManager()Lnet/minecraft/client/renderer/texture/TextureManager;"))
+    public TextureManager disableGetTextureManager(Minecraft minecraft) {
+        // Do nothing, yet
+        return null;
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;renderEngine:Lnet/minecraft/client/renderer/texture/TextureManager;",
+            opcode = Opcodes.PUTFIELD))
+    private void disableRenderEngine(RenderGlobal renderGlobal, TextureManager value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;glRenderListBase:I",
+            opcode = Opcodes.PUTFIELD))
+    private void disableGlRenderListBase(RenderGlobal renderGlobal, int value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;displayListEntities:I",
+            opcode = Opcodes.PUTFIELD))
+    private void disableDisplayListEntities(RenderGlobal renderGlobal, int value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;displayListEntitiesDirty:Z",
+            opcode = Opcodes.PUTFIELD))
+    private void disableDisplayListEntitiesDirty(RenderGlobal renderGlobal, boolean value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;occlusionEnabled:Z",
+            opcode = Opcodes.PUTFIELD))
+    private void disableOcclusionEnabled(RenderGlobal renderGlobal, boolean value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;occlusionEnabled:Z",
+            opcode = Opcodes.GETFIELD))
+    private boolean getOcclusionEnabled(RenderGlobal renderGlobal) {
+        return false;
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;starGLCallList:I",
+            opcode = Opcodes.PUTFIELD))
+    private void disableStarGLCallList(RenderGlobal renderGlobal, int value) {
+        // Do nothing
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glPushMatrix()V"))
+    public void disableGLPushMatrix() {
+        // Do nothing
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glNewList(II)V"))
+    public void disableGLNewList(int i1, int i2) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderStars()V"))
+    public void disableRenderStars(RenderGlobal renderGlobal) {
+        // Do nothing
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glEndList()V"))
+    public void disableGLEndList() {
+        // Do nothing
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glPopMatrix()V"))
+    public void disableGLPopMatrix() {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;glSkyList:I",
+            opcode = Opcodes.PUTFIELD))
+    private void disableGLSkyList(RenderGlobal renderGlobal, int value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;addVertex(DDD)V"))
+    public void disableTessellatorAddVertex(Tessellator tessellator, double d0, double d1, double d2) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;glSkyList2:I",
+            opcode = Opcodes.PUTFIELD))
+    private void disableGLSkyList2(RenderGlobal renderGlobal, int value) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;startDrawingQuads()V"))
+    public void disableTessellatorStartDrawingQuads(Tessellator tessellator) {
+        // Do nothing
+    }
+
+    @Redirect(
+        method = "<init>",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;draw()I"))
+    public int disableTessellatorDraw(Tessellator tessellator) {
+        // Do nothing, yet
+        return -1;
+    }
+
+    // And secondly - set up a new constructor
 
     @Inject(
         at = @At(
@@ -279,183 +438,72 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         method = "<init>")
     private void init(Minecraft mc, CallbackInfo info) {
         if (mc == null) {
-            generateEmpty = true;
+
+        } else {
+            this.mc = mc;
+            this.renderEngine = mc.getTextureManager();
+            byte b0 = 34;
+            byte b1 = 16;
+            this.glRenderListBase = GLAllocation.generateDisplayLists(b0 * b0 * b1 * 3);
+            this.displayListEntitiesDirty = false;
+            this.displayListEntities = GLAllocation.generateDisplayLists(1);
+            this.occlusionEnabled = OpenGlCapsChecker.checkARBOcclusion();
+
+            if (this.occlusionEnabled) {
+                this.occlusionResult.clear();
+                this.glOcclusionQueryBase = GLAllocation.createDirectIntBuffer(b0 * b0 * b1);
+                this.glOcclusionQueryBase.clear();
+                this.glOcclusionQueryBase.position(0);
+                this.glOcclusionQueryBase.limit(b0 * b0 * b1);
+                ARBOcclusionQuery.glGenQueriesARB(this.glOcclusionQueryBase);
+            }
+
+            this.starGLCallList = GLAllocation.generateDisplayLists(3);
+            GL11.glPushMatrix();
+
+            GL11.glNewList(this.starGLCallList, GL11.GL_COMPILE);
+            this.renderStars();
+            GL11.glEndList();
+            GL11.glPopMatrix();
+            Tessellator tessellator = Tessellator.instance;
+            this.glSkyList = this.starGLCallList + 1;
+            GL11.glNewList(this.glSkyList, GL11.GL_COMPILE);
+            byte b2 = 64;
+            int i = 256 / b2 + 2;
+            float f = 16.0F;
+            int j;
+            int k;
+
+            for (j = -b2 * i; j <= b2 * i; j += b2) {
+                for (k = -b2 * i; k <= b2 * i; k += b2) {
+                    tessellator.startDrawingQuads();
+                    tessellator.addVertex((double) (j + 0), (double) f, (double) (k + 0));
+                    tessellator.addVertex((double) (j + b2), (double) f, (double) (k + 0));
+                    tessellator.addVertex((double) (j + b2), (double) f, (double) (k + b2));
+                    tessellator.addVertex((double) (j + 0), (double) f, (double) (k + b2));
+                    tessellator.draw();
+                }
+            }
+
+            GL11.glEndList();
+            this.glSkyList2 = this.starGLCallList + 2;
+            GL11.glNewList(this.glSkyList2, GL11.GL_COMPILE);
+            f = -16.0F;
+            tessellator.startDrawingQuads();
+
+            for (j = -b2 * i; j <= b2 * i; j += b2) {
+                for (k = -b2 * i; k <= b2 * i; k += b2) {
+                    tessellator.addVertex((double) (j + b2), (double) f, (double) (k + 0));
+                    tessellator.addVertex((double) (j + 0), (double) f, (double) (k + 0));
+                    tessellator.addVertex((double) (j + 0), (double) f, (double) (k + b2));
+                    tessellator.addVertex((double) (j + b2), (double) f, (double) (k + b2));
+                }
+            }
+
+            tessellator.draw();
+            GL11.glEndList();
         }
     }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;mc:Lnet/minecraft/client/Minecraft;",
-            opcode = Opcodes.PUTFIELD))
-    private void wrapMc(RenderGlobal instance, Minecraft value, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, value);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/client/Minecraft;getTextureManager()Lnet/minecraft/client/renderer/texture/TextureManager;"))
-    public TextureManager wrapGetTextureManager(Minecraft instance, Operation<TextureManager> original) {
-        if (generateEmpty) return null;
-        else return original.call(instance);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;renderEngine:Lnet/minecraft/client/renderer/texture/TextureManager;",
-            opcode = Opcodes.PUTFIELD))
-    private void wrapRenderEngine(RenderGlobal instance, TextureManager value, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, value);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;glRenderListBase:I",
-            opcode = Opcodes.PUTFIELD))
-    private void wrapGlRenderListBase(RenderGlobal instance, int value, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, value);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;displayListEntities:I",
-            opcode = Opcodes.PUTFIELD))
-    private void wrapDisplayListEntities(RenderGlobal instance, int value, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, value);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;displayListEntitiesDirty:Z",
-            opcode = Opcodes.PUTFIELD))
-    private void wrapDisplayListEntitiesDirty(RenderGlobal instance, boolean value, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, value);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;occlusionEnabled:Z",
-            opcode = Opcodes.PUTFIELD))
-    private void wrapOcclusionEnabled(RenderGlobal instance, boolean value, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, value);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;occlusionEnabled:Z",
-            opcode = Opcodes.GETFIELD))
-    private boolean wrapGetOcclusionEnabled(RenderGlobal instance, Operation<Boolean> original) {
-        if (generateEmpty) return false;
-        else return original.call(instance);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;starGLCallList:I",
-            opcode = Opcodes.PUTFIELD))
-    private void wrapStarGLCallList(RenderGlobal instance, int value, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, value);
-    }
-
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glPushMatrix()V"))
-    public void wrapGLPushMatrix(Operation<Void> original) {
-        if (!generateEmpty) original.call();
-    }
-
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glNewList(II)V"))
-    public void wrapGLNewList(int i1, int i2, Operation<Void> original) {
-        if (!generateEmpty) original.call(i1, i2);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderGlobal;renderStars()V"))
-    public void wrapRenderStars(RenderGlobal instance, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance);
-    }
-
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glEndList()V"))
-    public void wrapGLEndList(Operation<Void> original) {
-        if (!generateEmpty) original.call();
-    }
-
-    @WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glPopMatrix()V"))
-    public void wrapGLPopMatrix(Operation<Void> original) {
-        if (!generateEmpty) original.call();
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/Tessellator;instance:Lnet/minecraft/client/renderer/Tessellator;",
-            opcode = Opcodes.GETSTATIC))
-    private Tessellator wrapGetTessellator(Operation<Tessellator> original) {
-        if (generateEmpty) return null;
-        else return original.call();
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;glSkyList:I",
-            opcode = Opcodes.PUTFIELD))
-    private void wrapGLSkyList(RenderGlobal instance, int value, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, value);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;addVertex(DDD)V"))
-    public void wrapTessellatorAddVertex(Tessellator instance, double d0, double d1, double d2,
-        Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, d0, d1, d2);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;glSkyList2:I",
-            opcode = Opcodes.PUTFIELD))
-    private void wrapGLSkyList2(RenderGlobal instance, int value, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance, value);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;startDrawingQuads()V"))
-    public void wrapTessellatorStartDrawingQuads(Tessellator instance, Operation<Void> original) {
-        if (!generateEmpty) original.call(instance);
-    }
-
-    @WrapOperation(
-        method = "<init>",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;draw()I"))
-    public int wrapTessellatorDraw(Tessellator instance, Operation<Integer> original) {
-        if (generateEmpty) return -1;
-        else return original.call(instance);
-    }
-
-    // Now we should hopefully have an empty RenderGlobal for subworlds
 
     public RenderGlobal setMC(Minecraft par1Minecraft) {
         this.mc = par1Minecraft;
@@ -706,129 +754,148 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         }
     }
 
-    @Inject(
-        method = "renderEntities",
-        at = { @At(value = "INVOKE", target = "Lnet/minecraft/profiler/Profiler;endSection()V", shift = Shift.AFTER) },
-        locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void injectRenderEntities(EntityLivingBase p_147589_1_, ICamera p_147589_2_, float p_147589_3_,
-        CallbackInfo ci, @Local(name = "pass") int pass, @Local(name = "d0") double d0, @Local(name = "d1") double d1,
-        @Local(name = "d2") double d2, @Local(name = "d3") double d3, @Local(name = "d4") double d4,
-        @Local(name = "d5") double d5) {
-        for (World curWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
-            WorldClient curClientWorld = (WorldClient) curWorld;
-            Vec3 transformedPos = ((IMixinWorld) curWorld).transformToLocal(d0, d1, d2);
-            this.theWorld.theProfiler.startSection("prepare");
-            TileEntityRendererDispatcher.instance.cacheActiveRenderInfo(
-                curClientWorld,
-                this.mc.getTextureManager(),
-                this.mc.fontRenderer,
-                this.mc.renderViewEntity,
-                p_147589_3_);
-            RenderManager.instance.cacheActiveRenderInfo(
-                curClientWorld,
-                this.mc.getTextureManager(),
-                this.mc.fontRenderer,
-                this.mc.renderViewEntity,
-                this.mc.pointedEntity,
-                this.mc.gameSettings,
-                p_147589_3_);
+    /**
+     * Renders all entities within range and within the frustrum. Args: pos, frustrum, partialTickTime
+     */
+    @Overwrite
+    public void renderEntities(EntityLivingBase p_147589_1_, ICamera p_147589_2_, float p_147589_3_) {
+        int pass = MinecraftForgeClient.getRenderPass();
+        if (this.renderEntitiesStartupCounter > 0) {
+            if (pass > 0) return;
+            --this.renderEntitiesStartupCounter;
+        } else {
+            double d0 = p_147589_1_.prevPosX + (p_147589_1_.posX - p_147589_1_.prevPosX) * (double) p_147589_3_;
+            double d1 = p_147589_1_.prevPosY + (p_147589_1_.posY - p_147589_1_.prevPosY) * (double) p_147589_3_;
+            double d2 = p_147589_1_.prevPosZ + (p_147589_1_.posZ - p_147589_1_.prevPosZ) * (double) p_147589_3_;
 
-            EntityLivingBase entitylivingbase1 = this.mc.renderViewEntity;
-            d3 = entitylivingbase1.lastTickPosX
-                + (entitylivingbase1.posX - entitylivingbase1.lastTickPosX) * (double) p_147589_3_;
-            d4 = entitylivingbase1.lastTickPosY
-                + (entitylivingbase1.posY - entitylivingbase1.lastTickPosY) * (double) p_147589_3_;
-            d5 = entitylivingbase1.lastTickPosZ
-                + (entitylivingbase1.posZ - entitylivingbase1.lastTickPosZ) * (double) p_147589_3_;
-            TileEntityRendererDispatcher.staticPlayerX = d3;
-            TileEntityRendererDispatcher.staticPlayerY = d4;
-            TileEntityRendererDispatcher.staticPlayerZ = d5;
-            this.theWorld.theProfiler.endStartSection("staticentities");
-
-            if (this.displayListEntitiesDirty) {
-                RenderManager.renderPosX = 0.0D;
-                RenderManager.renderPosY = 0.0D;
-                RenderManager.renderPosZ = 0.0D;
-                this.rebuildDisplayListEntities();
-            }
-
-            GL11.glMatrixMode(GL11.GL_MODELVIEW);
-            GL11.glPushMatrix();
-            GL11.glTranslated(-d3, -d4, -d5);
-            GL11.glCallList(this.displayListEntities);
-            GL11.glPopMatrix();
-            RenderManager.renderPosX = d3;
-            RenderManager.renderPosY = d4;
-            RenderManager.renderPosZ = d5;
-            this.mc.entityRenderer.enableLightmap((double) p_147589_3_);
-            this.theWorld.theProfiler.endStartSection("global");
-            List list = curWorld.getLoadedEntityList();
-            if (pass == 0) // no indentation for smaller patch size
+            if (pass == 0) // no indentation to shrink patch
             {
-                this.countEntitiesTotal = list.size();
+                this.countEntitiesTotal = 0;
+                this.countEntitiesRendered = 0;
+                this.countEntitiesHidden = 0;
             }
-            int i;
-            Entity entity;
 
-            for (i = 0; i < curWorld.weatherEffects.size(); ++i) {
-                entity = (Entity) curWorld.weatherEffects.get(i);
-                if (!entity.shouldRenderInPass(pass)) continue;
-                ++this.countEntitiesRendered;
+            for (World curWorld : ((IMixinWorld) this.theWorld).getWorlds()) {
+                WorldClient curClientWorld = (WorldClient) curWorld;
+                Vec3 transformedPos = ((IMixinWorld) curWorld).transformToLocal(d0, d1, d2);
+                this.theWorld.theProfiler.startSection("prepare");
+                TileEntityRendererDispatcher.instance.cacheActiveRenderInfo(
+                    curClientWorld,
+                    this.mc.getTextureManager(),
+                    this.mc.fontRenderer,
+                    this.mc.renderViewEntity,
+                    p_147589_3_);
+                RenderManager.instance.cacheActiveRenderInfo(
+                    curClientWorld,
+                    this.mc.getTextureManager(),
+                    this.mc.fontRenderer,
+                    this.mc.renderViewEntity,
+                    this.mc.pointedEntity,
+                    this.mc.gameSettings,
+                    p_147589_3_);
 
-                if (entity.isInRangeToRender3d(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord)) {
-                    RenderManager.instance.renderEntitySimple(entity, p_147589_3_);
+                EntityLivingBase entitylivingbase1 = this.mc.renderViewEntity;
+                double d3 = entitylivingbase1.lastTickPosX
+                    + (entitylivingbase1.posX - entitylivingbase1.lastTickPosX) * (double) p_147589_3_;
+                double d4 = entitylivingbase1.lastTickPosY
+                    + (entitylivingbase1.posY - entitylivingbase1.lastTickPosY) * (double) p_147589_3_;
+                double d5 = entitylivingbase1.lastTickPosZ
+                    + (entitylivingbase1.posZ - entitylivingbase1.lastTickPosZ) * (double) p_147589_3_;
+                TileEntityRendererDispatcher.staticPlayerX = d3;
+                TileEntityRendererDispatcher.staticPlayerY = d4;
+                TileEntityRendererDispatcher.staticPlayerZ = d5;
+                this.theWorld.theProfiler.endStartSection("staticentities");
+
+                if (this.displayListEntitiesDirty) {
+                    RenderManager.renderPosX = 0.0D;
+                    RenderManager.renderPosY = 0.0D;
+                    RenderManager.renderPosZ = 0.0D;
+                    this.rebuildDisplayListEntities();
                 }
-            }
 
-            this.theWorld.theProfiler.endStartSection("entities");
+                GL11.glMatrixMode(GL11.GL_MODELVIEW);
+                GL11.glPushMatrix();
+                GL11.glTranslated(-d3, -d4, -d5);
+                GL11.glCallList(this.displayListEntities);
+                GL11.glPopMatrix();
+                RenderManager.renderPosX = d3;
+                RenderManager.renderPosY = d4;
+                RenderManager.renderPosZ = d5;
+                this.mc.entityRenderer.enableLightmap((double) p_147589_3_);
+                this.theWorld.theProfiler.endStartSection("global");
+                List list = curWorld.getLoadedEntityList();
+                if (pass == 0) // no indentation for smaller patch size
+                {
+                    this.countEntitiesTotal = list.size();
+                }
+                int i;
+                Entity entity;
 
-            for (i = 0; i < list.size(); ++i) {
-                entity = (Entity) list.get(i);
-                if (!entity.shouldRenderInPass(pass)) continue;
-                boolean flag = entity
-                    .isInRangeToRender3d(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord)
-                    && (entity.ignoreFrustumCheck || p_147589_2_.isBoundingBoxInFrustum(
-                        ((IMixinAxisAlignedBB) entity.boundingBox).getTransformedToGlobalBoundingBox(entity.worldObj))
-                        || entity.riddenByEntity == this.mc.thePlayer);
+                for (i = 0; i < curWorld.weatherEffects.size(); ++i) {
+                    entity = (Entity) curWorld.weatherEffects.get(i);
+                    if (!entity.shouldRenderInPass(pass)) continue;
+                    ++this.countEntitiesRendered;
 
-                if (!flag && entity instanceof EntityLiving) {
-                    EntityLiving entityliving = (EntityLiving) entity;
-
-                    if (entityliving.getLeashed() && entityliving.getLeashedToEntity() != null) {
-                        Entity entity1 = entityliving.getLeashedToEntity();
-                        flag = p_147589_2_.isBoundingBoxInFrustum(
-                            ((IMixinAxisAlignedBB) entity1.boundingBox)
-                                .getTransformedToGlobalBoundingBox(entity.worldObj));
+                    if (entity
+                        .isInRangeToRender3d(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord)) {
+                        RenderManager.instance.renderEntitySimple(entity, p_147589_3_);
                     }
                 }
 
-                if (flag
-                    && (entity != this.mc.renderViewEntity || this.mc.gameSettings.thirdPersonView != 0
-                        || this.mc.renderViewEntity.isPlayerSleeping())
-                    && curWorld
-                        .blockExists(MathHelper.floor_double(entity.posX), 0, MathHelper.floor_double(entity.posZ))) {
-                    ++this.countEntitiesRendered;
-                    RenderManager.instance.renderEntitySimple(entity, p_147589_3_);
+                this.theWorld.theProfiler.endStartSection("entities");
+
+                for (i = 0; i < list.size(); ++i) {
+                    entity = (Entity) list.get(i);
+                    if (!entity.shouldRenderInPass(pass)) continue;
+                    boolean flag = entity
+                        .isInRangeToRender3d(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord)
+                        && (entity.ignoreFrustumCheck
+                            || p_147589_2_.isBoundingBoxInFrustum(
+                                ((IMixinAxisAlignedBB) entity.boundingBox)
+                                    .getTransformedToGlobalBoundingBox(entity.worldObj))
+                            || entity.riddenByEntity == this.mc.thePlayer);
+
+                    if (!flag && entity instanceof EntityLiving) {
+                        EntityLiving entityliving = (EntityLiving) entity;
+
+                        if (entityliving.getLeashed() && entityliving.getLeashedToEntity() != null) {
+                            Entity entity1 = entityliving.getLeashedToEntity();
+                            flag = p_147589_2_.isBoundingBoxInFrustum(
+                                ((IMixinAxisAlignedBB) entity1.boundingBox)
+                                    .getTransformedToGlobalBoundingBox(entity.worldObj));
+                        }
+                    }
+
+                    if (flag
+                        && (entity != this.mc.renderViewEntity || this.mc.gameSettings.thirdPersonView != 0
+                            || this.mc.renderViewEntity.isPlayerSleeping())
+                        && curWorld.blockExists(
+                            MathHelper.floor_double(entity.posX),
+                            0,
+                            MathHelper.floor_double(entity.posZ))) {
+                        ++this.countEntitiesRendered;
+                        RenderManager.instance.renderEntitySimple(entity, p_147589_3_);
+                    }
                 }
-            }
 
-            this.theWorld.theProfiler.endStartSection("blockentities");
-            RenderHelper.enableStandardItemLighting();
+                this.theWorld.theProfiler.endStartSection("blockentities");
+                RenderHelper.enableStandardItemLighting();
 
-            for (i = 0; i
-                < ((IMixinWorldIntermediate) curClientWorld).getMinecraft().renderGlobal.tileEntities.size(); ++i) {
-                TileEntity tile = (TileEntity) ((IMixinWorldIntermediate) curClientWorld)
-                    .getMinecraft().renderGlobal.tileEntities.get(i);
-                if (tile.shouldRenderInPass(pass) && p_147589_2_.isBoundingBoxInFrustum(
-                    tile.getWorldObj() == null ? tile.getRenderBoundingBox()
-                        : ((IMixinAxisAlignedBB) tile.getRenderBoundingBox())
-                            .getTransformedToGlobalBoundingBox(tile.getWorldObj()))) {
-                    TileEntityRendererDispatcher.instance.renderTileEntity(tile, p_147589_3_);
+                for (i = 0; i
+                    < ((IMixinWorldIntermediate) curClientWorld).getMinecraft().renderGlobal.tileEntities.size(); ++i) {
+                    TileEntity tile = (TileEntity) ((IMixinWorldIntermediate) curClientWorld)
+                        .getMinecraft().renderGlobal.tileEntities.get(i);
+                    if (tile.shouldRenderInPass(pass) && p_147589_2_.isBoundingBoxInFrustum(
+                        tile.getWorldObj() == null ? tile.getRenderBoundingBox()
+                            : ((IMixinAxisAlignedBB) tile.getRenderBoundingBox())
+                                .getTransformedToGlobalBoundingBox(tile.getWorldObj()))) {
+                        TileEntityRendererDispatcher.instance.renderTileEntity(tile, p_147589_3_);
+                    }
                 }
-            }
 
-            this.mc.entityRenderer.disableLightmap((double) p_147589_3_);
-            this.theWorld.theProfiler.endSection();
+                this.mc.entityRenderer.disableLightmap((double) p_147589_3_);
+                this.theWorld.theProfiler.endSection();
+            }
         }
     }
 
@@ -1433,68 +1500,87 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         }
     }
 
-    @Inject(
-        method = "drawBlockDamageTexture(Lnet/minecraft/client/renderer/Tessellator;Lnet/minecraft/entity/EntityLivingBase;F)V",
-        remap = false,
-        at = { @At(
-            value = "INVOKE",
-            target = "Lorg/lwjgl/opengl/GL11;glDisable(I)V",
-            ordinal = 0,
-            opcode = Opcodes.INVOKESTATIC) },
-        locals = LocalCapture.CAPTURE_FAILSOFT)
-    public void injectDrawBlockDamageTexture(Tessellator tessellator, EntityLivingBase entity, float p_72717_3_,
-        CallbackInfo ci, double d0, double d1, double d2) {
-        for (World curSubWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
-            this.renderBlocksRg.blockAccess = curSubWorld;
-            if (((IMixinWorld) curSubWorld).isSubWorld()) {
-                GL11.glPushMatrix();
-                GL11.glTranslated(-d0, -d1, -d2);
+    @Overwrite(remap = false)
+    public void drawBlockDamageTexture(Tessellator p_72717_1_, EntityLivingBase par2EntityPlayer, float p_72717_3_) {
+        double d0 = par2EntityPlayer.lastTickPosX
+            + (par2EntityPlayer.posX - par2EntityPlayer.lastTickPosX) * (double) p_72717_3_;
+        double d1 = par2EntityPlayer.lastTickPosY
+            + (par2EntityPlayer.posY - par2EntityPlayer.lastTickPosY) * (double) p_72717_3_;
+        double d2 = par2EntityPlayer.lastTickPosZ
+            + (par2EntityPlayer.posZ - par2EntityPlayer.lastTickPosZ) * (double) p_72717_3_;
 
-                GL11.glMultMatrix(((SubWorld) curSubWorld).getTransformToGlobalMatrixDirectBuffer());
-                GL11.glTranslated(d0, d1, d2);
-            }
+        if (!this.damagedBlocks.isEmpty()) {
+            OpenGlHelper.glBlendFunc(774, 768, 1, 0);
+            this.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
+            GL11.glColor4f(1.0F, 1.0F, 1.0F, 0.5F);
+            GL11.glPushMatrix();
+            GL11.glPolygonOffset(-3.0F, -3.0F);
+            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+            GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
+            GL11.glEnable(GL11.GL_ALPHA_TEST);
 
-            tessellator.startDrawingQuads();
-            tessellator.setTranslation(-d0, -d1, -d2);
-            tessellator.disableColor();
-            Iterator iterator = this.damagedBlocks.values()
-                .iterator();
+            for (World curSubWorld : ((IMixinWorld) this.theWorld).getWorlds()) {
+                this.renderBlocksRg.blockAccess = curSubWorld;
+                if (((IMixinWorld) curSubWorld).isSubWorld()) {
+                    GL11.glPushMatrix();
+                    GL11.glTranslated(-d0, -d1, -d2);
 
-            while (iterator.hasNext()) {
-                DestroyBlockProgress destroyblockprogress = (DestroyBlockProgress) iterator.next();
+                    GL11.glMultMatrix(((SubWorld) curSubWorld).getTransformToGlobalMatrixDirectBuffer());
+                    GL11.glTranslated(d0, d1, d2);
+                }
 
-                if (((IMixinDestroyBlockProgress) destroyblockprogress).getPartialBlockSubWorldID()
-                    != ((IMixinWorld) curSubWorld).getSubWorldID()) continue;
+                p_72717_1_.startDrawingQuads();
+                p_72717_1_.setTranslation(-d0, -d1, -d2);
+                p_72717_1_.disableColor();
+                Iterator iterator = this.damagedBlocks.values()
+                    .iterator();
 
-                if (((IMixinEntity) entity).getDistanceSq(
-                    destroyblockprogress.getPartialBlockX(),
-                    destroyblockprogress.getPartialBlockY(),
-                    destroyblockprogress.getPartialBlockZ(),
-                    curSubWorld) > 1024.0D) {
-                    iterator.remove();
-                } else {
-                    Block block = curSubWorld.getBlock(
+                while (iterator.hasNext()) {
+                    DestroyBlockProgress destroyblockprogress = (DestroyBlockProgress) iterator.next();
+                    // double d3 = (double)destroyblockprogress.getPartialBlockX() - d0;
+                    // double d4 = (double)destroyblockprogress.getPartialBlockY() - d1;
+                    // double d5 = (double)destroyblockprogress.getPartialBlockZ() - d2;
+
+                    if (((IMixinDestroyBlockProgress) destroyblockprogress).getPartialBlockSubWorldID()
+                        != ((IMixinWorld) curSubWorld).getSubWorldID()) continue;
+
+                    if (((IMixinEntity) par2EntityPlayer).getDistanceSq(
                         destroyblockprogress.getPartialBlockX(),
                         destroyblockprogress.getPartialBlockY(),
-                        destroyblockprogress.getPartialBlockZ());
-
-                    if (block.getMaterial() != Material.air) {
-                        this.renderBlocksRg.renderBlockUsingTexture(
-                            block,
+                        destroyblockprogress.getPartialBlockZ(),
+                        curSubWorld) > 1024.0D) {
+                        iterator.remove();
+                    } else {
+                        Block block = curSubWorld.getBlock(
                             destroyblockprogress.getPartialBlockX(),
                             destroyblockprogress.getPartialBlockY(),
-                            destroyblockprogress.getPartialBlockZ(),
-                            this.destroyBlockIcons[destroyblockprogress.getPartialBlockDamage()]);
+                            destroyblockprogress.getPartialBlockZ());
+
+                        if (block.getMaterial() != Material.air) {
+                            this.renderBlocksRg.renderBlockUsingTexture(
+                                block,
+                                destroyblockprogress.getPartialBlockX(),
+                                destroyblockprogress.getPartialBlockY(),
+                                destroyblockprogress.getPartialBlockZ(),
+                                this.destroyBlockIcons[destroyblockprogress.getPartialBlockDamage()]);
+                        }
                     }
                 }
+
+                p_72717_1_.draw();
+                p_72717_1_.setTranslation(0.0D, 0.0D, 0.0D);
+
+                if (((IMixinWorld) curSubWorld).isSubWorld()) GL11.glPopMatrix();
             }
+            this.renderBlocksRg.blockAccess = this.theWorld;
 
-            tessellator.draw();
-            tessellator.setTranslation(0.0D, 0.0D, 0.0D);
-
-            if (((IMixinWorld) curSubWorld).isSubWorld()) GL11.glPopMatrix();
+            GL11.glDisable(GL11.GL_ALPHA_TEST);
+            GL11.glPolygonOffset(0.0F, 0.0F);
+            GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+            GL11.glEnable(GL11.GL_ALPHA_TEST);
+            GL11.glDepthMask(true);
+            GL11.glPopMatrix();
         }
-        this.renderBlocksRg.blockAccess = this.theWorld;
     }
 
     /**

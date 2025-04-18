@@ -1,16 +1,15 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.client.renderer.entity;
 
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -25,31 +24,43 @@ public class MixinRenderManager {
         return false;
     }
 
-    private Vec3 lastTickPos;
-    private Vec3 pos;
+    @Overwrite
+    public boolean renderEntityStatic(Entity entity, float p_147936_2_, boolean p_147936_3_) {
+        if (entity.ticksExisted == 0) {
+            entity.lastTickPosX = entity.posX;
+            entity.lastTickPosY = entity.posY;
+            entity.lastTickPosZ = entity.posZ;
+        }
 
-    @Inject(method = "renderEntityStatic", at = { @At("HEAD") })
-    public void injectRenderEntityStatic(Entity entity, float p_147936_2_, boolean p_147936_3_,
-        CallbackInfoReturnable<Boolean> ci) {
         World world = entity.worldObj;
-        lastTickPos = ((IMixinWorld) world)
+        Vec3 lastTickPos = ((IMixinWorld) world)
             .transformToGlobal(Vec3.createVectorHelper(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ));
-        pos = ((IMixinWorld) world).transformToGlobal(Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ));
-    }
+        Vec3 pos = ((IMixinWorld) world)
+            .transformToGlobal(Vec3.createVectorHelper(entity.posX, entity.posY, entity.posZ));
 
-    @ModifyVariable(method = "renderEntityStatic", at = @At("STORE"), ordinal = 0)
-    private double modifyD0(double d0, Entity entity, float p_147936_2_, boolean p_147936_3_) {
-        return lastTickPos.xCoord + (pos.xCoord - lastTickPos.xCoord) * (double) p_147936_2_;
-    }
+        double d0 = lastTickPos.xCoord + (pos.xCoord - lastTickPos.xCoord) * (double) p_147936_2_;
+        double d1 = lastTickPos.yCoord + (pos.yCoord - lastTickPos.yCoord) * (double) p_147936_2_;
+        double d2 = lastTickPos.zCoord + (pos.zCoord - lastTickPos.zCoord) * (double) p_147936_2_;
+        float f1 = entity.prevRotationYaw + (entity.rotationYaw - entity.prevRotationYaw) * p_147936_2_
+            + (float) ((IMixinWorld) entity.worldObj).getRotationYaw() % 360;
+        int i = entity.getBrightnessForRender(p_147936_2_);
 
-    @ModifyVariable(method = "renderEntityStatic", at = @At("STORE"), ordinal = 1)
-    private double modifyD1(double d1, Entity entity, float p_147936_2_, boolean p_147936_3_) {
-        return lastTickPos.yCoord + (pos.yCoord - lastTickPos.yCoord) * (double) p_147936_2_;
-    }
+        if (entity.isBurning()) {
+            i = 15728880;
+        }
 
-    @ModifyVariable(method = "renderEntityStatic", at = @At("STORE"), ordinal = 2)
-    private double modifyD2(double d2, Entity entity, float p_147936_2_, boolean p_147936_3_) {
-        return lastTickPos.zCoord + (pos.zCoord - lastTickPos.zCoord) * (double) p_147936_2_;
+        int j = i % 65536;
+        int k = i / 65536;
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) j / 1.0F, (float) k / 1.0F);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        return this.func_147939_a(
+            entity,
+            d0 - RenderManager.renderPosX,
+            d1 - RenderManager.renderPosY,
+            d2 - RenderManager.renderPosZ,
+            f1,
+            p_147936_2_,
+            p_147936_3_);
     }
 
 }

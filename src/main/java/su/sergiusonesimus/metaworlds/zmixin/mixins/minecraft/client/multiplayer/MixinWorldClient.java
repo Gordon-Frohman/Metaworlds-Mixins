@@ -7,6 +7,7 @@ import java.util.Set;
 
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.MovingSoundMinecart;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -14,6 +15,7 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.RenderList;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
@@ -33,7 +35,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
@@ -377,13 +378,22 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
         return super.selectEntitiesWithinAABB(par1Class, par2AxisAlignedBB, par3IEntitySelector);
     }
 
-    @Redirect(
-        method = "spawnEntityInWorld",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
-    public boolean spawnEntityInWorld(World world, Entity entity) {
-        return spawnEntityInWorldIntermediate(entity);
+    /**
+     * Called to place all entities as part of a world
+     */
+    @Overwrite
+    public boolean spawnEntityInWorld(Entity p_72838_1_) {
+        boolean flag = spawnEntityInWorldIntermediate(p_72838_1_);
+        this.entityList.add(p_72838_1_);
+
+        if (!flag) {
+            this.entitySpawnQueue.add(p_72838_1_);
+        } else if (p_72838_1_ instanceof EntityMinecart) {
+            this.mc.getSoundHandler()
+                .playSound(new MovingSoundMinecart((EntityMinecart) p_72838_1_));
+        }
+
+        return flag;
     }
 
     public boolean spawnEntityInWorldIntermediate(Entity par1Entity) {

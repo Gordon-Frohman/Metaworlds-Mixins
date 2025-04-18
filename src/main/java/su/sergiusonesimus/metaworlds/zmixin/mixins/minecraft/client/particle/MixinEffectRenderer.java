@@ -2,6 +2,7 @@ package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.client.particle;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -9,22 +10,26 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.particle.EntityDiggingFX;
 import net.minecraft.client.particle.EntityFX;
+import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
@@ -69,16 +74,22 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
         }
     }
 
-    @Inject(
-        method = "renderParticles",
-        at = { @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/particle/EntityFX;interpPosZ:D",
-            opcode = Opcodes.PUTSTATIC,
-            shift = At.Shift.AFTER) },
-        locals = LocalCapture.CAPTURE_FAILSOFT)
-    public void injectRenderParticles1(Entity entity, float f, CallbackInfo ci, float f1, float f2, float f3, float f4,
-        float f5) {
+    /**
+     * Renders all current particles. Args player, partialTickTime
+     */
+    @Overwrite
+    public void renderParticles(Entity p_78874_1_, float p_78874_2_) {
+        float f1 = ActiveRenderInfo.rotationX;
+        float f2 = ActiveRenderInfo.rotationZ;
+        float f3 = ActiveRenderInfo.rotationYZ;
+        float f4 = ActiveRenderInfo.rotationXY;
+        float f5 = ActiveRenderInfo.rotationXZ;
+        EntityFX.interpPosX = p_78874_1_.lastTickPosX
+            + (p_78874_1_.posX - p_78874_1_.lastTickPosX) * (double) p_78874_2_;
+        EntityFX.interpPosY = p_78874_1_.lastTickPosY
+            + (p_78874_1_.posY - p_78874_1_.lastTickPosY) * (double) p_78874_2_;
+        EntityFX.interpPosZ = p_78874_1_.lastTickPosZ
+            + (p_78874_1_.posZ - p_78874_1_.lastTickPosZ) * (double) p_78874_2_;
         if (((IMixinWorld) this.worldObj).isSubWorld()) {
             Vec3 transformedViewDir = ((IMixinWorld) this.worldObj).rotateToLocal(f3, f5, f4);
             f3 = (float) transformedViewDir.xCoord;
@@ -87,49 +98,91 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
             float planarMagSq = f3 * f3 + f4 * f4;
             if (planarMagSq > 0.0f) {
                 float planarMag = (float) Math.sqrt(planarMagSq);
-                if (entity.rotationPitch < 0.0f) planarMag = -planarMag;
+                if (p_78874_1_.rotationPitch < 0.0f) planarMag = -planarMag;
                 f1 = f4 / planarMag;
                 f2 = -f3 / planarMag;
             }
         }
-    }
 
-    @Inject(
-        method = "renderParticles",
-        at = { @At(
-            value = "INVOKE",
-            target = "Lorg/lwjgl/opengl/GL11;glAlphaFunc(IF)V",
-            opcode = Opcodes.INVOKESTATIC,
-            shift = At.Shift.AFTER) })
-    public void injectRenderParticles2(Entity entity, float f, CallbackInfo ci) {
-        if (((IMixinWorld) this.worldObj).isSubWorld()) {
-            GL11.glPushMatrix();
-            GL11.glTranslated(-EntityFX.interpPosX, -EntityFX.interpPosY, -EntityFX.interpPosZ);
-            SubWorld parentSubWorld = (SubWorld) this.worldObj;
-            GL11.glMultMatrix(parentSubWorld.getTransformToGlobalMatrixDirectBuffer());
-            GL11.glTranslated(EntityFX.interpPosX, EntityFX.interpPosY, EntityFX.interpPosZ);
+        for (int k = 0; k < 3; ++k) {
+            final int i = k;
+
+            if (!this.fxLayers[i].isEmpty()) {
+                switch (i) {
+                    case 0:
+                    default:
+                        this.renderer.bindTexture(particleTextures);
+                        break;
+                    case 1:
+                        this.renderer.bindTexture(TextureMap.locationBlocksTexture);
+                        break;
+                    case 2:
+                        this.renderer.bindTexture(TextureMap.locationItemsTexture);
+                }
+
+                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+                GL11.glDepthMask(false);
+                GL11.glEnable(GL11.GL_BLEND);
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                GL11.glAlphaFunc(GL11.GL_GREATER, 0.003921569F);
+
+                if (((IMixinWorld) this.worldObj).isSubWorld()) {
+                    GL11.glPushMatrix();
+                    GL11.glTranslated(-EntityFX.interpPosX, -EntityFX.interpPosY, -EntityFX.interpPosZ);
+                    SubWorld parentSubWorld = (SubWorld) this.worldObj;
+                    GL11.glMultMatrix(parentSubWorld.getTransformToGlobalMatrixDirectBuffer());
+                    GL11.glTranslated(EntityFX.interpPosX, EntityFX.interpPosY, EntityFX.interpPosZ);
+                }
+
+                Tessellator tessellator = Tessellator.instance;
+                tessellator.startDrawingQuads();
+
+                for (int j = 0; j < this.fxLayers[i].size(); ++j) {
+                    final EntityFX entityfx = (EntityFX) this.fxLayers[i].get(j);
+                    if (entityfx == null) continue;
+                    tessellator.setBrightness(entityfx.getBrightnessForRender(p_78874_2_));
+
+                    try {
+                        entityfx.renderParticle(tessellator, p_78874_2_, f1, f5, f2, f3, f4);
+                    } catch (Throwable throwable) {
+                        CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");
+                        CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being rendered");
+                        crashreportcategory.addCrashSectionCallable("Particle", new Callable() {
+
+                            public String call() {
+                                return entityfx.toString();
+                            }
+                        });
+                        crashreportcategory.addCrashSectionCallable("Particle Type", new Callable() {
+
+                            public String call() {
+                                return i == 0 ? "MISC_TEXTURE"
+                                    : (i == 1 ? "TERRAIN_TEXTURE"
+                                        : (i == 2 ? "ITEM_TEXTURE"
+                                            : (i == 3 ? "ENTITY_PARTICLE_TEXTURE" : "Unknown - " + i)));
+                            }
+                        });
+                        throw new ReportedException(crashreport);
+                    }
+                }
+
+                tessellator.draw();
+
+                if (((IMixinWorld) this.worldObj).isSubWorld()) {
+                    GL11.glPopMatrix();
+                }
+
+                GL11.glDisable(GL11.GL_BLEND);
+                GL11.glDepthMask(true);
+                GL11.glAlphaFunc(GL11.GL_GREATER, 0.1F);
+            }
         }
-    }
 
-    @Inject(
-        method = "renderParticles",
-        at = { @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/Tessellator;draw()I",
-            shift = At.Shift.AFTER) })
-    public void injectRenderParticles3(Entity entity, float f, CallbackInfo ci) {
-        if (((IMixinWorld) this.worldObj).isSubWorld()) {
-            GL11.glPopMatrix();
-        }
-    }
-
-    @Inject(method = "renderParticles", at = { @At(value = "TAIL") })
-    public void injectRenderParticles4(Entity entity, float f, CallbackInfo ci) {
         if (!((IMixinWorld) this.worldObj).isSubWorld()) {
-            for (EntityPlayerProxy curPlayer : ((IMixinEntity) entity).getPlayerProxyMap()
+            for (EntityPlayerProxy curPlayer : ((IMixinEntity) p_78874_1_).getPlayerProxyMap()
                 .values()) {
                 EntityClientPlayerMPSubWorldProxy curPlayerProxy = (EntityClientPlayerMPSubWorldProxy) curPlayer;
-                curPlayerProxy.getMinecraft().effectRenderer.renderParticles(entity, f);
+                curPlayerProxy.getMinecraft().effectRenderer.renderParticles(p_78874_1_, p_78874_2_);
             }
         }
     }

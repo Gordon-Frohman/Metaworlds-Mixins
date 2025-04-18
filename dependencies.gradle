@@ -36,5 +36,4 @@
 dependencies {
 	shadowCompile group: 'org.jblas', name: 'jblas', version: '1.2.4'
 	shadowImplementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
-    implementation("com.github.GTNewHorizons:Angelica:1.0.0-beta40")
 }
