@@ -2,18 +2,22 @@ package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.entity.player;
 
 import java.util.Iterator;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.IBlockAccess;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -44,19 +48,19 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow(remap = true)
     protected abstract boolean isPlayer();
 
-    @Overwrite
-    public boolean isInBed() {
-        if (((EntityPlayer) (Object) this).worldObj
-            .getBlock(this.playerLocation.posX, this.playerLocation.posY, this.playerLocation.posZ)
-            .isBed(
-                ((EntityPlayer) (Object) this).worldObj,
-                playerLocation.posX,
-                playerLocation.posY,
-                playerLocation.posZ,
-                (EntityLivingBase) (Object) this)) {
+    // isInBed
+
+    @WrapOperation(
+        method = "isInBed",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/block/Block;isBed(Lnet/minecraft/world/IBlockAccess;IIILnet/minecraft/entity/EntityLivingBase;)Z"))
+    private boolean wrapIsBed(Block instance, IBlockAccess world, int x, int y, int z, EntityLivingBase player,
+        Operation<Boolean> original) {
+        if (original.call(instance, world, x, y, z, player)) {
             return true;
         } else {
-            if (!((IMixinWorld) ((EntityPlayer) (Object) this).worldObj).isSubWorld()) {
+            if (!((IMixinWorld) this.worldObj).isSubWorld()) {
                 Iterator i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator();

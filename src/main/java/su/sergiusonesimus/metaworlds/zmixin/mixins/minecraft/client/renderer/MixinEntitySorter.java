@@ -4,9 +4,13 @@ import net.minecraft.client.renderer.EntitySorter;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.util.Vec3;
 
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -22,20 +26,86 @@ public class MixinEntitySorter {
     @Shadow(remap = true)
     private double entityPosZ;
 
-    @Overwrite
-    public int compare(WorldRenderer p_compare_1_, WorldRenderer p_compare_2_) {
-        Vec3 transformedPos1 = ((IMixinWorld) p_compare_1_.worldObj)
-            .transformToLocal(-this.entityPosX, -this.entityPosY, -this.entityPosZ);
-        Vec3 transformedPos2 = ((IMixinWorld) p_compare_2_.worldObj)
-            .transformToLocal(-this.entityPosX, -this.entityPosY, -this.entityPosZ);
+    // compare
 
-        double d0 = (double) p_compare_1_.posXPlus - transformedPos1.xCoord;
-        double d1 = (double) p_compare_1_.posYPlus - transformedPos1.yCoord;
-        double d2 = (double) p_compare_1_.posZPlus - transformedPos1.zCoord;
-        double d3 = (double) p_compare_2_.posXPlus - transformedPos2.xCoord;
-        double d4 = (double) p_compare_2_.posYPlus - transformedPos2.yCoord;
-        double d5 = (double) p_compare_2_.posZPlus - transformedPos2.zCoord;
-        return (int) ((d0 * d0 + d1 * d1 + d2 * d2 - (d3 * d3 + d4 * d4 + d5 * d5)) * 1024.0D);
+    private Vec3 transformedPos1;
+    private Vec3 transformedPos2;
+
+    @Inject(
+        method = "compare(Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/client/renderer/WorldRenderer;)I",
+        at = @At("HEAD"))
+    private void getTransformedPos(WorldRenderer p_compare_1_, WorldRenderer p_compare_2_,
+        CallbackInfoReturnable<Integer> ci) {
+        transformedPos1 = ((IMixinWorld) p_compare_1_.worldObj)
+            .transformToLocal(-this.entityPosX, -this.entityPosY, -this.entityPosZ);
+        transformedPos2 = ((IMixinWorld) p_compare_2_.worldObj)
+            .transformToLocal(-this.entityPosX, -this.entityPosY, -this.entityPosZ);
+    }
+
+    @Redirect(
+        method = "compare(Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/client/renderer/WorldRenderer;)I",
+        at = @At(
+            value = "FIELD",
+            opcode = Opcodes.GETFIELD,
+            target = "Lnet/minecraft/client/renderer/EntitySorter;entityPosX:D",
+            ordinal = 0))
+    private double redirectEntityPosX1(EntitySorter entitySorter) {
+        return transformedPos1.xCoord;
+    }
+
+    @Redirect(
+        method = "compare(Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/client/renderer/WorldRenderer;)I",
+        at = @At(
+            value = "FIELD",
+            opcode = Opcodes.GETFIELD,
+            target = "Lnet/minecraft/client/renderer/EntitySorter;entityPosY:D",
+            ordinal = 0))
+    private double redirectEntityPosY1(EntitySorter entitySorter) {
+        return transformedPos1.yCoord;
+    }
+
+    @Redirect(
+        method = "compare(Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/client/renderer/WorldRenderer;)I",
+        at = @At(
+            value = "FIELD",
+            opcode = Opcodes.GETFIELD,
+            target = "Lnet/minecraft/client/renderer/EntitySorter;entityPosZ:D",
+            ordinal = 0))
+    private double redirectEntityPosZ1(EntitySorter entitySorter) {
+        return transformedPos1.zCoord;
+    }
+
+    @Redirect(
+        method = "compare(Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/client/renderer/WorldRenderer;)I",
+        at = @At(
+            value = "FIELD",
+            opcode = Opcodes.GETFIELD,
+            target = "Lnet/minecraft/client/renderer/EntitySorter;entityPosX:D",
+            ordinal = 1))
+    private double redirectEntityPosX2(EntitySorter entitySorter) {
+        return transformedPos2.xCoord;
+    }
+
+    @Redirect(
+        method = "compare(Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/client/renderer/WorldRenderer;)I",
+        at = @At(
+            value = "FIELD",
+            opcode = Opcodes.GETFIELD,
+            target = "Lnet/minecraft/client/renderer/EntitySorter;entityPosY:D",
+            ordinal = 1))
+    private double redirectEntityPosY2(EntitySorter entitySorter) {
+        return transformedPos2.yCoord;
+    }
+
+    @Redirect(
+        method = "compare(Lnet/minecraft/client/renderer/WorldRenderer;Lnet/minecraft/client/renderer/WorldRenderer;)I",
+        at = @At(
+            value = "FIELD",
+            opcode = Opcodes.GETFIELD,
+            target = "Lnet/minecraft/client/renderer/EntitySorter;entityPosZ:D",
+            ordinal = 1))
+    private double redirectEntityPosZ2(EntitySorter entitySorter) {
+        return transformedPos2.zCoord;
     }
 
 }

@@ -44,7 +44,6 @@ import net.minecraft.client.particle.EntitySuspendFX;
 import net.minecraft.client.renderer.DestroyBlockProgress;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.EntitySorter;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.RenderHelper;
@@ -81,8 +80,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -94,7 +95,6 @@ import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinDestroyBlockProgress;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinRenderGlobal;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinRenderList;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinWorldRenderer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
@@ -549,6 +549,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     /**
      * Loads all the renderers and sets up the basic settings usage
      */
+    // This one is probably way too complex to be modified without Overwrite
     @Overwrite
     public void loadRenderers() {
         if (this.theWorld != null) {
@@ -836,9 +837,10 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         }
     }
 
-    @Overwrite
-    public void markRenderersForNewPosition(int par1, int par2, int par3) {
+    @Inject(method = "markRenderersForNewPosition(III)V", at = @At(value = "HEAD"), cancellable = true)
+    private void markRenderersForNewPosition(int par1, int par2, int par3, CallbackInfo ci) {
         markRenderersForNewPosition((double) par1, (double) par2, (double) par3);
+        ci.cancel();
     }
 
     public void markRenderersForNewPositionSingle(double par1d, double par2d, double par3d, int subWorldID) {
@@ -937,6 +939,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     /**
      * Sorts all renderers based on the passed in entity. Args: entityLiving, renderPass, partialTickTime
      */
+    // Once again, too complex
     @Overwrite
     public int sortAndRender(EntityLivingBase par1EntityLivingBase, int par2, double par3) {
         this.theWorld.theProfiler.startSection("sortchunks");
@@ -1095,15 +1098,6 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
                                 float f8 = f5 - f1;
 
                                 GL11.glPushMatrix();
-                                /*
-                                 * if (f6 != 0.0F || f7 != 0.0F || f8 != 0.0F)
-                                 * {
-                                 * GL11.glTranslatef(f6, f7, f8);
-                                 * f9 += f6;
-                                 * f += f7;
-                                 * f1 += f8;
-                                 * }
-                                 */
                                 GL11.glTranslatef((float) -d9, (float) -d1, (float) -d2);
                                 if (((IMixinWorld) worldrenderer1.worldObj).isSubWorld()) {
                                     GL11.glMultMatrix(
@@ -1156,6 +1150,9 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         return k;
     }
 
+    // checkOcclusionQueryResult
+
+    // I'm too tired of tweaking this shit
     @Overwrite
     public void checkOcclusionQueryResult(int p_72720_1_, int p_72720_2_) {
         for (int k = p_72720_1_; k < p_72720_2_; ++k) {
@@ -1180,10 +1177,13 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         }
     }
 
+    // renderSortedRenderers
+
     /**
      * Renders the sorted renders for the specified render pass. Args: startRenderer, numRenderers, renderPass,
      * partialTickTime
      */
+    // Too complex
     @Overwrite
     public int renderSortedRenderers(int par1, int par2, int par3, double par4) {
         this.glRenderLists.clear();
@@ -1286,6 +1286,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     /**
      * Updates some of the renderers sorted by distance from the player
      */
+    // Fuck this shit
     @Overwrite
     public boolean updateRenderers(EntityLivingBase p_72716_1_, boolean p_72716_2_) {
         byte b0 = 2;
@@ -1369,8 +1370,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
             WorldRenderer worldrenderer2 = aworldrenderer[k1];
 
             if (worldrenderer2 != null) {
-                if (!worldrenderer2.isInFrustum && ((IMixinWorldRenderer) worldrenderer2).isInitialized()
-                    && k1 != b0 - 1) {
+                if (!worldrenderer2.isInFrustum && worldrenderer2.isInitialized && k1 != b0 - 1) {
                     aworldrenderer[k1] = null;
                     aworldrenderer[0] = null;
                     break;
@@ -1423,6 +1423,8 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
             this.worldRenderersToUpdate.remove(k1);
         }
     }
+
+    // drawBlockDamageTexture
 
     @Inject(
         method = "drawBlockDamageTexture(Lnet/minecraft/client/renderer/Tessellator;Lnet/minecraft/entity/EntityLivingBase;F)V",
@@ -1488,101 +1490,98 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         this.renderBlocksRg.blockAccess = this.theWorld;
     }
 
-    /**
-     * Draws the selection box for the player. Args: entityPlayer, rayTraceHit, i, itemStack, partialTickTime
-     */
-    @Overwrite
-    public void drawSelectionBox(EntityPlayer p_72731_1_, MovingObjectPosition par2MovingObjectPosition, int p_72731_3_,
-        float p_72731_4_) {
-        if (p_72731_3_ == 0 && par2MovingObjectPosition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK) {
-            GL11.glEnable(GL11.GL_BLEND);
-            OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-            GL11.glColor4f(0.0F, 0.0F, 0.0F, 0.4F);
-            GL11.glLineWidth(2.0F);
-            GL11.glDisable(GL11.GL_TEXTURE_2D);
-            GL11.glDepthMask(false);
-            float f1 = 0.002F;
-            Block block = ((IMixinMovingObjectPosition) par2MovingObjectPosition).getWorld()
-                .getBlock(
-                    par2MovingObjectPosition.blockX,
-                    par2MovingObjectPosition.blockY,
-                    par2MovingObjectPosition.blockZ);
+    // drawSelectionBox
 
-            if (block.getMaterial() != Material.air) {
-                block.setBlockBoundsBasedOnState(
-                    ((IMixinMovingObjectPosition) par2MovingObjectPosition).getWorld(),
-                    par2MovingObjectPosition.blockX,
-                    par2MovingObjectPosition.blockY,
-                    par2MovingObjectPosition.blockZ);
-                double d0 = p_72731_1_.lastTickPosX + (p_72731_1_.posX - p_72731_1_.lastTickPosX) * (double) p_72731_4_;
-                double d1 = p_72731_1_.lastTickPosY + (p_72731_1_.posY - p_72731_1_.lastTickPosY) * (double) p_72731_4_;
-                double d2 = p_72731_1_.lastTickPosZ + (p_72731_1_.posZ - p_72731_1_.lastTickPosZ) * (double) p_72731_4_;
-                drawOutlinedBoundingBox(
-                    ((IMixinAxisAlignedBB) block
-                        .getSelectedBoundingBoxFromPool(
-                            ((IMixinMovingObjectPosition) par2MovingObjectPosition).getWorld(),
-                            par2MovingObjectPosition.blockX,
-                            par2MovingObjectPosition.blockY,
-                            par2MovingObjectPosition.blockZ)
-                        .expand((double) f1, (double) f1, (double) f1))
-                            .getTransformedToGlobalBoundingBox(
-                                ((IMixinMovingObjectPosition) par2MovingObjectPosition).getWorld())
-                            .offset(-d0, -d1, -d2),
-                    -1);
-            }
+    private MovingObjectPosition storedMovingObjectPosition;
 
-            GL11.glDepthMask(true);
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glDisable(GL11.GL_BLEND);
-        }
+    @Inject(method = "drawSelectionBox", at = @At(value = "HEAD"))
+    private void storeMovingObjectPosition(EntityPlayer p_72731_1_, MovingObjectPosition par2MovingObjectPosition,
+        int p_72731_3_, float p_72731_4_, CallbackInfo ci) {
+        storedMovingObjectPosition = par2MovingObjectPosition;
     }
 
-    /**
-     * Draws lines for the edges of the bounding box.
-     */
-    @Overwrite
-    public static void drawOutlinedBoundingBox(AxisAlignedBB p_147590_0_, int p_147590_1_) {
-        OrientedBB par1OrientedBB = ((IMixinAxisAlignedBB) p_147590_0_).getOrientedBB();
-        Tessellator tessellator = Tessellator.instance;
-        tessellator.startDrawing(3);
+    @WrapOperation(
+        method = "drawSelectionBox",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/renderer/RenderGlobal;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;",
+            opcode = Opcodes.GETFIELD))
+    private WorldClient wrapTheWorld(RenderGlobal instance, Operation<WorldClient> original) {
+        return (WorldClient) ((IMixinMovingObjectPosition) storedMovingObjectPosition).getWorld();
+    }
 
-        if (p_147590_1_ != -1) {
-            tessellator.setColorOpaque_I(p_147590_1_);
+    @WrapOperation(
+        method = "drawSelectionBox",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/AxisAlignedBB;expand(DDD)Lnet/minecraft/util/AxisAlignedBB;"))
+    private AxisAlignedBB wrapExpandBB(AxisAlignedBB instance, double x, double y, double z,
+        Operation<AxisAlignedBB> original) {
+        return ((IMixinAxisAlignedBB) original.call(instance, x, y, z))
+            .getTransformedToGlobalBoundingBox(((IMixinMovingObjectPosition) storedMovingObjectPosition).getWorld());
+    }
+
+    @WrapOperation(
+        method = "drawSelectionBox",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/util/AxisAlignedBB;getOffsetBoundingBox(DDD)Lnet/minecraft/util/AxisAlignedBB;"))
+    private AxisAlignedBB wrapGetOffsetBoundingBox(AxisAlignedBB instance, double x, double y, double z,
+        Operation<AxisAlignedBB> original) {
+        return instance.offset(x, y, z);
+    }
+
+    // drawOutlinedBoundingBox
+
+    private static AxisAlignedBB storedAABB;
+    private static OrientedBB storedOBB;
+
+    @Inject(method = "drawOutlinedBoundingBox", at = @At(value = "HEAD"))
+    private static void storeVariables(AxisAlignedBB aabb, int p_147590_1_, CallbackInfo ci) {
+        storedAABB = aabb;
+        storedOBB = ((IMixinAxisAlignedBB) aabb).getOrientedBB();
+    }
+
+    @ModifyArgs(
+        method = "drawOutlinedBoundingBox",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;addVertex(DDD)V"))
+    private static void modifyAddVertex(Args args) {
+        double x = args.get(0);
+        double y = args.get(1);
+        double z = args.get(2);
+        int vertexIndex;
+        if (y == storedAABB.minY) {
+            if (z == storedAABB.minZ) {
+                if (x == storedAABB.minX) {
+                    vertexIndex = 0;
+                } else {
+                    vertexIndex = 1;
+                }
+            } else {
+                if (x == storedAABB.minX) {
+                    vertexIndex = 2;
+                } else {
+                    vertexIndex = 3;
+                }
+            }
+        } else {
+            if (z == storedAABB.minZ) {
+                if (x == storedAABB.minX) {
+                    vertexIndex = 4;
+                } else {
+                    vertexIndex = 5;
+                }
+            } else {
+                if (x == storedAABB.minX) {
+                    vertexIndex = 6;
+                } else {
+                    vertexIndex = 7;
+                }
+            }
         }
-
-        tessellator.addVertex(par1OrientedBB.getX(0), par1OrientedBB.getY(0), par1OrientedBB.getZ(0));
-        tessellator.addVertex(par1OrientedBB.getX(1), par1OrientedBB.getY(1), par1OrientedBB.getZ(1));
-        tessellator.addVertex(par1OrientedBB.getX(3), par1OrientedBB.getY(3), par1OrientedBB.getZ(3));
-        tessellator.addVertex(par1OrientedBB.getX(2), par1OrientedBB.getY(2), par1OrientedBB.getZ(2));
-        tessellator.addVertex(par1OrientedBB.getX(0), par1OrientedBB.getY(0), par1OrientedBB.getZ(0));
-        tessellator.draw();
-        tessellator.startDrawing(3);
-
-        if (p_147590_1_ != -1) {
-            tessellator.setColorOpaque_I(p_147590_1_);
-        }
-
-        tessellator.addVertex(par1OrientedBB.getX(4), par1OrientedBB.getY(4), par1OrientedBB.getZ(4));
-        tessellator.addVertex(par1OrientedBB.getX(5), par1OrientedBB.getY(5), par1OrientedBB.getZ(5));
-        tessellator.addVertex(par1OrientedBB.getX(7), par1OrientedBB.getY(7), par1OrientedBB.getZ(7));
-        tessellator.addVertex(par1OrientedBB.getX(6), par1OrientedBB.getY(6), par1OrientedBB.getZ(6));
-        tessellator.addVertex(par1OrientedBB.getX(4), par1OrientedBB.getY(4), par1OrientedBB.getZ(4));
-        tessellator.draw();
-        tessellator.startDrawing(1);
-
-        if (p_147590_1_ != -1) {
-            tessellator.setColorOpaque_I(p_147590_1_);
-        }
-
-        tessellator.addVertex(par1OrientedBB.getX(0), par1OrientedBB.getY(0), par1OrientedBB.getZ(0));
-        tessellator.addVertex(par1OrientedBB.getX(4), par1OrientedBB.getY(4), par1OrientedBB.getZ(4));
-        tessellator.addVertex(par1OrientedBB.getX(1), par1OrientedBB.getY(1), par1OrientedBB.getZ(1));
-        tessellator.addVertex(par1OrientedBB.getX(5), par1OrientedBB.getY(5), par1OrientedBB.getZ(5));
-        tessellator.addVertex(par1OrientedBB.getX(2), par1OrientedBB.getY(2), par1OrientedBB.getZ(2));
-        tessellator.addVertex(par1OrientedBB.getX(6), par1OrientedBB.getY(6), par1OrientedBB.getZ(6));
-        tessellator.addVertex(par1OrientedBB.getX(3), par1OrientedBB.getY(3), par1OrientedBB.getZ(3));
-        tessellator.addVertex(par1OrientedBB.getX(7), par1OrientedBB.getY(7), par1OrientedBB.getZ(7));
-        tessellator.draw();
+        args.set(0, storedOBB.getX(vertexIndex));
+        args.set(1, storedOBB.getY(vertexIndex));
+        args.set(2, storedOBB.getZ(vertexIndex));
     }
 
     /**
@@ -1642,21 +1641,11 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     public void clipRenderersByFrustum(ICamera p_72729_1_, float p_72729_2_) {
         for (Map.Entry<Integer, WorldRenderer> curRendererEntry : this.worldRenderersMap.entrySet()) {
             WorldRenderer curRenderer = curRendererEntry.getValue();
-            if (!curRenderer.skipAllRenderPasses() && /* curRenderer.isInitialized() && */ (!curRenderer.isInFrustum
-                || (curRendererEntry.getKey() + this.frustumCheckOffset & 15) == 0)) {
+            if (!curRenderer.skipAllRenderPasses()
+                && (!curRenderer.isInFrustum || (curRendererEntry.getKey() + this.frustumCheckOffset & 15) == 0)) {
                 curRenderer.updateInFrustum(p_72729_1_);
             }
         }
-        /*
-         * for (int i = 0; i < this.worldRenderers.length; ++i)
-         * {
-         * if (!this.worldRenderers[i].skipAllRenderPasses() && (!this.worldRenderers[i].isInFrustum || (i +
-         * this.frustumCheckOffset & 15) == 0))
-         * {
-         * this.worldRenderers[i].updateInFrustum(p_72729_1_);
-         * }
-         * }
-         */
 
         ++this.frustumCheckOffset;
     }

@@ -6,9 +6,12 @@ import java.nio.IntBuffer;
 import net.minecraft.client.renderer.RenderList;
 
 import org.lwjgl.opengl.GL11;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinRenderList;
 
@@ -79,25 +82,17 @@ public class MixinRenderList implements IMixinRenderList {
         return customTransformation;
     }
 
-    @Overwrite
-    public void callLists() {
-        if (this.valid) {
-            if (!this.bufferFlipped) {
-                this.glLists.flip();
-                this.bufferFlipped = true;
-            }
+    @ModifyArgs(
+        method = "callLists",
+        at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glTranslatef(FFF)V", opcode = Opcodes.INVOKESTATIC))
+    private void modifyCallLists(Args args) {
+        GL11.glTranslatef((float) (-this.cameraX), (float) (-this.cameraY), (float) (-this.cameraZ));
 
-            if (this.glLists.remaining() > 0) {
-                GL11.glPushMatrix();
-                GL11.glTranslatef((float) (-this.cameraX), (float) (-this.cameraY), (float) (-this.cameraZ));
+        if (this.customTransformation != null) GL11.glMultMatrix(this.customTransformation);
 
-                if (this.customTransformation != null) GL11.glMultMatrix(this.customTransformation);
-
-                GL11.glTranslatef((float) this.renderChunkX, (float) this.renderChunkY, (float) this.renderChunkZ);
-                GL11.glCallLists(this.glLists);
-                GL11.glPopMatrix();
-            }
-        }
+        args.set(0, (float) this.renderChunkX);
+        args.set(1, (float) this.renderChunkY);
+        args.set(2, (float) this.renderChunkZ);
     }
 
     public boolean rendersChunk(int par1, int par2, int par3, int parSubWorldID) {
