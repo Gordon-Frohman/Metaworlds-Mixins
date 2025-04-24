@@ -35,10 +35,10 @@ import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.PacketHandler;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.client.IMixinC03PacketPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.PacketHandler;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.client.IMixinC03PacketPlayer;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer {

@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinRenderList;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderList;
 
 @Mixin(RenderList.class)
 public class MixinRenderList implements IMixinRenderList {

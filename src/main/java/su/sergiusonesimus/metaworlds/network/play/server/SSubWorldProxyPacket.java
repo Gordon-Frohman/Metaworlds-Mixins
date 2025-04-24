@@ -22,7 +22,7 @@ import io.netty.channel.ChannelHandlerContext;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.network.MetaWorldsPacket;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 
 public class SSubWorldProxyPacket extends MetaWorldsPacket {
 

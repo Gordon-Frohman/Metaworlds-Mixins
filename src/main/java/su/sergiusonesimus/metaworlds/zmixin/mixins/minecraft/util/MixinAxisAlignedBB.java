@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.util.OBBPool;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinAxisAlignedBB;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinMovingObjectPosition;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinMovingObjectPosition;
 
 @Mixin(AxisAlignedBB.class)
 public abstract class MixinAxisAlignedBB implements IMixinAxisAlignedBB {

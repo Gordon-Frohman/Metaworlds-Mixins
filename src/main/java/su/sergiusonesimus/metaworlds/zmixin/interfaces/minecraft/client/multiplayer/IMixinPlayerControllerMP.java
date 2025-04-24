@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.client.multiplayer;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.multiplayer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerControllerMP;

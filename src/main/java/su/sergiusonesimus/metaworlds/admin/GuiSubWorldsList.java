@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 
 import cpw.mods.fml.client.GuiScrollingList;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class GuiSubWorldsList extends GuiScrollingList {

@@ -20,12 +20,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.llamalad7.mixinextras.sugar.Local;
 
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.PacketHandler;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS08PacketPlayerPosLook;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS14PacketEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS18PacketEntityTeleport;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.PacketHandler;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS08PacketPlayerPosLook;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS14PacketEntity;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS18PacketEntityTeleport;
 
 @Mixin(NetHandlerPlayClient.class)
 public abstract class MixinNetHandlerPlayClient {

@@ -15,7 +15,7 @@ import su.sergiusonesimus.metaworlds.client.multiplayer.PlayerControllerMPSubWor
 import su.sergiusonesimus.metaworlds.client.network.NetHandlerPlayClientSubWorldProxy;
 import su.sergiusonesimus.metaworlds.client.renderer.RenderGlobalSubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 

@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.client;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.client;
 
 public interface IMixinC03PacketPlayer {
 

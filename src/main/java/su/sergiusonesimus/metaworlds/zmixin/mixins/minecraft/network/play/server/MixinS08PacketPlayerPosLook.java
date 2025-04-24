@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS08PacketPlayerPosLook;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS08PacketPlayerPosLook;
 
 @Mixin(S08PacketPlayerPosLook.class)
 public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlayerPosLook {

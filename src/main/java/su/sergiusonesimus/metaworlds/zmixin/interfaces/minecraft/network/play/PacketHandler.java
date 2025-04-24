@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play;
 
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition;
@@ -13,10 +13,10 @@ import net.minecraft.network.play.server.S18PacketEntityTeleport;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.client.IMixinC03PacketPlayer;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS08PacketPlayerPosLook;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS14PacketEntity;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS18PacketEntityTeleport;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.client.IMixinC03PacketPlayer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS08PacketPlayerPosLook;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS14PacketEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS18PacketEntityTeleport;
 
 public class PacketHandler {
 

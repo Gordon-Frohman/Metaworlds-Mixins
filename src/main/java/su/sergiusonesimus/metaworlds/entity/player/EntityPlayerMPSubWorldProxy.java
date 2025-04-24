@@ -25,8 +25,8 @@ import net.minecraftforge.event.world.ChunkWatchEvent;
 
 import su.sergiusonesimus.metaworlds.network.NetworkManagerSubWorldProxy;
 import su.sergiusonesimus.metaworlds.server.management.ItemInWorldManagerForProxy;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.player.IMixinEntityPlayer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements EntityPlayerProxy {

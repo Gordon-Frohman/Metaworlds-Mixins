@@ -22,9 +22,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntityLivingBase;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.player.IMixinEntityPlayer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntityLivingBase;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.entity.MixinEntityLivingBase;
 

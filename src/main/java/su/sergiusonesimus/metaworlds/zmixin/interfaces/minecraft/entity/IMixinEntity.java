@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.entity;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity;
 
 import java.util.HashMap;
 

@@ -56,13 +56,13 @@ import su.sergiusonesimus.metaworlds.world.chunk.ChunkSubWorld;
 import su.sergiusonesimus.metaworlds.world.chunk.storage.AnvilChunkLoaderSubWorld;
 import su.sergiusonesimus.metaworlds.world.gen.ChunkProviderServerSubWorld;
 import su.sergiusonesimus.metaworlds.world.gen.ChunkProviderServerSubWorldBlank;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.server.IMixinMinecraftServer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.server.management.IMixinPlayerManager;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinAxisAlignedBB;
 
 // This says that there is an error, but it reality there isn't because we change WorldServer's superclass at runtime
 public class SubWorldServer extends WorldServer implements SubWorld {

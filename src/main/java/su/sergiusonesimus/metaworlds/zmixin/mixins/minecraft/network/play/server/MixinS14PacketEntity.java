@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server.IMixinS14PacketEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS14PacketEntity;
 
 @Mixin(S14PacketEntity.class)
 public abstract class MixinS14PacketEntity implements IMixinS14PacketEntity {

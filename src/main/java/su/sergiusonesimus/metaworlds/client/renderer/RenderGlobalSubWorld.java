@@ -23,13 +23,12 @@ import net.minecraft.world.World;
 import org.lwjgl.opengl.ARBOcclusionQuery;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinRenderGlobal;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class RenderGlobalSubWorld extends RenderGlobal {
 
     private RenderGlobal parentRenderGlobal;
-    // private World worldObj;
 
     public RenderGlobalSubWorld(Minecraft par1Minecraft, RenderGlobal origRenderGlobal) {
         super(null);
@@ -66,7 +65,6 @@ public class RenderGlobalSubWorld extends RenderGlobal {
 
         this.theWorld = par1Minecraft.theWorld;
 
-        // this.worldObj = par1;
         this.parentRenderGlobal = origRenderGlobal;
     }
 

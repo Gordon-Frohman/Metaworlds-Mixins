@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.player;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player;
 
 public interface IMixinEntityPlayer {
 

@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.server;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server;
 
 public interface IMixinS14PacketEntity {
 

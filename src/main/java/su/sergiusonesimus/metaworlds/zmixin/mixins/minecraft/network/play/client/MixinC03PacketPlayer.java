@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.network.play.client.IMixinC03PacketPlayer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.client.IMixinC03PacketPlayer;
 
 @Mixin(C03PacketPlayer.class)
 public abstract class MixinC03PacketPlayer implements IMixinC03PacketPlayer {

@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.client.particles;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.particles;
 
 import net.minecraft.world.World;
 

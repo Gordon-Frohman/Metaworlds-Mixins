@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 import su.sergiusonesimus.metaworlds.entity.EntitySubWorldController;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class BlockSubWorldController extends Block {

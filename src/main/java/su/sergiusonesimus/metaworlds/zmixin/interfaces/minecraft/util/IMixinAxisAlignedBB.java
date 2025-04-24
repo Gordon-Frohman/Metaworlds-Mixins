@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.util;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util;
 
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;

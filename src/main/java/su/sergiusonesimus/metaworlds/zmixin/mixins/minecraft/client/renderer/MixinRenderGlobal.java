@@ -92,14 +92,14 @@ import com.llamalad7.mixinextras.sugar.Local;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinDestroyBlockProgress;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinRenderGlobal;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinRenderList;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinDestroyBlockProgress;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderList;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinAxisAlignedBB;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.util.IMixinMovingObjectPosition;
 
 @Mixin(value = RenderGlobal.class)
 public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
@@ -2096,14 +2096,11 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     @Shadow(remap = true)
     protected abstract void onStaticEntitiesChanged();
 
-    /**
-     * Starts (or continues) destroying a block with given ID at the given coordinates for the given partially destroyed
-     * value
-     */
-    @Overwrite
-    public void destroyBlockPartially(int p_147587_1_, int p_147587_2_, int p_147587_3_, int p_147587_4_,
-        int p_147587_5_) {
+    @Inject(method = "destroyBlockPartially", at = @At(value = "HEAD"), cancellable = true)
+    private void destroyBlockPartially(int p_147587_1_, int p_147587_2_, int p_147587_3_, int p_147587_4_,
+        int p_147587_5_, CallbackInfo ci) {
         destroyBlockPartially(p_147587_1_, p_147587_2_, p_147587_3_, p_147587_4_, p_147587_5_, 0);
+        ci.cancel();
     }
 
     public void destroyBlockPartially(int p_147587_1_, int p_147587_2_, int p_147587_3_, int p_147587_4_,

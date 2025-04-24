@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer;
 
 import java.nio.DoubleBuffer;
 

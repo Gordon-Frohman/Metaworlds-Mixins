@@ -4,7 +4,7 @@ import net.minecraft.client.renderer.DestroyBlockProgress;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.client.renderer.IMixinDestroyBlockProgress;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinDestroyBlockProgress;
 
 @Mixin(DestroyBlockProgress.class)
 public class MixinDestroyBlockProgress implements IMixinDestroyBlockProgress {

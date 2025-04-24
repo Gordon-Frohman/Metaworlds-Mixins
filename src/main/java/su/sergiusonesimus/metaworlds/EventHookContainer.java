@@ -14,7 +14,7 @@ import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 

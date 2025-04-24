@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.zmixin.interfaces.client.network;
+package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.network;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
