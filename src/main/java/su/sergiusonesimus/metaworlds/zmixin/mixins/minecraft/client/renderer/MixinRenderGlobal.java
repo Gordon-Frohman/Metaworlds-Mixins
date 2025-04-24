@@ -837,6 +837,12 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         }
     }
 
+    public void markRenderersForNewPositionSubworlds(double par1, double par2, double par3) {
+        for (World curWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
+            this.markRenderersForNewPositionSingle(par1, par2, par3, ((IMixinWorld) curWorld).getSubWorldID());
+        }
+    }
+
     @Inject(method = "markRenderersForNewPosition(III)V", at = @At(value = "HEAD"), cancellable = true)
     private void markRenderersForNewPosition(int par1, int par2, int par3, CallbackInfo ci) {
         markRenderersForNewPosition((double) par1, (double) par2, (double) par3);

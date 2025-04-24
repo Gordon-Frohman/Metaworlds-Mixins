@@ -160,7 +160,6 @@ public class MetaworldsMod {
             String allNames[] = mc.getAllUsernames()
                 .clone();
             for (int i = 0; i < allNames.length; i++) {
-                // For 1.7.10, func_152612_a = getPlayerForUsername
                 EntityPlayerMP player = MinecraftServer.getServer()
                     .getConfigurationManager()
                     .func_152612_a(allNames[i]);

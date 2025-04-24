@@ -1,6 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8.5-GTNH",
+  "plugin": "su.sergiusonesimus.metaworlds.zmixin.Mixins",
   "package": "su.sergiusonesimus.metaworlds.zmixin.mixins",
   "mixinPriority": 100,
   "refmap": "mixins.metaworlds.refmap.json",
