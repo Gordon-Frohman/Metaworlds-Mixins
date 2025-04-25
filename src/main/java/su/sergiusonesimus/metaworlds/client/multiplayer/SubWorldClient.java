@@ -546,11 +546,6 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         }
     }
 
-    public void playSoundEffect(double par1, double par3, double par5, String par7Str, float par8, float par9) {
-        Vec3 newPos = this.transformToGlobal(par1, par3, par5);
-        super.playSoundEffect(newPos.xCoord, newPos.yCoord, newPos.zCoord, par7Str, par8, par9);
-    }
-
     public void playAuxSFXAtEntity(EntityPlayer par1EntityPlayer, int par2, int par3, int par4, int par5, int par6) {
         super.playAuxSFXAtEntity(par1EntityPlayer, par2, par3, par4, par5, par6);
     }

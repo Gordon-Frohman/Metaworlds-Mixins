@@ -549,7 +549,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     /**
      * Loads all the renderers and sets up the basic settings usage
      */
-    // This one is probably way too complex to be modified without Overwrite
+    // This one is too complex to be modified without Overwrite
     @Overwrite
     public void loadRenderers() {
         if (this.theWorld != null) {
@@ -679,7 +679,6 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
                 }
             }
-            // this.renderEntitiesStartupCounter = 2;
         }
     }
 
@@ -1158,7 +1157,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     // checkOcclusionQueryResult
 
-    // I'm too tired of tweaking this shit
+    // Too complex
     @Overwrite
     public void checkOcclusionQueryResult(int p_72720_1_, int p_72720_2_) {
         for (int k = p_72720_1_; k < p_72720_2_; ++k) {
@@ -1292,7 +1291,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     /**
      * Updates some of the renderers sorted by distance from the player
      */
-    // Fuck this shit
+    // Too complex
     @Overwrite
     public boolean updateRenderers(EntityLivingBase p_72716_1_, boolean p_72716_2_) {
         byte b0 = 2;

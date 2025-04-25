@@ -17,6 +17,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldSettings;
@@ -476,5 +477,19 @@ public abstract class MixinWorld implements IMixinWorld {
             }
         }
         return canSee;
+    }
+
+    @Inject(method = "playSoundEffect", at = @At(value = "HEAD"), cancellable = true)
+    public void injectPlaySoundEffect(double x, double y, double z, String soundName, float volume, float pitch,
+        CallbackInfo ci) {
+        if (this.isSubWorld) {
+            World parentWorld = this.getParentWorld();
+            Vec3 globalCoords = this.transformToGlobal(x, y, z);
+            for (int i = 0; i < parentWorld.worldAccesses.size(); ++i) {
+                ((IWorldAccess) parentWorld.worldAccesses.get(i))
+                    .playSound(soundName, globalCoords.xCoord, globalCoords.yCoord, globalCoords.zCoord, volume, pitch);
+            }
+            ci.cancel();
+        }
     }
 }

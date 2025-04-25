@@ -22,14 +22,6 @@ public class Mixins implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (targetClassName == "net.minecraft.client.renderer.RenderGlobal"
-            && mixinClassName == "su.sergiusonesimus.metaworlds.zmixin.mixins.angelica.MixinRenderGlobal") {
-            try {
-                return Class.forName("me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer") != null;
-            } catch (ClassNotFoundException e) {
-
-            }
-        }
         return true;
     }
 
