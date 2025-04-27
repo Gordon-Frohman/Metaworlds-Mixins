@@ -15,7 +15,6 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
-import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
@@ -563,25 +562,25 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     }
 
     public void registerEntityToDrag(Entity targetEntity) {
-        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX) && targetEntity.worldObj != this) {
+        if (targetEntity instanceof Entity && targetEntity.worldObj != this) {
             this.entitiesToDrag.put(targetEntity, (Vec3) null);
         }
     }
 
     public void unregisterEntityToDrag(Entity targetEntity) {
-        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX) && targetEntity.worldObj != this) {
+        if (targetEntity instanceof Entity && targetEntity.worldObj != this) {
             this.entitiesToDrag.remove(targetEntity);
         }
     }
 
     public void registerDetachedEntity(Entity targetEntity) {
-        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX) && targetEntity.worldObj == this) {
+        if (targetEntity instanceof Entity && targetEntity.worldObj == this) {
             this.entitiesToNotDrag.put(targetEntity, (Vec3) null);
         }
     }
 
     public void unregisterDetachedEntity(Entity targetEntity) {
-        if (targetEntity instanceof Entity && !(targetEntity instanceof EntityFX) && targetEntity.worldObj == this) {
+        if (targetEntity instanceof Entity && targetEntity.worldObj == this) {
             this.entitiesToNotDrag.remove(targetEntity);
         }
     }
