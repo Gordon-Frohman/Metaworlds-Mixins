@@ -12,11 +12,19 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntityLivingBase;
@@ -138,6 +146,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
         return false;
     }
 
+    /**
+     * @author Sergius Onesimus
+     * @reason We need to be able to modify local variables i, j, k and block, which is impossible without overwriting
+     */
     @Overwrite
     protected void updateFallState(double distanceFallenThisTick, boolean isOnGround) {
         if (!this.isInWater()) {
@@ -158,16 +170,27 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                         .expand(0, 1, 0);
                     if (worldBB.intersectsWith(this.boundingBox)) {
                         Vec3 localCoords = ((IMixinWorld) world).transformToLocal(globalCoords);
-                        block = world.getBlock(
-                            MathHelper.floor_double(localCoords.xCoord),
-                            MathHelper.floor_double(localCoords.yCoord),
-                            MathHelper.floor_double(localCoords.zCoord));
+                        int localI = MathHelper.floor_double(localCoords.xCoord);
+                        int localJ = MathHelper.floor_double(localCoords.yCoord);
+                        int localK = MathHelper.floor_double(localCoords.zCoord);
+                        block = world.getBlock(localI, localJ, localK);
                         if (block.getMaterial() != Material.air) {
                             targetWorld = world;
-                            i = MathHelper.floor_double(localCoords.xCoord);
-                            j = MathHelper.floor_double(localCoords.yCoord);
-                            k = MathHelper.floor_double(localCoords.zCoord);
+                            i = localI;
+                            j = localJ;
+                            k = localK;
                             break;
+                        } else {
+                            int l = world.getBlock(localI, localJ - 1, localK)
+                                .getRenderType();
+                            if (l == 11 || l == 32 || l == 21) {
+                                targetWorld = world;
+                                i = localI;
+                                j = localJ;
+                                k = localK;
+                                block = world.getBlock(localI, localJ - 1, localK);
+                                break;
+                            }
                         }
                     }
                 }
@@ -188,125 +211,60 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
         super.updateFallState(distanceFallenThisTick, isOnGround);
     }
 
-    /**
-     * Called when the entity is attacked.
-     */
-    @Overwrite
-    public boolean attackEntityFrom(DamageSource source, float amount) {
-        if (ForgeHooks.onLivingAttack((EntityLivingBase) (Object) this, source, amount)) return false;
-        if (this.isEntityInvulnerable()) {
-            return false;
-        } else if (this.worldObj.isRemote) {
-            return false;
-        } else {
-            this.entityAge = 0;
+    // attackEntityFrom
 
-            if (this.getHealth() <= 0.0F) {
-                return false;
-            } else if (source.isFireDamage() && this.isPotionActive(Potion.fireResistance)) {
-                return false;
-            } else {
-                if ((source == DamageSource.anvil || source == DamageSource.fallingBlock)
-                    && this.getEquipmentInSlot(4) != null) {
-                    this.getEquipmentInSlot(4)
-                        .damageItem(
-                            (int) (amount * 4.0F + this.rand.nextFloat() * amount * 2.0F),
-                            (EntityLivingBase) (Object) this);
-                    amount *= 0.75F;
-                }
+    private Vec3 entityPos;
+    private Vec3 thisPos;
 
-                this.limbSwingAmount = 1.5F;
-                boolean flag = true;
-
-                if ((float) this.hurtResistantTime > (float) this.maxHurtResistantTime / 2.0F) {
-                    if (amount <= this.lastDamage) {
-                        return false;
-                    }
-
-                    this.damageEntity(source, amount - this.lastDamage);
-                    this.lastDamage = amount;
-                    flag = false;
-                } else {
-                    this.lastDamage = amount;
-                    this.prevHealth = this.getHealth();
-                    this.hurtResistantTime = this.maxHurtResistantTime;
-                    this.damageEntity(source, amount);
-                    this.hurtTime = this.maxHurtTime = 10;
-                }
-
-                this.attackedAtYaw = 0.0F;
-                Entity entity = source.getEntity();
-
-                if (entity != null) {
-                    if (entity instanceof EntityLivingBase) {
-                        this.setRevengeTarget((EntityLivingBase) entity);
-                    }
-
-                    if (entity instanceof EntityPlayer) {
-                        this.recentlyHit = 100;
-                        this.attackingPlayer = (EntityPlayer) entity;
-                    } else if (entity instanceof net.minecraft.entity.passive.EntityTameable) {
-                        net.minecraft.entity.passive.EntityTameable entitywolf = (net.minecraft.entity.passive.EntityTameable) entity;
-
-                        if (entitywolf.isTamed()) {
-                            this.recentlyHit = 100;
-                            this.attackingPlayer = null;
-                        }
-                    }
-                }
-
-                if (flag) {
-                    this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 2);
-
-                    if (source != DamageSource.drown) {
-                        this.setBeenAttacked();
-                    }
-
-                    if (entity != null) {
-                        Vec3 entityPos = ((IMixinWorld) entity.worldObj).transformToGlobal(entity);
-                        Vec3 thisPos = ((IMixinWorld) this.worldObj)
-                            .transformToGlobal((EntityLivingBase) (Object) this);
-
-                        double dirX = entityPos.xCoord - thisPos.xCoord;
-                        double dirZ;
-
-                        for (dirZ = entityPos.zCoord - thisPos.zCoord; dirX * dirX + dirZ * dirZ
-                            < 1.0E-4D; dirZ = (Math.random() - Math.random()) * 0.01D) {
-                            dirX = (Math.random() - Math.random()) * 0.01D;
-                        }
-
-                        this.attackedAtYaw = (float) (Math.atan2(dirZ, dirX) * 180.0D / Math.PI) - this.rotationYaw;
-                        this.knockBack(entity, amount, dirX, dirZ);
-                    } else {
-                        this.attackedAtYaw = (float) ((int) (Math.random() * 2.0D) * 180);
-                    }
-                }
-
-                String s;
-
-                if (this.getHealth() <= 0.0F) {
-                    s = this.getDeathSound();
-
-                    if (flag && s != null) {
-                        this.playSound(s, this.getSoundVolume(), this.getSoundPitch());
-                    }
-
-                    this.onDeath(source);
-                } else {
-                    s = this.getHurtSound();
-
-                    if (flag && s != null) {
-                        this.playSound(s, this.getSoundVolume(), this.getSoundPitch());
-                    }
-                }
-
-                return true;
-            }
-        }
+    @Inject(
+        method = "attackEntityFrom",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/Entity;posX:D",
+            opcode = Opcodes.GETFIELD,
+            shift = Shift.BEFORE,
+            ordinal = 0))
+    private void injectAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci,
+        @Local(name = "entity") Entity entity) {
+        entityPos = ((IMixinWorld) entity.worldObj).transformToGlobal(entity);
+        thisPos = ((IMixinWorld) this.worldObj).transformToGlobal((EntityLivingBase) (Object) this);
     }
+
+    @WrapOperation(
+        method = "attackEntityFrom",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;posX:D", opcode = Opcodes.GETFIELD))
+    private double wrapPosX(Entity instance, Operation<Double> original) {
+        return entityPos.xCoord;
+    }
+
+    @WrapOperation(
+        method = "attackEntityFrom",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;posX:D", opcode = Opcodes.GETFIELD))
+    private double wrapPosX(EntityLivingBase instance, Operation<Double> original) {
+        return thisPos.xCoord;
+    }
+
+    @WrapOperation(
+        method = "attackEntityFrom",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;posZ:D", opcode = Opcodes.GETFIELD))
+    private double wrapPosZ(Entity instance, Operation<Double> original) {
+        return entityPos.zCoord;
+    }
+
+    @WrapOperation(
+        method = "attackEntityFrom",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLivingBase;posZ:D", opcode = Opcodes.GETFIELD))
+    private double wrapPosZ(EntityLivingBase instance, Operation<Double> original) {
+        return thisPos.zCoord;
+    }
+
+    // moveEntityWithHeading
 
     /**
      * Moves the entity based on the specified heading. Args: strafe, forward
+     * 
+     * @author Sergius Onesimus
+     * @reason Temporary solution for player spawn on subworlds
      */
     @Overwrite
     public void moveEntityWithHeading(float strafe, float forward) {
