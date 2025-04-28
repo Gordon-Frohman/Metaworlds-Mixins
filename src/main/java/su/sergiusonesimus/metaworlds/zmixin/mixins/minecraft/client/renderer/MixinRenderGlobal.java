@@ -548,8 +548,10 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     /**
      * Loads all the renderers and sets up the basic settings usage
+     * 
+     * @author Sergius Onesimus
+     * @reason Too complex to be modified without Overwrite
      */
-    // This one is too complex to be modified without Overwrite
     @Overwrite
     public void loadRenderers() {
         if (this.theWorld != null) {
@@ -943,8 +945,10 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     /**
      * Sorts all renderers based on the passed in entity. Args: entityLiving, renderPass, partialTickTime
+     * 
+     * @author Sergius Onesimus
+     * @reason Too complex to be modified without Overwrite
      */
-    // Once again, too complex
     @Overwrite
     public int sortAndRender(EntityLivingBase par1EntityLivingBase, int par2, double par3) {
         this.theWorld.theProfiler.startSection("sortchunks");
@@ -1156,8 +1160,10 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     }
 
     // checkOcclusionQueryResult
-
-    // Too complex
+    /**
+     * @author Sergius Onesimus
+     * @reason Too complex to be modified without Overwrite
+     */
     @Overwrite
     public void checkOcclusionQueryResult(int p_72720_1_, int p_72720_2_) {
         for (int k = p_72720_1_; k < p_72720_2_; ++k) {
@@ -1187,8 +1193,10 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     /**
      * Renders the sorted renders for the specified render pass. Args: startRenderer, numRenderers, renderPass,
      * partialTickTime
+     * 
+     * @author Sergius Onesimus
+     * @reason Too complex to be modified without Overwrite
      */
-    // Too complex
     @Overwrite
     public int renderSortedRenderers(int par1, int par2, int par3, double par4) {
         this.glRenderLists.clear();
@@ -1290,8 +1298,10 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     /**
      * Updates some of the renderers sorted by distance from the player
+     * 
+     * @author Sergius Onesimus
+     * @reason Too complex to be modified without Overwrite
      */
-    // Too complex
     @Overwrite
     public boolean updateRenderers(EntityLivingBase p_72716_1_, boolean p_72716_2_) {
         byte b0 = 2;
@@ -1591,6 +1601,9 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     /**
      * Marks the blocks in the given range for update
+     * 
+     * @author Sergius Onesimus
+     * @reason Too complex to be modified without Overwrite
      */
     @Overwrite
     public void markBlocksForUpdate(int p_72725_1_, int p_72725_2_, int p_72725_3_, int p_72725_4_, int p_72725_5_,
@@ -1641,6 +1654,9 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     /**
      * Checks all renderers that previously weren't in the frustum and 1/16th of those that previously were in the
      * frustum for frustum clipping Args: frustum, partialTickTime
+     * 
+     * @author Sergius Onesimus
+     * @reason Using maps instead of arrays, might as well overwrite the whole method
      */
     @Overwrite
     public void clipRenderersByFrustum(ICamera p_72729_1_, float p_72729_2_) {
@@ -1657,6 +1673,9 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
 
     /**
      * Spawns a particle. Arg: particleType, x, y, z, velX, velY, velZ
+     * 
+     * @author Sergius Onesimus
+     * @reason Too complex to be modified without Overwrite
      */
     @Overwrite
     public EntityFX doSpawnParticle(String par1Str, double p_72726_2_, double p_72726_4_, double p_72726_6_,
