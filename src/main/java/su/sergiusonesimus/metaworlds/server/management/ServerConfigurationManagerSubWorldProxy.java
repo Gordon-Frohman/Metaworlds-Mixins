@@ -47,8 +47,8 @@ public class ServerConfigurationManagerSubWorldProxy extends ServerConfiguration
      * params: srcPlayer,x,y,z,r,dimension. The packet is not sent to the srcPlayer, but all other players within the
      * search radius
      */
-    public void sendToAllNearExcept(EntityPlayer player, double x, double y, double z, double radius,
-        int dimension, Packet packet) {
+    public void sendToAllNearExcept(EntityPlayer player, double x, double y, double z, double radius, int dimension,
+        Packet packet) {
         for (int j = 0; j < this.mcServerProxy.getRealServer()
             .getConfigurationManager().playerEntityList.size(); ++j) {
             EntityPlayerMP entityplayermp = (EntityPlayerMP) ((IMixinEntity) (EntityPlayerMP) this.mcServerProxy
