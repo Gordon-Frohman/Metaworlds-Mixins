@@ -12,21 +12,25 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
@@ -167,6 +171,14 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     public int hurtResistantTime;
 
     // TODO
+
+    @Shadow(remap = true)
+    public boolean handleWaterMovement() {
+        return false;
+    }
+
+    @Shadow(remap = true)
+    protected void func_145780_a(int x, int y, int z, Block blockIn) {}
 
     @Shadow(remap = true)
     public boolean isOffsetPositionInLiquid(double x, double y, double z) {
@@ -413,6 +425,9 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
 
     /**
      * Tries to moves the entity by the passed in displacement. Args: x, y, z
+     * 
+     * @author Sergius Onesimus
+     * @reason Too complex to be modified without Overwrite
      */
     @Overwrite
     public void moveEntity(double x, double y, double z) {
@@ -769,23 +784,26 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
         }
     }
 
-    @Overwrite
-    protected void func_145780_a(int x, int y, int z, Block blockIn) {
-        Block.SoundType soundtype = blockIn.stepSound;
-        World targetWorld = this.getWorldBelowFeet();
+    // func_145780_a
 
-        if (targetWorld.getBlock(x, y + 1, z) == Blocks.snow_layer) {
-            soundtype = Blocks.snow_layer.stepSound;
-            this.playSound(soundtype.getStepResourcePath(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
-        } else if (!blockIn.getMaterial()
-            .isLiquid()) {
-                this.playSound(soundtype.getStepResourcePath(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
-            }
+    @WrapOperation(
+        method = "func_145780_a",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/Entity;worldObj:Lnet/minecraft/world/World;",
+            opcode = Opcodes.GETFIELD))
+    private World wrapGetBlock(Entity instance, Operation<World> original) {
+        return this.getWorldBelowFeet();
     }
 
+    // func_145775_I
+
+    /**
+     * @author Sergius Onesimus
+     * @reason We have to transform BB of any entity into global one, in case we are dealing with subworld entities
+     */
     @Overwrite
     protected void func_145775_I() {
-
         AxisAlignedBB globalBB = ((IMixinAxisAlignedBB) this.boundingBox)
             .getTransformedToGlobalBoundingBox(this.worldObj);
 
@@ -838,90 +856,85 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
         }
     }
 
-    /**
-     * Returns if this entity is in water and will end up adding the waters velocity to the entity
-     */
-    @Overwrite
-    public boolean handleWaterMovement() {
-        boolean waterFound = false;
-        for (World curSubWorld : ((IMixinWorld) this.worldObj).getWorlds()) {
-            if (curSubWorld.handleMaterialAcceleration(
-                this.boundingBox.expand(0.0D, -0.4000000059604645D, 0.0D)
-                    .contract(0.001D, 0.001D, 0.001D),
-                Material.water,
-                (Entity) (Object) this)) {
-                if (!this.inWater && !this.firstUpdate) {
-                    float f = MathHelper.sqrt_double(
-                        this.motionX * this.motionX * 0.20000000298023224D + this.motionY * this.motionY
-                            + this.motionZ * this.motionZ * 0.20000000298023224D)
-                        * 0.2F;
-                    if (f > 1.0F) {
-                        f = 1.0F;
+    // handleWaterMovement
+
+    @Inject(method = "handleWaterMovement", at = @At(value = "RETURN"))
+    private void injectHandleWaterMovement(CallbackInfoReturnable<Boolean> ci) {
+        boolean waterFound = ci.getReturnValueZ();
+        if (!waterFound) {
+            for (World curSubWorld : ((IMixinWorld) this.worldObj).getSubWorlds()) {
+                if (curSubWorld.handleMaterialAcceleration(
+                    this.boundingBox.expand(0.0D, -0.4000000059604645D, 0.0D)
+                        .contract(0.001D, 0.001D, 0.001D),
+                    Material.water,
+                    (Entity) (Object) this)) {
+                    if (!this.inWater && !this.firstUpdate) {
+                        float f = MathHelper.sqrt_double(
+                            this.motionX * this.motionX * 0.20000000298023224D + this.motionY * this.motionY
+                                + this.motionZ * this.motionZ * 0.20000000298023224D)
+                            * 0.2F;
+                        if (f > 1.0F) {
+                            f = 1.0F;
+                        }
+
+                        this.playSound(
+                            this.getSplashSound(),
+                            f,
+                            1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
+                        float f1 = (float) MathHelper.floor_double(this.boundingBox.minY);
+
+                        int i;
+                        float f2;
+                        float f3;
+                        for (i = 0; (float) i < 1.0F + this.width * 20.0F; ++i) {
+                            f2 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
+                            f3 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
+                            this.worldObj.spawnParticle(
+                                "bubble",
+                                this.posX + (double) f2,
+                                (double) (f1 + 1.0F),
+                                this.posZ + (double) f3,
+                                this.motionX,
+                                this.motionY - (double) (this.rand.nextFloat() * 0.2F),
+                                this.motionZ);
+                        }
+                        for (i = 0; (float) i < 1.0F + this.width * 20.0F; ++i) {
+                            f2 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
+                            f3 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
+                            this.worldObj.spawnParticle(
+                                "splash",
+                                this.posX + (double) f2,
+                                (double) (f1 + 1.0F),
+                                this.posZ + (double) f3,
+                                this.motionX,
+                                this.motionY,
+                                this.motionZ);
+                        }
                     }
 
-                    this.playSound(
-                        this.getSplashSound(),
-                        f,
-                        1.0F + (this.rand.nextFloat() - this.rand.nextFloat()) * 0.4F);
-                    float f1 = (float) MathHelper.floor_double(this.boundingBox.minY);
-
-                    int i;
-                    float f2;
-                    float f3;
-                    for (i = 0; (float) i < 1.0F + this.width * 20.0F; ++i) {
-                        f2 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-                        f3 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-                        this.worldObj.spawnParticle(
-                            "bubble",
-                            this.posX + (double) f2,
-                            (double) (f1 + 1.0F),
-                            this.posZ + (double) f3,
-                            this.motionX,
-                            this.motionY - (double) (this.rand.nextFloat() * 0.2F),
-                            this.motionZ);
-                    }
-                    for (i = 0; (float) i < 1.0F + this.width * 20.0F; ++i) {
-                        f2 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-                        f3 = (this.rand.nextFloat() * 2.0F - 1.0F) * this.width;
-                        this.worldObj.spawnParticle(
-                            "splash",
-                            this.posX + (double) f2,
-                            (double) (f1 + 1.0F),
-                            this.posZ + (double) f3,
-                            this.motionX,
-                            this.motionY,
-                            this.motionZ);
-                    }
+                    this.fallDistance = 0.0F;
+                    this.inWater = true;
+                    this.fire = 0;
+                    waterFound = true;
+                    break;
                 }
+            }
 
-                this.fallDistance = 0.0F;
-                this.inWater = true;
-                this.fire = 0;
-                waterFound = true;
-                break;
+            if (!waterFound) {
+                this.inWater = false;
             }
         }
-
-        if (!waterFound) {
-            this.inWater = false;
-        }
-
-        return this.inWater;
     }
 
-    /**
-     * Gets the distance to the position. Args: x, y, z
-     */
-    @Overwrite
-    public double getDistance(double p_70011_1_, double p_70011_3_, double p_70011_5_) {
-        return (double) MathHelper.sqrt_double(getDistanceSq(p_70011_1_, p_70011_3_, p_70011_5_));
-        /*
-         * double d3 = this.posX - p_70011_1_;
-         * double d4 = this.posY - p_70011_3_;
-         * double d5 = this.posZ - p_70011_5_;
-         * return (double)MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
-         */
+    // getDistance
+
+    @Inject(method = "getDistance(DDD)D", at = @At(value = "HEAD"), cancellable = true)
+    private void getDistance(double x, double y, double z, CallbackInfoReturnable<Double> ci) {
+        ci.setReturnValue((double) MathHelper.sqrt_double(getDistanceSq(x, y, z)));
+        ci.cancel();
     }
+
+    // setSneaking
 
     @Inject(method = "setSneaking(Z)V", at = @At("TAIL"))
     public void setSneaking(boolean sneaking, CallbackInfo ci) {
@@ -934,120 +947,18 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
         }
     }
 
-    /**
-     * Gets called every tick from main Entity class
-     */
-    @Overwrite
-    public void onEntityUpdate() {
-        this.worldObj.theProfiler.startSection("entityBaseTick");
+    // onEntityUpdate
 
-        if (this.ridingEntity != null && this.ridingEntity.isDead) {
-            this.ridingEntity = null;
-        }
-
-        this.prevDistanceWalkedModified = this.distanceWalkedModified;
-        this.prevPosX = this.posX;
-        this.prevPosY = this.posY;
-        this.prevPosZ = this.posZ;
-        this.prevRotationPitch = this.rotationPitch;
-        this.prevRotationYaw = this.rotationYaw;
-        int i;
-
-        if (!this.worldObj.isRemote && this.worldObj instanceof WorldServer) {
-            this.worldObj.theProfiler.startSection("portal");
-            MinecraftServer minecraftserver = ((WorldServer) this.worldObj).func_73046_m();
-            i = this.getMaxInPortalTime();
-
-            if (this.inPortal) {
-                if (minecraftserver.getAllowNether()) {
-                    if (this.ridingEntity == null && this.portalCounter++ >= i) {
-                        this.portalCounter = i;
-                        this.timeUntilPortal = this.getPortalCooldown();
-                        byte b0;
-
-                        if (this.worldObj.provider.dimensionId == -1) {
-                            b0 = 0;
-                        } else {
-                            b0 = -1;
-                        }
-
-                        this.travelToDimension(b0);
-                    }
-
-                    this.inPortal = false;
-                }
-            } else {
-                if (this.portalCounter > 0) {
-                    this.portalCounter -= 4;
-                }
-
-                if (this.portalCounter < 0) {
-                    this.portalCounter = 0;
-                }
-            }
-
-            if (this.timeUntilPortal > 0) {
-                --this.timeUntilPortal;
-            }
-
-            this.worldObj.theProfiler.endSection();
-        }
-
-        if (this.isSprinting() && !this.isInWater()) {
-            int j = MathHelper.floor_double(this.posX);
-            i = MathHelper.floor_double(this.posY - 0.20000000298023224D - (double) this.yOffset);
-            int k = MathHelper.floor_double(this.posZ);
-            Block block = this.worldObj.getBlock(j, i, k);
-
-            if (block.getMaterial() != Material.air) {
-                this.worldObj.spawnParticle(
-                    "blockcrack_" + Block.getIdFromBlock(block) + "_" + this.worldObj.getBlockMetadata(j, i, k),
-                    this.posX + ((double) this.rand.nextFloat() - 0.5D) * (double) this.width,
-                    this.boundingBox.minY + 0.1D,
-                    this.posZ + ((double) this.rand.nextFloat() - 0.5D) * (double) this.width,
-                    -this.motionX * 4.0D,
-                    1.5D,
-                    -this.motionZ * 4.0D);
-            }
-        }
-
-        this.handleWaterMovement();
-
-        if (this.worldObj.isRemote) {
-            this.fire = 0;
-        } else if (this.fire > 0) {
-            if (this.isImmuneToFire) {
-                this.fire -= 4;
-
-                if (this.fire < 0) {
-                    this.fire = 0;
-                }
-            } else {
-                if (this.fire % 20 == 0) {
-                    this.attackEntityFrom(DamageSource.onFire, 1.0F);
-                }
-
-                --this.fire;
-            }
-        }
-
-        if (this.handleLavaMovement()) {
-            this.setOnFireFromLava();
-            this.fallDistance *= 0.5F;
-        }
-
+    @Inject(
+        method = "onEntityUpdate",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/Entity;posY:D",
+            opcode = Opcodes.GETFIELD,
+            ordinal = 2,
+            shift = Shift.BEFORE))
+    private void injectOnEntityUpdate(CallbackInfo ci) {
         this.handleSubWorldsInteraction();
-
-        if (this.posY < -64.0D) {
-            this.kill();
-        }
-
-        if (!this.worldObj.isRemote) {
-            this.setFlag(0, this.fire > 0);
-        }
-
-        this.firstUpdate = false;
-        this.worldObj.theProfiler.endSection();
     }
 
     public void handleSubWorldsInteraction() {
