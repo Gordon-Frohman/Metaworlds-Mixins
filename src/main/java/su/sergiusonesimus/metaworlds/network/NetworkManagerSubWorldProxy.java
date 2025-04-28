@@ -51,8 +51,6 @@ public class NetworkManagerSubWorldProxy extends NetworkManager {
             EntityPlayerMP player = ((NetHandlerPlayServer) this.parentNetworkManager.getNetHandler()).playerEntity;
             pipeline.sendTo(proxyPacket, player);
         }
-
-        // this.parentNetworkManager.scheduleOutboundPacket(proxyPacket, p_150725_2_);
     }
 
     public void processReceivedPackets() {}
