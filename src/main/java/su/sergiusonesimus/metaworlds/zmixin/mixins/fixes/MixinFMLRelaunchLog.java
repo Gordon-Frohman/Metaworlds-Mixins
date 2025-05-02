@@ -8,8 +8,9 @@ import org.spongepowered.asm.mixin.Overwrite;
 import cpw.mods.fml.common.FMLLog;
 import cpw.mods.fml.relauncher.FMLRelaunchLog;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
+import su.sergiusonesimus.metaworlds.zmixin.Mixins;
 
-@Mixin(FMLRelaunchLog.class)
+@Mixin(value = FMLRelaunchLog.class, priority = Mixins.fmlPatchPriority)
 public abstract class MixinFMLRelaunchLog {
 
     @Overwrite(remap = false)

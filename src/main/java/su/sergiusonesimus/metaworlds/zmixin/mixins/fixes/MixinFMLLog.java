@@ -7,8 +7,9 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import cpw.mods.fml.common.FMLLog;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
+import su.sergiusonesimus.metaworlds.zmixin.Mixins;
 
-@Mixin(FMLLog.class)
+@Mixin(value = FMLLog.class, priority = Mixins.fmlPatchPriority)
 public abstract class MixinFMLLog {
 
     @Shadow(remap = false)

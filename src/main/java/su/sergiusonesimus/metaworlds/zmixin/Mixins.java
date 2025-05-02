@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 public class Mixins implements IMixinConfigPlugin {
 
     public static final int angelicaPatchPriority = 2001;
+    public static final int fmlPatchPriority = 1000;
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -34,15 +35,19 @@ public class Mixins implements IMixinConfigPlugin {
 
     @Override
     public List<String> getMixins() {
-        List<String> mixins = new ArrayList<>();
+        List<String> mixins = new ArrayList<String>();
+        try {
+            Class.forName("ganymedes01.etfuturum.EtFuturum");
+        } catch (ClassNotFoundException e) {
+            mixins.add("fixes.MixinFMLLog");
+            mixins.add("fixes.MixinFMLRelaunchLog");
+        }
         try {
             if (Class.forName("com.gtnewhorizons.angelica.AngelicaMod") != null) {
                 mixins.add("angelica.MixinRenderGlobal");
                 mixins.add("angelica.MixinEffectRenderer");
             }
-        } catch (ClassNotFoundException e) {
-
-        }
+        } catch (ClassNotFoundException e) {}
         return mixins;
     }
 
