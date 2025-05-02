@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
 public class Mixins implements IMixinConfigPlugin {
 
+    public static final int angelicaPatchPriority = 2001;
+
     @Override
     public void onLoad(String mixinPackage) {
 
@@ -36,6 +38,7 @@ public class Mixins implements IMixinConfigPlugin {
         try {
             if (Class.forName("com.gtnewhorizons.angelica.AngelicaMod") != null) {
                 mixins.add("angelica.MixinRenderGlobal");
+                mixins.add("angelica.MixinEffectRenderer");
             }
         } catch (ClassNotFoundException e) {
 
