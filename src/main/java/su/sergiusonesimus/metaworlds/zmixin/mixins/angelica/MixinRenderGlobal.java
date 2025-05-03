@@ -833,13 +833,9 @@ public class MixinRenderGlobal {
      */
     @Overwrite
     public void renderAllRenderLists(int p_72733_1_, double p_72733_2_) {
-        this.mc.entityRenderer.enableLightmap(p_72733_2_);
-
         for (int j = 0; j < this.allRenderLists.length; ++j) {
             this.allRenderLists[j].callLists();
         }
-
-        this.mc.entityRenderer.disableLightmap(p_72733_2_);
     }
 
     @Inject(method = "markBlockForUpdate", at = @At(value = "TAIL"))
