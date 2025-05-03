@@ -221,8 +221,9 @@ public class MixinRenderGlobal {
     @Shadow(remap = true)
     protected void onStaticEntitiesChanged() {};
 
-    // This method is now overwritten by Angelica
-    // To fix rendering issues, we re-overwrite it, leaving only subworlds renderers
+    // These methods are now overwritten by Angelica
+    // To fix rendering issues, we re-overwrite them, leaving only subworlds renderers
+
     @Overwrite
     public void loadRenderers() {
         if (this.theWorld != null) {
