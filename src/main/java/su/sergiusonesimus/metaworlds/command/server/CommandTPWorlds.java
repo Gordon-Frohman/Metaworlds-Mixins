@@ -22,7 +22,7 @@ public class CommandTPWorlds extends CommandBase {
     }
 
     public String getCommandUsage(ICommandSender icommandsender) {
-        return "/tpworlds Teleports all subworlds to you";
+        return "commands.tpworlds.usage";
     }
 
     public void processCommand(ICommandSender icommandsender, String[] astring) {

@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.command.server.CommandSetBlock;
 import net.minecraft.nbt.JsonToNBT;
@@ -27,19 +28,16 @@ public class CommandSetBlockInSubWorld extends CommandSetBlock {
         return "setblockinsubworld";
     }
 
-    /*
-     * public String getCommandUsage(ICommandSender sender)
-     * {
-     * return "commands.setblockinsubworld.usage";
-     * }
-     */
+    public String getCommandUsage(ICommandSender sender) {
+        return "commands.setblockinsubworld.usage";
+    }
 
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length >= 5) {
             World world = ((IMixinWorld) sender.getEntityWorld()).getSubWorld(Integer.parseInt(args[0]));
 
             if (world == null) {
-                throw new CommandException("commands.setblockinsubworld.nosuchworld", new Object[0]);
+                throw new NumberInvalidException("commands.setblockinsubworld.nosuchworld", new Object[] { args[0] });
             } else {
                 int i = sender.getPlayerCoordinates().posX;
                 int j = sender.getPlayerCoordinates().posY;

@@ -14,3 +14,8 @@ itemGroup.metaworlds=MetaWorlds
 
 item.emptyWorldBottle.name=Empty World Bottle
 item.bottledWorld.name=Bottled World
+
+commands.mvc.usage=/mwc Opens a MetaWorlds administration GUI
+commands.setblockinsubworld.usage=/setblockinsubworld <subworldID> <x> <y> <z> <TileName> [dataValue] [oldBlockHandling] [dataTag]
+commands.setblockinsubworld.nosuchworld=There's no such subworld with id %s
+commands.tpworlds.usage=/tpworlds Teleports all subworlds to you

@@ -14,3 +14,8 @@ itemGroup.metaworlds=Метамиры
 
 item.emptyWorldBottle.name=Пустая бутылка для мира
 item.bottledWorld.name=Мир в бутылке
+
+commands.mvc.usage=/mwc Открывает меню администратора MetaWorlds
+commands.setblockinsubworld.usage=/setblockinsubworld <ID метамира> <x> <y> <z> <TileName> [dataValue] [oldBlockHandling] [dataTag]
+commands.setblockinsubworld.nosuchworld=Метамир с ID %s не найден
+commands.tpworlds.usage=/tpworlds Телепортирует все метамиры к вам

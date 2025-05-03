@@ -18,7 +18,7 @@ public class CommandMWAdmin extends CommandBase {
     }
 
     public String getCommandUsage(ICommandSender var1) {
-        return "/mwc Opens a MetaWorlds administration GUI";
+        return "commands.mvc.usage";
     }
 
     public void processCommand(ICommandSender icommandsender, String[] var2) {
