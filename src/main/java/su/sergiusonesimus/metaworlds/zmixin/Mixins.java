@@ -37,12 +37,6 @@ public class Mixins implements IMixinConfigPlugin {
     public List<String> getMixins() {
         List<String> mixins = new ArrayList<String>();
         try {
-            Class.forName("ganymedes01.etfuturum.EtFuturum");
-        } catch (ClassNotFoundException e) {
-            mixins.add("fixes.MixinFMLLog");
-            mixins.add("fixes.MixinFMLRelaunchLog");
-        }
-        try {
             if (Class.forName("com.gtnewhorizons.angelica.AngelicaMod") != null) {
                 mixins.add("angelica.MixinRenderGlobal");
                 mixins.add("angelica.MixinEffectRenderer");

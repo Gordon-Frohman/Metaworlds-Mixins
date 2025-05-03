@@ -46,7 +46,8 @@
   	"minecraft.util.MixinMovingObjectPosition",
   	"minecraft.world.MixinWorld",
   	"minecraft.world.MixinWorldServer",
-  	"minecraft.world.storage.MixinWorldInfo"
+  	"minecraft.world.storage.MixinWorldInfo",
+  	"fixes.MixinFMLProxyPacket"
   ],
   "client": [],
   "server": []
