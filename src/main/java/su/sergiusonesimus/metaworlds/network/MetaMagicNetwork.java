@@ -1,4 +1,4 @@
-package net.tclproject.mysteriumlib.network;
+package su.sergiusonesimus.metaworlds.network;
 
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;

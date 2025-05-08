@@ -5,9 +5,9 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
-import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
 
 import su.sergiusonesimus.metaworlds.compat.packet.MwAdminClientActionPacket;
+import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 
 public class GuiMwAdmin extends GuiScreen {
 

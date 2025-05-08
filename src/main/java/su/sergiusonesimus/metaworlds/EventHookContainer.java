@@ -10,10 +10,10 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.world.WorldEvent.Load;
-import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
+import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;

@@ -5,7 +5,6 @@ import net.minecraft.command.ServerCommandManager;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
-import net.tclproject.mysteriumlib.network.MetaMagicNetwork;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -29,17 +28,17 @@ import su.sergiusonesimus.metaworlds.command.server.CommandTPWorlds;
 import su.sergiusonesimus.metaworlds.controls.SubWorldControllerKeyHandler;
 import su.sergiusonesimus.metaworlds.entity.EntitySubWorldController;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
+import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.client.CSubWorldProxyPacket;
 import su.sergiusonesimus.metaworlds.network.play.server.SSubWorldProxyPacket;
 import su.sergiusonesimus.metaworlds.serverlist.ServerListButtonAdder;
 
-@Mod(modid = MetaworldsMod.MODID, version = MetaworldsMod.VERSION, name = "MetaWorlds (Mixins Version)")
+@Mod(modid = MetaworldsMod.MODID, name = "MetaWorlds (Mixins Version)")
 public class MetaworldsMod {
 
     @Instance("MetaworldsMod")
     public static MetaworldsMod instance;
     public static final String MODID = "metaworlds";
-    public static final String VERSION = "Mixins-1.0";
 
     public GeneralPacketPipeline networkHandler;
     public static final String CHANNEL = "metaworlds";
