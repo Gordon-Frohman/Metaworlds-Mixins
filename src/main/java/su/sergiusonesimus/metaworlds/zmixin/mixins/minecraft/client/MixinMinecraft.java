@@ -263,13 +263,16 @@ public abstract class MixinMinecraft {
     private void wrapFunc_151354_b(Operation<Void> original) {
         if (!generateEmpty) original.call();
     }
-
-    @WrapOperation(
+    
+	/**
+	 * @author Sergius Onesimus
+	 * @reason For whatever reason WrapOperation isn't working when mod is used as a source. So we have to use Redirect.
+	 */
+    @Redirect(
         method = "<init>",
         at = @At(value = "NEW", target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;"))
-    private YggdrasilAuthenticationService yggdrasilAuthenticationServicePlaceholder(Proxy proxy, String clientToken,
-        Operation<YggdrasilAuthenticationService> original) {
-        if (!generateEmpty) return original.call(proxy, clientToken);
+    private YggdrasilAuthenticationService YggdrasilAuthenticationServicePlaceholder(Proxy proxy, String clientToken) {
+        if (!generateEmpty) return new YggdrasilAuthenticationService(proxy, clientToken);
         else return new YggdrasilAuthenticationService(Minecraft.theMinecraft.proxy, clientToken);
     }
 
@@ -278,7 +281,7 @@ public abstract class MixinMinecraft {
         at = @At(
             value = "INVOKE",
             target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;"))
-    public MinecraftSessionService disableCreateMinecraftSessionService(YggdrasilAuthenticationService instance,
+    public MinecraftSessionService wrapCreateMinecraftSessionService(YggdrasilAuthenticationService instance,
         Operation<MinecraftSessionService> original) {
         if (!generateEmpty) return original.call(instance);
         else return null;
@@ -287,7 +290,7 @@ public abstract class MixinMinecraft {
     @WrapOperation(
         method = "<init>",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Session;getUsername()Ljava/lang/String;"))
-    public String disableGetUsername(Session instance, Operation<String> original) {
+    public String wrapGetUsername(Session instance, Operation<String> original) {
         if (!generateEmpty) return original.call(instance);
         else return "";
     }
