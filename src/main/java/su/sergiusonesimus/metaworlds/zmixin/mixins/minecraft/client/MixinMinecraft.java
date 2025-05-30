@@ -263,11 +263,11 @@ public abstract class MixinMinecraft {
     private void wrapFunc_151354_b(Operation<Void> original) {
         if (!generateEmpty) original.call();
     }
-    
-	/**
-	 * @author Sergius Onesimus
-	 * @reason For whatever reason WrapOperation isn't working when mod is used as a source. So we have to use Redirect.
-	 */
+
+    /**
+     * @author Sergius Onesimus
+     * @reason For whatever reason WrapOperation isn't working when mod is used as a source. So we have to use Redirect.
+     */
     @Redirect(
         method = "<init>",
         at = @At(value = "NEW", target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;"))

@@ -114,6 +114,18 @@ public abstract class MixinEntityTrackerEntry {
     @Shadow(remap = true)
     public abstract void sendEventsToPlayers(List p_73125_1_);
 
+    // Creating this variables outside of Overwrite not to mess with other mods' Injects
+    int subWorldScaledX;
+    int subWorldScaledY;
+    int subWorldScaledZ;
+
+    int subWorldScaledXDiff;
+    int subWorldScaledYDiff;
+    int subWorldScaledZDiff;
+    boolean sendSubWorldPos;
+    boolean subWorldFlag;
+    boolean subWorldTeleportRequired;
+
     /**
      * also sends velocity, rotation, and riding info.
      */
@@ -164,16 +176,16 @@ public abstract class MixinEntityTrackerEntry {
                     int j;
 
                     if (this.myEntity.ridingEntity == null) {
-                        int subWorldScaledX = 0;
-                        int subWorldScaledY = 0;
-                        int subWorldScaledZ = 0;
+                        subWorldScaledX = 0;
+                        subWorldScaledY = 0;
+                        subWorldScaledZ = 0;
 
-                        int subWorldScaledXDiff = 0;
-                        int subWorldScaledYDiff = 0;
-                        int subWorldScaledZDiff = 0;
-                        boolean sendSubWorldPos = false;
-                        boolean subWorldFlag = false;
-                        boolean subWorldTeleportRequired = false;
+                        subWorldScaledXDiff = 0;
+                        subWorldScaledYDiff = 0;
+                        subWorldScaledZDiff = 0;
+                        sendSubWorldPos = false;
+                        subWorldFlag = false;
+                        subWorldTeleportRequired = false;
 
                         if (((IMixinWorld) ((IMixinEntity) this.myEntity).getWorldBelowFeet()).getSubWorldID()
                             != ((IMixinWorld) this.myEntity.worldObj).getSubWorldID()) {
