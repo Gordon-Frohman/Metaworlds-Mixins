@@ -47,7 +47,7 @@
   	"minecraft.world.MixinWorld",
   	"minecraft.world.MixinWorldServer",
   	"minecraft.world.storage.MixinWorldInfo",
-  	"fixes.MixinFMLProxyPacket"
+  	"forge.MixinFMLProxyPacket"
   ],
   "client": [],
   "server": []

@@ -42,6 +42,11 @@ public class Mixins implements IMixinConfigPlugin {
                 mixins.add("angelica.MixinEffectRenderer");
             }
         } catch (ClassNotFoundException e) {}
+        try {
+            if (Class.forName("chylex.hee.HardcoreEnderExpansion") != null) {
+                mixins.add("hee.MixinPlayerDataHandler");
+            }
+        } catch (ClassNotFoundException e) {}
         return mixins;
     }
 
