@@ -99,7 +99,6 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEn
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 
 @Mixin(value = RenderGlobal.class)
 public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
@@ -808,10 +807,8 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
             this.theWorld.theProfiler.endStartSection("blockentities");
             RenderHelper.enableStandardItemLighting();
 
-            for (i = 0; i
-                < ((IMixinWorldIntermediate) curClientWorld).getMinecraft().renderGlobal.tileEntities.size(); ++i) {
-                TileEntity tile = (TileEntity) ((IMixinWorldIntermediate) curClientWorld)
-                    .getMinecraft().renderGlobal.tileEntities.get(i);
+            for (i = 0; i < curClientWorld.mc.renderGlobal.tileEntities.size(); ++i) {
+                TileEntity tile = (TileEntity) curClientWorld.mc.renderGlobal.tileEntities.get(i);
                 if (tile.shouldRenderInPass(pass) && p_147589_2_.isBoundingBoxInFrustum(
                     tile.getWorldObj() == null ? tile.getRenderBoundingBox()
                         : ((IMixinAxisAlignedBB) tile.getRenderBoundingBox())

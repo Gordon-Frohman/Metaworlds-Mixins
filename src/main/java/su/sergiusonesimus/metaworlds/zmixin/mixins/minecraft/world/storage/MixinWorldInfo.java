@@ -25,7 +25,6 @@ import com.google.common.primitives.Ints;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 
 @Mixin(WorldInfo.class)
@@ -76,7 +75,7 @@ public class MixinWorldInfo implements IMixinWorldInfo {
         for (WorldServer curDimensionWorld : DimensionManager.getWorlds()) {
             NBTTagCompound dimensionData = new NBTTagCompound();
 
-            dimensionData.setInteger("DimID", ((IMixinWorldIntermediate) curDimensionWorld).getDimension());
+            dimensionData.setInteger("DimID", curDimensionWorld.provider.dimensionId);
             dimensionData.setIntArray(
                 "SubWorldIDs",
                 ArrayUtils.toPrimitive(

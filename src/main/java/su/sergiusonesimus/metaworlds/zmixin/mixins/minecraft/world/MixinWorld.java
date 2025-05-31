@@ -81,17 +81,21 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     @Shadow(remap = true)
-    public abstract GameRules getGameRules();
+    public GameRules getGameRules() {
+        return null;
+    }
 
     @SideOnly(Side.CLIENT)
     @Shadow(remap = true)
-    public abstract void func_82738_a(long p_82738_1_);
+    public void func_82738_a(long p_82738_1_) {}
 
     @Shadow(remap = true)
-    public abstract void setWorldTime(long time);
+    public void setWorldTime(long time) {}
 
     @Shadow(remap = true)
-    public abstract long getTotalWorldTime();
+    public long getTotalWorldTime() {
+        return -1;
+    }
 
     @Shadow(remap = true)
     public MovingObjectPosition func_147447_a(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) {
@@ -132,35 +136,43 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     @Shadow(remap = true)
-    public abstract void onEntityRemoved(Entity p_72847_1_);
+    public void onEntityRemoved(Entity p_72847_1_) {}
 
     @Shadow(remap = true)
-    public abstract void onEntityAdded(Entity p_72923_1_);
+    public void onEntityAdded(Entity p_72923_1_) {}
 
     @Shadow(remap = true)
-    public abstract void updateAllPlayersSleepingFlag();
+    public void updateAllPlayersSleepingFlag() {}
 
     @Shadow(remap = true)
-    public abstract Chunk getChunkFromChunkCoords(int p_72964_1_, int p_72964_2_);
+    public Chunk getChunkFromChunkCoords(int p_72964_1_, int p_72964_2_) {
+        return null;
+    }
 
     @Shadow(remap = true)
-    public abstract List getEntitiesWithinAABBExcludingEntity(Entity p_72839_1_, AxisAlignedBB p_72839_2_);
+    public List getEntitiesWithinAABBExcludingEntity(Entity p_72839_1_, AxisAlignedBB p_72839_2_) {
+        return null;
+    }
 
     @Shadow(remap = true)
-    public abstract boolean blockExists(int p_72899_1_, int p_72899_2_, int p_72899_3_);
+    public boolean blockExists(int p_72899_1_, int p_72899_2_, int p_72899_3_) {
+        return false;
+    }
 
     @Shadow(remap = true)
-    public abstract int getBlockMetadata(int p_72805_1_, int p_72805_2_, int p_72805_3_);
+    public int getBlockMetadata(int p_72805_1_, int p_72805_2_, int p_72805_3_) {
+        return -1;
+    }
 
     @Shadow(remap = true)
-    public abstract Block getBlock(final int p_150810_1_, final int p_150810_2_, final int p_150810_3_);
+    public Block getBlock(final int p_150810_1_, final int p_150810_2_, final int p_150810_3_) {
+        return null;
+    }
 
     @Shadow(remap = true)
-    public abstract boolean chunkExists(int p_72916_1_, int p_72916_2_);
-
-    public abstract World CreateSubWorld();
-
-    public abstract World CreateSubWorld(int newSubWorldID);
+    public boolean chunkExists(int p_72916_1_, int p_72916_2_) {
+        return false;
+    }
 
     public Collection<World> getWorlds() {
         if (this.allWorlds == null)
@@ -368,8 +380,10 @@ public abstract class MixinWorld implements IMixinWorld {
         return this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, (IEntitySelector) null);
     }
 
-    public abstract List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
-        IEntitySelector par3IEntitySelector);
+    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+        IEntitySelector par3IEntitySelector) {
+        return null;
+    }
 
     public void doTickPartial(double interpolationFactor) {}
 

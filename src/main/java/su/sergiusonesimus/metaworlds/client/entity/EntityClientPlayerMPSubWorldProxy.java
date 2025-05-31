@@ -17,7 +17,6 @@ import su.sergiusonesimus.metaworlds.client.renderer.RenderGlobalSubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 
 public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP implements EntityPlayerProxy {
 
@@ -55,7 +54,7 @@ public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP impl
         this.mc.effectRenderer = new EffectRenderer(targetSubWorld, Minecraft.getMinecraft().renderEngine);
         this.mc.renderGlobal = new RenderGlobalSubWorld(this.mc, Minecraft.getMinecraft().renderGlobal);
 
-        ((IMixinWorldIntermediate) this.mc.theWorld).setMinecraft(this.mc);
+        this.mc.theWorld.mc = this.mc;
 
         ((NetHandlerPlayClientSubWorldProxy) this.sendQueue).proxyPlayer = this;
 

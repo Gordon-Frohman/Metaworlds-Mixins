@@ -10,9 +10,9 @@ import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 public class SubWorldFactory {
 
     public static World CreateSubWorld(World parentWorld, int newSubWorldID) {
-        World result;
+        World subWorld;
         if (parentWorld.isRemote) {
-            result = new SubWorldClient(
+            subWorld = new SubWorldClient(
                 (WorldClient) parentWorld,
                 newSubWorldID,
                 ((WorldClient) parentWorld).sendQueue,
@@ -30,7 +30,7 @@ public class SubWorldFactory {
                 parentWorld.theProfiler);
         } else {
             SubWorldServer.global_newSubWorldID = newSubWorldID;
-            result = new SubWorldServer(
+            subWorld = new SubWorldServer(
                 (WorldServer) parentWorld,
                 newSubWorldID,
                 ((WorldServer) parentWorld).func_73046_m(),
@@ -49,6 +49,6 @@ public class SubWorldFactory {
                         .getTerrainType()),
                 parentWorld.theProfiler);
         }
-        return result;
+        return subWorld;
     }
 }

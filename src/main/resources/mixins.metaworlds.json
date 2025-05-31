@@ -45,6 +45,7 @@
   	"minecraft.util.MixinAxisAlignedBB",
   	"minecraft.util.MixinMovingObjectPosition",
   	"minecraft.world.MixinWorld",
+  	"minecraft.world.MixinWorldIntermediate",
   	"minecraft.world.MixinWorldServer",
   	"minecraft.world.storage.MixinWorldInfo",
   	"forge.MixinFMLProxyPacket"

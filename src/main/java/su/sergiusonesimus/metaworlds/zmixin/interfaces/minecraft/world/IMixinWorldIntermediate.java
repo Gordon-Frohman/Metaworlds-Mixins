@@ -3,28 +3,15 @@ package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world;
 import java.util.List;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.World;
 
 import su.sergiusonesimus.metaworlds.world.SubWorldFactory;
 
 public interface IMixinWorldIntermediate {
-
-    public World createSubWorld();
-
-    public World createSubWorld(int newSubWorldID);
-
-    public Minecraft getMinecraft();
-
-    public void setMinecraft(Minecraft newMinecraft);
-
-    public NetHandlerPlayClient getSendQueue();
 
     public void setSubworldFactory(SubWorldFactory subWorldFactory);
 
@@ -45,5 +32,7 @@ public interface IMixinWorldIntermediate {
     public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector);
 
-    public int getDimension();
+    public boolean spawnEntityInWorldIntermediate(Entity par1Entity);
+
+    public void removeEntityIntermediate(Entity par1Entity);
 }
