@@ -39,7 +39,6 @@ import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.world.SubWorldFactory;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
-import su.sergiusonesimus.metaworlds.world.SubWorldServerFactory;
 import su.sergiusonesimus.metaworlds.world.WorldManagerSubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.server.IMixinMinecraftServer;
@@ -65,7 +64,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void WorldServer(MinecraftServer p_i45284_1_, ISaveHandler p_i45284_2_, String p_i45284_3_, int p_i45284_4_,
         WorldSettings p_i45284_5_, Profiler p_i45284_6_, CallbackInfo ci) {
         this.worldDimension = p_i45284_4_;
-        if (subWorldFactory == null) subWorldFactory = new SubWorldServerFactory();
+        if (subWorldFactory == null) subWorldFactory = new SubWorldFactory();
     }
 
     @Redirect(

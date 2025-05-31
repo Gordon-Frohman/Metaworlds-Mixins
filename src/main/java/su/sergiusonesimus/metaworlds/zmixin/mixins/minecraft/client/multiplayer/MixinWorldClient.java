@@ -42,7 +42,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
-import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClientFactory;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.world.SubWorldFactory;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
@@ -81,7 +80,7 @@ public abstract class MixinWorldClient extends MixinWorld implements IMixinWorld
     public void WorldClient(NetHandlerPlayClient p_i45063_1_, WorldSettings p_i45063_2_, int p_i45063_3_,
         EnumDifficulty p_i45063_4_, Profiler p_i45063_5_, CallbackInfo ci) {
         this.worldDimension = p_i45063_3_;
-        if (subWorldFactory == null) subWorldFactory = new SubWorldClientFactory();
+        if (subWorldFactory == null) subWorldFactory = new SubWorldFactory();
     }
 
     public World createSubWorld() {
