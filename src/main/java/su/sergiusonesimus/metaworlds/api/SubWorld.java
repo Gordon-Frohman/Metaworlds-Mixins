@@ -233,4 +233,6 @@ public interface SubWorld {
      * please, do <3 - please
      */
     boolean hasCollision();
+
+    boolean isEmpty();
 }
