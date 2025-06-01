@@ -234,5 +234,7 @@ public interface SubWorld {
      */
     boolean hasCollision();
 
-    boolean isEmpty();
+    default boolean isEmpty() {
+        return false;
+    }
 }
