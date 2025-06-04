@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -181,17 +181,17 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     public Collection<World> getSubWorlds() {
-        if (this.childSubWorlds == null) childSubWorlds = new TreeMap<Integer, World>();
+        if (this.childSubWorlds == null) childSubWorlds = new ConcurrentHashMap<Integer, World>();
         return this.childSubWorlds.values();
     }
 
     public Map<Integer, World> getSubWorldsMap() {
-        if (this.childSubWorlds == null) childSubWorlds = new TreeMap<Integer, World>();
+        if (this.childSubWorlds == null) childSubWorlds = new ConcurrentHashMap<Integer, World>();
         return this.childSubWorlds;
     }
 
     public int getWorldsCount() {
-        if (this.childSubWorlds == null) childSubWorlds = new TreeMap<Integer, World>();
+        if (this.childSubWorlds == null) childSubWorlds = new ConcurrentHashMap<Integer, World>();
         return this.childSubWorlds.size() + 1;
     }
 
@@ -398,7 +398,7 @@ public abstract class MixinWorld implements IMixinWorld {
     @Inject(method = "<init>", at = @At("TAIL"))
     public void World(ISaveHandler p_i45368_1_, String p_i45368_2_, WorldProvider p_i45368_3_,
         WorldSettings p_i45368_4_, Profiler p_i45368_5_, CallbackInfo ci) {
-        childSubWorlds = new TreeMap<Integer, World>();
+        childSubWorlds = new ConcurrentHashMap<Integer, World>();
         allWorlds = new UnmodifiableSingleObjPlusCollection<World>((World) (Object) this, this.childSubWorlds.values());
     }
 

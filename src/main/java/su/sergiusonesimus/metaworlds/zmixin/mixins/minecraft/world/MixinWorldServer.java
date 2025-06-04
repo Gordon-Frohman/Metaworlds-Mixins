@@ -111,8 +111,6 @@ public class MixinWorldServer extends MixinWorld {
 
         newSubWorld.worldInfo = this.worldInfo;
         ((WorldServer) newSubWorld).difficultySetting = EnumDifficulty.EASY;// Fixes AI crashes
-        // newSubWorld.playerEntities = this.playerEntities;//Instead we create proxies for every player in every
-        // subworld now
 
         SubWorldInfoHolder curSubWorldInfo = ((IMixinWorldInfo) DimensionManager.getWorld(0)
             .getWorldInfo()).getSubWorldInfo(((IMixinWorld) newSubWorld).getSubWorldID());
@@ -131,8 +129,6 @@ public class MixinWorldServer extends MixinWorld {
         } catch (NoSuchMethodException e) {
             System.out.println(e.toString());
         }
-
-        // ForgeChunkManager.loadWorld(newSubWorld);
 
         newSubWorld.addWorldAccess(
             new WorldManagerSubWorld(((WorldServer) newSubWorld).func_73046_m(), (WorldServer) newSubWorld));
