@@ -162,10 +162,6 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         String folder = MinecraftServer.mcServer.worldServers[0].getSaveHandler()
             .getWorldDirectoryName();
         int dimension = this.provider.dimensionId;
-        /*
-         * if (dimension != 0)
-         * folder += "/DIM" + dimension;
-         */
         folder += "/SUBWORLD" + this.subWorldID;
         ISaveFormat isaveformat = MinecraftServer.mcServer.anvilConverterForAnvilFile;
         isaveformat.flushCache();
