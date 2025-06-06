@@ -16,6 +16,7 @@ import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
@@ -776,6 +777,13 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             while (i$.hasNext()) {
                 curEntry = (Entry) i$.next();
                 newPosition = this.transformToGlobal((Vec3) curEntry.getValue());
+                if (curEntry.getKey() instanceof EntityLivingBase) {
+                    // Making sure player's body is rotating with the world
+                    EntityLivingBase curEntity = (EntityLivingBase) curEntry.getKey();
+                    curEntity.prevRenderYawOffset = curEntity.prevRenderYawOffset
+                        - (float) this.getRotationYawSpeed() / 2;
+                    curEntity.renderYawOffset = curEntity.renderYawOffset - (float) this.getRotationYawSpeed() / 2;
+                }
                 if (curEntry.getKey() instanceof EntityPlayer) {
                     Entity curEntity = (Entity) curEntry.getKey();
                     double subWorldWeight = ((IMixinEntity) curEntity).getTractionFactor();

@@ -644,9 +644,6 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                                 + ((Entity) curEntry.getKey()).rotationYaw) {
                         curEntry = (Entry) i$.next();
                         Entity newPosition = (Entity) curEntry.getKey();
-                        if (newPosition instanceof EntityPlayer) {
-                            int x = 0;
-                        }
                         double newEntityPrevRotationYawDiff = ((IMixinEntity) newPosition).getTractionFactor();
                         double globalWeight = 1.0D - newEntityPrevRotationYawDiff;
                         Vec3 newPosition1 = this.transformToGlobal((Vec3) curEntry.getValue());
@@ -661,6 +658,14 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                             ((Entity) curEntry.getKey()).rotationYaw
                                 - (float) (this.getRotationYaw() - prevRotationYaw),
                             ((Entity) curEntry.getKey()).rotationPitch);
+                        if (curEntry.getKey() instanceof EntityLivingBase) {
+                            // Making sure player's body is rotating with the world
+                            EntityLivingBase curEntity = (EntityLivingBase) curEntry.getKey();
+                            curEntity.prevRenderYawOffset = curEntity.prevRenderYawOffset
+                                - (float) this.getRotationYawSpeed() / 2;
+                            curEntity.renderYawOffset = curEntity.renderYawOffset
+                                - (float) this.getRotationYawSpeed() / 2;
+                        }
                     }
 
                     float newEntityPrevRotationYawDiff2;
