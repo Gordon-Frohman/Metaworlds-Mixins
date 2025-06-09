@@ -81,7 +81,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     private boolean boundariesChanged = true;
     private boolean centerChanged = true;
     private boolean isEmpty = true;
-    private int subWorldType;
+    private String subWorldType;
     private List entitiesWithinAABBExcludingEntityResult = new ArrayList();
 
     public SubWorldServer(WorldServer parentWorld, int newSubWorldID, MinecraftServer par1MinecraftServer,
@@ -198,11 +198,11 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return this.subWorldID;
     }
 
-    public int getSubWorldType() {
+    public String getSubWorldType() {
         return this.subWorldType;
     }
 
-    public void setSubWorldType(int newType) {
+    public void setSubWorldType(String newType) {
         this.subWorldType = newType;
     }
 

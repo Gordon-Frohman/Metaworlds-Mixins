@@ -14,6 +14,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.world.SubWorldServer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.entity.IMixinEntityClientPlayerMP;
@@ -48,7 +49,7 @@ public class SubWorldUpdatePacket implements IMessage {
     public int maxX;
     public int maxY;
     public int maxZ;
-    public int subWorldType;
+    public String subWorldType;
 
     public SubWorldUpdatePacket() {}
 
@@ -124,7 +125,7 @@ public class SubWorldUpdatePacket implements IMessage {
         }
 
         if ((this.flags & 16) != 0) {
-            this.subWorldType = par1DataInput.readInt();
+            this.subWorldType = SubWorldTypeManager.getTypeByID(par1DataInput.readInt());
         }
     }
 
@@ -169,7 +170,7 @@ public class SubWorldUpdatePacket implements IMessage {
         }
 
         if ((this.flags & 16) != 0) {
-            par1DataOutput.writeInt(this.subWorldType);
+            par1DataOutput.writeInt(SubWorldTypeManager.getTypeID(this.subWorldType));
         }
     }
 

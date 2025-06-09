@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.google.common.primitives.Ints;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
@@ -56,7 +57,7 @@ public class MixinWorldInfo implements IMixinWorldInfo {
             for (int j = 0; j < subWorldslist.tagCount(); ++j) {
                 NBTTagCompound subWorldData = (NBTTagCompound) subWorldslist.getCompoundTagAt(j);
 
-                SubWorldInfoHolder curInfoHolder = new SubWorldInfoHolder(subWorldData);
+                SubWorldInfoHolder curInfoHolder = SubWorldTypeManager.getSubWorldInfoHolder(subWorldData);
 
                 subWorldInfoByID.put(curInfoHolder.subWorldId, curInfoHolder);
             }
@@ -86,8 +87,9 @@ public class MixinWorldInfo implements IMixinWorldInfo {
             subWorldIDslist.appendTag(dimensionData);
 
             for (World curSubWorld : ((IMixinWorld) curDimensionWorld).getSubWorlds()) {
-                this.subWorldInfoByID
-                    .put(((IMixinWorld) curSubWorld).getSubWorldID(), ((SubWorld) curSubWorld).getSubWorldInfoHolder());
+                this.subWorldInfoByID.put(
+                    ((IMixinWorld) curSubWorld).getSubWorldID(),
+                    SubWorldTypeManager.getSubWorldInfoHolder((SubWorld) curSubWorld));
             }
         }
         par1NBTTagCompound.setTag("SubWorldIDsByDimension", subWorldIDslist);
@@ -115,7 +117,8 @@ public class MixinWorldInfo implements IMixinWorldInfo {
     }
 
     public void updateSubWorldInfo(SubWorld subWorldToUpdate) {
-        this.subWorldInfoByID.put(subWorldToUpdate.getSubWorldID(), subWorldToUpdate.getSubWorldInfoHolder());
+        this.subWorldInfoByID
+            .put(subWorldToUpdate.getSubWorldID(), SubWorldTypeManager.getSubWorldInfoHolder(subWorldToUpdate));
     }
 
     public void updateSubWorldInfo(SubWorldInfoHolder newInfoHolder) {

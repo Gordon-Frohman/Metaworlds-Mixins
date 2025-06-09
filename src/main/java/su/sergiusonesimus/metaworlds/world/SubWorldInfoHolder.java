@@ -4,11 +4,12 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 
 public class SubWorldInfoHolder {
 
     public int subWorldId;
-    public int subWorldType = 0;
+    public String subWorldType = SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT;
     public double translationX = 0.0D;
     public double translationY = 0.0D;
     public double translationZ = 0.0D;
@@ -88,7 +89,7 @@ public class SubWorldInfoHolder {
     public SubWorldInfoHolder(NBTTagCompound sourceNBT) {
         this.subWorldId = sourceNBT.getInteger("subWorldId");
         if (sourceNBT.hasKey("subWorldType", 3)) {
-            this.subWorldType = sourceNBT.getInteger("subWorldType");
+            this.subWorldType = sourceNBT.getString("subWorldType");
         }
 
         this.translationX = sourceNBT.getDouble("positionX");
@@ -141,9 +142,13 @@ public class SubWorldInfoHolder {
         this.subWorldId = parSubWorldId;
     }
 
+    public SubWorldInfoHolder copy() {
+        return new SubWorldInfoHolder(this);
+    }
+
     public void writeToNBT(NBTTagCompound targetNBT) {
         targetNBT.setInteger("subWorldId", this.subWorldId);
-        targetNBT.setInteger("subWorldType", this.subWorldType);
+        targetNBT.setString("subWorldType", this.subWorldType);
         targetNBT.setDouble("positionX", this.translationX);
         targetNBT.setDouble("positionY", this.translationY);
         targetNBT.setDouble("positionZ", this.translationZ);

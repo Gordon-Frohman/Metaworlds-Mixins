@@ -76,7 +76,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     private ChunkCoordinates minCoordinates = new ChunkCoordinates();
     private ChunkCoordinates maxCoordinates = new ChunkCoordinates();
     private double maxRadius = 0.0D;
-    private int subWorldType;
+    private String subWorldType;
     private RenderGlobalSubWorld renderGlobalSubWorld;
     private SubWorldUpdatePacket updatePacketToHandle;
     private List entitiesWithinAABBExcludingEntityResult = new ArrayList();
@@ -168,11 +168,11 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.subWorldID;
     }
 
-    public int getSubWorldType() {
+    public String getSubWorldType() {
         return this.subWorldType;
     }
 
-    public void setSubWorldType(int newType) {
+    public void setSubWorldType(String newType) {
         this.subWorldType = newType;
     }
 

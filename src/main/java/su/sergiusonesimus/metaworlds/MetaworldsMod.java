@@ -22,6 +22,7 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.relauncher.Side;
 import su.sergiusonesimus.metaworlds.admin.MwAdminGuiHandler;
 import su.sergiusonesimus.metaworlds.admin.SubWorldImportProgressUpdater;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.block.MetaworldsBlocks;
 import su.sergiusonesimus.metaworlds.command.server.CommandMWAdmin;
 import su.sergiusonesimus.metaworlds.command.server.CommandTPWorlds;
@@ -72,6 +73,9 @@ public class MetaworldsMod {
             80,
             3,
             true);
+
+        SubWorldTypeManager.registerSubWorldType(SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT);
+        SubWorldTypeManager.registerSubWorldType(SubWorldTypeManager.SUBWORLD_TYPE_BOAT);
     }
 
     @EventHandler

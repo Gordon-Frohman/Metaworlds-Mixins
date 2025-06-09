@@ -108,7 +108,7 @@ public class SubWorldImporterThread extends Thread {
 
     private void generateSubWorldInfo() {
         if (this.sourceSubWorldInfo != null) {
-            this.targetSubWorldInfo = new SubWorldInfoHolder(this.sourceSubWorldInfo);
+            this.targetSubWorldInfo = this.sourceSubWorldInfo.copy();
             this.targetSubWorldInfo.subWorldId = this.newSubWorldId;
         } else {
             this.targetSubWorldInfo = new SubWorldInfoHolder(this.newSubWorldId);
