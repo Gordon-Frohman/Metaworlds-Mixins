@@ -13,11 +13,17 @@ import net.minecraft.world.World;
 
 import org.jblas.DoubleMatrix;
 
+import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
+
 public interface SubWorld {
 
     World getParentWorld();
 
     int getSubWorldID();
+
+    default SubWorldInfoHolder getSubWorldInfoHolder() {
+        return new SubWorldInfoHolder(this);
+    }
 
     void removeSubWorld();
 

@@ -86,8 +86,8 @@ public class MixinWorldInfo implements IMixinWorldInfo {
             subWorldIDslist.appendTag(dimensionData);
 
             for (World curSubWorld : ((IMixinWorld) curDimensionWorld).getSubWorlds()) {
-                SubWorldInfoHolder curSubWorldInfo = new SubWorldInfoHolder((SubWorld) curSubWorld);
-                this.subWorldInfoByID.put(((IMixinWorld) curSubWorld).getSubWorldID(), curSubWorldInfo);
+                this.subWorldInfoByID
+                    .put(((IMixinWorld) curSubWorld).getSubWorldID(), ((SubWorld) curSubWorld).getSubWorldInfoHolder());
             }
         }
         par1NBTTagCompound.setTag("SubWorldIDsByDimension", subWorldIDslist);
@@ -115,7 +115,7 @@ public class MixinWorldInfo implements IMixinWorldInfo {
     }
 
     public void updateSubWorldInfo(SubWorld subWorldToUpdate) {
-        this.subWorldInfoByID.put(subWorldToUpdate.getSubWorldID(), new SubWorldInfoHolder(subWorldToUpdate));
+        this.subWorldInfoByID.put(subWorldToUpdate.getSubWorldID(), subWorldToUpdate.getSubWorldInfoHolder());
     }
 
     public void updateSubWorldInfo(SubWorldInfoHolder newInfoHolder) {

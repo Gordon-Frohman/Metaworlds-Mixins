@@ -29,8 +29,6 @@ public class SubWorldInfoHolder {
     public ChunkCoordinates minCoordinates = new ChunkCoordinates();
     public ChunkCoordinates maxCoordinates = new ChunkCoordinates();
 
-    public SubWorldInfoHolder() {}
-
     public SubWorldInfoHolder(SubWorld sourceWorld) {
         this.subWorldId = sourceWorld.getSubWorldID();
         this.subWorldType = sourceWorld.getSubWorldType();
