@@ -12,8 +12,10 @@ import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.world.WorldEvent.Load;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
@@ -38,8 +40,13 @@ public class EventHookContainer {
                     while (i$.hasNext()) {
                         Integer curSubWorldID = (Integer) i$.next();
                         if (((IMixinWorld) event.world).getSubWorldsMap()
-                            .get(curSubWorldID) == null)
-                            ((IMixinWorld) event.world).createSubWorld(curSubWorldID.intValue());
+                            .get(curSubWorldID) == null) {
+                            int worldID = curSubWorldID.intValue();
+                            SubWorldInfoHolder curSubWorldInfo = ((IMixinWorldInfo) DimensionManager.getWorld(0)
+                                .getWorldInfo()).getSubWorldInfo(worldID);
+                            SubWorldTypeManager.getSubWorldInfoProvider(curSubWorldInfo.subWorldType)
+                                .create(event.world, worldID);
+                        }
                     }
                 }
             }

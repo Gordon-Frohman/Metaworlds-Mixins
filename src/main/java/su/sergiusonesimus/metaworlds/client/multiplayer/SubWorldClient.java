@@ -35,6 +35,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import org.jblas.DoubleMatrix;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.client.renderer.RenderGlobalSubWorld;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
 import su.sergiusonesimus.metaworlds.util.SubWorldTransformationHandler;
@@ -76,7 +77,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     private ChunkCoordinates minCoordinates = new ChunkCoordinates();
     private ChunkCoordinates maxCoordinates = new ChunkCoordinates();
     private double maxRadius = 0.0D;
-    private String subWorldType;
+    private String subWorldType = SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT;
     private RenderGlobalSubWorld renderGlobalSubWorld;
     private SubWorldUpdatePacket updatePacketToHandle;
     private List entitiesWithinAABBExcludingEntityResult = new ArrayList();

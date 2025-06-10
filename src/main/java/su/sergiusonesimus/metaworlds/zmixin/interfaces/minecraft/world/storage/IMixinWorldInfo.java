@@ -15,6 +15,8 @@ public interface IMixinWorldInfo {
 
     public void updateSubWorldInfo(SubWorldInfoHolder newInfoHolder);
 
+    public void removeSubWorldInfo(SubWorld subWorldToUpdate);
+
     public SubWorldInfoHolder getSubWorldInfo(int subWorldId);
 
     public Collection<SubWorldInfoHolder> getSubWorldInfos();

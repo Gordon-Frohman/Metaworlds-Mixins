@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.World;
 
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class SubWorldTypeManager {
 
@@ -64,6 +66,10 @@ public class SubWorldTypeManager {
     }
 
     public static class SubWorldInfoProvider {
+
+        public World create(World parentWorld, int id) {
+            return ((IMixinWorld) parentWorld).createSubWorld(id);
+        }
 
         public SubWorldInfoHolder fromSubworld(SubWorld sourceWorld) {
             return new SubWorldInfoHolder(sourceWorld);

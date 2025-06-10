@@ -47,6 +47,7 @@ import org.apache.logging.log4j.Logger;
 import org.jblas.DoubleMatrix;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
@@ -81,7 +82,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     private boolean boundariesChanged = true;
     private boolean centerChanged = true;
     private boolean isEmpty = true;
-    private String subWorldType;
+    private String subWorldType = SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT;
     private List entitiesWithinAABBExcludingEntityResult = new ArrayList();
 
     public SubWorldServer(WorldServer parentWorld, int newSubWorldID, MinecraftServer par1MinecraftServer,
@@ -159,10 +160,11 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             this.provider.dimensionId);
     }
 
-    public boolean deleteSubWorldDirectory() {
+    public boolean deleteSubWorldData() {
+        ((IMixinWorldInfo) DimensionManager.getWorld(0)
+            .getWorldInfo()).removeSubWorldInfo(this);
         String folder = MinecraftServer.mcServer.worldServers[0].getSaveHandler()
             .getWorldDirectoryName();
-        int dimension = this.provider.dimensionId;
         folder += "/SUBWORLD" + this.subWorldID;
         ISaveFormat isaveformat = MinecraftServer.mcServer.anvilConverterForAnvilFile;
         isaveformat.flushCache();

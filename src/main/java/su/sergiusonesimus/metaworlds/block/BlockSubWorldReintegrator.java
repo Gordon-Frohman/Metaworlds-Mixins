@@ -158,7 +158,7 @@ public class BlockSubWorldReintegrator extends Block {
                         .remove(subWorldServer.getSubWorldID());
                     subWorldServer.removeSubWorld();
                     subWorldServer.flush();
-                    subWorldServer.deleteSubWorldDirectory();
+                    subWorldServer.deleteSubWorldData();
                 }
             }
             BlockContagiousSubWorldCreator.isBusy = false;

@@ -125,6 +125,10 @@ public class MixinWorldInfo implements IMixinWorldInfo {
         this.subWorldInfoByID.put(newInfoHolder.subWorldId, newInfoHolder);
     }
 
+    public void removeSubWorldInfo(SubWorld subWorldToUpdate) {
+        this.subWorldInfoByID.remove(subWorldToUpdate.getSubWorldID());
+    }
+
     public SubWorldInfoHolder getSubWorldInfo(int subWorldId) {
         return this.subWorldInfoByID.get(subWorldId);
     }
