@@ -12,8 +12,8 @@ import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.world.WorldEvent.Load;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
@@ -27,9 +27,7 @@ public class EventHookContainer {
         if (!event.world.isRemote) {
             if (((IMixinWorld) event.world).isSubWorld()) {
                 MetaMagicNetwork.dispatcher.sendToDimension(
-                    new SubWorldCreatePacket(
-                        1,
-                        new Integer[] { Integer.valueOf(((IMixinWorld) event.world).getSubWorldID()) }),
+                    SubWorldTypeManager.getSubWorldCreatePacket((SubWorld) event.world),
                     event.world.provider.dimensionId);
             } else {
                 Collection subWorldIDs = ((IMixinWorldInfo) DimensionManager.getWorld(0)

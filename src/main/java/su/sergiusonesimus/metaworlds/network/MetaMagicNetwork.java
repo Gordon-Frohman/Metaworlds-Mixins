@@ -1,6 +1,8 @@
 package su.sergiusonesimus.metaworlds.network;
 
 import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
 import su.sergiusonesimus.metaworlds.compat.packet.ControllerKeyUpdatePacket;
@@ -16,52 +18,36 @@ import su.sergiusonesimus.metaworlds.compat.packet.UpdateServerHealthPacket;
 public final class MetaMagicNetwork {
 
     public static final SimpleNetworkWrapper dispatcher = NetworkRegistry.INSTANCE.newSimpleChannel("metaworlds");
+    private static int packetId = 0;
 
     public static boolean registered = false;
 
     public static final void registerPackets() {
         // Registration
         if (!registered) {
-            dispatcher.registerMessage(
-                ControllerKeyUpdatePacket.Handler.class,
-                ControllerKeyUpdatePacket.class,
-                2,
-                Side.SERVER);
-            dispatcher.registerMessage(
-                MwAdminClientActionPacket.Handler.class,
-                MwAdminClientActionPacket.class,
-                3,
-                Side.SERVER);
-            dispatcher.registerMessage(
-                UpdateServerHealthPacket.Handler.class,
-                UpdateServerHealthPacket.class,
-                9,
-                Side.SERVER);
+            // Client -> Server
+            registerPacket(ControllerKeyUpdatePacket.Handler.class, ControllerKeyUpdatePacket.class, Side.SERVER);
+            registerPacket(MwAdminClientActionPacket.Handler.class, MwAdminClientActionPacket.class, Side.SERVER);
+            registerPacket(UpdateServerHealthPacket.Handler.class, UpdateServerHealthPacket.class, Side.SERVER);
 
-            dispatcher.registerMessage(MwAdminGuiInitPacket.Handler.class, MwAdminGuiInitPacket.class, 4, Side.CLIENT);
-            dispatcher.registerMessage(
+            // Server -> Client
+            registerPacket(MwAdminGuiInitPacket.Handler.class, MwAdminGuiInitPacket.class, Side.CLIENT);
+            registerPacket(
                 MwAdminGuiSubWorldInfosPacket.Handler.class,
                 MwAdminGuiSubWorldInfosPacket.class,
-                5,
                 Side.CLIENT);
-            dispatcher.registerMessage(SubWorldCreatePacket.Handler.class, SubWorldCreatePacket.class, 6, Side.CLIENT);
-            dispatcher
-                .registerMessage(SubWorldDestroyPacket.Handler.class, SubWorldDestroyPacket.class, 7, Side.CLIENT);
-            dispatcher.registerMessage(SubWorldUpdatePacket.Handler.class, SubWorldUpdatePacket.class, 8, Side.CLIENT);
-            dispatcher.registerMessage(
-                SubWorldSpawnPositionPacket.Handler.class,
-                SubWorldSpawnPositionPacket.class,
-                9,
-                Side.CLIENT);
+            registerPacket(SubWorldCreatePacket.Handler.class, SubWorldCreatePacket.class, Side.CLIENT);
+            registerPacket(SubWorldDestroyPacket.Handler.class, SubWorldDestroyPacket.class, Side.CLIENT);
+            registerPacket(SubWorldUpdatePacket.Handler.class, SubWorldUpdatePacket.class, Side.CLIENT);
+            registerPacket(SubWorldSpawnPositionPacket.Handler.class, SubWorldSpawnPositionPacket.class, Side.CLIENT);
 
             registered = true;
         }
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked", "unused" })
-    private static final void registerParallelPacket(Class handlerClass, Class messageClass) {
-        dispatcher.registerMessage(handlerClass, messageClass, 0, Side.CLIENT);
-        dispatcher.registerMessage(handlerClass, messageClass, 1, Side.SERVER);
+    public static <T extends IMessage> void registerPacket(Class<? extends IMessageHandler<T, IMessage>> handler,
+        Class<T> type, Side side) {
+        dispatcher.registerMessage(handler, type, packetId++, side);
     }
 
 }

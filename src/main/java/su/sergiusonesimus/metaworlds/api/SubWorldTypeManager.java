@@ -6,6 +6,8 @@ import java.util.Map;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -57,6 +59,10 @@ public class SubWorldTypeManager {
         return getSubWorldInfoProvider(sourceWorld.getSubWorldType());
     }
 
+    public static IMessage getSubWorldCreatePacket(SubWorld sourceWorld) {
+        return getSubWorldInfoProvider(sourceWorld.getSubWorldType()).getCreatePacket(sourceWorld);
+    }
+
     public static SubWorldInfoHolder getSubWorldInfoHolder(SubWorld sourceWorld) {
         return getSubWorldInfoProvider(sourceWorld).fromSubworld(sourceWorld);
     }
@@ -69,6 +75,13 @@ public class SubWorldTypeManager {
 
         public World create(World parentWorld, int id) {
             return ((IMixinWorld) parentWorld).createSubWorld(id);
+        }
+
+        public IMessage getCreatePacket(SubWorld sourceWorld) {
+            return new SubWorldCreatePacket(
+                1,
+                new Integer[] { Integer.valueOf(sourceWorld.getSubWorldID()) },
+                new Integer[] { Integer.valueOf(SubWorldTypeManager.getTypeID(sourceWorld.getSubWorldType())) });
         }
 
         public SubWorldInfoHolder fromSubworld(SubWorld sourceWorld) {
