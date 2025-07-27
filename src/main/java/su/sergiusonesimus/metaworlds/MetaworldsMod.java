@@ -33,6 +33,8 @@ import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.client.CSubWorldProxyPacket;
 import su.sergiusonesimus.metaworlds.network.play.server.SSubWorldProxyPacket;
 import su.sergiusonesimus.metaworlds.serverlist.ServerListButtonAdder;
+import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
+import su.sergiusonesimus.metaworlds.util.RotationHelper;
 
 @Mod(modid = MetaworldsMod.MODID, name = "MetaWorlds (Mixins Version)")
 public class MetaworldsMod {
@@ -141,7 +143,8 @@ public class MetaworldsMod {
 
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
-
+        RotationHelper.init();
+        BlockVolatilityMap.init();
     }
 
     @EventHandler

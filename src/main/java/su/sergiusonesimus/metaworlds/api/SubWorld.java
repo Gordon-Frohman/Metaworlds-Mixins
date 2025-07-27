@@ -122,6 +122,24 @@ public interface SubWorld {
 
     DoubleBuffer getTransformToGlobalMatrixDirectBuffer();
 
+    /**
+     * Should only be applied to subworlds aligned by the coordinate axes
+     */
+    default ChunkCoordinates transformBlockToLocal(ChunkCoordinates chunkCoordinates) {
+        return transformBlockToLocal(chunkCoordinates.posX, chunkCoordinates.posY, chunkCoordinates.posZ);
+    }
+
+    /**
+     * Should only be applied to subworlds aligned by the coordinate axes
+     */
+    default ChunkCoordinates transformBlockToLocal(int x, int y, int z) {
+        Vec3 localCenter = transformToLocal(x + 0.5d, y + 0.5d, z + 0.5d);
+        return new ChunkCoordinates(
+            (int) Math.floor(localCenter.xCoord),
+            (int) Math.floor(localCenter.yCoord),
+            (int) Math.floor(localCenter.zCoord));
+    }
+
     Vec3 transformToLocal(Entity var1);
 
     Vec3 transformToLocal(Vec3 var1);
@@ -131,6 +149,24 @@ public interface SubWorld {
     DoubleMatrix transformToLocal(DoubleMatrix var1);
 
     DoubleMatrix transformToLocal(DoubleMatrix var1, DoubleMatrix var2);
+
+    /**
+     * Should only be applied to subworlds aligned by the coordinate axes
+     */
+    default ChunkCoordinates transformBlockToGlobal(ChunkCoordinates chunkCoordinates) {
+        return transformBlockToGlobal(chunkCoordinates.posX, chunkCoordinates.posY, chunkCoordinates.posZ);
+    }
+
+    /**
+     * Should only be applied to subworlds aligned by the coordinate axes
+     */
+    default ChunkCoordinates transformBlockToGlobal(int x, int y, int z) {
+        Vec3 localCenter = transformToGlobal(x + 0.5d, y + 0.5d, z + 0.5d);
+        return new ChunkCoordinates(
+            (int) Math.floor(localCenter.xCoord),
+            (int) Math.floor(localCenter.yCoord),
+            (int) Math.floor(localCenter.zCoord));
+    }
 
     Vec3 transformToGlobal(Entity var1);
 
@@ -236,5 +272,20 @@ public interface SubWorld {
 
     default boolean isEmpty() {
         return false;
+    }
+
+    default void alignSubWorld() {
+        setRotationYaw((double) Math.round(getRotationYaw() / 90.0D) * 90.0D);
+        setRotationPitch((double) Math.round(getRotationPitch() / 90.0D) * 90.0D);
+        setRotationRoll((double) Math.round(getRotationRoll() / 90.0D) * 90.0D);
+        setTranslation(
+            (double) Math.round(getTranslationX()),
+            (double) Math.round(getTranslationY()),
+            (double) Math.round(getTranslationZ()));
+        setMotion(0.0D, 0.0D, 0.0D);
+        setRotationYawSpeed(0.0D);
+        setRotationPitchSpeed(0.0D);
+        setRotationRollSpeed(0.0D);
+        setScaleChangeRate(0.0D);
     }
 }

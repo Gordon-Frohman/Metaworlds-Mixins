@@ -4,23 +4,22 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
+import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class BlockContagiousSubWorldCreator extends Block {
 
-    public static Map<Integer, Boolean> blockVolatilityMap = new TreeMap();
     public static boolean isBusy = false;
 
     public BlockContagiousSubWorldCreator() {
@@ -31,23 +30,30 @@ public class BlockContagiousSubWorldCreator extends Block {
     public void onBlockAdded(World par1World, int par2, int par3, int par4) {
         if (!isBusy) {
             isBusy = true;
-            ArrayList blocksToTake = new ArrayList();
-            ArrayList blocksToTakeVolatile = new ArrayList();
-            HashSet prevMargin = new HashSet();
-            HashSet margin = new HashSet();
-            HashSet newMargin = new HashSet();
-            blocksToTake.add(new BlockContagiousSubWorldCreator.BlockCoord3(par2, par3, par4));
-            margin.add(new BlockContagiousSubWorldCreator.BlockCoord3(par2, par3, par4));
+            ArrayList<ChunkCoordinates> blocksToTake = new ArrayList<ChunkCoordinates>();
+            ArrayList<ChunkCoordinates> blocksToTakeSolidVolatile = new ArrayList<ChunkCoordinates>();
+            ArrayList<ChunkCoordinates> blocksToTakeVolatile = new ArrayList<ChunkCoordinates>();
+            HashSet<ChunkCoordinates> prevMargin = new HashSet<ChunkCoordinates>();
+            HashSet<ChunkCoordinates> margin = new HashSet<ChunkCoordinates>();
+            HashSet<ChunkCoordinates> newMargin = new HashSet<ChunkCoordinates>();
+            blocksToTake.add(new ChunkCoordinates(par2, par3, par4));
+            margin.add(new ChunkCoordinates(par2, par3, par4));
             boolean isValid = true;
 
             do {
-                isValid = this
-                    .expandAtMargin(par1World, blocksToTake, blocksToTakeVolatile, prevMargin, margin, newMargin);
+                isValid = this.expandAtMargin(
+                    par1World,
+                    blocksToTake,
+                    blocksToTakeSolidVolatile,
+                    blocksToTakeVolatile,
+                    prevMargin,
+                    margin,
+                    newMargin);
                 if (!isValid) {
                     break;
                 }
 
-                HashSet newWorld = prevMargin;
+                HashSet<ChunkCoordinates> newWorld = prevMargin;
                 prevMargin = margin;
                 margin = newMargin;
                 newMargin = newWorld;
@@ -57,74 +63,46 @@ public class BlockContagiousSubWorldCreator extends Block {
             if (isValid) {
                 World newWorld1 = ((IMixinWorld) par1World).createSubWorld();
                 SubWorld newSubWorld = (SubWorld) newWorld1;
-                Iterator i$ = blocksToTake.iterator();
 
-                BlockContagiousSubWorldCreator.BlockCoord3 curCoord;
+                ChunkCoordinates curCoord;
                 Block block;
                 int blockMetadata;
                 TileEntity origTE;
                 NBTTagCompound nbttag;
                 TileEntity newTE;
-                while (i$.hasNext()) {
-                    curCoord = (BlockContagiousSubWorldCreator.BlockCoord3) i$.next();
-                    block = par1World.getBlock(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
-                    blockMetadata = par1World
-                        .getBlockMetadata(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
-                    newWorld1
-                        .setBlock(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ, block, blockMetadata, 0);
-                    newWorld1.setBlockMetadataWithNotify(
-                        curCoord.blockPosX,
-                        curCoord.blockPosY,
-                        curCoord.blockPosZ,
-                        blockMetadata,
-                        0);
-                    if (block.hasTileEntity(blockMetadata)) {
-                        origTE = par1World.getTileEntity(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
-                        nbttag = new NBTTagCompound();
-                        origTE.writeToNBT(nbttag);
-                        origTE.invalidate();
-                        newTE = TileEntity.createAndLoadEntity(nbttag);
-                        newWorld1.setTileEntity(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ, newTE);
+
+                List<List<ChunkCoordinates>> listsToParse = new ArrayList<List<ChunkCoordinates>>();
+                listsToParse.add(blocksToTake);
+                listsToParse.add(blocksToTakeSolidVolatile);
+                listsToParse.add(blocksToTakeVolatile);
+                for (List<ChunkCoordinates> currentList : listsToParse) {
+                    Iterator<ChunkCoordinates> i$ = currentList.iterator();
+                    while (i$.hasNext()) {
+                        curCoord = (ChunkCoordinates) i$.next();
+                        block = par1World.getBlock(curCoord.posX, curCoord.posY, curCoord.posZ);
+                        blockMetadata = par1World.getBlockMetadata(curCoord.posX, curCoord.posY, curCoord.posZ);
+                        newWorld1.setBlock(curCoord.posX, curCoord.posY, curCoord.posZ, block, blockMetadata, 0);
+                        newWorld1
+                            .setBlockMetadataWithNotify(curCoord.posX, curCoord.posY, curCoord.posZ, blockMetadata, 0);
+                        if (block.hasTileEntity(blockMetadata)) {
+                            origTE = par1World.getTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ);
+                            nbttag = new NBTTagCompound();
+                            origTE.writeToNBT(nbttag);
+                            origTE.invalidate();
+                            newTE = TileEntity.createAndLoadEntity(nbttag);
+                            newWorld1.setTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ, newTE);
+                        }
                     }
                 }
 
-                i$ = blocksToTakeVolatile.iterator();
-
-                while (i$.hasNext()) {
-                    curCoord = (BlockContagiousSubWorldCreator.BlockCoord3) i$.next();
-                    block = par1World.getBlock(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
-                    blockMetadata = par1World
-                        .getBlockMetadata(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
-                    newWorld1
-                        .setBlock(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ, block, blockMetadata, 0);
-                    newWorld1.setBlockMetadataWithNotify(
-                        curCoord.blockPosX,
-                        curCoord.blockPosY,
-                        curCoord.blockPosZ,
-                        blockMetadata,
-                        0);
-                    if (block.hasTileEntity(blockMetadata)) {
-                        origTE = par1World.getTileEntity(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
-                        nbttag = new NBTTagCompound();
-                        origTE.writeToNBT(nbttag);
-                        origTE.invalidate();
-                        newTE = TileEntity.createAndLoadEntity(nbttag);
-                        newWorld1.setTileEntity(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ, newTE);
+                listsToParse.set(0, blocksToTakeVolatile);
+                listsToParse.set(2, blocksToTake);
+                for (List<ChunkCoordinates> currentList : listsToParse) {
+                    Iterator<ChunkCoordinates> i$ = currentList.iterator();
+                    while (i$.hasNext()) {
+                        curCoord = (ChunkCoordinates) i$.next();
+                        par1World.setBlockToAir(curCoord.posX, curCoord.posY, curCoord.posZ);
                     }
-                }
-
-                i$ = blocksToTakeVolatile.iterator();
-
-                while (i$.hasNext()) {
-                    curCoord = (BlockContagiousSubWorldCreator.BlockCoord3) i$.next();
-                    par1World.setBlockToAir(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
-                }
-
-                i$ = blocksToTake.iterator();
-
-                while (i$.hasNext()) {
-                    curCoord = (BlockContagiousSubWorldCreator.BlockCoord3) i$.next();
-                    par1World.setBlockToAir(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
                 }
 
                 newSubWorld.setCenter(
@@ -146,67 +124,61 @@ public class BlockContagiousSubWorldCreator extends Block {
         }
     }
 
-    public boolean expandAtMargin(World par1World, List<BlockContagiousSubWorldCreator.BlockCoord3> blockList,
-        List<BlockContagiousSubWorldCreator.BlockCoord3> volatileBlockList,
-        HashSet<BlockContagiousSubWorldCreator.BlockCoord3> prevMarginList,
-        HashSet<BlockContagiousSubWorldCreator.BlockCoord3> marginList,
-        HashSet<BlockContagiousSubWorldCreator.BlockCoord3> newMarginList) {
-        Iterator i$ = marginList.iterator();
+    public boolean expandAtMargin(World par1World, List<ChunkCoordinates> blockList,
+        List<ChunkCoordinates> solidVolatileBlockList, List<ChunkCoordinates> volatileBlockList,
+        HashSet<ChunkCoordinates> prevMarginList, HashSet<ChunkCoordinates> marginList,
+        HashSet<ChunkCoordinates> newMarginList) {
+        Iterator<ChunkCoordinates> i$ = marginList.iterator();
 
         while (i$.hasNext()) {
-            BlockContagiousSubWorldCreator.BlockCoord3 curCoord = (BlockContagiousSubWorldCreator.BlockCoord3) i$
-                .next();
+            ChunkCoordinates curCoord = (ChunkCoordinates) i$.next();
 
             for (int direction = 0; direction < 18; ++direction) {
-                BlockContagiousSubWorldCreator.BlockCoord3 newCoords = new BlockContagiousSubWorldCreator.BlockCoord3(
-                    curCoord.blockPosX,
-                    curCoord.blockPosY,
-                    curCoord.blockPosZ);
+                ChunkCoordinates newCoords = new ChunkCoordinates(curCoord.posX, curCoord.posY, curCoord.posZ);
                 boolean includePlants = direction == 1;
                 boolean includeFromPlants = direction == 0;
                 if (direction < 6) {
                     switch (direction / 2) {
                         case 0:
-                            newCoords.blockPosY += direction % 2 * 2 - 1;
+                            newCoords.posY += direction % 2 * 2 - 1;
                             break;
                         case 1:
-                            newCoords.blockPosX += direction % 2 * 2 - 1;
+                            newCoords.posX += direction % 2 * 2 - 1;
                             break;
                         case 2:
-                            newCoords.blockPosZ += direction % 2 * 2 - 1;
+                            newCoords.posZ += direction % 2 * 2 - 1;
                     }
                 } else {
                     int prevBlock = direction - 6;
                     if (prevBlock >= 4) {
                         prevBlock -= 4;
                         if (prevBlock >= 4) {
-                            ++newCoords.blockPosY;
+                            ++newCoords.posY;
                             prevBlock -= 4;
                         } else {
-                            --newCoords.blockPosY;
+                            --newCoords.posY;
                         }
 
                         switch (prevBlock / 2) {
                             case 0:
-                                newCoords.blockPosX += prevBlock % 2 * 2 - 1;
+                                newCoords.posX += prevBlock % 2 * 2 - 1;
                                 break;
                             case 1:
-                                newCoords.blockPosZ += prevBlock % 2 * 2 - 1;
+                                newCoords.posZ += prevBlock % 2 * 2 - 1;
                         }
                     } else {
-                        newCoords.blockPosX += prevBlock % 2 * 2 - 1;
-                        newCoords.blockPosZ += prevBlock / 2 * 2 - 1;
+                        newCoords.posX += prevBlock % 2 * 2 - 1;
+                        newCoords.posZ += prevBlock / 2 * 2 - 1;
                     }
                 }
 
                 if (!prevMarginList.contains(newCoords) && !marginList.contains(newCoords)) {
-                    Block var20 = par1World.getBlock(curCoord.blockPosX, curCoord.blockPosY, curCoord.blockPosZ);
+                    Block var20 = par1World.getBlock(curCoord.posX, curCoord.posY, curCoord.posZ);
                     if (includeFromPlants || var20.getMaterial()
                         .isLiquid()
                         || !var20.getMaterial()
                             .isReplaceable() && var20.getMaterial() != Material.plants) {
-                        Block curBlock = par1World
-                            .getBlock(newCoords.blockPosX, newCoords.blockPosY, newCoords.blockPosZ);
+                        Block curBlock = par1World.getBlock(newCoords.posX, newCoords.posY, newCoords.posZ);
                         if (curBlock.equals(Blocks.bedrock)) {
                             return false;
                         }
@@ -217,42 +189,21 @@ public class BlockContagiousSubWorldCreator extends Block {
                                 .isLiquid()
                                 || !curBlock.getMaterial()
                                     .isReplaceable() && curBlock.getMaterial() != Material.plants)
-                            && (!curBlock.equals(Blocks.water) && !curBlock.equals(Blocks.lava) || !par1World
-                                .getBlock(newCoords.blockPosX, newCoords.blockPosY + 1, newCoords.blockPosZ)
-                                .equals(curBlock))
+                            && (!curBlock.equals(Blocks.water) && !curBlock.equals(Blocks.lava)
+                                || !par1World.getBlock(newCoords.posX, newCoords.posY + 1, newCoords.posZ)
+                                    .equals(curBlock))
                             && newMarginList.add(newCoords)) {
-                            int blockId = Block.getIdFromBlock(curBlock);
-                            Boolean isVolatile = (Boolean) blockVolatilityMap.get(Integer.valueOf(blockId));
-                            if (isVolatile == null) {
-                                try {
-                                    if (curBlock.getClass()
-                                        .getMethod(
-                                            BlockDummyReobfTracker.canBlockStayMethodName,
-                                            new Class[] { World.class, Integer.TYPE, Integer.TYPE, Integer.TYPE })
-                                        .getDeclaringClass()
-                                        .equals(Block.class)
-                                        && curBlock.getClass()
-                                            .getMethod(
-                                                BlockDummyReobfTracker.onNeighborBlockChange,
-                                                new Class[] { World.class, Integer.TYPE, Integer.TYPE, Integer.TYPE,
-                                                    Block.class })
-                                            .getDeclaringClass()
-                                            .equals(Block.class)) {
-                                        isVolatile = Boolean.valueOf(false);
-                                    } else {
-                                        isVolatile = Boolean.valueOf(true);
-                                    }
-                                } catch (SecurityException var18) {
-                                    ;
-                                } catch (NoSuchMethodException var19) {
-                                    ;
+                            if (BlockVolatilityMap.checkBlockVolatility(curBlock)) {
+                                if (BlockVolatilityMap.isBlockSolid(
+                                    curBlock,
+                                    par1World,
+                                    newCoords.posX,
+                                    newCoords.posY,
+                                    newCoords.posZ)) {
+                                    solidVolatileBlockList.add(newCoords);
+                                } else {
+                                    volatileBlockList.add(newCoords);
                                 }
-
-                                blockVolatilityMap.put(Integer.valueOf(blockId), isVolatile);
-                            }
-
-                            if (isVolatile.booleanValue()) {
-                                volatileBlockList.add(newCoords);
                             } else {
                                 blockList.add(newCoords);
                             }
@@ -263,32 +214,5 @@ public class BlockContagiousSubWorldCreator extends Block {
         }
 
         return true;
-    }
-
-    public class BlockCoord3 {
-
-        int blockPosX;
-        int blockPosY;
-        int blockPosZ;
-
-        BlockCoord3(int x, int y, int z) {
-            this.blockPosX = x;
-            this.blockPosY = y;
-            this.blockPosZ = z;
-        }
-
-        public boolean equals(Object par1Obj) {
-            if (!(par1Obj instanceof BlockContagiousSubWorldCreator.BlockCoord3)) {
-                return false;
-            } else {
-                BlockContagiousSubWorldCreator.BlockCoord3 targetCoord = (BlockContagiousSubWorldCreator.BlockCoord3) par1Obj;
-                return targetCoord.blockPosX == this.blockPosX && targetCoord.blockPosY == this.blockPosY
-                    && targetCoord.blockPosZ == this.blockPosZ;
-            }
-        }
-
-        public int hashCode() {
-            return this.blockPosY + this.blockPosX + (this.blockPosZ << 12) << 8;
-        }
     }
 }

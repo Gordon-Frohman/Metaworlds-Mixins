@@ -1529,10 +1529,8 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
     @Override
     public BiomeGenBase getBiomeGenForCoordsBody(final int x, final int z) {
-        Vec3 globalCoords = this.transformToGlobal(x + 0.5d, 128.5d, z + 0.5d);
+        ChunkCoordinates globalCoords = this.transformBlockToGlobal(x, (int) this.getCenterY(), z);
         return this.getParentWorld()
-            .getBiomeGenForCoordsBody(
-                MathHelper.floor_double(globalCoords.xCoord),
-                MathHelper.floor_double(globalCoords.zCoord));
+            .getBiomeGenForCoordsBody(globalCoords.posX, globalCoords.posZ);
     }
 }

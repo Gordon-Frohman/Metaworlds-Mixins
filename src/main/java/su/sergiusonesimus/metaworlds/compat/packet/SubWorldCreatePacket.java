@@ -24,8 +24,10 @@ public class SubWorldCreatePacket implements IMessage {
         this.subWorldIDs = subWorldIDsArray;
         this.subWorldTypes = new Integer[subWorldsCount];
         IMixinWorld parentWorld = (IMixinWorld) DimensionManager.getWorld(0);
-        for (int i = 0; i < subWorldsCount; i++) subWorldTypes[i] = SubWorldTypeManager
-            .getTypeID(((SubWorld) parentWorld.getSubWorld(subWorldIDs[i])).getSubWorldType());
+        for (int i = 0; i < subWorldsCount; i++) {
+            SubWorld subworld = (SubWorld) parentWorld.getSubWorld(subWorldIDs[i]);
+            subWorldTypes[i] = subworld == null ? 0 : SubWorldTypeManager.getTypeID(subworld.getSubWorldType());
+        }
     }
 
     public SubWorldCreatePacket(int numSubWorldsToCreate, Integer[] subWorldIDsArray, Integer[] subWorldTypesArray) {
