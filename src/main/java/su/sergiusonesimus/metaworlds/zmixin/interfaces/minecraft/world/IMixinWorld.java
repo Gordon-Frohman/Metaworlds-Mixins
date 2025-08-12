@@ -158,15 +158,15 @@ public interface IMixinWorld {
     // par2AxisAlignedBB
     // Expects par2AxisAlignedBB in global coordinates
     // Returns list of bounding boxes in global coordinates
-    public List getCollidingBoundingBoxesGlobal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB);
+    public List<AxisAlignedBB> getCollidingBoundingBoxesGlobal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB);
 
     // Expects par2AxisAlignedBB in local coordinates
     // In comparison:
     // getEntitiesWithinAABBExcludingEntity returns entities of this world and its parent's world
     // getEntitiesWithinAABBExcludingEntityLocal returns entities from this world only
-    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB);
+    public List<Entity> getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB);
 
-    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+    public List<Entity> getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector);
 
     public Chunk createNewChunk(int xPos, int zPos);

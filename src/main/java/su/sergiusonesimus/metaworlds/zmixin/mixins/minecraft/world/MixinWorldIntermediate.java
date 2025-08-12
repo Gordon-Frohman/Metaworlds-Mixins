@@ -33,17 +33,17 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
 
     private static SubWorldFactory subWorldFactory = null;
 
-    private ArrayList collidingBBCacheIntermediate = new ArrayList();
+    private List<AxisAlignedBB> collidingBBCacheIntermediate = new ArrayList<AxisAlignedBB>();
 
     public MovingObjectPosition func_147447_a(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4, boolean par5) {
         MovingObjectPosition bestResult = null;
         Vec3 vecSource = ((IMixinWorld) this).transformToGlobal(par1Vec3);
         Vec3 vecDest = ((IMixinWorld) this).transformToGlobal(par2Vec3);
-        Iterator i$ = ((IMixinWorld) ((IMixinWorld) this).getParentWorld()).getWorlds()
+        Iterator<World> i$ = ((IMixinWorld) ((IMixinWorld) this).getParentWorld()).getWorlds()
             .iterator();
 
         while (i$.hasNext()) {
-            World curWorld = (World) i$.next();
+            World curWorld = i$.next();
             MovingObjectPosition curResult = ((IMixinWorldIntermediate) curWorld).rayTraceBlocks_do_do_single(
                 ((IMixinWorld) curWorld).transformToLocal(vecSource),
                 ((IMixinWorld) curWorld).transformToLocal(vecDest),
@@ -72,14 +72,14 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         return super.func_147447_a(par1Vec3, par2Vec3, par3, par4, par5);
     }
 
-    public List getCollidingBoundingBoxes(Entity entity, AxisAlignedBB aabb) {
+    public List<AxisAlignedBB> getCollidingBoundingBoxes(Entity entity, AxisAlignedBB aabb) {
         this.collidingBBCacheIntermediate.clear();
-        this.collidingBBCacheIntermediate = (ArrayList) this.getCollidingBoundingBoxesLocal(entity, aabb);
-        Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+        this.collidingBBCacheIntermediate = this.getCollidingBoundingBoxesLocal(entity, aabb);
+        Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
-            World curSubWorld = (World) i$.next();
+            World curSubWorld = i$.next();
             if (!((SubWorld) curSubWorld).getMaximumCloseWorldBBRotated()
                 .intersectsWith(aabb)) continue;
             double worldRotationY = ((IMixinWorld) curSubWorld).getRotationYaw() % 360;
@@ -128,7 +128,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         return this.collidingBBCacheIntermediate;
     }
 
-    public List getCollidingBoundingBoxesLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+    public List<AxisAlignedBB> getCollidingBoundingBoxesLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
         return super.getCollidingBoundingBoxes(par1Entity, par2AxisAlignedBB);
     }
 
@@ -137,7 +137,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
             return true;
         } else {
             if (!((IMixinWorld) this).isSubWorld()) {
-                Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+                Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
                     .iterator();
 
                 while (i$.hasNext()) {
@@ -161,7 +161,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
             return true;
         } else {
             if (!((IMixinWorld) this).isSubWorld()) {
-                Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+                Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
                     .iterator();
 
                 while (i$.hasNext()) {
@@ -176,16 +176,16 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         }
     }
 
-    public List getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+    public List<Entity> getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
-        ArrayList arraylist = new ArrayList();
+        ArrayList<Entity> arraylist = new ArrayList<Entity>();
         arraylist
             .addAll(this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, par3IEntitySelector));
-        Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+        Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
-            World curSubWorld = (World) i$.next();
+            World curSubWorld = i$.next();
             arraylist.addAll(
                 ((IMixinWorld) curSubWorld).getEntitiesWithinAABBExcludingEntityLocal(
                     par1Entity,
@@ -196,11 +196,11 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         return arraylist;
     }
 
-    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+    public List<Entity> getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
         return this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, (IEntitySelector) null);
     }
 
-    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+    public List<Entity> getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
         if (par1Entity instanceof EntityPlayer) {
             par1Entity = ((IMixinEntity) par1Entity).getProxyPlayer(((World) (Object) this));
@@ -209,11 +209,12 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         return super.getEntitiesWithinAABBExcludingEntity((Entity) par1Entity, par2AxisAlignedBB, par3IEntitySelector);
     }
 
-    public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public List<Entity> selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
-        ArrayList arraylist = new ArrayList();
+        ArrayList<Entity> arraylist = new ArrayList<Entity>();
         arraylist.addAll(this.selectEntitiesWithinAABBLocal(par1Class, par2AxisAlignedBB, par3IEntitySelector));
-        Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+        Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
@@ -228,7 +229,8 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         return arraylist;
     }
 
-    public List selectEntitiesWithinAABBLocal(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public List<Entity> selectEntitiesWithinAABBLocal(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
         return super.selectEntitiesWithinAABB(par1Class, par2AxisAlignedBB, par3IEntitySelector);
     }
@@ -239,7 +241,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         Object proxyPlayer;
         if (!((World) (Object) this).isRemote && !((IMixinWorld) this).isSubWorld()
             && par1Entity instanceof EntityPlayer) {
-            for (Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+            for (Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
                 .iterator(); i$.hasNext(); curSubWorld.spawnEntityInWorld((Entity) proxyPlayer)) {
                 curSubWorld = (World) i$.next();
                 proxyPlayer = ((IMixinEntity) par1Entity).getProxyPlayer(curSubWorld);
@@ -257,7 +259,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         super.removeEntity(par1Entity);
         if (!((World) (Object) this).isRemote && !((IMixinWorld) this).isSubWorld()
             && par1Entity instanceof EntityPlayer) {
-            Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+            Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
                 .iterator();
 
             while (i$.hasNext()) {
@@ -279,7 +281,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         super.removePlayerEntityDangerously(par1Entity);
         if (!((WorldServer) (Object) this).isRemote && !((IMixinWorld) this).isSubWorld()
             && par1Entity instanceof EntityPlayer) {
-            Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+            Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
                 .iterator();
 
             while (i$.hasNext()) {
@@ -296,7 +298,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
     }
 
     public void setSubworldFactory(SubWorldFactory subWorldFactory) {
-        this.subWorldFactory = subWorldFactory;
+        MixinWorldIntermediate.subWorldFactory = subWorldFactory;
     }
 
     public SubWorldFactory getSubworldFactory() {

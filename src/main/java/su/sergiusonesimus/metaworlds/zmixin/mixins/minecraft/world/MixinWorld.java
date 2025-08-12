@@ -10,6 +10,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
@@ -50,6 +51,7 @@ public abstract class MixinWorld implements IMixinWorld {
     @Shadow(remap = true)
     public static double MAX_ENTITY_RADIUS;
 
+    @SuppressWarnings("rawtypes")
     @Shadow(remap = true)
     public ArrayList collidingBoundingBoxes;
 
@@ -57,16 +59,16 @@ public abstract class MixinWorld implements IMixinWorld {
     public boolean restoringBlockSnapshots;
 
     @Shadow(remap = true)
-    public List playerEntities;
+    public List<EntityPlayer> playerEntities;
 
     @Shadow(remap = true)
-    public List loadedEntityList;
+    public List<Entity> loadedEntityList;
 
     @Shadow(remap = true)
     public WorldInfo worldInfo;
 
     @Shadow(remap = true)
-    protected List worldAccesses;
+    protected List<IWorldAccess> worldAccesses;
 
     // TODO
 
@@ -114,13 +116,12 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     @Shadow(remap = true)
-    public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
-        IEntitySelector par3IEntitySelector) {
+    public <T> List<T> selectEntitiesWithinAABB(Class<T> clazz, AxisAlignedBB bb, IEntitySelector selector) {
         return null;
     }
 
     @Shadow(remap = true)
-    public List getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+    public List<Entity> getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
         return null;
     }
@@ -131,7 +132,7 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     @Shadow(remap = true)
-    public List getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+    public List<AxisAlignedBB> getCollidingBoundingBoxes(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
         return null;
     }
 
@@ -150,7 +151,7 @@ public abstract class MixinWorld implements IMixinWorld {
     }
 
     @Shadow(remap = true)
-    public List getEntitiesWithinAABBExcludingEntity(Entity p_72839_1_, AxisAlignedBB p_72839_2_) {
+    public List<Entity> getEntitiesWithinAABBExcludingEntity(Entity p_72839_1_, AxisAlignedBB p_72839_2_) {
         return null;
     }
 
@@ -372,15 +373,15 @@ public abstract class MixinWorld implements IMixinWorld {
         return globalVectors;
     }
 
-    public List getCollidingBoundingBoxesGlobal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+    public List<AxisAlignedBB> getCollidingBoundingBoxesGlobal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
         return this.getCollidingBoundingBoxes(par1Entity, par2AxisAlignedBB);
     }
 
-    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
+    public List<Entity> getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB) {
         return this.getEntitiesWithinAABBExcludingEntityLocal(par1Entity, par2AxisAlignedBB, (IEntitySelector) null);
     }
 
-    public List getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+    public List<Entity> getEntitiesWithinAABBExcludingEntityLocal(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
         return null;
     }
