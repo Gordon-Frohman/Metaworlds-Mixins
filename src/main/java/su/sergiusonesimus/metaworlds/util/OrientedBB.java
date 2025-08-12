@@ -285,18 +285,67 @@ public class OrientedBB extends AxisAlignedBB {
         boolean obb2FlatY = (v1.getX() == v2.getX()) && (v1.getY() == v2.getY()) && (v1.getZ() == v2.getZ());
         boolean obb2FlatZ = (v1.getX() == v4.getX()) && (v1.getY() == v4.getY()) && (v1.getZ() == v4.getZ());
 
+        // Calculating BBs' centers
+        double centerX1 = 0;
+        double centerY1 = 0;
+        double centerZ1 = 0;
+        double centerX2 = 0;
+        double centerY2 = 0;
+        double centerZ2 = 0;
+        for (int i = 0; i < 8; i++) {
+            centerX1 += this.getX(i);
+            centerY1 += this.getY(i);
+            centerZ1 += this.getZ(i);
+            centerX2 += par1OrientedBB.getX(i);
+            centerY2 += par1OrientedBB.getY(i);
+            centerZ2 += par1OrientedBB.getZ(i);
+        }
+        Vector3D center1 = new Vector3D(centerX1 / 8, centerY1 / 8, centerZ1 / 8);
+        Vector3D center2 = new Vector3D(centerX2 / 8, centerY2 / 8, centerZ2 / 8);
+
         // Getting planes for every face
         List<Plane> planeFaces1 = new ArrayList<Plane>();
         List<Plane> planeFaces2 = new ArrayList<Plane>();
         for (int i = 0; i < 6; i++) {
+            Plane plane;
             if ((obb1FlatY && i == 0) || (obb1FlatX && i == 2)
                 || (obb1FlatZ && i == 5)
-                || (!obb1FlatY && !obb1FlatX && !obb1FlatZ))
-                planeFaces1.add(new Plane(faces1[i][0], faces1[i][1], faces1[i][2]));
+                || (!obb1FlatY && !obb1FlatX && !obb1FlatZ)) {
+                plane = new Plane(faces1[i][0], faces1[i][1], faces1[i][2]);
+                // Making sure that center is always on the positive side of the plane
+                if (plane.getOffset(center1) < 0) plane.revertSelf();
+                planeFaces1.add(plane);
+            }
             if ((obb2FlatY && i == 0) || (obb2FlatX && i == 2)
                 || (obb2FlatZ && i == 5)
-                || (!obb2FlatY && !obb2FlatX && !obb2FlatZ))
-                planeFaces2.add(new Plane(faces2[i][0], faces2[i][1], faces2[i][2]));
+                || (!obb2FlatY && !obb2FlatX && !obb2FlatZ)) {
+                plane = new Plane(faces2[i][0], faces2[i][1], faces2[i][2]);
+                // Making sure that center is always on the positive side of the plane
+                if (plane.getOffset(center2) < 0) plane.revertSelf();
+                planeFaces2.add(plane);
+            }
+        }
+
+        // First let's check if one BB contains any point of the other
+        for (int i = 0; i < 8; i++) {
+            boolean contains = true;
+            Vector3D vertice = this.getVertice(i);
+            for (Plane plane : planeFaces2) {
+                if (plane.getOffset(vertice) < 0) {
+                    contains = false;
+                    break;
+                }
+            }
+            if (contains) return true;
+            contains = true;
+            vertice = par1OrientedBB.getVertice(i);
+            for (Plane plane : planeFaces1) {
+                if (plane.getOffset(vertice) < 0) {
+                    contains = false;
+                    break;
+                }
+            }
+            if (contains) return true;
         }
 
         boolean intersects = false;

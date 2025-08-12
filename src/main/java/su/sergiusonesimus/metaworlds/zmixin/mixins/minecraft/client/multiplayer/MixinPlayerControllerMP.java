@@ -337,6 +337,19 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
             .getProxyPlayer(storedWorld)).sendQueue;
     }
 
+    // attackEntity
+
+    @Redirect(
+        method = "attackEntity",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
+            opcode = Opcodes.GETFIELD))
+    private NetHandlerPlayClient getNetClientHandlerAttackEntity(PlayerControllerMP instance,
+        @Local EntityPlayer player) {
+        return ((EntityClientPlayerMP) player).sendQueue;
+    }
+
     // interactWithEntitySendPacket
 
     @Redirect(
