@@ -22,6 +22,7 @@ public class MixinRenderPainting extends MixinRender {
     private void rotatePainting(EntityPainting entity, double x, double y, double z, float rotationYaw,
         float rotationRoll, CallbackInfo ci) {
         float xAngle = 0;
+        float yAngle = (float) ((IMixinWorld) entity.worldObj).getRotationYaw() % 360;
         float zAngle = 0;
         switch (entity.hangingDirection) {
             default:
@@ -44,6 +45,7 @@ public class MixinRenderPainting extends MixinRender {
                 break;
         }
         GL11.glRotatef(xAngle, 1.0F, 0.0F, 0.0F);
+        GL11.glRotatef(yAngle, 0.0F, 1.0F, 0.0F);
         GL11.glRotatef(zAngle, 0.0F, 0.0F, 1.0F);
     }
 

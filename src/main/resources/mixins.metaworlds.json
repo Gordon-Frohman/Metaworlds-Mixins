@@ -24,6 +24,7 @@
   	"minecraft.client.renderer.entity.MixinRenderManager",
   	"minecraft.client.renderer.entity.MixinRenderMinecart",
   	"minecraft.client.renderer.entity.MixinRenderPainting",
+  	"minecraft.client.renderer.tileentity.MixinRenderItemFrame",
   	"minecraft.client.renderer.tileentity.MixinTileEntityRendererDispatcher",
   	"minecraft.entity.MixinEntity",
   	"minecraft.entity.MixinEntityLivingBase",
