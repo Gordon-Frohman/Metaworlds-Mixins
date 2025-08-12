@@ -13,10 +13,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.Facing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
@@ -24,6 +27,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import org.jblas.DoubleMatrix;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,8 +39,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.util.Direction;
+import su.sergiusonesimus.metaworlds.util.Direction.Axis;
 import su.sergiusonesimus.metaworlds.util.UnmodifiableSingleObjPlusCollection;
+import su.sergiusonesimus.metaworlds.world.chunk.ChunkSubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.server.IMixinMinecraftServer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -68,7 +76,46 @@ public abstract class MixinWorld implements IMixinWorld {
     @Shadow(remap = true)
     protected List worldAccesses;
 
+    @Shadow(remap = true)
+    public WorldProvider provider;
+
+    @Shadow(remap = true)
+    public Profiler theProfiler;
+
+    @Shadow(remap = true)
+    int[] lightUpdateBlockList;
+
     // TODO
+
+    @Shadow(remap = true)
+    public int computeLightValue(int x, int y, int z, EnumSkyBlock p_98179_4_) {
+        return 0;
+    }
+
+    @Shadow(remap = true)
+    public void setLightValue(EnumSkyBlock lightType, int x, int y, int z, int value) {}
+
+    @Shadow(remap = true)
+    public int getSavedLightValue(EnumSkyBlock p_72972_1_, int p_72972_2_, int p_72972_3_, int p_72972_4_) {
+        return 0;
+    }
+
+    @Shadow(remap = true)
+    public boolean doChunksNearChunkExist(int p_72873_1_, int p_72873_2_, int p_72873_3_, int p_72873_4_) {
+        return false;
+    }
+
+    @Shadow(remap = true)
+    public void markBlockRangeForRenderUpdate(int p_147458_1_, int p_147458_2_, int p_147458_3_, int p_147458_4_,
+        int p_147458_5_, int p_147458_6_) {}
+
+    @Shadow(remap = true)
+    public void markBlocksDirtyVertical(int p_72975_1_, int p_72975_2_, int p_72975_3_, int p_72975_4_) {}
+
+    @Shadow(remap = true)
+    public int getSkyBlockTypeBrightness(EnumSkyBlock p_72925_1_, int p_72925_2_, int p_72925_3_, int p_72925_4_) {
+        return 0;
+    }
 
     @Shadow(remap = true)
     public Chunk getChunkFromBlockCoords(int p_72938_1_, int p_72938_2_) {
@@ -448,49 +495,54 @@ public abstract class MixinWorld implements IMixinWorld {
         return precHeight > 255 ? 255 : precHeight;
     }
 
+    public boolean canBlockSeeTheSky(ForgeDirection dir, int x, int y, int z) {
+        if (dir == ForgeDirection.UP) {
+            return this.canBlockSeeTheSky(x, y, z);
+        } else {
+            return false;
+        }
+    }
+
     /**
      * Checks if the specified block is able to see the sky
      */
     @Overwrite
     public boolean canBlockSeeTheSky(int x, int y, int z) {
-        boolean canSee = this.getChunkFromChunkCoords(x >> 4, z >> 4)
-            .canBlockSeeTheSky(x & 15, y, z & 15);
-        if (canSee) {
-            double centerX = x + 0.5;
-            double centerY = y + 0.5;
-            double centerZ = z + 0.5;
-            Collection<World> subworlds = ((IMixinWorld) this.getParentWorld()).getSubWorlds();
-            if (this.isSubWorld) {
-                Vec3 globalCoords = this.transformToGlobal(Vec3.createVectorHelper(centerX, centerY, centerZ));
-                centerX = globalCoords.xCoord;
-                centerY = globalCoords.yCoord;
-                centerZ = globalCoords.zCoord;
-            }
-            for (World subworld : subworlds) {
-                // For now - skipping worlds rotated around x/z. Maybe add this later
-                if (((SubWorld) subworld).getRotationPitch() != 0 || ((SubWorld) subworld).getRotationRoll() != 0)
-                    continue;
-                // "The most important part of every investigation is not to find yourself guilty"
-                if (subworld == (World) (Object) this) continue;
-                AxisAlignedBB worldBB = ((SubWorld) subworld).getMaximumCloseWorldBBRotated();
-                if (centerX >= worldBB.minX && centerX <= worldBB.maxX
-                    && centerZ >= worldBB.minZ
-                    && centerZ <= worldBB.maxZ) {
-                    Vec3 localCoords = ((IMixinWorld) subworld)
-                        .transformToLocal(Vec3.createVectorHelper(centerX, centerY, centerZ));
-                    int localX = MathHelper.floor_double(localCoords.xCoord);
-                    int localY = MathHelper.floor_double(localCoords.yCoord);
-                    int localZ = MathHelper.floor_double(localCoords.zCoord);
-                    Chunk subworldChunk = subworld.getChunkFromChunkCoords(localX >> 4, localZ >> 4);
-                    int subworldHeight = subworldChunk.getHeightValue(localX & 15, localZ & 15);
-                    if (subworldHeight > localY) {
-                        canSee = false;
-                        break;
+        if (this.isSubWorld) {
+            return this.getChunkFromChunkCoords(x >> 4, z >> 4)
+                .canBlockSeeTheSky(x & 15, y, z & 15);
+        } else {
+            boolean canSee = this.getChunkFromChunkCoords(x >> 4, z >> 4)
+                .canBlockSeeTheSky(x & 15, y, z & 15);
+            if (canSee) {
+                double centerX = x + 0.5;
+                double centerY = y + 0.5;
+                double centerZ = z + 0.5;
+                for (World subworld : this.getSubWorlds()) {
+                    // For now - skipping worlds rotated around x/z. Maybe add this later
+                    if (((SubWorld) subworld).getRotationPitch() != 0 || ((SubWorld) subworld).getRotationRoll() != 0)
+                        continue;
+                    // "The most important part of every investigation is not to find yourself guilty"
+                    if (subworld == (World) (Object) this) continue;
+                    AxisAlignedBB worldBB = ((SubWorld) subworld).getMaximumCloseWorldBBRotated();
+                    if (centerX >= worldBB.minX && centerX <= worldBB.maxX
+                        && centerZ >= worldBB.minZ
+                        && centerZ <= worldBB.maxZ) {
+                        Vec3 localCoords = ((IMixinWorld) subworld).transformToLocal(centerX, centerY, centerZ);
+                        int localX = MathHelper.floor_double(localCoords.xCoord);
+                        int localY = MathHelper.floor_double(localCoords.yCoord);
+                        int localZ = MathHelper.floor_double(localCoords.zCoord);
+                        Chunk subworldChunk = subworld.getChunkFromChunkCoords(localX >> 4, localZ >> 4);
+                        int subworldHeight = subworldChunk.getHeightValue(localX & 15, localZ & 15);
+                        if (subworldHeight > localY) {
+                            canSee = false;
+                            break;
+                        }
                     }
                 }
             }
+            return canSee;
         }
-        return canSee;
     }
 
     @Inject(method = "playSoundEffect", at = @At(value = "HEAD"), cancellable = true)
@@ -504,6 +556,423 @@ public abstract class MixinWorld implements IMixinWorld {
                     .playSound(soundName, globalCoords.xCoord, globalCoords.yCoord, globalCoords.zCoord, volume, pitch);
             }
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "setWorldTime", at = @At("TAIL"), remap = false)
+    public void setWorldTime(long time, CallbackInfo ci) {
+        for (World subworld : getSubWorlds()) {
+            subworld.setWorldTime(time);
+        }
+    }
+
+    public void markBlocksDirtyDirectional(Direction dir, int coord1, int coord2, int coordVarMin, int coordVarMax) {
+        Axis axis = dir.getAxis();
+        if (axis == Axis.Y) {
+            this.markBlocksDirtyVertical(coord1, coord2, coordVarMin, coordVarMax);
+        } else {
+            int i1;
+
+            if (coordVarMin > coordVarMax) {
+                i1 = coordVarMax;
+                coordVarMax = coordVarMin;
+                coordVarMin = i1;
+            }
+
+            if (!this.provider.hasNoSky) {
+                int x = axis == Axis.X ? coordVarMin : coord1;
+                int y = coord2;
+                int z = axis == Axis.Z ? coordVarMin : coord1;
+                for (i1 = coordVarMin; i1 <= coordVarMax; ++i1) {
+                    if (axis == Axis.X) {
+                        x = i1;
+                    } else {
+                        z = i1;
+                    }
+                    this.updateSkyLight(dir, x, y, z);
+                }
+            }
+
+            int minX;
+            int minZ;
+            int maxX;
+            int maxZ;
+            if (axis == Axis.X) {
+                minX = coordVarMin;
+                maxX = coordVarMax;
+                minZ = maxZ = coord1;
+            } else {
+                minZ = coordVarMin;
+                maxZ = coordVarMax;
+                minX = maxX = coord1;
+            }
+            this.markBlockRangeForRenderUpdate(minX, coord2, minZ, maxX, coord2, maxZ);
+        }
+    }
+
+    public boolean updateSkyLight(Direction dir, int x, int y, int z) {
+        if (!this.doChunksNearChunkExist(x, y, z, 17)) {
+            return false;
+        } else {
+            int l = 0;
+            int i1 = 0;
+            this.theProfiler.startSection("getBrightness" + dir.toString());
+            int j1 = this.getSavedSkyLightValue(dir, x, y, z);
+            int k1 = this.computeSkyLightValue(dir, x, y, z);
+            int l1;
+            int i2;
+            int j2;
+            int k2;
+            int l2;
+            int i3;
+            int j3;
+            int k3;
+            int l3;
+
+            if (k1 > j1) {
+                this.lightUpdateBlockList[i1++] = 133152;
+            } else if (k1 < j1) {
+                this.lightUpdateBlockList[i1++] = 133152 | j1 << 18;
+
+                while (l < i1) {
+                    l1 = this.lightUpdateBlockList[l++];
+                    i2 = (l1 & 63) - 32 + x;
+                    j2 = (l1 >> 6 & 63) - 32 + y;
+                    k2 = (l1 >> 12 & 63) - 32 + z;
+                    l2 = l1 >> 18 & 15;
+                    i3 = this.getSavedSkyLightValue(dir, i2, j2, k2);
+
+                    if (i3 == l2) {
+                        this.setLightValue(dir, EnumSkyBlock.Sky, i2, j2, k2, 0);
+
+                        if (l2 > 0) {
+                            j3 = MathHelper.abs_int(i2 - x);
+                            k3 = MathHelper.abs_int(j2 - y);
+                            l3 = MathHelper.abs_int(k2 - z);
+
+                            if (j3 + k3 + l3 < 17) {
+                                for (int i4 = 0; i4 < 6; ++i4) {
+                                    int j4 = i2 + Facing.offsetsXForSide[i4];
+                                    int k4 = j2 + Facing.offsetsYForSide[i4];
+                                    int l4 = k2 + Facing.offsetsZForSide[i4];
+                                    int i5 = Math.max(
+                                        1,
+                                        this.getBlock(j4, k4, l4)
+                                            .getLightOpacity((World) (Object) this, j4, k4, l4));
+                                    i3 = this.getSavedSkyLightValue(dir, j4, k4, l4);
+
+                                    if (i3 == l2 - i5 && i1 < this.lightUpdateBlockList.length) {
+                                        this.lightUpdateBlockList[i1++] = j4 - x + 32 | k4 - y + 32 << 6
+                                            | l4 - z + 32 << 12
+                                            | l2 - i5 << 18;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                l = 0;
+            }
+
+            this.theProfiler.endSection();
+            this.theProfiler.startSection("checkedPosition < toCheckCount (" + dir.toString() + ")");
+
+            while (l < i1) {
+                l1 = this.lightUpdateBlockList[l++];
+                i2 = (l1 & 63) - 32 + x;
+                j2 = (l1 >> 6 & 63) - 32 + y;
+                k2 = (l1 >> 12 & 63) - 32 + z;
+                l2 = this.getSavedSkyLightValue(dir, i2, j2, k2);
+                i3 = this.computeSkyLightValue(dir, i2, j2, k2);
+
+                if (i3 != l2) {
+                    this.setLightValue(dir, EnumSkyBlock.Sky, i2, j2, k2, i3);
+
+                    if (i3 > l2) {
+                        j3 = Math.abs(i2 - x);
+                        k3 = Math.abs(j2 - y);
+                        l3 = Math.abs(k2 - z);
+                        boolean flag = i1 < this.lightUpdateBlockList.length - 6;
+
+                        if (j3 + k3 + l3 < 17 && flag) {
+                            if (this.getSavedSkyLightValue(dir, i2 - 1, j2, k2) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - 1
+                                    - x
+                                    + 32
+                                    + (j2 - y + 32 << 6)
+                                    + (k2 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(dir, i2 + 1, j2, k2) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 + 1
+                                    - x
+                                    + 32
+                                    + (j2 - y + 32 << 6)
+                                    + (k2 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(dir, i2, j2 - 1, k2) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - x
+                                    + 32
+                                    + (j2 - 1 - y + 32 << 6)
+                                    + (k2 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(dir, i2, j2 + 1, k2) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - x
+                                    + 32
+                                    + (j2 + 1 - y + 32 << 6)
+                                    + (k2 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(dir, i2, j2, k2 - 1) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - x
+                                    + 32
+                                    + (j2 - y + 32 << 6)
+                                    + (k2 - 1 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(dir, i2, j2, k2 + 1) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - x
+                                    + 32
+                                    + (j2 - y + 32 << 6)
+                                    + (k2 + 1 - z + 32 << 12);
+                            }
+                        }
+                    }
+                }
+            }
+
+            this.theProfiler.endSection();
+            return true;
+        }
+    }
+
+    public int getSavedSkyLightValue(Direction dir, int x, int y, int z) {
+        if (!this.isSubWorld) return this.getSavedLightValue(EnumSkyBlock.Sky, x, y, z);
+        if (y < 0) {
+            y = 0;
+        }
+
+        if (y >= 256) {
+            y = 255;
+        }
+
+        if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
+            int l = x >> 4;
+            int i1 = z >> 4;
+
+            if (!this.chunkExists(l, i1)) {
+                return EnumSkyBlock.Sky.defaultLightValue;
+            } else {
+                Chunk testChunk = this.getChunkFromChunkCoords(l, i1);
+                if (!(testChunk instanceof ChunkSubWorld)) MetaworldsMod.breakpoint();
+                ChunkSubWorld chunk = (ChunkSubWorld) this.getChunkFromChunkCoords(l, i1);
+                return chunk.getSavedSkyLightValue(dir, x & 15, y, z & 15);
+            }
+        } else {
+            return EnumSkyBlock.Sky.defaultLightValue;
+        }
+    }
+
+    private int computeSkyLightValue(Direction dir, int x, int y, int z) {
+        if (this.canBlockSeeTheSky(dir.toForgeDirection(), x, y, z)) {
+            return 15;
+        } else {
+            Block block = this.getBlock(x, y, z);
+            int blockLight = block.getLightValue((World) (Object) this, x, y, z);
+            int l = 0;
+            int i1 = block.getLightOpacity((World) (Object) this, x, y, z);
+
+            if (i1 >= 15 && blockLight > 0) {
+                i1 = 1;
+            }
+
+            if (i1 < 1) {
+                i1 = 1;
+            }
+
+            if (i1 >= 15) {
+                return 0;
+            } else {
+                for (int j1 = 0; j1 < 6; ++j1) {
+                    int k1 = x + Facing.offsetsXForSide[j1];
+                    int l1 = y + Facing.offsetsYForSide[j1];
+                    int i2 = z + Facing.offsetsZForSide[j1];
+                    int j2 = this.getSavedSkyLightValue(dir, k1, l1, i2) - i1;
+
+                    if (j2 > l) {
+                        l = j2;
+                    }
+
+                    if (l >= 14) {
+                        return l;
+                    }
+                }
+
+                return l;
+            }
+        }
+    }
+
+    public void setLightValue(Direction dir, EnumSkyBlock lightType, int x, int y, int z, int value) {
+        if (dir == Direction.UP) {
+            this.setLightValue(lightType, x, y, z, value);
+        } else {
+            if (this instanceof SubWorld && x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
+                if (y >= 0) {
+                    if (y < 256) {
+                        if (this.chunkExists(x >> 4, z >> 4)) {
+                            ChunkSubWorld chunk = (ChunkSubWorld) this.getChunkFromChunkCoords(x >> 4, z >> 4);
+                            chunk.setLightValue(dir, lightType, x & 15, y, z & 15, value);
+
+                            for (int i1 = 0; i1 < this.worldAccesses.size(); ++i1) {
+                                ((IWorldAccess) this.worldAccesses.get(i1)).markBlockForRenderUpdate(x, y, z);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean updateSkyLight(int x, int y, int z) {
+        if (!this.doChunksNearChunkExist(x, y, z, 17)) {
+            return false;
+        } else {
+            int l = 0;
+            int i1 = 0;
+            this.theProfiler.startSection("getBrightness");
+            int j1 = this.getSavedSkyLightValue(Direction.UP, x, y, z);
+            int k1 = this.computeLightValue(x, y, z, EnumSkyBlock.Sky);
+            int l1;
+            int i2;
+            int j2;
+            int k2;
+            int l2;
+            int i3;
+            int j3;
+            int k3;
+            int l3;
+
+            if (k1 > j1) {
+                this.lightUpdateBlockList[i1++] = 133152;
+            } else if (k1 < j1) {
+                this.lightUpdateBlockList[i1++] = 133152 | j1 << 18;
+
+                while (l < i1) {
+                    l1 = this.lightUpdateBlockList[l++];
+                    i2 = (l1 & 63) - 32 + x;
+                    j2 = (l1 >> 6 & 63) - 32 + y;
+                    k2 = (l1 >> 12 & 63) - 32 + z;
+                    l2 = l1 >> 18 & 15;
+                    i3 = this.getSavedSkyLightValue(Direction.UP, i2, j2, k2);
+
+                    if (i3 == l2) {
+                        this.setLightValue(EnumSkyBlock.Sky, i2, j2, k2, 0);
+
+                        if (l2 > 0) {
+                            j3 = MathHelper.abs_int(i2 - x);
+                            k3 = MathHelper.abs_int(j2 - y);
+                            l3 = MathHelper.abs_int(k2 - z);
+
+                            if (j3 + k3 + l3 < 17) {
+                                for (int i4 = 0; i4 < 6; ++i4) {
+                                    int j4 = i2 + Facing.offsetsXForSide[i4];
+                                    int k4 = j2 + Facing.offsetsYForSide[i4];
+                                    int l4 = k2 + Facing.offsetsZForSide[i4];
+                                    int i5 = Math.max(
+                                        1,
+                                        this.getBlock(j4, k4, l4)
+                                            .getLightOpacity((IBlockAccess) this, j4, k4, l4));
+                                    i3 = this.getSavedSkyLightValue(Direction.UP, j4, k4, l4);
+
+                                    if (i3 == l2 - i5 && i1 < this.lightUpdateBlockList.length) {
+                                        this.lightUpdateBlockList[i1++] = j4 - x + 32 | k4 - y + 32 << 6
+                                            | l4 - z + 32 << 12
+                                            | l2 - i5 << 18;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                l = 0;
+            }
+
+            this.theProfiler.endSection();
+            this.theProfiler.startSection("checkedPosition < toCheckCount");
+
+            while (l < i1) {
+                l1 = this.lightUpdateBlockList[l++];
+                i2 = (l1 & 63) - 32 + x;
+                j2 = (l1 >> 6 & 63) - 32 + y;
+                k2 = (l1 >> 12 & 63) - 32 + z;
+                l2 = this.getSavedSkyLightValue(Direction.UP, i2, j2, k2);
+                i3 = this.computeLightValue(i2, j2, k2, EnumSkyBlock.Sky);
+
+                if (i3 != l2) {
+                    this.setLightValue(EnumSkyBlock.Sky, i2, j2, k2, i3);
+
+                    if (i3 > l2) {
+                        j3 = Math.abs(i2 - x);
+                        k3 = Math.abs(j2 - y);
+                        l3 = Math.abs(k2 - z);
+                        boolean flag = i1 < this.lightUpdateBlockList.length - 6;
+
+                        if (j3 + k3 + l3 < 17 && flag) {
+                            if (this.getSavedSkyLightValue(Direction.UP, i2 - 1, j2, k2) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - 1
+                                    - x
+                                    + 32
+                                    + (j2 - y + 32 << 6)
+                                    + (k2 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(Direction.UP, i2 + 1, j2, k2) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 + 1
+                                    - x
+                                    + 32
+                                    + (j2 - y + 32 << 6)
+                                    + (k2 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(Direction.UP, i2, j2 - 1, k2) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - x
+                                    + 32
+                                    + (j2 - 1 - y + 32 << 6)
+                                    + (k2 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(Direction.UP, i2, j2 + 1, k2) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - x
+                                    + 32
+                                    + (j2 + 1 - y + 32 << 6)
+                                    + (k2 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(Direction.UP, i2, j2, k2 - 1) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - x
+                                    + 32
+                                    + (j2 - y + 32 << 6)
+                                    + (k2 - 1 - z + 32 << 12);
+                            }
+
+                            if (this.getSavedSkyLightValue(Direction.UP, i2, j2, k2 + 1) < i3) {
+                                this.lightUpdateBlockList[i1++] = i2 - x
+                                    + 32
+                                    + (j2 - y + 32 << 6)
+                                    + (k2 + 1 - z + 32 << 12);
+                            }
+                        }
+                    }
+                }
+            }
+
+            this.theProfiler.endSection();
+            return true;
         }
     }
 }

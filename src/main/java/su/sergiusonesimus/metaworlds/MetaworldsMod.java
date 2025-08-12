@@ -176,4 +176,8 @@ public class MetaworldsMod {
             // PlayerLoggedOutEvent in an EventBus subscription instead
         }
     }
+
+    public static void breakpoint() {
+        int x = 0;
+    }
 }

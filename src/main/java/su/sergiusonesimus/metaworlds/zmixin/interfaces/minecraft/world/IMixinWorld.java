@@ -10,8 +10,11 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import org.jblas.DoubleMatrix;
+
+import su.sergiusonesimus.metaworlds.util.Direction;
 
 public interface IMixinWorld {
 
@@ -176,4 +179,12 @@ public interface IMixinWorld {
     public Map<Integer, World> getSubWorldsMap();
 
     public void doTickPartial(double interpolationFactor);
+
+    public void markBlocksDirtyDirectional(Direction dir, int coord1, int coord2, int coordVarMin, int coordVarMax);
+
+    public boolean canBlockSeeTheSky(ForgeDirection dir, int x, int y, int z);
+
+    public abstract int getSavedSkyLightValue(Direction up, int x, int y, int z);
+
+    public abstract boolean updateSkyLight(int x, int y, int z);
 }

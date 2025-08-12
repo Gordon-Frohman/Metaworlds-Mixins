@@ -24,13 +24,16 @@ import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.Facing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.chunk.IChunkProvider;
 
 import org.jblas.DoubleMatrix;
 
@@ -38,7 +41,10 @@ import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.client.renderer.RenderGlobalSubWorld;
 import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
+import su.sergiusonesimus.metaworlds.util.Direction;
 import su.sergiusonesimus.metaworlds.util.SubWorldTransformationHandler;
+import su.sergiusonesimus.metaworlds.world.chunk.DirectionalChunk;
+import su.sergiusonesimus.metaworlds.world.chunk.DirectionalChunkProvider;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
@@ -50,6 +56,8 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     private int subWorldID;
     private ArrayList collidingBBCache = new ArrayList();
     private SubWorldTransformationHandler transformationHandler = new SubWorldTransformationHandler(this);
+    private DirectionalChunkProvider directionalChunkProvider = new DirectionalChunkProvider(this);
+    private Vec3 lightVector = Vec3.createVectorHelper(0, 1, 0);
     public int localTickCounter;
     public int lastServerTickReceived;
     public float serverTickDiff;
@@ -637,6 +645,10 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                 this.setRotationRoll(this.getRotationRoll() + this.getRotationRollSpeed() * (double) count);
                 this.setScaling(this.getScaling() + this.getScaleChangeRate() * (double) count);
 
+                if (this.getRotationPitchSpeed() != 0 || this.getRotationRollSpeed() != 0) {
+                    this.lightVector = this.rotateToLocal(0, 1, 0);
+                }
+
                 float newEntityPrevRotationYawDiff1;
                 if (canUpdate && !skipDragging) {
                     for (i$ = this.entitiesToDrag.entrySet()
@@ -760,6 +772,11 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                         + (this.nextTickRotationRoll - this.lastTickRotationRoll) * interpolationFactor);
                 this.setScaling(
                     this.lastTickScaling + (this.nextTickScaling - this.lastTickScaling) * interpolationFactor);
+
+                if (this.lastTickRotationPitch != this.nextTickRotationPitch
+                    || this.lastTickRotationRoll != this.nextTickRotationRoll) {
+                    this.lightVector = this.rotateToLocal(0, 1, 0);
+                }
 
                 Vec3 newPosition2;
                 for (i$ = this.entitiesToDrag.entrySet()
@@ -1287,5 +1304,80 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         ChunkCoordinates globalCoords = this.transformBlockToGlobal(x, (int) this.getCenterY(), z);
         return this.getParentWorld()
             .getBiomeGenForCoordsBody(globalCoords.posX, globalCoords.posZ);
+    }
+
+    @Override
+    public DirectionalChunk getDirectionalChunk(Direction dir, int x, int y, int z) {
+        DirectionalChunk chunk = directionalChunkProvider.provideChunk(dir, x, y, z);
+        if (chunk.getSegmentsCount() > 0) {
+            ((ChunkProviderClientSubWorld) this.clientChunkProvider).directionalChunkListing.add(chunk);
+        } else {
+            ((ChunkProviderClientSubWorld) this.clientChunkProvider).directionalChunkListing.remove(chunk);
+        }
+        return chunk;
+    }
+
+    /**
+     * Creates the chunk provider for this world. Called in the constructor. Retrieves provider from worldProvider?
+     */
+    protected IChunkProvider createChunkProvider() {
+        this.clientChunkProvider = new ChunkProviderClientSubWorld(this);
+        return this.clientChunkProvider;
+    }
+
+    @Override
+    public Vec3 getLightVector() {
+        return this.lightVector;
+    }
+
+    @Override
+    public boolean updateLightByType(EnumSkyBlock lightType, int x, int y, int z) {
+        if (lightType == EnumSkyBlock.Sky) return ((IMixinWorld) this).updateSkyLight(x, y, z);
+        else return super.updateLightByType(lightType, x, y, z);
+    }
+
+    @Override
+    public int computeLightValue(int x, int y, int z, EnumSkyBlock lightType) {
+        if (lightType == EnumSkyBlock.Sky && this.canBlockSeeTheSky(x, y, z)) {
+            return 15;
+        } else {
+            Block block = this.getBlock(x, y, z);
+            int blockLight = block.getLightValue(this, x, y, z);
+            int l = lightType == EnumSkyBlock.Sky ? 0 : blockLight;
+            int i1 = block.getLightOpacity(this, x, y, z);
+
+            if (i1 >= 15 && blockLight > 0) {
+                i1 = 1;
+            }
+
+            if (i1 < 1) {
+                i1 = 1;
+            }
+
+            if (i1 >= 15) {
+                return 0;
+            } else if (l >= 14) {
+                return l;
+            } else {
+                for (int j1 = 0; j1 < 6; ++j1) {
+                    int k1 = x + Facing.offsetsXForSide[j1];
+                    int l1 = y + Facing.offsetsYForSide[j1];
+                    int i2 = z + Facing.offsetsZForSide[j1];
+                    int j2 = (lightType == EnumSkyBlock.Sky
+                        ? ((IMixinWorld) this).getSavedSkyLightValue(Direction.UP, k1, l1, i2)
+                        : this.getSavedLightValue(lightType, k1, l1, i2)) - i1;
+
+                    if (j2 > l) {
+                        l = j2;
+                    }
+
+                    if (l >= 14) {
+                        return l;
+                    }
+                }
+
+                return l;
+            }
+        }
     }
 }

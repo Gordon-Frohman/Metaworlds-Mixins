@@ -54,7 +54,11 @@ public abstract class MixinTileEntityRendererDispatcher {
 
     @Inject(
         method = "renderTileEntity(Lnet/minecraft/tileentity/TileEntity;F)V",
-        at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glColor4f(FFFF)V", shift = Shift.AFTER))
+        at = @At(
+            value = "INVOKE",
+            target = "Lorg/lwjgl/opengl/GL11;glColor4f(FFFF)V",
+            remap = false,
+            shift = Shift.AFTER))
     private void injectRenderTileEntity1(TileEntity p_147544_1_, float p_147544_2_, CallbackInfo ci) {
         GL11.glPushMatrix();
         if (p_147544_1_.hasWorldObj() && ((IMixinWorld) p_147544_1_.getWorldObj()).isSubWorld()) {

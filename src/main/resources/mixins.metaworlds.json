@@ -47,6 +47,7 @@
   	"minecraft.world.MixinWorld",
   	"minecraft.world.MixinWorldIntermediate",
   	"minecraft.world.MixinWorldServer",
+  	"minecraft.world.chunk.storage.MixinAnvilChunkLoader",
   	"minecraft.world.storage.MixinWorldInfo",
   	"forge.MixinFMLProxyPacket"
   ],

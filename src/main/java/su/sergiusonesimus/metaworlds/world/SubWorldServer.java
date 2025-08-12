@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
@@ -23,10 +25,12 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.Facing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -53,8 +57,11 @@ import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.server.MinecraftServerSubWorldProxy;
+import su.sergiusonesimus.metaworlds.util.Direction;
 import su.sergiusonesimus.metaworlds.util.SubWorldTransformationHandler;
 import su.sergiusonesimus.metaworlds.world.chunk.ChunkSubWorld;
+import su.sergiusonesimus.metaworlds.world.chunk.DirectionalChunk;
+import su.sergiusonesimus.metaworlds.world.chunk.DirectionalChunkProvider;
 import su.sergiusonesimus.metaworlds.world.chunk.storage.AnvilChunkLoaderSubWorld;
 import su.sergiusonesimus.metaworlds.world.gen.ChunkProviderServerSubWorld;
 import su.sergiusonesimus.metaworlds.world.gen.ChunkProviderServerSubWorldBlank;
@@ -75,6 +82,9 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     private int subWorldID;
     private ArrayList collidingBBCache = new ArrayList();
     private SubWorldTransformationHandler transformationHandler = new SubWorldTransformationHandler(this);
+    private DirectionalChunkProvider directionalChunkProvider = new DirectionalChunkProvider(this);
+    protected Set<DirectionalChunk> activeDirChunkSet = new CopyOnWriteArraySet<DirectionalChunk>();
+    private Vec3 lightVector = Vec3.createVectorHelper(0, 1, 0);
     public Map<Entity, Vec3> entitiesToDrag = new TreeMap();
     private Map<Entity, Vec3> entitiesToNotDrag = new TreeMap();
     private ChunkCoordinates minCoordinates = new ChunkCoordinates();
@@ -772,6 +782,11 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             this.setRotationPitch(this.getRotationPitch() + this.getRotationPitchSpeed());
             this.setRotationRoll(this.getRotationRoll() + this.getRotationRollSpeed());
             this.setScaling(this.getScaling() + this.getScaleChangeRate());
+
+            if (this.getRotationPitchSpeed() != 0 || this.getRotationRollSpeed() != 0) {
+                this.lightVector = this.rotateToLocal(0, 1, 0);
+            }
+
             i$ = this.entitiesToDrag.entrySet()
                 .iterator();
 
@@ -1532,5 +1547,82 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         ChunkCoordinates globalCoords = this.transformBlockToGlobal(x, (int) this.getCenterY(), z);
         return this.getParentWorld()
             .getBiomeGenForCoordsBody(globalCoords.posX, globalCoords.posZ);
+    }
+
+    @Override
+    public DirectionalChunk getDirectionalChunk(Direction dir, int x, int y, int z) {
+        DirectionalChunk chunk = directionalChunkProvider.provideChunk(dir, x, y, z);
+        if (chunk.getSegmentsCount() > 0) {
+            this.activeDirChunkSet.add(chunk);
+        } else {
+            this.activeDirChunkSet.remove(chunk);
+        }
+        return chunk;
+    }
+
+    @Override
+    public Vec3 getLightVector() {
+        return this.lightVector;
+    }
+
+    protected void func_147456_g() {
+        super.func_147456_g();
+        Iterator<DirectionalChunk> iterator = this.activeDirChunkSet.iterator();
+
+        while (iterator.hasNext()) {
+            iterator.next()
+                .func_150804_b(false);
+        }
+    }
+
+    @Override
+    public boolean updateLightByType(EnumSkyBlock lightType, int x, int y, int z) {
+        if (lightType == EnumSkyBlock.Sky) return ((IMixinWorld) this).updateSkyLight(x, y, z);
+        else return super.updateLightByType(lightType, x, y, z);
+    }
+
+    @Override
+    public int computeLightValue(int x, int y, int z, EnumSkyBlock lightType) {
+        if (lightType == EnumSkyBlock.Sky && this.canBlockSeeTheSky(x, y, z)) {
+            return 15;
+        } else {
+            Block block = this.getBlock(x, y, z);
+            int blockLight = block.getLightValue(this, x, y, z);
+            int l = lightType == EnumSkyBlock.Sky ? 0 : blockLight;
+            int i1 = block.getLightOpacity(this, x, y, z);
+
+            if (i1 >= 15 && blockLight > 0) {
+                i1 = 1;
+            }
+
+            if (i1 < 1) {
+                i1 = 1;
+            }
+
+            if (i1 >= 15) {
+                return 0;
+            } else if (l >= 14) {
+                return l;
+            } else {
+                for (int j1 = 0; j1 < 6; ++j1) {
+                    int k1 = x + Facing.offsetsXForSide[j1];
+                    int l1 = y + Facing.offsetsYForSide[j1];
+                    int i2 = z + Facing.offsetsZForSide[j1];
+                    int j2 = (lightType == EnumSkyBlock.Sky
+                        ? ((IMixinWorld) this).getSavedSkyLightValue(Direction.UP, k1, l1, i2)
+                        : this.getSavedLightValue(lightType, k1, l1, i2)) - i1;
+
+                    if (j2 > l) {
+                        l = j2;
+                    }
+
+                    if (l >= 14) {
+                        return l;
+                    }
+                }
+
+                return l;
+            }
+        }
     }
 }

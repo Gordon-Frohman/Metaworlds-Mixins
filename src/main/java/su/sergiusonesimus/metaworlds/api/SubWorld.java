@@ -13,6 +13,10 @@ import net.minecraft.world.World;
 
 import org.jblas.DoubleMatrix;
 
+import su.sergiusonesimus.metaworlds.util.Direction;
+import su.sergiusonesimus.metaworlds.world.chunk.DirectionalChunk;
+import su.sergiusonesimus.metaworlds.world.chunk.storage.ExtendedBlockStorageSubWorld;
+
 public interface SubWorld {
 
     World getParentWorld();
@@ -288,4 +292,57 @@ public interface SubWorld {
         setRotationRollSpeed(0.0D);
         setScaleChangeRate(0.0D);
     }
+
+    default boolean canBlockSeeTheSky(Direction dir, int x, int y, int z) {
+        return this.getDirectionalChunk(dir, x, y, z)
+            .canBlockSeeTheSky(x, y, z);
+    }
+
+    DirectionalChunk getDirectionalChunk(Direction dir, int x, int y, int z);
+
+    default void registerExtendedBlockStorage(ExtendedBlockStorageSubWorld ebs, int chunkX, int chunkY, int chunkZ) {
+        if (!ebs.isEmpty()) {
+            Direction[] directions = { Direction.DOWN, Direction.EAST, Direction.WEST, Direction.SOUTH,
+                Direction.NORTH };
+            int index;
+            for (Direction direction : directions) {
+                switch (direction.getAxis()) {
+                    case X:
+                        index = chunkX;
+                        break;
+                    default:
+                    case Y:
+                        index = chunkY;
+                        break;
+                    case Z:
+                        index = chunkZ;
+                        break;
+                }
+                getDirectionalChunk(direction, chunkX * 16, chunkY * 16, chunkZ * 16)
+                    .registerExtendedBlockStorage(ebs, index);
+            }
+        }
+    }
+
+    default void unregisterExtendedBlockStorage(int chunkX, int chunkY, int chunkZ) {
+        Direction[] directions = { Direction.DOWN, Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.NORTH };
+        int index;
+        for (Direction direction : directions) {
+            switch (direction.getAxis()) {
+                case X:
+                    index = chunkX;
+                    break;
+                default:
+                case Y:
+                    index = chunkY;
+                    break;
+                case Z:
+                    index = chunkZ;
+                    break;
+            }
+            getDirectionalChunk(direction, chunkX * 16, chunkY * 16, chunkZ * 16).unregisterExtendedBlockStorage(index);
+        }
+    }
+
+    Vec3 getLightVector();
 }
