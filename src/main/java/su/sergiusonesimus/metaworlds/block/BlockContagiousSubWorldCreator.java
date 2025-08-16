@@ -7,9 +7,14 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 
@@ -67,9 +72,11 @@ public class BlockContagiousSubWorldCreator extends Block {
                 ChunkCoordinates curCoord;
                 Block block;
                 int blockMetadata;
-                TileEntity origTE;
                 NBTTagCompound nbttag;
+                TileEntity oldTE;
                 TileEntity newTE;
+                Entity oldEntity;
+                Entity newEntity;
 
                 List<List<ChunkCoordinates>> listsToParse = new ArrayList<List<ChunkCoordinates>>();
                 listsToParse.add(blocksToTake);
@@ -85,12 +92,38 @@ public class BlockContagiousSubWorldCreator extends Block {
                         newWorld1
                             .setBlockMetadataWithNotify(curCoord.posX, curCoord.posY, curCoord.posZ, blockMetadata, 0);
                         if (block.hasTileEntity(blockMetadata)) {
-                            origTE = par1World.getTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ);
+                            oldTE = par1World.getTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ);
                             nbttag = new NBTTagCompound();
-                            origTE.writeToNBT(nbttag);
-                            origTE.invalidate();
+                            oldTE.writeToNBT(nbttag);
+                            oldTE.invalidate();
                             newTE = TileEntity.createAndLoadEntity(nbttag);
                             newWorld1.setTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ, newTE);
+                        }
+                        List<Entity> entities = par1World.getEntitiesWithinAABBExcludingEntity(
+                            null,
+                            AxisAlignedBB
+                                .getBoundingBox(
+                                    curCoord.posX,
+                                    curCoord.posY,
+                                    curCoord.posZ,
+                                    curCoord.posX + 1,
+                                    curCoord.posY + 1,
+                                    curCoord.posZ + 1)
+                                .expand(0.25, 0.25, 0.25));
+                        Iterator<Entity> j$ = entities.iterator();
+                        while (j$.hasNext()) {
+                            oldEntity = j$.next();
+                            if (oldEntity instanceof EntityMinecart || (oldEntity instanceof EntityHanging
+                                && (((EntityHanging) oldEntity).field_146063_b == curCoord.posX
+                                    && ((EntityHanging) oldEntity).field_146064_c == curCoord.posY
+                                    && ((EntityHanging) oldEntity).field_146062_d == curCoord.posZ))) {
+                                nbttag = new NBTTagCompound();
+                                newEntity = EntityList
+                                    .createEntityByName(EntityList.getEntityString(oldEntity), newWorld1);
+                                newEntity.copyDataFrom(oldEntity, true);
+                                newWorld1.spawnEntityInWorld(newEntity);
+                                oldEntity.setDead();
+                            }
                         }
                     }
                 }

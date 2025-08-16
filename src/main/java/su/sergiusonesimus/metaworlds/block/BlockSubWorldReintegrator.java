@@ -7,10 +7,14 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
@@ -73,11 +77,13 @@ public class BlockSubWorldReintegrator extends Block {
 
                     ChunkCoordinates curCoord;
                     Block block;
-                    int origMeta;
+                    int oldMeta;
                     int newMeta;
-                    TileEntity origTE;
-                    NBTTagCompound nbttag;
+                    TileEntity oldTE;
                     TileEntity newTE;
+                    Entity oldEntity;
+                    Entity newEntity;
+                    NBTTagCompound nbttag;
 
                     List<List<ChunkCoordinates>> listsToParse = new ArrayList<List<ChunkCoordinates>>();
                     listsToParse.add(blocksToTake);
@@ -88,19 +94,19 @@ public class BlockSubWorldReintegrator extends Block {
                         while (i$.hasNext()) {
                             curCoord = (ChunkCoordinates) i$.next();
                             block = world.getBlock(curCoord.posX, curCoord.posY, curCoord.posZ);
-                            origMeta = world.getBlockMetadata(curCoord.posX, curCoord.posY, curCoord.posZ);
+                            oldMeta = world.getBlockMetadata(curCoord.posX, curCoord.posY, curCoord.posZ);
                             newMeta = RotationHelper.getRotatedMeta(world, curCoord.posX, curCoord.posY, curCoord.posZ);
                             ChunkCoordinates globalPos = subworld
                                 .transformBlockToGlobal(curCoord.posX, curCoord.posY, curCoord.posZ);
                             parentWorld.setBlock(globalPos.posX, globalPos.posY, globalPos.posZ, block, newMeta, 3);
                             parentWorld
                                 .setBlockMetadataWithNotify(globalPos.posX, globalPos.posY, globalPos.posZ, newMeta, 3);
-                            if (block.hasTileEntity(origMeta)) {
+                            if (block.hasTileEntity(oldMeta)) {
                                 RotationHelper.rotateTileEntity(world, curCoord.posX, curCoord.posY, curCoord.posZ);
-                                origTE = world.getTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ);
+                                oldTE = world.getTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ);
                                 nbttag = new NBTTagCompound();
-                                origTE.writeToNBT(nbttag);
-                                origTE.invalidate();
+                                oldTE.writeToNBT(nbttag);
+                                oldTE.invalidate();
                                 newTE = TileEntity.createAndLoadEntity(nbttag);
                                 if (newTE.blockMetadata != -1) newTE.blockMetadata = newMeta;
                                 newTE.xCoord = globalPos.posX;
@@ -110,6 +116,25 @@ public class BlockSubWorldReintegrator extends Block {
                                 parentWorld.setTileEntity(globalPos.posX, globalPos.posY, globalPos.posZ, newTE);
                             }
                         }
+                    }
+
+                    Iterator<Entity> iter = world.loadedEntityList.iterator();
+                    while (iter.hasNext()) {
+                        oldEntity = iter.next();
+                        if (oldEntity instanceof EntityPlayer) continue;
+                        nbttag = new NBTTagCompound();
+                        newEntity = EntityList.createEntityByName(EntityList.getEntityString(oldEntity), parentWorld);
+                        newEntity.copyDataFrom(oldEntity, true);
+                        Vec3 globalCoords = subworld.transformToGlobal(newEntity);
+                        newEntity.setLocationAndAngles(
+                            globalCoords.xCoord,
+                            globalCoords.yCoord,
+                            globalCoords.zCoord,
+                            newEntity.rotationYaw,
+                            newEntity.rotationPitch);
+                        RotationHelper.rotateEntity(world, newEntity);
+                        parentWorld.spawnEntityInWorld(newEntity);
+                        oldEntity.setDead();
                     }
 
                     listsToParse.set(0, blocksToTakeVolatile);

@@ -1,12 +1,19 @@
 package su.sergiusonesimus.metaworlds.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySkull;
@@ -22,11 +29,14 @@ public class RotationHelper {
 
     private static Map<Block, String> blockTypes = new HashMap<Block, String>();
     private static Map<String, MetaRotator> metaRotators = new HashMap<String, MetaRotator>();
-    private static Map<Class<? extends TileEntity>, TileEntityRotator> tileEntityRotators = new HashMap<Class<? extends TileEntity>, TileEntityRotator>();
+    private static Map<Class<? extends TileEntity>, String> tileEntityTypes = new HashMap<Class<? extends TileEntity>, String>();
+    private static Map<String, TileEntityRotator> tileEntityRotators = new HashMap<String, TileEntityRotator>();
+    private static Map<Class<? extends Entity>, String> entityTypes = new HashMap<Class<? extends Entity>, String>();
+    private static Map<String, EntityRotator> entityRotators = new HashMap<String, EntityRotator>();
 
     public static void init() {
         // Logs
-        registerRotator("log", (meta) -> {
+        registerBlockRotator("log", (meta) -> {
             if (meta < 4) return Vec3.createVectorHelper(0, 1, 0);
             if (meta < 8) return Vec3.createVectorHelper(1, 0, 0);
             if (meta < 12) return Vec3.createVectorHelper(0, 0, 1);
@@ -53,7 +63,7 @@ public class RotationHelper {
         registerBlocks("log", Blocks.log, Blocks.log2, Blocks.hay_block);
 
         // Slabs
-        registerRotator("slab", (meta) -> {
+        registerBlockRotator("slab", (meta) -> {
             if (meta >= 8) return Vec3.createVectorHelper(0, 1, 0);
             return Vec3.createVectorHelper(0, -1, 0);
         }, (originalMeta, vec) -> {
@@ -76,7 +86,7 @@ public class RotationHelper {
         registerBlocks("slab", Blocks.stone_slab, Blocks.wooden_slab);
 
         // Stairs
-        registerRotator("stairs", (meta) -> {
+        registerBlockRotator("stairs", (meta) -> {
             Vec3 result = Vec3.createVectorHelper(0, 0, 0);
             switch (meta % 4) {
                 default:
@@ -127,7 +137,7 @@ public class RotationHelper {
             Blocks.stone_stairs);
 
         // Quartz pillar
-        registerRotator("quartz_pillar", (meta) -> {
+        registerBlockRotator("quartz_pillar", (meta) -> {
             switch (meta) {
                 default:
                     return null;
@@ -161,7 +171,7 @@ public class RotationHelper {
         registerBlocks("quartz_pillar", Blocks.quartz_block);
 
         // Torches
-        registerRotator("torch", (meta) -> {
+        registerBlockRotator("torch", (meta) -> {
             switch (meta) {
                 default:
                     return Vec3.createVectorHelper(0, -1, 0);
@@ -203,7 +213,7 @@ public class RotationHelper {
         registerBlocks("torch", Blocks.torch, Blocks.redstone_torch, Blocks.unlit_redstone_torch);
 
         // Hanging blocks
-        registerRotator("hanging", (meta) -> {
+        registerBlockRotator("hanging", (meta) -> {
             switch (meta) {
                 default:
                     return null;
@@ -237,7 +247,7 @@ public class RotationHelper {
         registerBlocks("hanging", Blocks.ladder, Blocks.wall_sign);
 
         // Vine
-        registerRotator("vine", (meta) -> {
+        registerBlockRotator("vine", (meta) -> {
             switch (meta) {
                 default:
                     return null;
@@ -333,7 +343,7 @@ public class RotationHelper {
         registerBlocks("vine", Blocks.vine);
 
         // Horizontal directional blocks
-        registerRotator("horizontal_directional", (meta) -> {
+        registerBlockRotator("horizontal_directional", (meta) -> {
             switch (meta % 4) {
                 default:
                 case 0:
@@ -384,7 +394,7 @@ public class RotationHelper {
             Blocks.fence_gate);
 
         // Doors
-        registerRotator("door", (meta) -> {
+        registerBlockRotator("door", (meta) -> {
             switch (meta % 4) {
                 default:
                 case 0:
@@ -423,7 +433,7 @@ public class RotationHelper {
         registerBlocks("door", Blocks.wooden_door, Blocks.iron_door);
 
         // Trapdoors
-        registerRotator("trapdoor", (meta) -> {
+        registerBlockRotator("trapdoor", (meta) -> {
             Vec3 result;
             double horizontal;
             double vertical;
@@ -484,7 +494,7 @@ public class RotationHelper {
         registerBlocks("trapdoor", Blocks.trapdoor);
 
         // 3D directional blocks
-        registerRotator("3d_directional", (meta) -> {
+        registerBlockRotator("3d_directional", (meta) -> {
             ChunkCoordinates dir = Direction.from3DDataValue(meta % 8 % 6)
                 .getNormal();
             return Vec3.createVectorHelper(dir.posX, dir.posY, dir.posZ);
@@ -503,7 +513,7 @@ public class RotationHelper {
             Blocks.dropper);
 
         // Lever
-        registerRotator("lever", (meta) -> {
+        registerBlockRotator("lever", (meta) -> {
             switch (meta % 8) {
                 case 0:
                     return Vec3.createVectorHelper(0.5, 1, 0);
@@ -573,7 +583,7 @@ public class RotationHelper {
         registerBlocks("lever", Blocks.lever);
 
         // Buttons
-        registerRotator("button", (meta) -> {
+        registerBlockRotator("button", (meta) -> {
             switch (meta % 8) {
                 default:
                 case 1:
@@ -607,7 +617,7 @@ public class RotationHelper {
         registerBlocks("button", Blocks.stone_button, Blocks.wooden_button);
 
         // Portal
-        registerRotator("portal", (meta) -> {
+        registerBlockRotator("portal", (meta) -> {
             switch (meta % 4) {
                 default:
                     return null;
@@ -635,7 +645,7 @@ public class RotationHelper {
         registerBlocks("portal", Blocks.portal);
 
         // Standing sign
-        registerRotator("sign", (meta) -> {
+        registerBlockRotator("sign", (meta) -> {
             Vec3 result = Vec3.createVectorHelper(0, 0, 1);
             if (meta > 0) result.rotateAroundY((float) (-Math.PI / 8f * (float) meta));
             return result;
@@ -654,7 +664,7 @@ public class RotationHelper {
         registerBlocks("sign", Blocks.standing_sign);
 
         // Horizontal directional blocks with tile entities
-        registerRotator("horizontal_tileentity", (meta) -> {
+        registerBlockRotator("horizontal_tileentity", (meta) -> {
             switch (meta) {
                 default:
                     return null;
@@ -695,7 +705,7 @@ public class RotationHelper {
             Blocks.hopper);
 
         // Linear rails
-        registerRotator("rails_linear", (meta) -> {
+        registerBlockRotator("rails_linear", (meta) -> {
             switch (meta % 8) {
                 default:
                 case 0:
@@ -754,7 +764,7 @@ public class RotationHelper {
         registerBlocks("rails_linear", Blocks.activator_rail, Blocks.detector_rail, Blocks.golden_rail);
 
         // Rotating rails
-        registerRotator("rails_rotating", (meta) -> {
+        registerBlockRotator("rails_rotating", (meta) -> {
             switch (meta) {
                 default:
                 case 0:
@@ -828,7 +838,7 @@ public class RotationHelper {
         registerBlocks("rails_rotating", Blocks.rail);
 
         // Skulls
-        registerRotator("skull", (meta) -> {
+        registerBlockRotator("skull", (meta) -> {
             switch (meta) {
                 default:
                     return null;
@@ -862,11 +872,250 @@ public class RotationHelper {
             return originalMeta;
         });
         registerBlocks("skull", Blocks.skull);
-        registerRotator(TileEntitySkull.class, (te, angle) -> {
+        registerTileEntities("skull", TileEntitySkull.class);
+        registerTileEntityRotator("skull", (te, world) -> {
             TileEntitySkull tes = (TileEntitySkull) te;
+            double angle = -((SubWorld) world).getRotationActualYaw();
             tes.field_145910_i = (int) ((tes.field_145910_i * 360 / 16f + angle + 360) % 360 * 16f / 360);
         });
 
+        // Hanging entities
+        registerEntities("hanging", EntityHanging.class);
+        registerEntityRotator("hanging", (entity, world) -> {
+            EntityHanging hanging = (EntityHanging) entity;
+            SubWorld subworld = (SubWorld) world;
+            ChunkCoordinates globalCoords = subworld
+                .transformBlockToGlobal(hanging.field_146063_b, hanging.field_146064_c, hanging.field_146062_d);
+            hanging.field_146063_b = globalCoords.posX;
+            hanging.field_146064_c = globalCoords.posY;
+            hanging.field_146062_d = globalCoords.posZ;
+
+            if (hanging.hangingDirection >= 0 && hanging.hangingDirection <= 3) {
+                float angleX = (float) (subworld.getRotationRoll() % 360 / 180 * Math.PI);
+                float angleY = (float) (subworld.getRotationActualYaw() / 180 * Math.PI);
+                float angleZ = (float) (subworld.getRotationPitch() % 360 / 180 * Math.PI);
+                Vec3 dir = Vec3.createVectorHelper(
+                    net.minecraft.util.Direction.offsetX[hanging.hangingDirection],
+                    0,
+                    net.minecraft.util.Direction.offsetZ[hanging.hangingDirection]);
+                dir.rotateAroundX(angleX);
+                dir.rotateAroundY(angleY);
+                dir.rotateAroundZ(angleZ);
+                Direction hangindDir = Direction.getNearest(dir);
+                int rotation = -1;
+                switch (hangindDir) {
+                    default:
+                        break;
+                    case SOUTH:
+                        rotation = 0;
+                        break;
+                    case WEST:
+                        rotation = 1;
+                        break;
+                    case NORTH:
+                        rotation = 2;
+                        break;
+                    case EAST:
+                        rotation = 3;
+                        break;
+                }
+                if (rotation != -1) {
+                    hanging.setDirection(rotation);
+                }
+            }
+        });
+
+        // Item frames
+        registerEntities("item frame", EntityItemFrame.class);
+        registerEntityRotator("item frame", (entity, world) -> {
+            EntityItemFrame itemFrame = (EntityItemFrame) entity;
+            SubWorld subworld = (SubWorld) world;
+
+            float angleX = (float) (subworld.getRotationRoll() % 360 / 180 * Math.PI);
+            float angleY = (float) (subworld.getRotationActualYaw() / 180 * Math.PI);
+            float angleZ = (float) (subworld.getRotationPitch() % 360 / 180 * Math.PI);
+            Vec3 dir = Vec3.createVectorHelper(0, 0, 0);
+            int horDiv = 1;
+            switch (itemFrame.getRotation()) {
+                default:
+                    break;
+                case 0:
+                    dir.yCoord = 1;
+                    break;
+                case 3:
+                    horDiv = -1;
+                case 1:
+                    switch (itemFrame.hangingDirection) {
+                        default:
+                        case 0:
+                            dir.xCoord = -horDiv;
+                            break;
+                        case 1:
+                            dir.zCoord = -horDiv;
+                            break;
+                        case 2:
+                            dir.xCoord = horDiv;
+                            break;
+                        case 3:
+                            dir.zCoord = horDiv;
+                            break;
+                    }
+                    break;
+                case 2:
+                    dir.yCoord = -1;
+                    break;
+            }
+
+            entityRotators.get("hanging")
+                .rotateEntity(entity, world);
+            dir.rotateAroundX(angleX);
+            dir.rotateAroundY(angleY);
+            dir.rotateAroundZ(angleZ);
+
+            Direction itemDir = Direction.getNearest(dir);
+            int rotation = -1;
+            switch (itemDir) {
+                default:
+                    break;
+                case UP:
+                    rotation = 0;
+                    break;
+                case DOWN:
+                    rotation = 2;
+                    break;
+                case NORTH:
+                    if (itemFrame.hangingDirection == 1) rotation = 1;
+                    else if (itemFrame.hangingDirection == 3) rotation = 3;
+                    break;
+                case SOUTH:
+                    if (itemFrame.hangingDirection == 1) rotation = 3;
+                    else if (itemFrame.hangingDirection == 3) rotation = 1;
+                    break;
+                case WEST:
+                    if (itemFrame.hangingDirection == 0) rotation = 1;
+                    else if (itemFrame.hangingDirection == 2) rotation = 3;
+                    break;
+                case EAST:
+                    if (itemFrame.hangingDirection == 0) rotation = 3;
+                    else if (itemFrame.hangingDirection == 2) rotation = 1;
+                    break;
+            }
+            if (rotation != -1) {
+                itemFrame.setItemRotation(rotation);
+            }
+        });
+
+        // Paintings
+        registerEntities("painting", EntityPainting.class);
+        registerEntityRotator("painting", (entity, world) -> {
+            EntityPainting painting = (EntityPainting) entity;
+            SubWorld subworld = (SubWorld) world;
+            List<ChunkCoordinates> corners = new ArrayList<ChunkCoordinates>();
+            corners
+                .add(new ChunkCoordinates(painting.field_146063_b, painting.field_146064_c, painting.field_146062_d));
+            int height = painting.getHeightPixels() / 16 - 1;
+            int width = painting.getWidthPixels() / 16 - 1;
+            if (height > 0) corners.add(
+                new ChunkCoordinates(
+                    painting.field_146063_b,
+                    painting.field_146064_c + height,
+                    painting.field_146062_d));
+            if (width > 0) {
+                int dX = 0;
+                int dZ = 0;
+                switch (painting.hangingDirection) {
+                    default:
+                    case 0:
+                        dX = width;
+                        break;
+                    case 1:
+                        dZ = width;
+                        break;
+                    case 2:
+                        dX = -width;
+                        break;
+                    case 3:
+                        dZ = -width;
+                        break;
+                }
+                corners.add(
+                    new ChunkCoordinates(
+                        painting.field_146063_b + dX,
+                        painting.field_146064_c,
+                        painting.field_146062_d + dZ));
+                if (height > 0) corners.add(
+                    new ChunkCoordinates(
+                        painting.field_146063_b + dX,
+                        painting.field_146064_c + height,
+                        painting.field_146062_d + dZ));
+            }
+
+            for (int i = 0; i < corners.size(); i++) {
+                ChunkCoordinates corner = corners.get(i);
+                corners.set(i, subworld.transformBlockToGlobal(corner.posX, corner.posY, corner.posZ));
+            }
+            ChunkCoordinates newCorner = corners.get(0);
+            corners.remove(0);
+
+            if (painting.hangingDirection >= 0 && painting.hangingDirection <= 3) {
+                float angleX = (float) (subworld.getRotationRoll() % 360 / 180 * Math.PI);
+                float angleY = (float) (subworld.getRotationActualYaw() / 180 * Math.PI);
+                float angleZ = (float) (subworld.getRotationPitch() % 360 / 180 * Math.PI);
+                Vec3 dir = Vec3.createVectorHelper(
+                    net.minecraft.util.Direction.offsetX[painting.hangingDirection],
+                    0,
+                    net.minecraft.util.Direction.offsetZ[painting.hangingDirection]);
+                dir.rotateAroundX(angleX);
+                dir.rotateAroundY(angleY);
+                dir.rotateAroundZ(angleZ);
+                Direction hangindDir = Direction.getNearest(dir);
+                int rotation = -1;
+                boolean cornerAxisX = false;
+                boolean cornerIsMin = false;
+                switch (hangindDir) {
+                    default:
+                        break;
+                    case SOUTH:
+                        rotation = 0;
+                        cornerAxisX = true;
+                        cornerIsMin = true;
+                        break;
+                    case WEST:
+                        rotation = 1;
+                        cornerAxisX = false;
+                        cornerIsMin = true;
+                        break;
+                    case NORTH:
+                        rotation = 2;
+                        cornerAxisX = true;
+                        cornerIsMin = false;
+                        break;
+                    case EAST:
+                        rotation = 3;
+                        cornerAxisX = false;
+                        cornerIsMin = false;
+                        break;
+                }
+
+                for (ChunkCoordinates corner : corners) {
+                    if (corner.posY <= newCorner.posY
+                        && ((cornerAxisX && ((cornerIsMin && corner.posX <= newCorner.posX)
+                            || (!cornerIsMin && corner.posX >= newCorner.posX)))
+                            || (!cornerAxisX && ((cornerIsMin && corner.posZ <= newCorner.posZ)
+                                || (!cornerIsMin && corner.posZ >= newCorner.posZ))))) {
+                        newCorner = corner;
+                    }
+                }
+
+                if (rotation != -1) {
+                    painting.setDirection(rotation);
+                }
+            }
+
+            painting.field_146063_b = newCorner.posX;
+            painting.field_146064_c = newCorner.posY;
+            painting.field_146062_d = newCorner.posZ;
+        });
     }
 
     /**
@@ -910,8 +1159,27 @@ public class RotationHelper {
         if (world instanceof SubWorld) {
             TileEntity te = world.getTileEntity(x, y, z);
             if (te != null) {
-                TileEntityRotator rotator = tileEntityRotators.get(te.getClass());
-                if (rotator != null) rotator.rotateTileEntity(te, -((SubWorld) world).getRotationActualYaw());
+                String teType = getTileEntityType(te);
+                if (teType != null) {
+                    TileEntityRotator rotator = tileEntityRotators.get(teType);
+                    if (rotator != null) rotator.rotateTileEntity(te, world);
+                }
+            }
+        }
+    }
+
+    /**
+     * Rotates a subworld entity if it can be rotated
+     * 
+     * @param world  - subworld containing tile entity
+     * @param entity
+     */
+    public static void rotateEntity(World world, Entity entity) {
+        if (world instanceof SubWorld && entity != null) {
+            String entityType = getEntityType(entity);
+            if (entityType != null) {
+                EntityRotator rotator = entityRotators.get(entityType);
+                if (rotator != null) rotator.rotateEntity(entity, world);
             }
         }
     }
@@ -1009,21 +1277,69 @@ public class RotationHelper {
         }
     }
 
-    public static void registerRotator(String name, Function<Integer, Vec3> vectorFromMeta,
+    public static void registerBlockRotator(String name, Function<Integer, Vec3> vectorFromMeta,
         BiFunction<Integer, Vec3, Integer> metaFromVector) {
-        registerRotator(name, new MetaRotator(vectorFromMeta, metaFromVector));
+        registerBlockRotator(name, new MetaRotator(vectorFromMeta, metaFromVector));
     }
 
-    public static void registerRotator(String name, MetaRotator rotator) {
+    public static void registerBlockRotator(String name, MetaRotator rotator) {
         metaRotators.put(name, rotator);
     }
 
-    public static void registerRotator(Class<? extends TileEntity> teClass, BiConsumer<TileEntity, Double> rotator) {
-        registerRotator(teClass, new TileEntityRotator(rotator));
+    @SafeVarargs
+    public static void registerTileEntities(String tileEntityType, Class<? extends TileEntity>... tileEntities) {
+        for (Class<? extends TileEntity> tileEntity : tileEntities) {
+            tileEntityTypes.put(tileEntity, tileEntityType);
+        }
     }
 
-    public static void registerRotator(Class<? extends TileEntity> teClass, TileEntityRotator rotator) {
-        tileEntityRotators.put(teClass, rotator);
+    private static String getTileEntityType(TileEntity tileEntity) {
+        Class<? extends TileEntity> resultClass = null;
+        for (Entry<Class<? extends TileEntity>, String> currentEntry : tileEntityTypes.entrySet()) {
+            Class<? extends TileEntity> currentClass = currentEntry.getKey();
+            if (currentClass.isInstance(tileEntity)) {
+                if (resultClass == null || resultClass.isAssignableFrom(currentClass)) {
+                    resultClass = currentClass;
+                }
+            }
+        }
+        return resultClass == null ? null : tileEntityTypes.get(resultClass);
+    }
+
+    public static void registerTileEntityRotator(String tileEntityType, BiConsumer<TileEntity, World> rotator) {
+        registerTileEntityRotator(tileEntityType, new TileEntityRotator(rotator));
+    }
+
+    public static void registerTileEntityRotator(String tileEntityType, TileEntityRotator rotator) {
+        tileEntityRotators.put(tileEntityType, rotator);
+    }
+
+    @SafeVarargs
+    public static void registerEntities(String entityType, Class<? extends Entity>... entities) {
+        for (Class<? extends Entity> entity : entities) {
+            entityTypes.put(entity, entityType);
+        }
+    }
+
+    private static String getEntityType(Entity entity) {
+        Class<? extends Entity> resultClass = null;
+        for (Entry<Class<? extends Entity>, String> currentEntry : entityTypes.entrySet()) {
+            Class<? extends Entity> currentClass = currentEntry.getKey();
+            if (currentClass.isInstance(entity)) {
+                if (resultClass == null || resultClass.isAssignableFrom(currentClass)) {
+                    resultClass = currentClass;
+                }
+            }
+        }
+        return resultClass == null ? null : entityTypes.get(resultClass);
+    }
+
+    public static void registerEntityRotator(String entityType, BiConsumer<Entity, World> rotator) {
+        registerEntityRotator(entityType, new EntityRotator(rotator));
+    }
+
+    public static void registerEntityRotator(String entityType, EntityRotator rotator) {
+        entityRotators.put(entityType, rotator);
     }
 
     private static class MetaRotator {
@@ -1048,14 +1364,28 @@ public class RotationHelper {
 
     private static class TileEntityRotator {
 
-        private BiConsumer<TileEntity, Double> rotateTileEntity;
+        private BiConsumer<TileEntity, World> rotateTileEntity;
 
-        public TileEntityRotator(BiConsumer<TileEntity, Double> rotator) {
+        public TileEntityRotator(BiConsumer<TileEntity, World> rotator) {
             this.rotateTileEntity = rotator;
         }
 
-        public void rotateTileEntity(TileEntity tileEntity, double angle) {
-            rotateTileEntity.accept(tileEntity, angle);
+        public void rotateTileEntity(TileEntity tileEntity, World world) {
+            if (tileEntity != null && world instanceof SubWorld) rotateTileEntity.accept(tileEntity, world);
+        }
+
+    }
+
+    private static class EntityRotator {
+
+        private BiConsumer<Entity, World> rotateEntity;
+
+        public EntityRotator(BiConsumer<Entity, World> rotator) {
+            this.rotateEntity = rotator;
+        }
+
+        public void rotateEntity(Entity entity, World world) {
+            if (entity != null && world instanceof SubWorld) rotateEntity.accept(entity, world);
         }
 
     }
