@@ -57,13 +57,32 @@ public enum Direction {
             case UP:
                 return ForgeDirection.UP;
             case NORTH:
-                return ForgeDirection.EAST;
-            case EAST:
-                return ForgeDirection.SOUTH;
-            case SOUTH:
-                return ForgeDirection.WEST;
-            case WEST:
                 return ForgeDirection.NORTH;
+            case EAST:
+                return ForgeDirection.EAST;
+            case SOUTH:
+                return ForgeDirection.SOUTH;
+            case WEST:
+                return ForgeDirection.WEST;
+        }
+    }
+
+    public static Direction fromForgeDirection(ForgeDirection dir) {
+        switch (dir) {
+            default:
+                return null;
+            case DOWN:
+                return Direction.DOWN;
+            case UP:
+                return Direction.UP;
+            case NORTH:
+                return Direction.NORTH;
+            case EAST:
+                return Direction.EAST;
+            case SOUTH:
+                return Direction.SOUTH;
+            case WEST:
+                return Direction.WEST;
         }
     }
 
