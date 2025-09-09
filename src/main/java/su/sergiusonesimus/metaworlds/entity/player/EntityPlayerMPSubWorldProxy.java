@@ -127,6 +127,7 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
     /**
      * Called to update the entity's position/logic.
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void onUpdate() {
         this.theItemInWorldManager.updateBlockRemoving();
@@ -146,11 +147,11 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
         while (!this.destroyedItemsNetCache.isEmpty()) {
             int i = Math.min(this.destroyedItemsNetCache.size(), 127);
             int[] aint = new int[i];
-            Iterator iterator = this.destroyedItemsNetCache.iterator();
+            Iterator<Integer> iterator = this.destroyedItemsNetCache.iterator();
             int j = 0;
 
             while (iterator.hasNext() && j < i) {
-                aint[j++] = ((Integer) iterator.next()).intValue();
+                aint[j++] = iterator.next();
                 iterator.remove();
             }
 
@@ -158,9 +159,9 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
         }
 
         if (!this.loadedChunks.isEmpty()) {
-            ArrayList arraylist = new ArrayList();
-            Iterator iterator1 = this.loadedChunks.iterator();
-            ArrayList arraylist1 = new ArrayList();
+            ArrayList<Chunk> arraylist = new ArrayList<Chunk>();
+            Iterator<ChunkCoordIntPair> iterator1 = this.loadedChunks.iterator();
+            ArrayList<TileEntity> arraylist1 = new ArrayList<TileEntity>();
             Chunk chunk;
 
             while (iterator1.hasNext() && arraylist.size() < S26PacketMapChunkBulk.func_149258_c()) {
@@ -194,17 +195,16 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
 
             if (!arraylist.isEmpty()) {
                 this.playerNetServerHandler.sendPacket(new S26PacketMapChunkBulk(arraylist));
-                Iterator iterator2 = arraylist1.iterator();
+                Iterator<TileEntity> iterator2 = arraylist1.iterator();
 
                 while (iterator2.hasNext()) {
-                    TileEntity tileentity = (TileEntity) iterator2.next();
-                    this.func_147097_b(tileentity);
+                    this.func_147097_b(iterator2.next());
                 }
 
-                iterator2 = arraylist.iterator();
+                Iterator<Chunk> iterator3 = arraylist.iterator();
 
                 while (iterator2.hasNext()) {
-                    chunk = (Chunk) iterator2.next();
+                    chunk = iterator3.next();
                     this.getServerForPlayer()
                         .getEntityTracker()
                         .func_85172_a(this, chunk);

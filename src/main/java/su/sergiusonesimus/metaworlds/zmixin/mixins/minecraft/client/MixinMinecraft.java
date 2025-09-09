@@ -51,6 +51,7 @@ public abstract class MixinMinecraft {
 
     private boolean generateEmpty = false;
 
+    @SuppressWarnings("rawtypes")
     @Inject(
         at = @At(
             value = "FIELD",
@@ -123,6 +124,7 @@ public abstract class MixinMinecraft {
         if (!generateEmpty) original.call(instance, value);
     }
 
+    @SuppressWarnings("rawtypes")
     @WrapOperation(
         method = "<init>",
         at = @At(

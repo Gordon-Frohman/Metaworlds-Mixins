@@ -106,7 +106,6 @@ public abstract class MixinNetHandlerPlayServer {
     /**
      * Processes clients perspective on player positioning and/or orientation
      */
-    @SuppressWarnings("unchecked")
     @Overwrite
     public void processPlayer(C03PacketPlayer packetPlayer) {
         WorldServer worldserver = this.serverController.worldServerForDimension(this.playerEntity.dimension);

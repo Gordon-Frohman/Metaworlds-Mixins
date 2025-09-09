@@ -30,10 +30,10 @@ public class EventHookContainer {
                     SubWorldTypeManager.getSubWorldCreatePacket((SubWorld) event.world),
                     event.world.provider.dimensionId);
             } else {
-                Collection subWorldIDs = ((IMixinWorldInfo) DimensionManager.getWorld(0)
+                Collection<Integer> subWorldIDs = ((IMixinWorldInfo) DimensionManager.getWorld(0)
                     .getWorldInfo()).getSubWorldIDs(((WorldServer) event.world).provider.dimensionId);
                 if (subWorldIDs != null) {
-                    Iterator i$ = subWorldIDs.iterator();
+                    Iterator<Integer> i$ = subWorldIDs.iterator();
 
                     while (i$.hasNext()) {
                         Integer curSubWorldID = (Integer) i$.next();

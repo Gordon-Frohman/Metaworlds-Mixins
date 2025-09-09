@@ -14,14 +14,13 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.I
 
 public class SubWorldImportProgressUpdater {
 
-    private List<SubWorldImporterThread> finishedImports = new ArrayList();
+    private List<SubWorldImporterThread> finishedImports = new ArrayList<SubWorldImporterThread>();
 
     @SubscribeEvent
     public void onServerTick(ServerTickEvent event) {
-        List worldInfo = MwAdminContainer.importThreads;
         SubWorldImporterThread curFinishedImport;
         synchronized (MwAdminContainer.importThreads) {
-            ListIterator i$ = MwAdminContainer.importThreads.listIterator();
+            ListIterator<SubWorldImporterThread> i$ = MwAdminContainer.importThreads.listIterator();
 
             while (true) {
                 if (!i$.hasNext()) {
@@ -38,7 +37,7 @@ public class SubWorldImportProgressUpdater {
 
         WorldInfo worldInfo1 = DimensionManager.getWorld(0)
             .getWorldInfo();
-        Iterator i$1 = this.finishedImports.iterator();
+        Iterator<SubWorldImporterThread> i$1 = this.finishedImports.iterator();
 
         while (i$1.hasNext()) {
             curFinishedImport = (SubWorldImporterThread) i$1.next();

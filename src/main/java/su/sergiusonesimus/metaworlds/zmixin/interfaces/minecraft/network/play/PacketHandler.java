@@ -65,9 +65,6 @@ public class PacketHandler {
             p_i45254_9_,
             p_i45254_10_,
             p_i45254_11_);
-        if (worldBelowFeetId == 0) {
-            int x = 0;
-        }
         return (C06PacketPlayerPosLook) ((IMixinC03PacketPlayer) (Object) c06).setSubWorldBelowFeetId(worldBelowFeetId)
             .setTractionLoss(parTractionLoss)
             .setLosingTraction(parLosingTraction);

@@ -30,6 +30,7 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
     @Shadow(remap = true)
     public static Logger field_152627_a;
 
+    @SuppressWarnings("rawtypes")
     @Shadow(remap = true)
     private List players;
 
@@ -42,6 +43,7 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
     @Shadow(remap = true)
     private LongHashMap playerInstances;
 
+    @SuppressWarnings("rawtypes")
     @Shadow(remap = true)
     private List playerInstanceList;
 
@@ -51,14 +53,10 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
     @Shadow(remap = true)
     public abstract PlayerManager.PlayerInstance getOrCreateChunkWatcher(int chunkXPos, int chunkZPos, boolean b);
 
-    @Override
-    public List getPlayers() {
-        return this.players;
-    }
-
     /**
      * Adds an EntityPlayerMP to the PlayerManager.
      */
+    @SuppressWarnings("unchecked")
     @Overwrite
     public void addPlayer(EntityPlayerMP player) {
 

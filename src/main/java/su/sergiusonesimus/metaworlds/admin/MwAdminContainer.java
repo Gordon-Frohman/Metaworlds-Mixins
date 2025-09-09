@@ -35,7 +35,7 @@ public class MwAdminContainer extends Container {
     protected EntityPlayerMP player;
     protected List<MwAdminContainer.SaveGameInfo> saveList;
     protected Map<Integer, MwAdminContainer.AdminSubWorldInfo> adminSubWorldInfos;
-    public static List<SubWorldImporterThread> importThreads = new ArrayList();
+    public static List<SubWorldImporterThread> importThreads = new ArrayList<SubWorldImporterThread>();
 
     public MwAdminContainer(EntityPlayer playerPar) {
         this.player = (EntityPlayerMP) playerPar;
@@ -46,9 +46,9 @@ public class MwAdminContainer extends Container {
     }
 
     public void loadAndSendSaves() {
-        this.saveList = new ArrayList();
+        this.saveList = new ArrayList<SaveGameInfo>();
         if (this.player.mcServer instanceof IntegratedServer) {
-            List i$ = null;
+            List<SaveFormatComparator> i$ = null;
 
             try {
                 i$ = this.player.mcServer.getActiveAnvilConverter()
@@ -57,16 +57,15 @@ public class MwAdminContainer extends Container {
                 var10.printStackTrace();
             }
 
-            Iterator curSaveInfo = i$.iterator();
+            Iterator<SaveFormatComparator> curSaveInfo = i$.iterator();
 
             while (curSaveInfo.hasNext()) {
-                Object subFiles = curSaveInfo.next();
-                SaveFormatComparator arr$ = (SaveFormatComparator) subFiles;
+                SaveFormatComparator subFiles = curSaveInfo.next();
                 File len$ = new File(
                     FMLClientHandler.instance()
                         .getSavesDir(),
-                    arr$.getFileName());
-                this.saveList.add(new MwAdminContainer.SaveGameInfo(arr$.getFileName(), len$));
+                    subFiles.getFileName());
+                this.saveList.add(new MwAdminContainer.SaveGameInfo(subFiles.getFileName(), len$));
             }
         } else {
             String var11 = DimensionManager.getWorld(0)
@@ -80,7 +79,7 @@ public class MwAdminContainer extends Container {
                         .getWorldDirectory()));
         }
 
-        Iterator var12 = this.saveList.iterator();
+        Iterator<SaveGameInfo> var12 = this.saveList.iterator();
 
         while (var12.hasNext()) {
             MwAdminContainer.SaveGameInfo var13 = (MwAdminContainer.SaveGameInfo) var12.next();
@@ -109,10 +108,10 @@ public class MwAdminContainer extends Container {
     }
 
     public void sendSubWorldInfos() {
-        Collection subWorldInfos = ((IMixinWorldInfo) DimensionManager.getWorld(0)
+        Collection<SubWorldInfoHolder> subWorldInfos = ((IMixinWorldInfo) DimensionManager.getWorld(0)
             .getWorldInfo()).getSubWorldInfos();
-        this.adminSubWorldInfos = new TreeMap();
-        Iterator arr$ = subWorldInfos.iterator();
+        this.adminSubWorldInfos = new TreeMap<Integer, AdminSubWorldInfo>();
+        Iterator<SubWorldInfoHolder> arr$ = subWorldInfos.iterator();
 
         while (arr$.hasNext()) {
             SubWorldInfoHolder len$ = (SubWorldInfoHolder) arr$.next();
@@ -124,7 +123,7 @@ public class MwAdminContainer extends Container {
 
         for (int i$ = 0; i$ < var11; ++i$) {
             WorldServer curDimensionWorld = var10[i$];
-            Iterator i$1 = ((IMixinWorld) curDimensionWorld).getSubWorlds()
+            Iterator<World> i$1 = ((IMixinWorld) curDimensionWorld).getSubWorlds()
                 .iterator();
 
             while (i$1.hasNext()) {
@@ -269,7 +268,7 @@ public class MwAdminContainer extends Container {
         }
     }
 
-    public static class AdminSubWorldInfo implements Comparable {
+    public static class AdminSubWorldInfo implements Comparable<AdminSubWorldInfo> {
 
         public int subWorldId;
         public boolean isSpawned;
@@ -285,8 +284,8 @@ public class MwAdminContainer extends Container {
             this(parInfoHolder.subWorldId, false, 0);
         }
 
-        public int compareTo(Object o) {
-            return this.subWorldId - ((MwAdminContainer.AdminSubWorldInfo) o).subWorldId;
+        public int compareTo(AdminSubWorldInfo o) {
+            return this.subWorldId - o.subWorldId;
         }
 
         public String toString() {
@@ -298,7 +297,7 @@ public class MwAdminContainer extends Container {
 
         public String worldFileName;
         public File saveDir;
-        public List<MwAdminContainer.SaveGameSubWorldInfo> subWorldsList = new ArrayList();
+        public List<SaveGameSubWorldInfo> subWorldsList = new ArrayList<SaveGameSubWorldInfo>();
 
         public SaveGameInfo(String parFileName, File parSaveDir) {
             this.worldFileName = parFileName;

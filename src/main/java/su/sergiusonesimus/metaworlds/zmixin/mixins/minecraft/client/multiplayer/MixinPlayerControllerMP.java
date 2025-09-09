@@ -75,6 +75,7 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
     /**
      * Called when a player completes the destruction of a block
      */
+    @SuppressWarnings("deprecation")
     public boolean onPlayerDestroyBlock(int par1, int par2, int par3, int par4, World par5World) {
         ItemStack stack = mc.thePlayer.getCurrentEquippedItem();
         if (stack != null && stack.getItem() != null

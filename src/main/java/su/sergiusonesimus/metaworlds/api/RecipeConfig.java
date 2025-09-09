@@ -93,7 +93,7 @@ public class RecipeConfig {
                 GameRegistry.addShapedRecipe(this.itemToCraft, recipeContents);
             } else {
                 String var10 = this.stringsToParse[1] + this.stringsToParse[2] + this.stringsToParse[3];
-                LinkedList var11 = new LinkedList();
+                LinkedList<ItemStack> var11 = new LinkedList<ItemStack>();
                 arr$ = this.parsedPlaceHolders;
                 len$ = arr$.length;
 

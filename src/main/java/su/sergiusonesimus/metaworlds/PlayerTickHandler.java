@@ -1,6 +1,5 @@
 package su.sergiusonesimus.metaworlds;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -14,7 +13,6 @@ public class PlayerTickHandler {
     public void onPlayerTick(PlayerTickEvent event) {
         if (event.phase.equals(Phase.START) && ((IMixinEntity) event.player).isLosingTraction()) {
             byte tractionTicks = ((IMixinEntity) event.player).getTractionLossTicks();
-            EntityPlayer var10001 = event.player;
             if (tractionTicks >= 20) {
                 ((IMixinEntity) event.player).setWorldBelowFeet((World) null);
             } else if (event.player.isOnLadder()) {

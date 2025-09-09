@@ -147,11 +147,6 @@ public class SubWorldTransformationHandler {
     }
 
     public void setCenter(double newX, double newY, double newZ) {
-        if ((int) Math.round(newX * 10) == -1795 && (int) Math.round(newY * 10) == 665
-            && (int) Math.round(newZ * 10) == 5
-            && this.holderWorld.isRemote) {
-            int x = 0;
-        }
         if (this.centerX != newX || this.centerY != newY || this.centerZ != newZ) {
             Vec3 oldGlobalPos = this.transformToGlobal(0.0D, 0.0D, 0.0D);
             this.centerX = newX;
@@ -173,11 +168,6 @@ public class SubWorldTransformationHandler {
     }
 
     public void setCenterOnCreate(double newX, double newY, double newZ) {
-        if ((int) Math.round(newX * 10) == -1795 && (int) Math.round(newY * 10) == 665
-            && (int) Math.round(newZ * 10) == 5
-            && this.holderWorld.isRemote) {
-            int x = 0;
-        }
         if (this.centerX != newX || this.centerY != newY || this.centerZ != newZ) {
             this.centerX = newX;
             this.centerY = newY;
@@ -381,8 +371,6 @@ public class SubWorldTransformationHandler {
     public Vec3 transformToLocal(Vec3 globalVec) {
         return this.transformToLocal(globalVec.xCoord, globalVec.yCoord, globalVec.zCoord);
     }
-
-    private Vec3 storedLocalPos = null;
 
     public Vec3 transformToLocal(double globalX, double globalY, double globalZ) {
         DoubleMatrix tempVector = new DoubleMatrix(new double[] { globalX, globalY, globalZ, 1.0D });

@@ -111,6 +111,7 @@ public abstract class MixinEntityTrackerEntry {
     @Shadow(remap = true)
     public abstract void func_151259_a(Packet p_151259_1_);
 
+    @SuppressWarnings("rawtypes")
     @Shadow(remap = true)
     public abstract void sendEventsToPlayers(List p_73125_1_);
 
@@ -129,6 +130,7 @@ public abstract class MixinEntityTrackerEntry {
     /**
      * also sends velocity, rotation, and riding info.
      */
+    @SuppressWarnings("rawtypes")
     @Overwrite
     public void sendLocationToAllClients(List p_73122_1_) {
         this.playerEntitiesUpdated = false;

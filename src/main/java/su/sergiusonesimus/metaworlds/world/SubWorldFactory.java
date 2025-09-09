@@ -9,7 +9,9 @@ import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 
 public class SubWorldFactory {
 
-    public static World CreateSubWorld(World parentWorld, int newSubWorldID) {
+    public static SubWorldFactory instance = new SubWorldFactory();
+
+    public World CreateSubWorld(World parentWorld, int newSubWorldID) {
         World subWorld;
         if (parentWorld.isRemote) {
             subWorld = new SubWorldClient(

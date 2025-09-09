@@ -1,7 +1,5 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.client.multiplayer;
 
-import java.util.Set;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -47,13 +45,7 @@ public class MixinWorldClient extends MixinWorld {
     private IntHashMap entityHashSet;
 
     @Shadow(remap = true)
-    private Set entityList;
-
-    @Shadow(remap = true)
     public NetHandlerPlayClient sendQueue;
-
-    @Shadow(remap = true)
-    private Set entitySpawnQueue;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void WorldClient(NetHandlerPlayClient p_i45063_1_, WorldSettings p_i45063_2_, int p_i45063_3_,
@@ -68,8 +60,8 @@ public class MixinWorldClient extends MixinWorld {
 
     public World createSubWorld(int newSubWorldID) {
         if (((IMixinWorldIntermediate) this).getSubworldFactory() == null) return null;
-        World newSubWorld = ((IMixinWorldIntermediate) this).getSubworldFactory()
-            .CreateSubWorld(((World) (Object) this), newSubWorldID);
+        ((IMixinWorldIntermediate) this).getSubworldFactory();
+        World newSubWorld = SubWorldFactory.instance.CreateSubWorld(((World) (Object) this), newSubWorldID);
         if (((IMixinWorld) this).getSubWorldsMap()
             .get(((IMixinWorld) newSubWorld).getSubWorldID()) == null) {
             ((IMixinWorld) this).getSubWorldsMap()

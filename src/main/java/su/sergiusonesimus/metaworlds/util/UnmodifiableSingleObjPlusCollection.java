@@ -19,7 +19,7 @@ public class UnmodifiableSingleObjPlusCollection<E extends Object> extends Abstr
     }
 
     public Iterator<E> iterator() {
-        return new UnmodifiableSingleObjPlusCollection.SingleObjPlusCollIterator(this);
+        return new SingleObjPlusCollIterator<E>(this);
     }
 
     public class SingleObjPlusCollIterator<T extends Object> implements Iterator<T> {
@@ -28,7 +28,7 @@ public class UnmodifiableSingleObjPlusCollection<E extends Object> extends Abstr
         Iterator<T> curIter;
         boolean isAtZero = true;
 
-        public SingleObjPlusCollIterator(UnmodifiableSingleObjPlusCollection parentCollection) {
+        public SingleObjPlusCollIterator(UnmodifiableSingleObjPlusCollection<T> parentCollection) {
             this.singleObj = (T) parentCollection.mSingleObj;
             this.curIter = parentCollection.mPlusCollection.iterator();
         }

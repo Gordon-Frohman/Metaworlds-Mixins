@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -14,6 +13,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import su.sergiusonesimus.metaworlds.admin.GuiMwAdmin;
 import su.sergiusonesimus.metaworlds.admin.MwAdminContainer;
+import su.sergiusonesimus.metaworlds.admin.MwAdminContainer.AdminSubWorldInfo;
 
 public class MwAdminGuiSubWorldInfosPacket implements IMessage {
 
@@ -29,7 +29,7 @@ public class MwAdminGuiSubWorldInfosPacket implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.adminSubWorldInfos = new ArrayList();
+        this.adminSubWorldInfos = new ArrayList<AdminSubWorldInfo>();
         int entriesCount = buf.readInt();
 
         for (int i = 0; i < entriesCount; ++i) {
@@ -44,7 +44,7 @@ public class MwAdminGuiSubWorldInfosPacket implements IMessage {
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.adminSubWorldInfos.size());
-        Iterator i$ = this.adminSubWorldInfos.iterator();
+        Iterator<AdminSubWorldInfo> i$ = this.adminSubWorldInfos.iterator();
 
         while (i$.hasNext()) {
             MwAdminContainer.AdminSubWorldInfo curInfo = (MwAdminContainer.AdminSubWorldInfo) i$.next();
@@ -60,10 +60,9 @@ public class MwAdminGuiSubWorldInfosPacket implements IMessage {
         public IMessage onMessage(MwAdminGuiSubWorldInfosPacket message, MessageContext ctx) {
             // BattlemodeHookContainerClass.interactWith = message.data.getBoolean("intw");
             if (!ctx.side.isServer()) {
-                EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
                 if (Minecraft.getMinecraft().currentScreen instanceof GuiMwAdmin) {
                     ((GuiMwAdmin) Minecraft
-                        .getMinecraft().currentScreen).guiSubWorldsList.adminSubWorldInfos = (List) message.adminSubWorldInfos;
+                        .getMinecraft().currentScreen).guiSubWorldsList.adminSubWorldInfos = (List<AdminSubWorldInfo>) message.adminSubWorldInfos;
                 }
             }
             return null;

@@ -20,6 +20,7 @@ public interface IMixinWorldIntermediate {
     public MovingObjectPosition rayTraceBlocks_do_do_single(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4,
         boolean par5);
 
+    @SuppressWarnings("rawtypes")
     public List<Entity> selectEntitiesWithinAABBLocal(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector);
 

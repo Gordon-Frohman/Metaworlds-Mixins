@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
 
 import cpw.mods.fml.common.network.ByteBufUtils;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -15,6 +14,8 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import su.sergiusonesimus.metaworlds.admin.GuiMwAdmin;
 import su.sergiusonesimus.metaworlds.admin.MwAdminContainer;
+import su.sergiusonesimus.metaworlds.admin.MwAdminContainer.SaveGameInfo;
+import su.sergiusonesimus.metaworlds.admin.MwAdminContainer.SaveGameSubWorldInfo;
 
 public class MwAdminGuiInitPacket implements IMessage {
 
@@ -30,7 +31,7 @@ public class MwAdminGuiInitPacket implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.saveGameInfos = new ArrayList();
+        this.saveGameInfos = new ArrayList<SaveGameInfo>();
         int entryCount = buf.readInt();
 
         for (int i = 0; i < entryCount; ++i) {
@@ -50,13 +51,13 @@ public class MwAdminGuiInitPacket implements IMessage {
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeInt(this.saveGameInfos.size());
-        Iterator i$ = this.saveGameInfos.iterator();
+        Iterator<SaveGameInfo> i$ = this.saveGameInfos.iterator();
 
         while (i$.hasNext()) {
             MwAdminContainer.SaveGameInfo curInfo = (MwAdminContainer.SaveGameInfo) i$.next();
             ByteBufUtils.writeUTF8String(buf, curInfo.worldFileName);
             buf.writeInt(curInfo.subWorldsList.size());
-            Iterator i$1 = curInfo.subWorldsList.iterator();
+            Iterator<SaveGameSubWorldInfo> i$1 = curInfo.subWorldsList.iterator();
 
             while (i$1.hasNext()) {
                 MwAdminContainer.SaveGameSubWorldInfo curSubWorldInfo = (MwAdminContainer.SaveGameSubWorldInfo) i$1
@@ -71,7 +72,6 @@ public class MwAdminGuiInitPacket implements IMessage {
         @Override
         public IMessage onMessage(MwAdminGuiInitPacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
-                EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
                 if (Minecraft.getMinecraft().currentScreen instanceof GuiMwAdmin) {
                     ((GuiMwAdmin) Minecraft
                         .getMinecraft().currentScreen).guiImportWorldsList.worldsList = message.saveGameInfos;

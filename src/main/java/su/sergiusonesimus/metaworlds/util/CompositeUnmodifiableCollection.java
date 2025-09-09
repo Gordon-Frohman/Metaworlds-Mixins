@@ -19,7 +19,7 @@ public class CompositeUnmodifiableCollection<E extends Object> extends AbstractC
     }
 
     public Iterator<E> iterator() {
-        return new CompositeUnmodifiableCollection.CUCIterator(this);
+        return new CUCIterator<E>(this);
     }
 
     public class CUCIterator<T extends Object> implements Iterator<T> {
@@ -28,7 +28,7 @@ public class CompositeUnmodifiableCollection<E extends Object> extends AbstractC
         Iterator<T> iterSecond;
         Iterator<T> curIter;
 
-        public CUCIterator(CompositeUnmodifiableCollection parentCollection) {
+        public CUCIterator(CompositeUnmodifiableCollection<T> parentCollection) {
             this.iterFirst = parentCollection.collection1.iterator();
             this.iterSecond = parentCollection.collection2.iterator();
             this.curIter = this.iterFirst;

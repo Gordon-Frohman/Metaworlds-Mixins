@@ -18,6 +18,7 @@ import su.sergiusonesimus.metaworlds.network.play.server.SSubWorldProxyPacket;
 public class NetworkManagerSubWorldProxy extends NetworkManager {
 
     private NetworkManager parentNetworkManager;
+    @SuppressWarnings("unused")
     private INetHandler netHandlerProxy;
     private int subWorldID;
     protected boolean clientSide;
@@ -34,6 +35,7 @@ public class NetworkManagerSubWorldProxy extends NetworkManager {
         this.netHandlerProxy = nethandler;
     }
 
+    @SuppressWarnings("rawtypes")
     public void scheduleOutboundPacket(Packet packet, GenericFutureListener... p_150725_2_) {
         GeneralPacketPipeline pipeline = MetaworldsMod.instance.networkHandler;
 

@@ -22,7 +22,6 @@ import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.world.SubWorldFactory;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.server.management.IMixinPlayerManager;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -267,8 +266,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
                 EntityPlayer proxyPlayer = ((IMixinEntity) par1Entity).getProxyPlayer(curSubWorld);
                 if (proxyPlayer != null) {
                     curSubWorld.removeEntity(proxyPlayer);
-                    if (!((IMixinPlayerManager) ((WorldServer) curSubWorld).getPlayerManager()).getPlayers()
-                        .contains(proxyPlayer)) {
+                    if (!((WorldServer) curSubWorld).getPlayerManager().players.contains(proxyPlayer)) {
                         ((IMixinEntity) par1Entity).getPlayerProxyMap()
                             .remove(Integer.valueOf(((IMixinWorld) curSubWorld).getSubWorldID()));
                     }
@@ -288,8 +286,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
                 World curSubWorld = (World) i$.next();
                 EntityPlayer proxyPlayer = ((IMixinEntity) par1Entity).getProxyPlayer(curSubWorld);
                 curSubWorld.removeEntity(proxyPlayer);
-                if (!((IMixinPlayerManager) ((WorldServer) curSubWorld).getPlayerManager()).getPlayers()
-                    .contains(proxyPlayer)) {
+                if (!((WorldServer) curSubWorld).getPlayerManager().players.contains(proxyPlayer)) {
                     ((IMixinEntity) par1Entity).getPlayerProxyMap()
                         .remove(Integer.valueOf(((IMixinWorld) curSubWorld).getSubWorldID()));
                 }

@@ -18,7 +18,7 @@ public interface IMixinRenderGlobal {
 
     public IntBuffer getOcclusionQueryBase();
 
-    public List getWorldRenderersToUpdate();
+    public List<WorldRenderer> getWorldRenderersToUpdate();
 
     public List<WorldRenderer> getSortedWorldRenderersList();
 

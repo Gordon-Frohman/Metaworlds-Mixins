@@ -9,6 +9,4 @@ public interface IMixinPlayerManager {
     public void addWatchableChunks(List<ChunkCoordIntPair> chunksToAdd);
 
     public void removeWatchableChunks(List<ChunkCoordIntPair> chunksToRemove);
-
-    public List getPlayers();
 }

@@ -61,7 +61,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             return true;
         } else {
             if (!((IMixinWorld) this.worldObj).isSubWorld()) {
-                Iterator i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -84,7 +84,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Inject(method = "wakeUpPlayer", at = @At("TAIL"))
     public void wakeUpPlayer(boolean par1, boolean par2, boolean par3, CallbackInfo ci) {
         if (!this.isProxyPlayer) {
-            Iterator i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+            Iterator<EntityPlayerProxy> i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                 .values()
                 .iterator();
 
@@ -102,7 +102,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         } else if (super.isOnLadder()) {
             return true;
         } else {
-            Iterator i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+            Iterator<EntityPlayerProxy> i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                 .values()
                 .iterator();
 
@@ -145,7 +145,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                 ((IMixinEntityLivingBase) curProxyPlayer)
                     .setPositionLocal(curProxy.xCoord, curProxy.yCoord, curProxy.zCoord);
-                Iterator transformedToLocalPos = ((IMixinEntity) curProxyPlayer).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> transformedToLocalPos = ((IMixinEntity) curProxyPlayer).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -162,7 +162,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     }
                 }
             } else if (this.isPlayer()) {
-                Iterator i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -197,7 +197,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 }
 
                 curProxy.setRotation(transformYawToGlobal(par1, (Entity) (Object) this), par2);
-                Iterator curProxyPlayer = ((IMixinEntity) curProxy).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> curProxyPlayer = ((IMixinEntity) curProxy).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -209,7 +209,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     }
                 }
             } else if (this.isPlayer()) {
-                Iterator i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -237,7 +237,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 ((EntityLivingBase) (Object) this).posZ);
             EntityPlayerProxy curProxyPlayer;
             if (!this.isPlayerProxy) {
-                for (Iterator i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+                for (Iterator<EntityPlayerProxy> i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator(); i$
                         .hasNext(); ((EntityPlayer) curProxyPlayer).onGround = ((EntityLivingBase) (Object) this).onGround) {
@@ -266,7 +266,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     curProxy.zCoord,
                     transformYawToGlobal(par7, (EntityLivingBase) (Object) this),
                     par8);
-                Iterator transformedToLocalPos = ((IMixinEntity) curProxyPlayer).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> transformedToLocalPos = ((IMixinEntity) curProxyPlayer).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -285,7 +285,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     }
                 }
             } else if (this.isPlayer()) {
-                Iterator i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -324,7 +324,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 }
 
                 curProxy.setAngles(par1, par2);
-                Iterator curProxyPlayer = ((IMixinEntity) curProxy).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> curProxyPlayer = ((IMixinEntity) curProxy).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -336,7 +336,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     }
                 }
             } else if (this.isPlayer()) {
-                Iterator i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -374,7 +374,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     curProxy.zCoord,
                     transformYawToGlobal(par7, (EntityLivingBase) (Object) this),
                     par8);
-                Iterator transformedToLocalPos = ((IMixinEntity) curProxyPlayer).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> transformedToLocalPos = ((IMixinEntity) curProxyPlayer).getPlayerProxyMap()
                     .values()
                     .iterator();
 
@@ -393,7 +393,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     }
                 }
             } else if (this.isPlayer()) {
-                Iterator i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+                Iterator<EntityPlayerProxy> i$1 = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator();
 

@@ -29,7 +29,7 @@ public class CommandTPWorlds extends CommandBase {
         if (icommandsender instanceof EntityPlayer) {
             EntityPlayer senderPlayer = (EntityPlayer) icommandsender;
             World baseWorld = ((IMixinWorld) senderPlayer.worldObj).getParentWorld();
-            Iterator i$ = ((IMixinWorld) baseWorld).getSubWorlds()
+            Iterator<World> i$ = ((IMixinWorld) baseWorld).getSubWorlds()
                 .iterator();
 
             while (i$.hasNext()) {

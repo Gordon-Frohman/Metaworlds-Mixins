@@ -110,7 +110,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     private Map<Integer, WorldRenderer> worldRenderersMap = new HashMap<Integer, WorldRenderer>();
 
     @Shadow(remap = true)
-    public Map damagedBlocks;
+    public Map<Integer, DestroyBlockProgress> damagedBlocks;
 
     @Shadow(remap = true)
     private Minecraft mc;
@@ -128,7 +128,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     private IntBuffer glOcclusionQueryBase;
 
     @Shadow(remap = true)
-    private List worldRenderersToUpdate;
+    private List<WorldRenderer> worldRenderersToUpdate;
 
     @Shadow(remap = true)
     private int renderChunksWide;
@@ -140,7 +140,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     private int renderChunksDeep;
 
     @Shadow(remap = true)
-    private List tileEntities;
+    private List<TileEntity> tileEntities;
 
     @Shadow(remap = true)
     private int glRenderListBase;
@@ -239,7 +239,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
     private int cloudTickCounter;
 
     @Shadow(remap = true)
-    public List glRenderLists;
+    public List<WorldRenderer> glRenderLists;
 
     @Shadow(remap = true)
     public RenderList[] allRenderLists;
@@ -462,7 +462,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         return this.glOcclusionQueryBase;
     }
 
-    public List getWorldRenderersToUpdate() {
+    public List<WorldRenderer> getWorldRenderersToUpdate() {
         return this.worldRenderersToUpdate;
     }
 
@@ -551,6 +551,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
      * @author Sergius Onesimus
      * @reason Too complex to be modified without Overwrite
      */
+    @SuppressWarnings("unchecked")
     @Overwrite
     public void loadRenderers() {
         if (this.theWorld != null) {
@@ -573,8 +574,6 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
             this.worldRenderersList.clear();
             this.sortedWorldRenderersList.clear();
 
-            int j = 0;
-            int k = 0;
             this.minBlockX = 0;
             this.minBlockY = 0;
             this.minBlockZ = 0;
@@ -630,6 +629,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void loadRenderersForNewSubWorld(int subWorldId) {
         if (this.theWorld != null) {
             int i;
@@ -754,7 +754,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
             RenderManager.renderPosZ = d5;
             this.mc.entityRenderer.enableLightmap((double) p_147589_3_);
             this.theWorld.theProfiler.endStartSection("global");
-            List list = curWorld.getLoadedEntityList();
+            List<Entity> list = curWorld.getLoadedEntityList();
             if (pass == 0) // no indentation for smaller patch size
             {
                 this.countEntitiesTotal = list.size();
@@ -847,6 +847,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
         ci.cancel();
     }
 
+    @SuppressWarnings("unused")
     public void markRenderersForNewPositionSingle(double par1d, double par2d, double par3d, int subWorldID) {
         World curWorld = ((IMixinWorld) this.theWorld).getSubWorld(subWorldID);
         Vec3 tranformedVec = ((IMixinWorld) curWorld).transformToLocal((double) par1d, (double) par2d, (double) par3d);
@@ -946,6 +947,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
      * @author Sergius Onesimus
      * @reason Too complex to be modified without Overwrite
      */
+    @SuppressWarnings({ "unchecked", "unused" })
     @Overwrite
     public int sortAndRender(EntityLivingBase par1EntityLivingBase, int par2, double par3) {
         this.theWorld.theProfiler.startSection("sortchunks");
@@ -1194,6 +1196,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
      * @author Sergius Onesimus
      * @reason Too complex to be modified without Overwrite
      */
+    @SuppressWarnings("unchecked")
     @Overwrite
     public int renderSortedRenderers(int par1, int par2, int par3, double par4) {
         this.glRenderLists.clear();
@@ -1299,12 +1302,13 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
      * @author Sergius Onesimus
      * @reason Too complex to be modified without Overwrite
      */
+    @SuppressWarnings("unchecked")
     @Overwrite
     public boolean updateRenderers(EntityLivingBase p_72716_1_, boolean p_72716_2_) {
         byte b0 = 2;
         RenderSorter rendersorter = new RenderSorter(p_72716_1_);
         WorldRenderer[] aworldrenderer = new WorldRenderer[b0];
-        ArrayList arraylist = null;
+        ArrayList<WorldRenderer> arraylist = null;
         int i = this.worldRenderersToUpdate.size();
         int j = 0;
         this.theWorld.theProfiler.startSection("nearChunksSearch");
@@ -1349,12 +1353,12 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
                 }
 
                 if (arraylist == null) {
-                    arraylist = new ArrayList();
+                    arraylist = new ArrayList<WorldRenderer>();
                 }
 
                 ++j;
                 arraylist.add(worldrenderer);
-                this.worldRenderersToUpdate.set(k, (Object) null);
+                this.worldRenderersToUpdate.set(k, null);
             }
         }
 
@@ -1462,7 +1466,7 @@ public abstract class MixinRenderGlobal implements IMixinRenderGlobal {
             tessellator.startDrawingQuads();
             tessellator.setTranslation(-d0, -d1, -d2);
             tessellator.disableColor();
-            Iterator iterator = this.damagedBlocks.values()
+            Iterator<DestroyBlockProgress> iterator = this.damagedBlocks.values()
                 .iterator();
 
             while (iterator.hasNext()) {

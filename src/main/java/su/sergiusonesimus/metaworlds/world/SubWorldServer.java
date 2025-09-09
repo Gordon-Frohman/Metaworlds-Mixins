@@ -399,7 +399,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     }
 
     public boolean getIsInMotion() {
-        return getIsInMotion();
+        return this.transformationHandler.getIsInMotion();
     }
 
     public void setMotion(double par1MotionX, double par2MotionY, double par3MotionZ) {

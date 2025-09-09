@@ -1,6 +1,7 @@
 package su.sergiusonesimus.metaworlds;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 
 import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -19,8 +20,7 @@ public class MWControlEventListener {
         // SubWorld world = (SubWorld)event.player.worldBelowFeet;
         // }
         if (BlockSubWorldController.toMakeFalse && count > 10) {
-            Minecraft.getMinecraft().gameSettings.keyBindSneak
-                .setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSneak.getKeyCode(), false);
+            KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSneak.getKeyCode(), false);
             BlockSubWorldController.toMakeFalse = false;
             count = 0;
         } else if (BlockSubWorldController.toMakeFalse) {

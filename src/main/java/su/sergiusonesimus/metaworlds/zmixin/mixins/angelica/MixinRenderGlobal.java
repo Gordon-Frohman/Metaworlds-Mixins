@@ -56,9 +56,6 @@ public class MixinRenderGlobal {
     private Map<Integer, WorldRenderer> worldRenderersMap;
 
     @Shadow(remap = true)
-    public Map damagedBlocks;
-
-    @Shadow(remap = true)
     private Minecraft mc;
 
     @Shadow(remap = true)
@@ -74,7 +71,7 @@ public class MixinRenderGlobal {
     private IntBuffer glOcclusionQueryBase;
 
     @Shadow(remap = true)
-    private List worldRenderersToUpdate;
+    private List<WorldRenderer> worldRenderersToUpdate;
 
     @Shadow(remap = true)
     private int renderChunksWide;
@@ -85,6 +82,7 @@ public class MixinRenderGlobal {
     @Shadow(remap = true)
     private int renderChunksDeep;
 
+    @SuppressWarnings("rawtypes")
     @Shadow(remap = true)
     private List tileEntities;
 
@@ -185,7 +183,7 @@ public class MixinRenderGlobal {
     private int cloudTickCounter;
 
     @Shadow(remap = true)
-    public List glRenderLists;
+    public List<WorldRenderer> glRenderLists;
 
     @Shadow(remap = true)
     public RenderList[] allRenderLists;
@@ -224,6 +222,7 @@ public class MixinRenderGlobal {
     // These methods are now overwritten by Angelica
     // To fix rendering issues, we re-overwrite them, leaving only subworlds renderers
 
+    @SuppressWarnings("unchecked")
     @Overwrite
     public void loadRenderers() {
         if (this.theWorld != null) {
@@ -246,8 +245,6 @@ public class MixinRenderGlobal {
             this.worldRenderersList.clear();
             this.sortedWorldRenderersList.clear();
 
-            int j = 0;
-            int k = 0;
             this.minBlockX = 0;
             this.minBlockY = 0;
             this.minBlockZ = 0;
@@ -303,6 +300,7 @@ public class MixinRenderGlobal {
         }
     }
 
+    @SuppressWarnings({ "unused", "unchecked" })
     @Inject(method = "sortAndRender", at = @At("RETURN"), cancellable = true)
     private void sortAndRender(EntityLivingBase entity, int pass, double partialTicks,
         CallbackInfoReturnable<Integer> ci) {
@@ -528,6 +526,7 @@ public class MixinRenderGlobal {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Overwrite
     public int renderSortedRenderers(int par1, int par2, int par3, double par4) {
         this.glRenderLists.clear();
@@ -627,12 +626,13 @@ public class MixinRenderGlobal {
         return l;
     }
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "updateRenderers", at = @At(value = "RETURN"), cancellable = true)
     public void updateRenderers(EntityLivingBase p_72716_1_, boolean p_72716_2_, CallbackInfoReturnable<Boolean> ci) {
         byte b0 = 2;
         RenderSorter rendersorter = new RenderSorter(p_72716_1_);
         WorldRenderer[] aworldrenderer = new WorldRenderer[b0];
-        ArrayList arraylist = null;
+        ArrayList<WorldRenderer> arraylist = null;
         int i = this.worldRenderersToUpdate.size();
         int j = 0;
         this.theWorld.theProfiler.startSection("nearChunksSearch");
@@ -677,12 +677,12 @@ public class MixinRenderGlobal {
                 }
 
                 if (arraylist == null) {
-                    arraylist = new ArrayList();
+                    arraylist = new ArrayList<WorldRenderer>();
                 }
 
                 ++j;
                 arraylist.add(worldrenderer);
-                this.worldRenderersToUpdate.set(k, (Object) null);
+                this.worldRenderersToUpdate.set(k, null);
             }
         }
 

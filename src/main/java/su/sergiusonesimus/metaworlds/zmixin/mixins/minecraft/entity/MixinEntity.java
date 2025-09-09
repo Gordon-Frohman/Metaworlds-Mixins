@@ -42,7 +42,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxis
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 @Mixin(Entity.class)
-public abstract class MixinEntity implements Comparable, IMixinEntity {
+public abstract class MixinEntity implements Comparable<Entity>, IMixinEntity {
 
     @Shadow(remap = true)
     public boolean noClip;
@@ -293,7 +293,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
     public int serverPosYOnSubWorld;
     public int serverPosZOnSubWorld;
     public HashMap<Integer, EntityPlayerProxy> playerProxyMap = ((Entity) (Object) this) instanceof EntityPlayer
-        ? new HashMap()
+        ? new HashMap<Integer, EntityPlayerProxy>()
         : null;
 
     public int getServerPosXOnSubWorld() {
@@ -328,7 +328,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
         return this.tractionLoss;
     }
 
-    public HashMap getPlayerProxyMap() {
+    public HashMap<Integer, EntityPlayerProxy> getPlayerProxyMap() {
         return playerProxyMap;
     }
 
@@ -371,10 +371,8 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
         return this.worldBelowFeet == null ? ((Entity) (Object) this).worldObj : this.worldBelowFeet;
     }
 
-    public int compareTo(Object par1Obj) {
-        return ((Object) this) instanceof Entity && par1Obj instanceof Entity
-            ? ((Entity) par1Obj).getEntityId() - ((Entity) (Object) this).getEntityId()
-            : 0;
+    public int compareTo(Entity par1Obj) {
+        return par1Obj.getEntityId() - ((Entity) (Object) this).getEntityId();
     }
 
     public Vec3 getGlobalPos() {
@@ -521,7 +519,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                 // By expanding entity's BB we allow smooth interaction with ladders
                 expander = 0.1;
             }
-            List list = this.worldObj.getCollidingBoundingBoxes(
+            List<AxisAlignedBB> list = this.worldObj.getCollidingBoundingBoxes(
                 (Entity) (Object) this,
                 this.boundingBox.addCoord(x, y, z)
                     .expand(expander, 0, expander));
@@ -968,7 +966,7 @@ public abstract class MixinEntity implements Comparable, IMixinEntity {
                     || (world instanceof SubWorldClient && ((Entity) (Object) this instanceof EntityPlayer))) {
                     SubWorld subworld = (SubWorld) world;
                     if (!subworld.getEntitiesToDrag()
-                        .containsKey(this)
+                        .containsKey((Entity) (Object) this)
                         && (subworld.getRotationYawSpeed() != 0 || subworld.getRotationPitchSpeed() != 0
                             || subworld.getRotationRollSpeed() != 0
                             || subworld.getMotionX() != 0

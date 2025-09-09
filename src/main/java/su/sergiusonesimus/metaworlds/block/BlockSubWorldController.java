@@ -3,6 +3,7 @@ package su.sergiusonesimus.metaworlds.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
@@ -27,8 +28,7 @@ public class BlockSubWorldController extends Block {
             par5EntityPlayer.dismountEntity(par5EntityPlayer.ridingEntity);
             par5EntityPlayer.ridingEntity.setDead();
             par5EntityPlayer.ridingEntity = null;
-            Minecraft.getMinecraft().gameSettings.keyBindSneak
-                .setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSneak.getKeyCode(), true);
+            KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSneak.getKeyCode(), true);
             toMakeFalse = true;
             return true;
         }

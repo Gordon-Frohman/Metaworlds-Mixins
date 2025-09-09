@@ -55,7 +55,7 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
     private Random rand;
 
     @Shadow(remap = true)
-    private List[] fxLayers = new List[4];
+    private List<EntityFX>[] fxLayers;
 
     @Shadow(remap = true)
     private TextureManager renderer;
@@ -156,13 +156,13 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
                     } catch (Throwable throwable) {
                         CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");
                         CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being rendered");
-                        crashreportcategory.addCrashSectionCallable("Particle", new Callable() {
+                        crashreportcategory.addCrashSectionCallable("Particle", new Callable<String>() {
 
                             public String call() {
                                 return entityfx.toString();
                             }
                         });
-                        crashreportcategory.addCrashSectionCallable("Particle Type", new Callable() {
+                        crashreportcategory.addCrashSectionCallable("Particle Type", new Callable<String>() {
 
                             public String call() {
                                 return i == 0 ? "MISC_TEXTURE"

@@ -2,7 +2,7 @@ package su.sergiusonesimus.metaworlds.world;
 
 import net.minecraft.world.ChunkCoordIntPair;
 
-public class ChunkCoordIntPairSubWorldID extends ChunkCoordIntPair implements Comparable {
+public class ChunkCoordIntPairSubWorldID extends ChunkCoordIntPair implements Comparable<ChunkCoordIntPairSubWorldID> {
 
     public int chunkSubWorldID;
 
@@ -32,8 +32,7 @@ public class ChunkCoordIntPairSubWorldID extends ChunkCoordIntPair implements Co
         return "[" + this.chunkXPos + ", " + this.chunkZPos + "] SubWorldID [" + this.chunkSubWorldID + "]";
     }
 
-    public int compareTo(Object arg0) {
-        ChunkCoordIntPairSubWorldID argCoord = (ChunkCoordIntPairSubWorldID) arg0;
+    public int compareTo(ChunkCoordIntPairSubWorldID argCoord) {
         return argCoord.chunkSubWorldID != this.chunkSubWorldID ? this.chunkSubWorldID - argCoord.chunkSubWorldID
             : (argCoord.chunkXPos != this.chunkXPos ? argCoord.chunkXPos - this.chunkXPos
                 : (argCoord.chunkZPos != this.chunkZPos ? argCoord.chunkZPos - this.chunkZPos : 0));

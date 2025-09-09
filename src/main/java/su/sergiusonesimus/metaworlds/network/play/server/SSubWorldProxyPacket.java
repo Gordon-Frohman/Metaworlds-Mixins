@@ -19,7 +19,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
+import su.sergiusonesimus.metaworlds.GeneralPacketPipeline;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.network.MetaWorldsPacket;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
@@ -42,7 +42,7 @@ public class SSubWorldProxyPacket extends MetaWorldsPacket {
     @Override
     public void read(ChannelHandlerContext ctx, ByteBuf buf) {
         FMLProxyPacket fmlProxyPacket = ((WeakReference<FMLProxyPacket>) ctx
-            .attr(MetaworldsMod.instance.networkHandler.getInboundPacketTrackerAttributeKey())
+            .attr(GeneralPacketPipeline.getInboundPacketTrackerAttributeKey())
             .get()
             .get()).get();
         if (fmlProxyPacket.getTarget()
@@ -53,7 +53,7 @@ public class SSubWorldProxyPacket extends MetaWorldsPacket {
         PacketBuffer packetbuffer = new PacketBuffer(buf);
         int packetId = packetbuffer.readVarIntFromBuffer();
         this.actualPacket = Packet.generatePacket(
-            (BiMap) this.networkManager.channel()
+            (BiMap<Integer, Class<? extends Packet>>) this.networkManager.channel()
                 .attr(NetworkManager.attrKeyReceivable)
                 .get(),
             packetId);
@@ -68,7 +68,7 @@ public class SSubWorldProxyPacket extends MetaWorldsPacket {
     public void write(ChannelHandlerContext ctx, ByteBuf buf) {
         buf.writeInt(this.subWorldID);
 
-        Integer integer = (Integer) ((BiMap) this.networkManager.channel()
+        Integer integer = (Integer) ((BiMap<Integer, Class<? extends Packet>>) this.networkManager.channel()
             .attr(NetworkManager.attrKeySendable)
             .get()).inverse()
                 .get(this.actualPacket.getClass());

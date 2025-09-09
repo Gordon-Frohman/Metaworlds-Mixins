@@ -32,6 +32,7 @@ public class CommandSetBlockInSubWorld extends CommandSetBlock {
         return "commands.setblockinsubworld.usage";
     }
 
+    @SuppressWarnings("deprecation")
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length >= 5) {
             World world = ((IMixinWorld) sender.getEntityWorld()).getSubWorld(Integer.parseInt(args[0]));
@@ -120,7 +121,8 @@ public class CommandSetBlockInSubWorld extends CommandSetBlock {
     /**
      * Adds the strings available in this command to the given list of tab completion options.
      */
-    public List addTabCompletionOptions(ICommandSender sender, String[] args) {
+    @SuppressWarnings("unchecked")
+    public List<String> addTabCompletionOptions(ICommandSender sender, String[] args) {
         return args.length == 1 ? getListOfSubWorldsInWorld(sender.getEntityWorld())
             : args.length == 5 ? getListOfStringsFromIterableMatchingLastWord(args, Block.blockRegistry.getKeys())
                 : (args.length == 7
@@ -128,14 +130,14 @@ public class CommandSetBlockInSubWorld extends CommandSetBlock {
                     : null);
     }
 
-    public List getListOfSubWorldsInWorld(World world) {
+    public List<String> getListOfSubWorldsInWorld(World world) {
         Set<Integer> subworlds = ((IMixinWorld) world).getSubWorldsMap()
             .keySet();
-        ArrayList arraylist = new ArrayList();
+        ArrayList<String> subworldList = new ArrayList<String>();
         for (Integer subworld : subworlds) {
-            arraylist.add(subworld.toString());
+            subworldList.add(subworld.toString());
         }
-        return arraylist;
+        return subworldList;
     }
 
 }

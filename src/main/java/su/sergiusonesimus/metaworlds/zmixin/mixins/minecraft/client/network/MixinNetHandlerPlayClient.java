@@ -94,7 +94,6 @@ public abstract class MixinNetHandlerPlayClient {
                 ((IMixinEntity) entity).setServerPosZOnSubWorld(
                     ((IMixinEntity) entity).getServerPosZOnSubWorld()
                         + ((IMixinS14PacketEntity) packetIn).getZPosDiffOnSubWorld());
-                Vec3 deleteMePos = ((IMixinEntity) entity).getLocalPos(((IMixinEntity) entity).getWorldBelowFeet());
                 Vec3 transformedPos = ((IMixinWorld) ((IMixinEntity) entity).getWorldBelowFeet()).transformLocalToOther(
                     entity.worldObj,
                     (double) ((IMixinEntity) entity).getServerPosXOnSubWorld() / 32.0D,

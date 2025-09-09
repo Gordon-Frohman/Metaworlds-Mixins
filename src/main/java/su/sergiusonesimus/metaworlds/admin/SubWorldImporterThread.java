@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -34,7 +33,7 @@ public class SubWorldImporterThread extends Thread {
     protected File sourceSubWorldDir;
     protected WorldInfo sourceWorldInfo;
     protected SubWorldInfoHolder sourceSubWorldInfo;
-    private Map<Integer, Integer> blockIdReplacementMap = new HashMap();
+    private Map<Integer, Integer> blockIdReplacementMap = new HashMap<Integer, Integer>();
     private File targetSaveRegion;
     public SubWorldInfoHolder targetSubWorldInfo;
     protected boolean finished = false;
@@ -49,7 +48,6 @@ public class SubWorldImporterThread extends Thread {
     }
 
     public void run() {
-        List newSubWorldDir = MwAdminContainer.importThreads;
         synchronized (MwAdminContainer.importThreads) {
             MwAdminContainer.importThreads.add(this);
         }
@@ -134,8 +132,8 @@ public class SubWorldImporterThread extends Thread {
                 }
             }
 
-            Set nbtKeys = leveldat.func_150296_c();
-            Iterator i$ = nbtKeys.iterator();
+            Set<String> nbtKeys = leveldat.func_150296_c();
+            Iterator<String> i$ = nbtKeys.iterator();
 
             while (i$.hasNext()) {
                 String curKey = (String) i$.next();
@@ -147,6 +145,7 @@ public class SubWorldImporterThread extends Thread {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void addBlockIdMappings(NBTTagList itemDataTagList) {
         if (itemDataTagList.tagCount() != 0) {
             for (int i = 0; i < itemDataTagList.tagCount(); ++i) {
@@ -177,7 +176,7 @@ public class SubWorldImporterThread extends Thread {
     private void loadRegions() {
         Pattern regionFilenameMatcher = Pattern.compile("r\\.-?\\d\\.-?\\d\\.mca");
         File[] regionFiles = this.targetSaveRegion.listFiles();
-        HashMap regions = new HashMap();
+        HashMap<RegionFile, File> regions = new HashMap<RegionFile, File>();
         File[] i$ = regionFiles;
         int curRegion = regionFiles.length;
 
@@ -189,11 +188,11 @@ public class SubWorldImporterThread extends Thread {
             }
         }
 
-        Iterator var9 = regions.entrySet()
+        Iterator<Entry<RegionFile, File>> var9 = regions.entrySet()
             .iterator();
 
         while (var9.hasNext()) {
-            Entry var10 = (Entry) var9.next();
+            Entry<RegionFile, File> var10 = var9.next();
             String[] var11 = ((File) var10.getValue()).getName()
                 .split("\\.", -1);
             int var12 = Integer.parseInt(var11[1]);

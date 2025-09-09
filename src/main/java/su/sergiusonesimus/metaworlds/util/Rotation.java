@@ -9,6 +9,7 @@ public enum Rotation {
     CLOCKWISE_180("180", 2),
     COUNTERCLOCKWISE_90("counterclockwise_90", 3);
 
+    @SuppressWarnings("unused")
     private final String name;
     private final int rotation;
 

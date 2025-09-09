@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.world.EnumDifficulty;
@@ -12,8 +11,6 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -40,15 +37,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.I
 @Mixin(WorldServer.class)
 public class MixinWorldServer extends MixinWorld {
 
-    private static SubWorldFactory subWorldFactory = null;
-
     // TODO
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    public void WorldServer(MinecraftServer p_i45284_1_, ISaveHandler p_i45284_2_, String p_i45284_3_, int p_i45284_4_,
-        WorldSettings p_i45284_5_, Profiler p_i45284_6_, CallbackInfo ci) {
-        if (subWorldFactory == null) subWorldFactory = new SubWorldFactory();
-    }
 
     @Redirect(
         method = "<init>",
@@ -100,10 +89,11 @@ public class MixinWorldServer extends MixinWorld {
         return this.createSubWorld(this.getUnoccupiedSubworldID());
     }
 
+    @SuppressWarnings("rawtypes")
     public World createSubWorld(int newSubWorldID) {
-        if (this.subWorldFactory == null) return null;
+        if (SubWorldFactory.instance == null) return null;
 
-        World newSubWorld = this.subWorldFactory.CreateSubWorld((World) (Object) this, newSubWorldID);
+        World newSubWorld = SubWorldFactory.instance.CreateSubWorld((World) (Object) this, newSubWorldID);
         if (((IMixinMinecraftServer) MinecraftServer.mcServer).getExistingSubWorlds()
             .put(((IMixinWorld) newSubWorld).getSubWorldID(), newSubWorld) != null) {
             throw new IllegalArgumentException("SubWorld with this ID already exists!");

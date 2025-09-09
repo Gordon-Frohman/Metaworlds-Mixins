@@ -201,7 +201,7 @@ public class MixinServerConfigurationManager {
             player.requestTexturePackLoad(this.mcServer.getTexturePack());
         }
 
-        Iterator iterator = player.getActivePotionEffects()
+        Iterator<PotionEffect> iterator = player.getActivePotionEffects()
             .iterator();
 
         while (iterator.hasNext()) {

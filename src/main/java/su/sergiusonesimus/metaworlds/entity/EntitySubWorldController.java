@@ -13,7 +13,9 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWor
 
 public class EntitySubWorldController extends Entity {
 
+    @SuppressWarnings("unused")
     private boolean riseSubWorld;
+    @SuppressWarnings("unused")
     private boolean wasJumping;
     public World controlledWorld;
     public double startingYaw;

@@ -16,7 +16,7 @@ public class SubWorldClientPreTickHandler {
     @SubscribeEvent
     public void onClientTick(ClientTickEvent event) {
         if (event.phase.equals(Phase.START) && Minecraft.getMinecraft().theWorld != null) {
-            Iterator i$ = ((IMixinWorld) Minecraft.getMinecraft().theWorld).getSubWorlds()
+            Iterator<World> i$ = ((IMixinWorld) Minecraft.getMinecraft().theWorld).getSubWorlds()
                 .iterator();
 
             while (i$.hasNext()) {
