@@ -100,6 +100,8 @@ public interface SubWorld {
 
     double getScaleChangeRate();
 
+    boolean getIsInMotion();
+
     int getMinX();
 
     int getMinY();

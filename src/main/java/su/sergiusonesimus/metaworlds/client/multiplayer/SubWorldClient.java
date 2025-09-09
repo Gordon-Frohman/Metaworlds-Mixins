@@ -48,7 +48,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
     private WorldClient m_parentWorld;
     private int subWorldID;
-    private ArrayList collidingBBCache = new ArrayList();
+    private ArrayList<AxisAlignedBB> collidingBBCache = new ArrayList<AxisAlignedBB>();
     private SubWorldTransformationHandler transformationHandler = new SubWorldTransformationHandler(this);
     public int localTickCounter;
     public int lastServerTickReceived;
@@ -72,15 +72,15 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     private double prevRendererUpdateZ;
     private double prevRendererRotation;
     private double prevRendererScaling;
-    private Map<Entity, Vec3> entitiesToDrag = new TreeMap();
-    private Map<Entity, Vec3> entitiesToNotDrag = new TreeMap();
+    private Map<Entity, Vec3> entitiesToDrag = new TreeMap<Entity, Vec3>();
+    private Map<Entity, Vec3> entitiesToNotDrag = new TreeMap<Entity, Vec3>();
     private ChunkCoordinates minCoordinates = new ChunkCoordinates();
     private ChunkCoordinates maxCoordinates = new ChunkCoordinates();
     private double maxRadius = 0.0D;
     private String subWorldType = SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT;
     private RenderGlobalSubWorld renderGlobalSubWorld;
     private SubWorldUpdatePacket updatePacketToHandle;
-    private List entitiesWithinAABBExcludingEntityResult = new ArrayList();
+    private List<Entity> entitiesWithinAABBExcludingEntityResult = new ArrayList<Entity>();
 
     public boolean canUpdate = false;
 
@@ -177,7 +177,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         this.subWorldType = newType;
     }
 
-    public List getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+    public List<Entity> getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
         this.entitiesWithinAABBExcludingEntityResult.clear();
         this.entitiesWithinAABBExcludingEntityResult.addAll(
@@ -187,7 +187,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         this.entitiesWithinAABBExcludingEntityResult.addAll(
             ((IMixinWorld) this.m_parentWorld)
                 .getEntitiesWithinAABBExcludingEntityLocal(par1Entity, globalBB, par3IEntitySelector));
-        Iterator i$ = ((IMixinWorld) this.m_parentWorld).getSubWorlds()
+        Iterator<World> i$ = ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
@@ -336,6 +336,10 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
     public double getScaleChangeRate() {
         return this.transformationHandler.getScaleChangeRate();
+    }
+
+    public boolean getIsInMotion() {
+        return getIsInMotion();
     }
 
     public void setMotion(double par1MotionX, double par2MotionY, double par3MotionZ) {
@@ -600,22 +604,22 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
     public void tickPosition(int count) {
         if (count != 0) {
-            if (this.transformationHandler.getIsInMotion()) {
+            if (getIsInMotion()) {
                 double prevRotationYaw = this.getRotationYaw();
                 boolean skipDragging = this.lastTickRotationPitch == 0 && this.lastTickRotationYaw == 0
                     && this.lastTickRotationRoll == 0
                     && this.lastTickX == 0
                     && this.lastTickY == 0
                     && this.lastTickZ == 0;
-                Iterator i$;
-                Entry curEntry;
+                Iterator<Entry<Entity, Vec3>> i$;
+                Entry<Entity, Vec3> curEntry;
 
                 if (canUpdate && !skipDragging) {
                     i$ = this.entitiesToDrag.entrySet()
                         .iterator();
 
                     while (i$.hasNext()) {
-                        curEntry = (Entry) i$.next();
+                        curEntry = i$.next();
                         curEntry.setValue(this.transformToLocal((Entity) curEntry.getKey()));
                     }
 
@@ -623,7 +627,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                         .iterator();
 
                     while (i$.hasNext()) {
-                        curEntry = (Entry) i$.next();
+                        curEntry = i$.next();
                         curEntry.setValue(this.transformToGlobal((Entity) curEntry.getKey()));
                     }
                 }
@@ -641,24 +645,24 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                 if (canUpdate && !skipDragging) {
                     for (i$ = this.entitiesToDrag.entrySet()
                         .iterator(); i$
-                            .hasNext(); ((Entity) curEntry.getKey()).prevRotationYaw = newEntityPrevRotationYawDiff1
-                                + ((Entity) curEntry.getKey()).rotationYaw) {
-                        curEntry = (Entry) i$.next();
-                        Entity newPosition = (Entity) curEntry.getKey();
+                            .hasNext(); curEntry.getKey().prevRotationYaw = newEntityPrevRotationYawDiff1
+                                + curEntry.getKey().rotationYaw) {
+                        curEntry = i$.next();
+                        Entity newPosition = curEntry.getKey();
                         double newEntityPrevRotationYawDiff = ((IMixinEntity) newPosition).getTractionFactor();
                         double globalWeight = 1.0D - newEntityPrevRotationYawDiff;
-                        Vec3 newPosition1 = this.transformToGlobal((Vec3) curEntry.getValue());
-                        ((Entity) curEntry.getKey()).setPosition(
-                            newPosition.posX * globalWeight + newPosition1.xCoord * newEntityPrevRotationYawDiff,
-                            newPosition.posY * globalWeight + newPosition1.yCoord * newEntityPrevRotationYawDiff,
-                            newPosition.posZ * globalWeight + newPosition1.zCoord * newEntityPrevRotationYawDiff);
-                        newEntityPrevRotationYawDiff1 = ((Entity) curEntry.getKey()).prevRotationYaw
-                            - (((Entity) curEntry.getKey()).rotationYaw
-                                - (float) (this.getRotationYaw() - prevRotationYaw));
-                        ((Entity) curEntry.getKey()).setRotation(
-                            ((Entity) curEntry.getKey()).rotationYaw
-                                - (float) (this.getRotationYaw() - prevRotationYaw),
-                            ((Entity) curEntry.getKey()).rotationPitch);
+                        Vec3 newPosition1 = this.transformToGlobal(curEntry.getValue());
+                        curEntry.getKey()
+                            .setPosition(
+                                newPosition.posX * globalWeight + newPosition1.xCoord * newEntityPrevRotationYawDiff,
+                                newPosition.posY * globalWeight + newPosition1.yCoord * newEntityPrevRotationYawDiff,
+                                newPosition.posZ * globalWeight + newPosition1.zCoord * newEntityPrevRotationYawDiff);
+                        newEntityPrevRotationYawDiff1 = curEntry.getKey().prevRotationYaw
+                            - (curEntry.getKey().rotationYaw - (float) (this.getRotationYaw() - prevRotationYaw));
+                        curEntry.getKey()
+                            .setRotation(
+                                curEntry.getKey().rotationYaw - (float) (this.getRotationYaw() - prevRotationYaw),
+                                curEntry.getKey().rotationPitch);
                         if (curEntry.getKey() instanceof EntityLivingBase) {
                             // Making sure player's body is rotating with the world
                             EntityLivingBase curEntity = (EntityLivingBase) curEntry.getKey();
@@ -672,19 +676,18 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                     float newEntityPrevRotationYawDiff2;
                     for (i$ = this.entitiesToNotDrag.entrySet()
                         .iterator(); i$
-                            .hasNext(); ((Entity) curEntry.getKey()).prevRotationYaw = newEntityPrevRotationYawDiff2
-                                + ((Entity) curEntry.getKey()).rotationYaw) {
-                        curEntry = (Entry) i$.next();
+                            .hasNext(); curEntry.getKey().prevRotationYaw = newEntityPrevRotationYawDiff2
+                                + curEntry.getKey().rotationYaw) {
+                        curEntry = i$.next();
                         Vec3 newPosition2 = this.transformToLocal((Vec3) curEntry.getValue());
-                        ((Entity) curEntry.getKey())
+                        curEntry.getKey()
                             .setPosition(newPosition2.xCoord, newPosition2.yCoord, newPosition2.zCoord);
-                        newEntityPrevRotationYawDiff2 = ((Entity) curEntry.getKey()).prevRotationYaw
-                            - (((Entity) curEntry.getKey()).rotationYaw
-                                + (float) (this.getRotationYaw() - prevRotationYaw));
-                        ((Entity) curEntry.getKey()).setRotation(
-                            ((Entity) curEntry.getKey()).rotationYaw
-                                + (float) (this.getRotationYaw() - prevRotationYaw),
-                            ((Entity) curEntry.getKey()).rotationPitch);
+                        newEntityPrevRotationYawDiff2 = curEntry.getKey().prevRotationYaw
+                            - (curEntry.getKey().rotationYaw + (float) (this.getRotationYaw() - prevRotationYaw));
+                        curEntry.getKey()
+                            .setRotation(
+                                curEntry.getKey().rotationYaw + (float) (this.getRotationYaw() - prevRotationYaw),
+                                curEntry.getKey().rotationPitch);
                     }
                 }
 
@@ -706,9 +709,9 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                 && this.lastTickX == 0
                 && this.lastTickY == 0
                 && this.lastTickZ == 0;
-            Iterator i$;
+            Iterator<Entry<Entity, Vec3>> i$;
 
-            Entry curEntry;
+            Entry<Entity, Vec3> curEntry;
             Entity newPosition;
             double curEntity;
             double globalWeight;
@@ -719,7 +722,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                 i$ = this.entitiesToDrag.entrySet()
                     .iterator();
                 while (i$.hasNext()) {
-                    curEntry = (Entry) i$.next();
+                    curEntry = i$.next();
                     newPosition = (Entity) curEntry.getKey();
                     curEntity = newPosition.prevPosX + (newPosition.posX - newPosition.prevPosX) * interpolationFactor;
                     globalWeight = newPosition.prevPosY
@@ -734,7 +737,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                     .iterator();
 
                 while (i$.hasNext()) {
-                    curEntry = (Entry) i$.next();
+                    curEntry = i$.next();
                     newPosition = (Entity) curEntry.getKey();
                     curEntity = newPosition.prevPosX + (newPosition.posX - newPosition.prevPosX) * interpolationFactor;
                     globalWeight = newPosition.prevPosY
@@ -767,11 +770,8 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                         .hasNext(); newPosition.prevPosZ = newPosition2.zCoord
                             + (newPosition2.zCoord - newPosition.posZ) * interpolationFactor
                                 / (1.0D - interpolationFactor)) {
-                    curEntry = (Entry) i$.next();
-                    newPosition = (Entity) curEntry.getKey();
-                    if (newPosition instanceof EntityPlayer) {
-                        int x = 0;
-                    }
+                    curEntry = i$.next();
+                    newPosition = curEntry.getKey();
                     curEntity = ((IMixinEntity) newPosition).getTractionFactor();
                     globalWeight = 1.0D - curEntity;
                     newPosition2 = this.transformToGlobal((Vec3) curEntry.getValue());
@@ -797,7 +797,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                         .hasNext(); curEntity1.prevPosZ = newPosition3.zCoord
                             + (newPosition3.zCoord - curEntity1.posZ) * interpolationFactor
                                 / (1.0D - interpolationFactor)) {
-                    curEntry = (Entry) i$.next();
+                    curEntry = i$.next();
                     newPosition3 = this.transformToLocal((Vec3) curEntry.getValue());
                     curEntity1 = (Entity) curEntry.getKey();
                     curEntity1.prevPosX = newPosition3.xCoord
@@ -817,7 +817,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
     public void UpdatePositionAndRotation(double newX, double newY, double newZ, double newRotationYaw,
         double newRotationPitch, double newRotationRoll, double newScaling) {
-        Iterator rotationDiff = this.entitiesToDrag.entrySet()
+        Iterator<Entry<Entity, Vec3>> rotationDiff = this.entitiesToDrag.entrySet()
             .iterator();
 
         boolean skipDragging = this.lastTickRotationPitch == 0 && this.lastTickRotationYaw == 0
@@ -826,18 +826,18 @@ public class SubWorldClient extends WorldClient implements SubWorld {
             && this.lastTickY == 0
             && this.lastTickZ == 0;
         if (canUpdate && !skipDragging) {
-            Entry curEntry;
+            Entry<Entity, Vec3> curEntry;
             while (rotationDiff.hasNext()) {
-                curEntry = (Entry) rotationDiff.next();
-                curEntry.setValue(this.transformToLocal((Entity) curEntry.getKey()));
+                curEntry = rotationDiff.next();
+                curEntry.setValue(this.transformToLocal(curEntry.getKey()));
             }
 
             rotationDiff = this.entitiesToNotDrag.entrySet()
                 .iterator();
 
             while (rotationDiff.hasNext()) {
-                curEntry = (Entry) rotationDiff.next();
-                curEntry.setValue(this.transformToGlobal((Entity) curEntry.getKey()));
+                curEntry = rotationDiff.next();
+                curEntry.setValue(this.transformToGlobal(curEntry.getKey()));
             }
         }
 
@@ -849,46 +849,46 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         this.setScaling(newScaling);
 
         if (canUpdate && !skipDragging) {
-            Iterator i$;
-            Entry curEntry1;
+            Iterator<Entry<Entity, Vec3>> i$;
+            Entry<Entity, Vec3> curEntry1;
             float newEntityPrevRotationYawDiff1;
             for (i$ = this.entitiesToDrag.entrySet()
                 .iterator(); i$
-                    .hasNext(); ((Entity) curEntry1.getKey()).prevRotationYaw = newEntityPrevRotationYawDiff1
-                        + ((Entity) curEntry1.getKey()).rotationYaw) {
-                curEntry1 = (Entry) i$.next();
+                    .hasNext(); curEntry1.getKey().prevRotationYaw = newEntityPrevRotationYawDiff1
+                        + curEntry1.getKey().rotationYaw) {
+                curEntry1 = i$.next();
                 Entity newPosition = (Entity) curEntry1.getKey();
-                if (newPosition instanceof EntityPlayer) {
-                    int x = 0;
-                }
                 double newEntityPrevRotationYawDiff = ((IMixinEntity) newPosition).getTractionFactor();
                 double globalWeight = 1.0D - newEntityPrevRotationYawDiff;
                 Vec3 newPosition1 = this.transformToGlobal((Vec3) curEntry1.getValue());
-                ((Entity) curEntry1.getKey()).setPosition(
-                    newPosition.posX * globalWeight + newPosition1.xCoord * newEntityPrevRotationYawDiff,
-                    newPosition.posY * globalWeight + newPosition1.yCoord * newEntityPrevRotationYawDiff,
-                    newPosition.posZ * globalWeight + newPosition1.zCoord * newEntityPrevRotationYawDiff);
-                newEntityPrevRotationYawDiff1 = ((Entity) curEntry1.getKey()).prevRotationYaw
-                    - (((Entity) curEntry1.getKey()).rotationYaw - (float) rotationDiff1);
-                ((Entity) curEntry1.getKey()).setRotation(
-                    ((Entity) curEntry1.getKey()).rotationYaw - (float) rotationDiff1,
-                    ((Entity) curEntry1.getKey()).rotationPitch);
+                curEntry1.getKey()
+                    .setPosition(
+                        newPosition.posX * globalWeight + newPosition1.xCoord * newEntityPrevRotationYawDiff,
+                        newPosition.posY * globalWeight + newPosition1.yCoord * newEntityPrevRotationYawDiff,
+                        newPosition.posZ * globalWeight + newPosition1.zCoord * newEntityPrevRotationYawDiff);
+                newEntityPrevRotationYawDiff1 = curEntry1.getKey().prevRotationYaw
+                    - (curEntry1.getKey().rotationYaw - (float) rotationDiff1);
+                curEntry1.getKey()
+                    .setRotation(
+                        curEntry1.getKey().rotationYaw - (float) rotationDiff1,
+                        curEntry1.getKey().rotationPitch);
             }
 
             float newEntityPrevRotationYawDiff2;
             for (i$ = this.entitiesToNotDrag.entrySet()
                 .iterator(); i$
-                    .hasNext(); ((Entity) curEntry1.getKey()).prevRotationYaw = newEntityPrevRotationYawDiff2
-                        + ((Entity) curEntry1.getKey()).rotationYaw) {
-                curEntry1 = (Entry) i$.next();
+                    .hasNext(); curEntry1.getKey().prevRotationYaw = newEntityPrevRotationYawDiff2
+                        + curEntry1.getKey().rotationYaw) {
+                curEntry1 = i$.next();
                 Vec3 newPosition2 = this.transformToLocal((Vec3) curEntry1.getValue());
-                ((Entity) curEntry1.getKey())
+                curEntry1.getKey()
                     .setPosition(newPosition2.xCoord, newPosition2.yCoord, newPosition2.zCoord);
-                newEntityPrevRotationYawDiff2 = ((Entity) curEntry1.getKey()).prevRotationYaw
-                    - (((Entity) curEntry1.getKey()).rotationYaw + (float) rotationDiff1);
-                ((Entity) curEntry1.getKey()).setRotation(
-                    ((Entity) curEntry1.getKey()).rotationYaw + (float) rotationDiff1,
-                    ((Entity) curEntry1.getKey()).rotationPitch);
+                newEntityPrevRotationYawDiff2 = curEntry1.getKey().prevRotationYaw
+                    - (curEntry1.getKey().rotationYaw + (float) rotationDiff1);
+                curEntry1.getKey()
+                    .setRotation(
+                        curEntry1.getKey().rotationYaw + (float) rotationDiff1,
+                        curEntry1.getKey().rotationPitch);
             }
         }
 
@@ -916,9 +916,9 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         this.lastTickScaling = this.getScaling();
     }
 
-    public List getCollidingBoundingBoxes(Entity entity, AxisAlignedBB aabb) {
-        ArrayList result = (ArrayList) this.getCollidingBoundingBoxesLocal(entity, aabb);
-        Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+    public List<AxisAlignedBB> getCollidingBoundingBoxes(Entity entity, AxisAlignedBB aabb) {
+        ArrayList<AxisAlignedBB> result = (ArrayList<AxisAlignedBB>) this.getCollidingBoundingBoxesLocal(entity, aabb);
+        Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
@@ -951,7 +951,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return result;
     }
 
-    public List getCollidingBoundingBoxesLocal(Entity entity, AxisAlignedBB aabb) {
+    public List<AxisAlignedBB> getCollidingBoundingBoxesLocal(Entity entity, AxisAlignedBB aabb) {
         this.collidingBBCache.clear();
         int i = MathHelper.floor_double(Math.max(aabb.minX, (double) this.getMinX()));
         int j = MathHelper.floor_double(Math.min(aabb.maxX + 1.0D, (double) this.getMaxX()));
@@ -974,7 +974,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         }
 
         double var14 = 0.25D;
-        List var15 = ((IMixinWorld) this)
+        List<Entity> var15 = ((IMixinWorld) this)
             .getEntitiesWithinAABBExcludingEntityLocal(entity, aabb.expand(var14, var14, var14));
 
         for (int var16 = 0; var16 < var15.size(); ++var16) {
@@ -992,11 +992,11 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.collidingBBCache;
     }
 
-    public List getCollidingBoundingBoxesGlobal(Entity entity, AxisAlignedBB aabb) {
-        List result = this.getCollidingBoundingBoxesLocal(
+    public List<AxisAlignedBB> getCollidingBoundingBoxesGlobal(Entity entity, AxisAlignedBB aabb) {
+        List<AxisAlignedBB> result = this.getCollidingBoundingBoxesLocal(
             entity,
             ((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(this));
-        ListIterator iter = result.listIterator();
+        ListIterator<AxisAlignedBB> iter = result.listIterator();
 
         while (iter.hasNext()) {
             AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next()).getTransformedToGlobalBoundingBox(this);
@@ -1006,7 +1006,8 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return result;
     }
 
-    public List getCollidingBoundingBoxesLocalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement) {
+    public List<AxisAlignedBB> getCollidingBoundingBoxesLocalWithMovement(Entity entity, AxisAlignedBB aabb,
+        Vec3 movement) {
         AxisAlignedBB localBB = ((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(this);
         localBB = AxisAlignedBB
             .getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
@@ -1021,9 +1022,10 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.getCollidingBoundingBoxesLocal(entity, localBB);
     }
 
-    public List getCollidingBoundingBoxesGlobalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement) {
-        List result = this.getCollidingBoundingBoxesLocalWithMovement(entity, aabb, movement);
-        ListIterator iter = result.listIterator();
+    public List<AxisAlignedBB> getCollidingBoundingBoxesGlobalWithMovement(Entity entity, AxisAlignedBB aabb,
+        Vec3 movement) {
+        List<AxisAlignedBB> result = this.getCollidingBoundingBoxesLocalWithMovement(entity, aabb, movement);
+        ListIterator<AxisAlignedBB> iter = result.listIterator();
 
         while (iter.hasNext()) {
             AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next()).getTransformedToGlobalBoundingBox(this);
@@ -1173,6 +1175,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return AxisAlignedBB.getBoundingBox(newMinX, newMinY, newMinZ, newMaxX, newMaxY, newMaxZ);
     }
 
+    @SuppressWarnings("unused")
     private AxisAlignedBB actuallyRotateBB(AxisAlignedBB original, double degrees) {
         double[] rotMin = rotatePoint(original.minX, original.minZ, degrees);
         double[] rotMax = rotatePoint(original.maxX, original.maxZ, degrees);
@@ -1185,6 +1188,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return new double[] { transformedX, transformedZ };
     }
 
+    @SuppressWarnings("unused")
     private double radiansYawRotation(double rot) {
         return rot * Math.PI / 180;
     }

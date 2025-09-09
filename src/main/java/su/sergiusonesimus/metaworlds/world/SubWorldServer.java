@@ -73,17 +73,17 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public static int global_newSubWorldID = 1;
     private WorldServer m_parentWorld;
     private int subWorldID;
-    private ArrayList collidingBBCache = new ArrayList();
+    private ArrayList<AxisAlignedBB> collidingBBCache = new ArrayList<AxisAlignedBB>();
     private SubWorldTransformationHandler transformationHandler = new SubWorldTransformationHandler(this);
-    public Map<Entity, Vec3> entitiesToDrag = new TreeMap();
-    private Map<Entity, Vec3> entitiesToNotDrag = new TreeMap();
+    public Map<Entity, Vec3> entitiesToDrag = new TreeMap<Entity, Vec3>();
+    private Map<Entity, Vec3> entitiesToNotDrag = new TreeMap<Entity, Vec3>();
     private ChunkCoordinates minCoordinates = new ChunkCoordinates();
     private ChunkCoordinates maxCoordinates = new ChunkCoordinates();
     private boolean boundariesChanged = true;
     private boolean centerChanged = true;
     private boolean isEmpty = true;
     private String subWorldType = SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT;
-    private List entitiesWithinAABBExcludingEntityResult = new ArrayList();
+    private List<Entity> entitiesWithinAABBExcludingEntityResult = new ArrayList<Entity>();
 
     public SubWorldServer(WorldServer parentWorld, int newSubWorldID, MinecraftServer par1MinecraftServer,
         ISaveHandler par2ISaveHandler, String par3Str, int par4, WorldSettings par5WorldSettings,
@@ -117,8 +117,9 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return ((IMixinWorld) this.m_parentWorld).createSubWorld(newSubWorldID);
     }
 
+    @SuppressWarnings("rawtypes")
     public void removeSubWorld() {
-        Iterator minecraftexception = this.playerEntities.iterator();
+        Iterator<EntityPlayer> minecraftexception = this.playerEntities.iterator();
 
         while (minecraftexception.hasNext()) {
             Object unloadWorldMethod = minecraftexception.next();
@@ -133,7 +134,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             .remove(this.subWorldID);
 
         try {
-            Class[] minecraftexception1 = new Class[] { World.class };
+            Class[] minecraftexception1 = { World.class };
             Method unloadWorldMethod1 = ForgeChunkManager.class.getDeclaredMethod("unloadWorld", minecraftexception1);
             unloadWorldMethod1.setAccessible(true);
 
@@ -208,7 +209,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         this.subWorldType = newType;
     }
 
-    public List getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
+    public List<Entity> getEntitiesWithinAABBExcludingEntity(Entity par1Entity, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
         this.entitiesWithinAABBExcludingEntityResult.clear();
         this.entitiesWithinAABBExcludingEntityResult.addAll(
@@ -218,7 +219,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         this.entitiesWithinAABBExcludingEntityResult.addAll(
             ((IMixinWorld) this.m_parentWorld)
                 .getEntitiesWithinAABBExcludingEntityLocal(par1Entity, globalBB, par3IEntitySelector));
-        Iterator i$ = ((IMixinWorld) this.m_parentWorld).getSubWorlds()
+        Iterator<World> i$ = ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
@@ -235,23 +236,24 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return this.entitiesWithinAABBExcludingEntityResult;
     }
 
-    public List selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public List<Entity> selectEntitiesWithinAABB(Class par1Class, AxisAlignedBB par2AxisAlignedBB,
         IEntitySelector par3IEntitySelector) {
-        ArrayList arraylist = new ArrayList();
-        arraylist.addAll(
+        ArrayList<Entity> entityList = new ArrayList<Entity>();
+        entityList.addAll(
             ((IMixinWorldIntermediate) this)
                 .selectEntitiesWithinAABBLocal(par1Class, par2AxisAlignedBB, par3IEntitySelector));
         AxisAlignedBB globalBB = ((IMixinAxisAlignedBB) par2AxisAlignedBB).getTransformedToGlobalBoundingBox(this);
-        arraylist.addAll(
+        entityList.addAll(
             ((IMixinWorldIntermediate) this.m_parentWorld)
                 .selectEntitiesWithinAABBLocal(par1Class, globalBB, par3IEntitySelector));
-        Iterator i$ = ((IMixinWorld) this.m_parentWorld).getSubWorlds()
+        Iterator<World> i$ = ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
             World curSubWorld = (World) i$.next();
             if (curSubWorld != this) {
-                arraylist.addAll(
+                entityList.addAll(
                     ((IMixinWorldIntermediate) curSubWorld).selectEntitiesWithinAABBLocal(
                         par1Class,
                         ((IMixinAxisAlignedBB) globalBB).getTransformedToLocalBoundingBox(curSubWorld),
@@ -259,7 +261,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             }
         }
 
-        return arraylist;
+        return entityList;
     }
 
     public boolean checkNoEntityCollision(AxisAlignedBB par1AxisAlignedBB, Entity par2Entity) {
@@ -394,6 +396,10 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
     public double getScaleChangeRate() {
         return this.transformationHandler.getScaleChangeRate();
+    }
+
+    public boolean getIsInMotion() {
+        return getIsInMotion();
     }
 
     public void setMotion(double par1MotionX, double par2MotionY, double par3MotionZ) {
@@ -588,7 +594,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                 maxZ = 0;
             }
 
-            List chunksToRemoveFromWatch;
+            List<ChunkCoordIntPair> chunksToRemoveFromWatch;
             if (!willBeEmpty) {
                 if (this.isEmpty) {
                     chunksToRemoveFromWatch = this.makeChunkList(minX, minZ, maxX, maxZ);
@@ -638,7 +644,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     }
 
     private List<ChunkCoordIntPair> makeChunkList(int minX, int minZ, int maxX, int maxZ) {
-        ArrayList chunksList = new ArrayList();
+        ArrayList<ChunkCoordIntPair> chunksList = new ArrayList<ChunkCoordIntPair>();
 
         for (int curChunkX = (minX >> 4) - 1; curChunkX <= (maxX - 1 >> 4) + 1; ++curChunkX) {
             for (int curChunkZ = (minZ >> 4) - 1; curChunkZ <= (maxZ - 1 >> 4) + 1; ++curChunkZ) {
@@ -651,7 +657,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
     private List<ChunkCoordIntPair> makeChunkListAreaAWithoutB(int minXA, int minZA, int maxXA, int maxZA, int minXB,
         int minZB, int maxXB, int maxZB) {
-        ArrayList chunksAWithoutB = new ArrayList();
+        ArrayList<ChunkCoordIntPair> chunksAWithoutB = new ArrayList<ChunkCoordIntPair>();
 
         int startX;
         int endX;
@@ -718,7 +724,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         if (MinecraftServer.getServer()
             .getTickCounter() % 20 == 0) {
             updateFlags |= 1;
-            if (this.transformationHandler.getIsInMotion()) {
+            if (getIsInMotion()) {
                 updateFlags |= 2;
             }
 
@@ -726,7 +732,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             updateFlags |= 8;
             updateFlags |= 16;
         } else {
-            if (this.transformationHandler.getIsInMotion()) {
+            if (getIsInMotion()) {
                 updateFlags |= 3;
             } else if (MinecraftServer.getServer()
                 .getTickCounter() % 5 == 0) {
@@ -746,13 +752,13 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
         MetaMagicNetwork.dispatcher
             .sendToDimension(new SubWorldUpdatePacket(this, updateFlags), this.provider.dimensionId);
-        if (this.transformationHandler.getIsInMotion()) {
-            Iterator i$ = this.entitiesToDrag.entrySet()
+        if (getIsInMotion()) {
+            Iterator<Entry<Entity, Vec3>> i$ = this.entitiesToDrag.entrySet()
                 .iterator();
 
-            Entry curEntry;
+            Entry<Entity, Vec3> curEntry;
             while (i$.hasNext()) {
-                curEntry = (Entry) i$.next();
+                curEntry = i$.next();
                 curEntry.setValue(this.transformToLocal((Entity) curEntry.getKey()));
             }
 
@@ -760,7 +766,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                 .iterator();
 
             while (i$.hasNext()) {
-                curEntry = (Entry) i$.next();
+                curEntry = i$.next();
                 curEntry.setValue(this.transformToGlobal((Entity) curEntry.getKey()));
             }
 
@@ -777,7 +783,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
             Vec3 newPosition;
             while (i$.hasNext()) {
-                curEntry = (Entry) i$.next();
+                curEntry = i$.next();
                 newPosition = this.transformToGlobal((Vec3) curEntry.getValue());
                 if (curEntry.getKey() instanceof EntityLivingBase) {
                     // Making sure player's body is rotating with the world
@@ -808,7 +814,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                 .iterator();
 
             while (i$.hasNext()) {
-                curEntry = (Entry) i$.next();
+                curEntry = i$.next();
                 newPosition = this.transformToLocal((Vec3) curEntry.getValue());
                 if (curEntry.getKey() instanceof EntityPlayer) {
                     ((Entity) curEntry.getKey())
@@ -907,6 +913,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return AxisAlignedBB.getBoundingBox(newMinX, newMinY, newMinZ, newMaxX, newMaxY, newMaxZ);
     }
 
+    @SuppressWarnings("unused")
     private AxisAlignedBB actuallyRotateBB(AxisAlignedBB original, double degrees) {
         double[] rotMin = rotatePoint(original.minX, original.minZ, degrees);
         double[] rotMax = rotatePoint(original.maxX, original.maxZ, degrees);
@@ -923,6 +930,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return false;
     }
 
+    @SuppressWarnings("unused")
     private double radiansYawRotation(double rot) {
         return rot * Math.PI / 180;
     }
@@ -971,9 +979,9 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return this.getRotationYaw() % 360;
     }
 
-    public List getCollidingBoundingBoxes(Entity entity, AxisAlignedBB aabb) {
-        ArrayList result = (ArrayList) this.getCollidingBoundingBoxesLocal(entity, aabb);
-        Iterator i$ = ((IMixinWorld) this).getSubWorlds()
+    public List<AxisAlignedBB> getCollidingBoundingBoxes(Entity entity, AxisAlignedBB aabb) {
+        ArrayList<AxisAlignedBB> result = (ArrayList<AxisAlignedBB>) this.getCollidingBoundingBoxesLocal(entity, aabb);
+        Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
             .iterator();
 
         while (i$.hasNext()) {
@@ -1021,7 +1029,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return false;
     }
 
-    public List getCollidingBoundingBoxesLocal(Entity entity, AxisAlignedBB aabb) {
+    public List<AxisAlignedBB> getCollidingBoundingBoxesLocal(Entity entity, AxisAlignedBB aabb) {
         this.collidingBBCache.clear();
         int i = MathHelper.floor_double(Math.max(aabb.minX, (double) this.getMinX()));
         int j = MathHelper.floor_double(Math.min(aabb.maxX + 1.0D, (double) this.getMaxX()));
@@ -1044,16 +1052,17 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         }
 
         double var14 = 0.25D;
-        List var15 = ((IMixinWorld) this)
+        List<Entity> var15 = ((IMixinWorld) this)
             .getEntitiesWithinAABBExcludingEntityLocal(entity, aabb.expand(var14, var14, var14));
 
         for (int var16 = 0; var16 < var15.size(); ++var16) {
-            AxisAlignedBB axisalignedbb1 = ((Entity) var15.get(var16)).getBoundingBox();
+            AxisAlignedBB axisalignedbb1 = var15.get(var16)
+                .getBoundingBox();
             if (axisalignedbb1 != null && axisalignedbb1.intersectsWith(aabb)) {
                 this.collidingBBCache.add(axisalignedbb1);
             }
 
-            axisalignedbb1 = entity.getCollisionBox((Entity) var15.get(var16));
+            axisalignedbb1 = entity.getCollisionBox(var15.get(var16));
             if (axisalignedbb1 != null && axisalignedbb1.intersectsWith(aabb)) {
                 this.collidingBBCache.add(axisalignedbb1);
             }
@@ -1062,11 +1071,11 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return this.collidingBBCache;
     }
 
-    public List getCollidingBoundingBoxesGlobal(Entity entity, AxisAlignedBB aabb) {
-        List result = this.getCollidingBoundingBoxesLocal(
+    public List<AxisAlignedBB> getCollidingBoundingBoxesGlobal(Entity entity, AxisAlignedBB aabb) {
+        List<AxisAlignedBB> result = this.getCollidingBoundingBoxesLocal(
             entity,
             ((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(this));
-        ListIterator iter = result.listIterator();
+        ListIterator<AxisAlignedBB> iter = result.listIterator();
 
         while (iter.hasNext()) {
             AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next()).getTransformedToGlobalBoundingBox(this);
@@ -1076,7 +1085,8 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return result;
     }
 
-    public List getCollidingBoundingBoxesLocalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement) {
+    public List<AxisAlignedBB> getCollidingBoundingBoxesLocalWithMovement(Entity entity, AxisAlignedBB aabb,
+        Vec3 movement) {
         AxisAlignedBB localBB = ((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(this);
         localBB = AxisAlignedBB
             .getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
@@ -1091,9 +1101,10 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return this.getCollidingBoundingBoxesLocal(entity, localBB);
     }
 
-    public List getCollidingBoundingBoxesGlobalWithMovement(Entity entity, AxisAlignedBB aabb, Vec3 movement) {
-        List result = this.getCollidingBoundingBoxesLocalWithMovement(entity, aabb, movement);
-        ListIterator iter = result.listIterator();
+    public List<AxisAlignedBB> getCollidingBoundingBoxesGlobalWithMovement(Entity entity, AxisAlignedBB aabb,
+        Vec3 movement) {
+        List<AxisAlignedBB> result = this.getCollidingBoundingBoxesLocalWithMovement(entity, aabb, movement);
+        ListIterator<AxisAlignedBB> iter = result.listIterator();
 
         while (iter.hasNext()) {
             AxisAlignedBB replacementBB = ((IMixinAxisAlignedBB) iter.next()).getTransformedToGlobalBoundingBox(this);
