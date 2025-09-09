@@ -6,6 +6,10 @@ public interface IMixinS08PacketPlayerPosLook {
 
     public int getSubWorldBelowFeetID();
 
+    public int getSubWorldBelowFeetType();
+
     public S08PacketPlayerPosLook setSubWorldBelowFeetID(int ID);
+
+    public S08PacketPlayerPosLook setSubWorldBelowFeetType(int type);
 
 }

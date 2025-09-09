@@ -20,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.llamalad7.mixinextras.sugar.Local;
 
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager.SubWorldInfoProvider;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.PacketHandler;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS08PacketPlayerPosLook;
@@ -117,9 +119,9 @@ public abstract class MixinNetHandlerPlayClient {
         World subworld = ((IMixinWorld) entityclientplayermp.worldObj).getSubWorldsMap()
             .get(subWorldID);
         if (subworld == null && subWorldID != 0) {
-            ((IMixinWorld) entityclientplayermp.worldObj).createSubWorld(subWorldID);
-            subworld = ((IMixinWorld) entityclientplayermp.worldObj).getSubWorldsMap()
-                .get(subWorldID);
+            SubWorldInfoProvider provider = SubWorldTypeManager.getSubWorldInfoProvider(
+                SubWorldTypeManager.getTypeByID(((IMixinS08PacketPlayerPosLook) packetIn).getSubWorldBelowFeetType()));
+            subworld = provider.create(entityclientplayermp.worldObj, subWorldID);
         }
         ((IMixinEntity) entityclientplayermp).setWorldBelowFeet(subworld);
 

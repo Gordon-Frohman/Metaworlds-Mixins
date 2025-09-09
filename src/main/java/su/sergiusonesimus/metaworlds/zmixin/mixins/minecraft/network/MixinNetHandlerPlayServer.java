@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import com.llamalad7.mixinextras.sugar.Local;
 
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
@@ -100,7 +101,9 @@ public abstract class MixinNetHandlerPlayServer {
                 yaw,
                 pitch,
                 false,
-                ((IMixinWorld) ((IMixinEntity) this.playerEntity).getWorldBelowFeet()).getSubWorldID()));
+                ((IMixinWorld) ((IMixinEntity) this.playerEntity).getWorldBelowFeet()).getSubWorldID(),
+                SubWorldTypeManager.getTypeID(
+                    ((IMixinWorld) ((IMixinEntity) this.playerEntity).getWorldBelowFeet()).getSubWorldType())));
     }
 
     /**

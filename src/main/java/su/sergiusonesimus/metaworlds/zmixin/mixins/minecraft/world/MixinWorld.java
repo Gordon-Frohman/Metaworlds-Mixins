@@ -203,10 +203,6 @@ public abstract class MixinWorld implements IMixinWorld {
         return maxID;
     }
 
-    public int getSubWorldID() {
-        return 0;
-    }
-
     public World getParentWorld() {
         return (World) (Object) this;
     }

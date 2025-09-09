@@ -71,14 +71,15 @@ public class PacketHandler {
     }
 
     public static S08PacketPlayerPosLook getS08PacketPlayerPosLook(double p_i45164_1_, double p_i45164_3_,
-        double p_i45164_5_, float p_i45164_7_, float p_i45164_8_, boolean p_i45164_9_, int subWorldBelowFeetID) {
-        return ((IMixinS08PacketPlayerPosLook) new S08PacketPlayerPosLook(
+        double p_i45164_5_, float p_i45164_7_, float p_i45164_8_, boolean p_i45164_9_, int subWorldBelowFeetID,
+        int subWorldBelowFeetType) {
+        return ((IMixinS08PacketPlayerPosLook) ((IMixinS08PacketPlayerPosLook) new S08PacketPlayerPosLook(
             p_i45164_1_,
             p_i45164_3_,
             p_i45164_5_,
             p_i45164_7_,
             p_i45164_8_,
-            p_i45164_9_)).setSubWorldBelowFeetID(subWorldBelowFeetID);
+            p_i45164_9_)).setSubWorldBelowFeetID(subWorldBelowFeetID)).setSubWorldBelowFeetType(subWorldBelowFeetType);
     }
 
     public static S14PacketEntity getS14PacketEntity(int p_i45206_1_, int parSubWorldBelowFeetId, byte parTractionLoss,

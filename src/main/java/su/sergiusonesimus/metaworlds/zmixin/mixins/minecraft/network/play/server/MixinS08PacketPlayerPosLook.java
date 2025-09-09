@@ -23,12 +23,23 @@ public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlay
 
     private int subWorldBelowFeetID;
 
+    private int subWorldBelowFeetType;
+
     public int getSubWorldBelowFeetID() {
         return subWorldBelowFeetID;
     }
 
+    public int getSubWorldBelowFeetType() {
+        return subWorldBelowFeetType;
+    }
+
     public S08PacketPlayerPosLook setSubWorldBelowFeetID(int ID) {
         subWorldBelowFeetID = ID;
+        return (S08PacketPlayerPosLook) (Object) this;
+    }
+
+    public S08PacketPlayerPosLook setSubWorldBelowFeetType(int type) {
+        subWorldBelowFeetType = type;
         return (S08PacketPlayerPosLook) (Object) this;
     }
 
@@ -38,6 +49,7 @@ public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlay
     @Inject(method = "readPacketData", at = @At("TAIL"))
     public void readPacketData(PacketBuffer data, CallbackInfo ci) throws IOException {
         this.subWorldBelowFeetID = data.readInt();
+        this.subWorldBelowFeetType = data.readInt();
     }
 
     /**
@@ -46,6 +58,7 @@ public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlay
     @Inject(method = "writePacketData", at = @At("TAIL"))
     public void writePacketData(PacketBuffer data, CallbackInfo ci) throws IOException {
         data.writeInt(this.subWorldBelowFeetID);
+        data.writeInt(this.subWorldBelowFeetType);
     }
 
 }

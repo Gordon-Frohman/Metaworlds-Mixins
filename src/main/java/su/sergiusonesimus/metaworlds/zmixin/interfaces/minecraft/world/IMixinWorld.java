@@ -13,6 +13,8 @@ import net.minecraft.world.chunk.Chunk;
 
 import org.jblas.DoubleMatrix;
 
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
+
 public interface IMixinWorld {
 
     // Creates a new SubWorld
@@ -33,7 +35,13 @@ public interface IMixinWorld {
 
     // The parent worlds always have subWorldID 0. SubWorlds start from ID 1 counting up
     // The ID is the same as the number suffix of the save folders
-    public int getSubWorldID();
+    public default int getSubWorldID() {
+        return 0;
+    }
+
+    public default String getSubWorldType() {
+        return SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT;
+    }
 
     public World getParentWorld();
 
