@@ -750,8 +750,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             }
         }
 
-        MetaMagicNetwork.dispatcher
-            .sendToDimension(new SubWorldUpdatePacket(this, updateFlags), this.provider.dimensionId);
+        MetaMagicNetwork.dispatcher.sendToDimension(getUpdatePacket(this, updateFlags), this.provider.dimensionId);
         if (getIsInMotion()) {
             Iterator<Entry<Entity, Vec3>> i$ = this.entitiesToDrag.entrySet()
                 .iterator();
@@ -829,6 +828,10 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                 }
             }
         }
+    }
+
+    protected SubWorldUpdatePacket getUpdatePacket(SubWorldServer par1SubWorldServer, int updateFlags) {
+        return new SubWorldUpdatePacket(par1SubWorldServer, updateFlags);
     }
 
     public void func_82738_a(long par1) {}

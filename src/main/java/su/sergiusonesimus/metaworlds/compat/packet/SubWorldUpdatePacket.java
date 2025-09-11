@@ -182,9 +182,7 @@ public class SubWorldUpdatePacket implements IMessage {
     public void executeOnTick() {
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
         World targetWorld = ((IMixinWorld) player.worldObj).getSubWorld(this.subWorldId);
-        if (targetWorld == null) {
-            ;
-        }
+        if (targetWorld == null) return;
 
         if (((IMixinWorld) targetWorld).isSubWorld()) {
             SubWorldClient targetSubWorld = (SubWorldClient) targetWorld;
@@ -263,12 +261,9 @@ public class SubWorldUpdatePacket implements IMessage {
             if (!ctx.side.isServer()) {
                 EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
                 World targetWorld = ((IMixinWorld) player.worldObj).getSubWorld(message.subWorldId);
-                if (targetWorld == null) {
-                    return null;
-                }
+                if (targetWorld == null) return null;
 
-                if (((IMixinWorld) targetWorld).isSubWorld()) {
-                    SubWorldClient targetSubWorld = (SubWorldClient) targetWorld;
+                if (targetWorld instanceof SubWorldClient targetSubWorld) {
                     if (targetSubWorld.lastServerTickReceived < message.serverTick
                         && (targetSubWorld.getUpdatePacketToHandle() == null
                             || targetSubWorld.getUpdatePacketToHandle().serverTick <= message.serverTick)) {
