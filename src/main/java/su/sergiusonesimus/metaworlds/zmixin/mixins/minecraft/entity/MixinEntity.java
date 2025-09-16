@@ -965,7 +965,8 @@ public abstract class MixinEntity implements Comparable<Entity>, IMixinEntity {
                 if ((world instanceof SubWorldServer && !((Entity) (Object) this instanceof EntityPlayer))
                     || (world instanceof SubWorldClient && ((Entity) (Object) this instanceof EntityPlayer))) {
                     SubWorld subworld = (SubWorld) world;
-                    if (!subworld.getEntitiesToDrag().containsKey((Entity) (Object) this) && subworld.getIsInMotion()) {
+                    if (!subworld.getEntitiesToDrag()
+                        .containsKey((Entity) (Object) this) && subworld.getIsInMotion()) {
                         AxisAlignedBB worldBB = subworld.getMaximumCloseWorldBBRotated();
                         if (this.boundingBox.intersectsWith(worldBB)) {
                             AxisAlignedBB localEntityBB = ((IMixinAxisAlignedBB) this.boundingBox)

@@ -13,7 +13,9 @@ import net.minecraft.world.chunk.Chunk;
 
 import org.jblas.DoubleMatrix;
 
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
+import su.sergiusonesimus.metaworlds.command.ISubWorldSelector;
 
 public interface IMixinWorld {
 
@@ -184,4 +186,20 @@ public interface IMixinWorld {
     public Map<Integer, World> getSubWorldsMap();
 
     public void doTickPartial(double interpolationFactor);
+
+    /**
+     * Will get all subworlds intersecting the specified AABB excluding the one passed into it. Args: subworldToExclude,
+     * aabb
+     */
+    public List<World> getSubworldsWithinAABBExcludingSubworld(SubWorld subworld, AxisAlignedBB bb);
+
+    public List<World> getSubworldsWithinAABBExcludingSubworld(SubWorld subworld, AxisAlignedBB bb,
+        ISubWorldSelector selector);
+
+    /**
+     * Returns all subworlds of the specified class type which intersect with the AABB. Args: entityClass, aabb
+     */
+    public <T> List<T> getSubworldsWithinAABB(Class<T> subworldClass, AxisAlignedBB bb);
+
+    public <T> List<T> getSubworldsWithinAABB(Class<T> subworldClass, AxisAlignedBB bb, ISubWorldSelector selector);
 }

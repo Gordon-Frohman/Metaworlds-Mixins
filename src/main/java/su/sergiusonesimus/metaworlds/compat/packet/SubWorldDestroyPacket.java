@@ -58,24 +58,21 @@ public class SubWorldDestroyPacket implements IMessage {
                 if (message.subWorldsCount == -1) {
                     while (!((IMixinWorld) player.worldObj).getSubWorldsMap()
                         .isEmpty()) {
-                        SubWorld arr$ = (SubWorld) ((IMixinWorld) player.worldObj).getSubWorlds()
+                        SubWorld subworld = (SubWorld) ((IMixinWorld) player.worldObj).getSubWorlds()
                             .iterator()
                             .next();
-                        arr$.removeSubWorld();
+                        subworld.removeSubWorld();
                         ((IMixinEntity) player).getPlayerProxyMap()
-                            .remove(Integer.valueOf(arr$.getSubWorldID()));
+                            .remove(Integer.valueOf(subworld.getSubWorldID()));
                     }
                 } else {
-                    Integer[] var10 = message.subWorldIDs;
-                    int len$ = var10.length;
-
-                    for (int i$ = 0; i$ < len$; ++i$) {
-                        Integer curSubWorldID = var10[i$];
-                        SubWorld curSubWorld = (SubWorld) ((IMixinWorld) player.worldObj)
-                            .getSubWorld(curSubWorldID.intValue());
-                        curSubWorld.removeSubWorld();
+                    Integer[] subworldIDs = message.subWorldIDs;
+                    for (int i$ = 0; i$ < subworldIDs.length; ++i$) {
+                        Integer curSubWorldID = subworldIDs[i$];
+                        SubWorld curSubWorld = (SubWorld) ((IMixinWorld) player.worldObj).getSubWorld(curSubWorldID);
+                        if (curSubWorld != null) curSubWorld.removeSubWorld();
                         ((IMixinEntity) player).getPlayerProxyMap()
-                            .remove(Integer.valueOf(curSubWorld.getSubWorldID()));
+                            .remove(curSubWorldID);
                     }
                 }
             }

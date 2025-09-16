@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.command.ISubWorldSelector;
 import su.sergiusonesimus.metaworlds.util.UnmodifiableSingleObjPlusCollection;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.server.IMixinMinecraftServer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -502,5 +503,49 @@ public abstract class MixinWorld implements IMixinWorld {
             }
             ci.cancel();
         }
+    }
+
+    @Override
+    public List<World> getSubworldsWithinAABBExcludingSubworld(SubWorld subworld, AxisAlignedBB bb) {
+        return getSubworldsWithinAABBExcludingSubworld(subworld, bb, null);
+    }
+
+    @Override
+    public List<World> getSubworldsWithinAABBExcludingSubworld(SubWorld subworld, AxisAlignedBB bb,
+        ISubWorldSelector selector) {
+        ArrayList<World> result = new ArrayList<World>();
+
+        for (World currentSubworld : getSubWorlds()) {
+            if (currentSubworld == subworld) continue;
+            if (selector == null || selector.isSubWorldApplicable(currentSubworld)) {
+                if (((SubWorld) currentSubworld).getMaximumStretchedWorldBB(false, false)
+                    .intersectsWith(bb)) result.add(currentSubworld);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public <T> List<T> getSubworldsWithinAABB(Class<T> subworldClass, AxisAlignedBB bb) {
+        return getSubworldsWithinAABB(subworldClass, bb, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> List<T> getSubworldsWithinAABB(Class<T> subworldClass, AxisAlignedBB bb, ISubWorldSelector selector) {
+        if (subworldClass == null) return null;
+        ArrayList<T> result = new ArrayList<T>();
+
+        for (World currentSubworld : getSubWorlds()) {
+            if (subworldClass.isInstance(currentSubworld)) {
+                if (selector == null || selector.isSubWorldApplicable(currentSubworld)) {
+                    if (((SubWorld) currentSubworld).getMaximumStretchedWorldBB(false, false)
+                        .intersectsWith(bb)) result.add((T) currentSubworld);
+                }
+            }
+        }
+
+        return result;
     }
 }
