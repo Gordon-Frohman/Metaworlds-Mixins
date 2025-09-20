@@ -12,7 +12,7 @@ public enum Direction {
     DOWN(0, 1, -1, "down", Direction.AxisDirection.NEGATIVE, Direction.Axis.Y, new ChunkCoordinates(0, -1, 0)),
     UP(1, 0, -1, "up", Direction.AxisDirection.POSITIVE, Direction.Axis.Y, new ChunkCoordinates(0, 1, 0)),
     NORTH(2, 3, 2, "north", Direction.AxisDirection.NEGATIVE, Direction.Axis.Z, new ChunkCoordinates(0, 0, -1)),
-    SOUTH(3, 2, 0, "south", Direction.AxisDirection.POSITIVE, Direction.Axis.Z, new ChunkCoordinates(0, 0, 1)),
+    SOUTH(3, 2, 3, "south", Direction.AxisDirection.POSITIVE, Direction.Axis.Z, new ChunkCoordinates(0, 0, 1)),
     WEST(4, 5, 1, "west", Direction.AxisDirection.NEGATIVE, Direction.Axis.X, new ChunkCoordinates(-1, 0, 0)),
     EAST(5, 4, 0, "east", Direction.AxisDirection.POSITIVE, Direction.Axis.X, new ChunkCoordinates(1, 0, 0));
 
