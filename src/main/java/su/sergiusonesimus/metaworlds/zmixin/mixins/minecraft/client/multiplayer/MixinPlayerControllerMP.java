@@ -226,6 +226,16 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
         return (WorldClient) ((IMixinWorld) instance.theWorld).getSubWorld(this.currentBlockSubWorldID);
     }
 
+    @WrapOperation(
+        method = "resetBlockRemoving",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/multiplayer/WorldClient;destroyBlockInWorldPartially(IIIII)V"))
+    private void destroyBlockInWorldPartially(WorldClient instance, int p_147443_1_, int x, int y, int z,
+        int blockDamage, Operation<Void> original) {
+        if (instance != null) original.call(instance, p_147443_1_, x, y, z, blockDamage);
+    }
+
     /**
      * Called when a player damages a block and updates damage counters
      */
