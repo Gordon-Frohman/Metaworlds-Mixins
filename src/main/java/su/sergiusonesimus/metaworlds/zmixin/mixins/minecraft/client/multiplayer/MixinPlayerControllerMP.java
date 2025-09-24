@@ -11,6 +11,7 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Vec3;
@@ -25,6 +26,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.compat.CompatUtil;
@@ -191,24 +194,35 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
 
     // Class constructor
 
-    @Redirect(
+    @WrapOperation(
         method = "resetBlockRemoving",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
             opcode = Opcodes.GETFIELD))
-    private NetHandlerPlayClient getNetClientHandlerInit(PlayerControllerMP instance) {
-        return ((EntityClientPlayerMP) ((IMixinEntity) (Object) this.mc.thePlayer)
-            .getProxyPlayer(this.currentBlockSubWorldID)).sendQueue;
+    private NetHandlerPlayClient getNetClientHandlerInit(PlayerControllerMP instance,
+        Operation<NetHandlerPlayClient> original) {
+        EntityClientPlayerMP proxy = ((EntityClientPlayerMP) ((IMixinEntity) (Object) this.mc.thePlayer)
+            .getProxyPlayer(this.currentBlockSubWorldID));
+        return proxy == null ? null : proxy.sendQueue;
     }
 
-    @Redirect(
+    @WrapOperation(
+        method = "resetBlockRemoving",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/network/NetHandlerPlayClient;addToSendQueue(Lnet/minecraft/network/Packet;)V"))
+    private void addToSendQueue(NetHandlerPlayClient instance, Packet packet, Operation<Void> original) {
+        if (instance != null) original.call(instance, packet);
+    }
+
+    @WrapOperation(
         method = "resetBlockRemoving",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/client/Minecraft;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;",
             opcode = Opcodes.GETFIELD))
-    private WorldClient getTheWorld(Minecraft instance) {
+    private WorldClient getTheWorld(Minecraft instance, Operation<WorldClient> original) {
         return (WorldClient) ((IMixinWorld) instance.theWorld).getSubWorld(this.currentBlockSubWorldID);
     }
 
