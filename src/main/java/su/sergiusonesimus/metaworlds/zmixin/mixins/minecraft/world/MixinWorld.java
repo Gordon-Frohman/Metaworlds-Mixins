@@ -26,7 +26,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 
-import org.jblas.DoubleMatrix;
+import org.ejml.simple.SimpleMatrix;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -270,12 +270,12 @@ public abstract class MixinWorld implements IMixinWorld {
         return Vec3.createVectorHelper(localX, localY, localZ);
     }
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors) {
-        return localVectors.dup();
+    public SimpleMatrix transformToGlobal(SimpleMatrix localVectors) {
+        return localVectors.copy();
     }
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors, DoubleMatrix result) {
-        result.copy(localVectors);
+    public SimpleMatrix transformToGlobal(SimpleMatrix localVectors, SimpleMatrix result) {
+        result.setTo(localVectors);
         return result;
     }
 
@@ -291,12 +291,12 @@ public abstract class MixinWorld implements IMixinWorld {
         return Vec3.createVectorHelper(globalX, globalY, globalZ);
     }
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors) {
-        return globalVectors.dup();
+    public SimpleMatrix transformToLocal(SimpleMatrix globalVectors) {
+        return globalVectors.copy();
     }
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors, DoubleMatrix result) {
-        result.copy(globalVectors);
+    public SimpleMatrix transformToLocal(SimpleMatrix globalVectors, SimpleMatrix result) {
+        result.setTo(globalVectors);
         return result;
     }
 
@@ -314,13 +314,17 @@ public abstract class MixinWorld implements IMixinWorld {
             : ((IMixinWorld) targetWorld).transformToLocal(localX, localY, localZ);
     }
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors) {
-        return targetWorld == null ? localVectors.dup() : ((IMixinWorld) targetWorld).transformToLocal(localVectors);
+    public SimpleMatrix transformLocalToOther(World targetWorld, SimpleMatrix localVectors) {
+        return targetWorld == null ? localVectors.copy() : ((IMixinWorld) targetWorld).transformToLocal(localVectors);
     }
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors, DoubleMatrix result) {
-        return targetWorld == null ? result.copy(localVectors)
-            : ((IMixinWorld) targetWorld).transformToLocal(localVectors, result);
+    public SimpleMatrix transformLocalToOther(World targetWorld, SimpleMatrix localVectors, SimpleMatrix result) {
+        if (targetWorld == null) {
+            result.setTo(localVectors);
+            return result;
+        } else {
+            return ((IMixinWorld) targetWorld).transformToLocal(localVectors, result);
+        }
     }
 
     public Vec3 transformOtherToLocal(World sourceWorld, Entity otherEntity) {
@@ -337,13 +341,17 @@ public abstract class MixinWorld implements IMixinWorld {
             : ((IMixinWorld) sourceWorld).transformToGlobal(otherX, otherY, otherZ);
     }
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors) {
-        return sourceWorld == null ? otherVectors.dup() : ((IMixinWorld) sourceWorld).transformToGlobal(otherVectors);
+    public SimpleMatrix transformOtherToLocal(World sourceWorld, SimpleMatrix otherVectors) {
+        return sourceWorld == null ? otherVectors.copy() : ((IMixinWorld) sourceWorld).transformToGlobal(otherVectors);
     }
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors, DoubleMatrix result) {
-        return sourceWorld == null ? result.copy(otherVectors)
-            : ((IMixinWorld) sourceWorld).transformToGlobal(otherVectors, result);
+    public SimpleMatrix transformOtherToLocal(World sourceWorld, SimpleMatrix otherVectors, SimpleMatrix result) {
+        if (sourceWorld == null) {
+            result.setTo(otherVectors);
+            return result;
+        } else {
+            return ((IMixinWorld) sourceWorld).transformToGlobal(otherVectors, result);
+        }
     }
 
     public Vec3 rotateToGlobal(Vec3 localVec) {
@@ -354,7 +362,7 @@ public abstract class MixinWorld implements IMixinWorld {
         return Vec3.createVectorHelper(localX, localY, localZ);
     }
 
-    public DoubleMatrix rotateToGlobal(DoubleMatrix localVectors) {
+    public SimpleMatrix rotateToGlobal(SimpleMatrix localVectors) {
         return localVectors;
     }
 
@@ -366,7 +374,7 @@ public abstract class MixinWorld implements IMixinWorld {
         return Vec3.createVectorHelper(globalX, globalY, globalZ);
     }
 
-    public DoubleMatrix rotateToLocal(DoubleMatrix globalVectors) {
+    public SimpleMatrix rotateToLocal(SimpleMatrix globalVectors) {
         return globalVectors;
     }
 

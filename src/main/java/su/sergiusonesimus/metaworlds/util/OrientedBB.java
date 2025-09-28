@@ -12,14 +12,14 @@ import org.apache.commons.math3.geometry.euclidean.threed.Plane;
 import org.apache.commons.math3.geometry.euclidean.threed.Segment;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.jblas.DoubleMatrix;
+import org.ejml.simple.SimpleMatrix;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class OrientedBB extends AxisAlignedBB {
 
-    public DoubleMatrix vertices = new DoubleMatrix(4, 8);
+    public SimpleMatrix vertices = new SimpleMatrix(4, 8);
     public Vec3 dimensions = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
     public World lastTransformedBy = null;
 
@@ -34,21 +34,18 @@ public class OrientedBB extends AxisAlignedBB {
         return this;
     }
 
-    public AxisAlignedBB copy() {
+    public AxisAlignedBB setTo() {
         OrientedBB newOBB = OBBPool.createOBB(this);
-        newOBB.vertices.copy(this.vertices);
+        newOBB.vertices.setTo(this.vertices);
         newOBB.dimensions.setComponents(this.dimensions.xCoord, this.dimensions.yCoord, this.dimensions.zCoord);
         return newOBB;
     }
 
     public void setBB(AxisAlignedBB par1AxisAlignedBB) {
         super.setBB(par1AxisAlignedBB);
-        if (par1AxisAlignedBB instanceof OrientedBB) {
-            this.vertices.copy(((OrientedBB) par1AxisAlignedBB).vertices);
-            this.dimensions.setComponents(
-                ((OrientedBB) par1AxisAlignedBB).dimensions.xCoord,
-                ((OrientedBB) par1AxisAlignedBB).dimensions.yCoord,
-                ((OrientedBB) par1AxisAlignedBB).dimensions.zCoord);
+        if (par1AxisAlignedBB instanceof OrientedBB obb) {
+            this.vertices.setTo(obb.vertices);
+            this.dimensions.setComponents(obb.dimensions.xCoord, obb.dimensions.yCoord, obb.dimensions.zCoord);
         } else {
             this.setVerticesAndDimensions(par1AxisAlignedBB);
         }
@@ -72,8 +69,8 @@ public class OrientedBB extends AxisAlignedBB {
                 double rotatedX = translatedX * cosYaw - translatedZ * sinYaw;
                 double rotatedZ = translatedX * sinYaw + translatedZ * cosYaw;
 
-                vertices.data[i * 4] = centerX + rotatedX;
-                vertices.data[i * 4 + 2] = centerZ + rotatedZ;
+                vertices.set(0, i, centerX + rotatedX);
+                vertices.set(2, i, centerZ + rotatedZ);
             }
 
             recalcAABB();
@@ -113,15 +110,15 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public double getX(int index) {
-        return this.vertices.data[index * 4];
+        return this.vertices.get(0, index);
     }
 
     public double getY(int index) {
-        return this.vertices.data[index * 4 + 1];
+        return this.vertices.get(1, index);
     }
 
     public double getZ(int index) {
-        return this.vertices.data[index * 4 + 2];
+        return this.vertices.get(2, index);
     }
 
     public void fromAABB(AxisAlignedBB sourceBB) {
@@ -135,67 +132,70 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public void setVerticesAndDimensions(AxisAlignedBB sourceBB) {
-        this.vertices.data[0] = sourceBB.minX;
-        this.vertices.data[1] = sourceBB.minY;
-        this.vertices.data[2] = sourceBB.minZ;
-        this.vertices.data[3] = 1.0D;
-        this.vertices.data[4] = sourceBB.minX;
-        this.vertices.data[5] = sourceBB.minY;
-        this.vertices.data[6] = sourceBB.maxZ;
-        this.vertices.data[7] = 1.0D;
-        this.vertices.data[8] = sourceBB.maxX;
-        this.vertices.data[9] = sourceBB.minY;
-        this.vertices.data[10] = sourceBB.minZ;
-        this.vertices.data[11] = 1.0D;
-        this.vertices.data[12] = sourceBB.maxX;
-        this.vertices.data[13] = sourceBB.minY;
-        this.vertices.data[14] = sourceBB.maxZ;
-        this.vertices.data[15] = 1.0D;
-        this.vertices.data[16] = sourceBB.minX;
-        this.vertices.data[17] = sourceBB.maxY;
-        this.vertices.data[18] = sourceBB.minZ;
-        this.vertices.data[19] = 1.0D;
-        this.vertices.data[20] = sourceBB.minX;
-        this.vertices.data[21] = sourceBB.maxY;
-        this.vertices.data[22] = sourceBB.maxZ;
-        this.vertices.data[23] = 1.0D;
-        this.vertices.data[24] = sourceBB.maxX;
-        this.vertices.data[25] = sourceBB.maxY;
-        this.vertices.data[26] = sourceBB.minZ;
-        this.vertices.data[27] = 1.0D;
-        this.vertices.data[28] = sourceBB.maxX;
-        this.vertices.data[29] = sourceBB.maxY;
-        this.vertices.data[30] = sourceBB.maxZ;
-        this.vertices.data[31] = 1.0D;
+        this.vertices.set(0, 0, sourceBB.minX);
+        this.vertices.set(0, 1, sourceBB.minX);
+        this.vertices.set(0, 2, sourceBB.maxX);
+        this.vertices.set(0, 3, sourceBB.maxX);
+        this.vertices.set(0, 4, sourceBB.minX);
+        this.vertices.set(0, 5, sourceBB.minX);
+        this.vertices.set(0, 6, sourceBB.maxX);
+        this.vertices.set(0, 7, sourceBB.maxX);
+
+        this.vertices.set(1, 0, sourceBB.minY);
+        this.vertices.set(1, 1, sourceBB.minY);
+        this.vertices.set(1, 2, sourceBB.minY);
+        this.vertices.set(1, 3, sourceBB.minY);
+        this.vertices.set(1, 4, sourceBB.maxY);
+        this.vertices.set(1, 5, sourceBB.maxY);
+        this.vertices.set(1, 6, sourceBB.maxY);
+        this.vertices.set(1, 7, sourceBB.maxY);
+
+        this.vertices.set(2, 0, sourceBB.minZ);
+        this.vertices.set(2, 1, sourceBB.maxZ);
+        this.vertices.set(2, 2, sourceBB.minZ);
+        this.vertices.set(2, 3, sourceBB.maxZ);
+        this.vertices.set(2, 4, sourceBB.minZ);
+        this.vertices.set(2, 5, sourceBB.maxZ);
+        this.vertices.set(2, 6, sourceBB.minZ);
+        this.vertices.set(2, 7, sourceBB.maxZ);
+
+        for (int i = 0; i < 8; i++) {
+            this.vertices.set(3, i, 1.0D);
+        }
+
         this.dimensions
             .setComponents(sourceBB.maxX - sourceBB.minX, sourceBB.maxY - sourceBB.minY, sourceBB.maxZ - sourceBB.minZ);
     }
 
     public void recalcAABB() {
-        this.minX = this.vertices.data[0];
-        this.minY = this.vertices.data[1];
-        this.minZ = this.vertices.data[2];
-        this.maxX = this.vertices.data[0];
-        this.maxY = this.vertices.data[1];
-        this.maxZ = this.vertices.data[2];
+        this.minX = this.vertices.get(0, 0);
+        this.minY = this.vertices.get(1, 0);
+        this.minZ = this.vertices.get(2, 0);
+        this.maxX = this.vertices.get(0, 0);
+        this.maxY = this.vertices.get(1, 0);
+        this.maxZ = this.vertices.get(2, 0);
 
-        for (int i = 4; i < 32; i += 4) {
-            if (this.vertices.data[i] < this.minX) {
-                this.minX = this.vertices.data[i];
-            } else if (this.vertices.data[i] > this.maxX) {
-                this.maxX = this.vertices.data[i];
+        for (int i = 1; i < 8; i++) {
+            double x = this.vertices.get(0, i);
+            double y = this.vertices.get(1, i);
+            double z = this.vertices.get(2, i);
+
+            if (x < this.minX) {
+                this.minX = x;
+            } else if (x > this.maxX) {
+                this.maxX = x;
             }
 
-            if (this.vertices.data[i + 1] < this.minY) {
-                this.minY = this.vertices.data[i + 1];
-            } else if (this.vertices.data[i + 1] > this.maxY) {
-                this.maxY = this.vertices.data[i + 1];
+            if (y < this.minY) {
+                this.minY = y;
+            } else if (y > this.maxY) {
+                this.maxY = y;
             }
 
-            if (this.vertices.data[i + 2] < this.minZ) {
-                this.minZ = this.vertices.data[i + 2];
-            } else if (this.vertices.data[i + 2] > this.maxZ) {
-                this.maxZ = this.vertices.data[i + 2];
+            if (z < this.minZ) {
+                this.minZ = z;
+            } else if (z > this.maxZ) {
+                this.maxZ = z;
             }
         }
     }
@@ -222,13 +222,13 @@ public class OrientedBB extends AxisAlignedBB {
         return this;
     }
 
-    public OrientedBB offsetLocal(double par1, double par3, double par5) {
-        super.offset(par1, par3, par5);
+    public OrientedBB offsetLocal(double x, double y, double z) {
+        super.offset(x, y, z);
 
         for (int i = 0; i < 8; ++i) {
-            this.vertices.data[i * 4] += par1;
-            this.vertices.data[i * 4 + 1] += par3;
-            this.vertices.data[i * 4 + 2] += par5;
+            this.vertices.set(0, i, this.vertices.get(0, i) + x);
+            this.vertices.set(1, i, this.vertices.get(1, i) + y);
+            this.vertices.set(2, i, this.vertices.get(2, i) + z);
         }
 
         return this;

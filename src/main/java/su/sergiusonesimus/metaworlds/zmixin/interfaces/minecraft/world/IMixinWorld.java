@@ -11,7 +11,7 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-import org.jblas.DoubleMatrix;
+import org.ejml.simple.SimpleMatrix;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
@@ -104,9 +104,9 @@ public interface IMixinWorld {
 
     public Vec3 transformToGlobal(double localX, double localY, double localZ);
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors);
+    public SimpleMatrix transformToGlobal(SimpleMatrix localVectors);
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors, DoubleMatrix result);// In-Place operation for
+    public SimpleMatrix transformToGlobal(SimpleMatrix localVectors, SimpleMatrix result);// In-Place operation for
                                                                                           // smaller memory footprint
 
     public Vec3 transformToLocal(Entity globalEntity);
@@ -115,9 +115,9 @@ public interface IMixinWorld {
 
     public Vec3 transformToLocal(double globalX, double globalY, double globalZ);
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors);
+    public SimpleMatrix transformToLocal(SimpleMatrix globalVectors);
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors, DoubleMatrix result);// In-Place operation for
+    public SimpleMatrix transformToLocal(SimpleMatrix globalVectors, SimpleMatrix result);// In-Place operation for
                                                                                           // smaller memory footprint
 
     // Transform from this world's coordinates to another world's coordinates
@@ -127,9 +127,9 @@ public interface IMixinWorld {
 
     public Vec3 transformLocalToOther(World targetWorld, double localX, double localY, double localZ);
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors);
+    public SimpleMatrix transformLocalToOther(World targetWorld, SimpleMatrix localVectors);
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors, DoubleMatrix result);// In-Place
+    public SimpleMatrix transformLocalToOther(World targetWorld, SimpleMatrix localVectors, SimpleMatrix result);// In-Place
                                                                                                                  // operation
                                                                                                                  // for
                                                                                                                  // smaller
@@ -143,9 +143,9 @@ public interface IMixinWorld {
 
     public Vec3 transformOtherToLocal(World sourceWorld, double otherX, double otherY, double otherZ);
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors);
+    public SimpleMatrix transformOtherToLocal(World sourceWorld, SimpleMatrix otherVectors);
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors, DoubleMatrix result);// In-Place
+    public SimpleMatrix transformOtherToLocal(World sourceWorld, SimpleMatrix otherVectors, SimpleMatrix result);// In-Place
                                                                                                                  // operation
                                                                                                                  // for
                                                                                                                  // smaller
@@ -156,13 +156,13 @@ public interface IMixinWorld {
 
     public Vec3 rotateToGlobal(double localX, double localY, double localZ);
 
-    public DoubleMatrix rotateToGlobal(DoubleMatrix localVectors);
+    public SimpleMatrix rotateToGlobal(SimpleMatrix localVectors);
 
     public Vec3 rotateToLocal(Vec3 globalVec);
 
     public Vec3 rotateToLocal(double globalX, double globalY, double globalZ);
 
-    public DoubleMatrix rotateToLocal(DoubleMatrix globalVectors);
+    public SimpleMatrix rotateToLocal(SimpleMatrix globalVectors);
 
     // Retrieve list of bounding boxes from this world (does not include those from its child subworlds) colliding with
     // par2AxisAlignedBB

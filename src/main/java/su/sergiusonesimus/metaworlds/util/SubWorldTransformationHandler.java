@@ -5,7 +5,7 @@ import java.nio.DoubleBuffer;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import org.jblas.DoubleMatrix;
+import org.ejml.simple.SimpleMatrix;
 import org.lwjgl.BufferUtils;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -36,24 +36,24 @@ public class SubWorldTransformationHandler {
     private double rotationRollFrequency;
     private double scaling = 1.0D;
     private double scaleChangeRate;
-    DoubleMatrix matrixTranslation = DoubleMatrix.eye(4);
-    DoubleMatrix matrixTranslationInverse = DoubleMatrix.eye(4);
-    DoubleMatrix matrixCenterTranslation = DoubleMatrix.eye(4);
-    DoubleMatrix matrixCenterTranslationInverse = DoubleMatrix.eye(4);
+    SimpleMatrix matrixTranslation = SimpleMatrix.identity(4);
+    SimpleMatrix matrixTranslationInverse = SimpleMatrix.identity(4);
+    SimpleMatrix matrixCenterTranslation = SimpleMatrix.identity(4);
+    SimpleMatrix matrixCenterTranslationInverse = SimpleMatrix.identity(4);
     boolean needRotationRecalc = false;
-    DoubleMatrix matrixRotationYaw = DoubleMatrix.eye(4);
-    DoubleMatrix matrixRotationYawInverse = DoubleMatrix.eye(4);
-    DoubleMatrix matrixRotationPitch = DoubleMatrix.eye(4);
-    DoubleMatrix matrixRotationPitchInverse = DoubleMatrix.eye(4);
-    DoubleMatrix matrixRotationRoll = DoubleMatrix.eye(4);
-    DoubleMatrix matrixRotationRollInverse = DoubleMatrix.eye(4);
-    DoubleMatrix matrixRotation = DoubleMatrix.eye(4);
-    DoubleMatrix matrixRotationInverse = DoubleMatrix.eye(4);
-    DoubleMatrix matrixScaling = DoubleMatrix.eye(4);
-    DoubleMatrix matrixScalingInverse = DoubleMatrix.eye(4);
+    SimpleMatrix matrixRotationYaw = SimpleMatrix.identity(4);
+    SimpleMatrix matrixRotationYawInverse = SimpleMatrix.identity(4);
+    SimpleMatrix matrixRotationPitch = SimpleMatrix.identity(4);
+    SimpleMatrix matrixRotationPitchInverse = SimpleMatrix.identity(4);
+    SimpleMatrix matrixRotationRoll = SimpleMatrix.identity(4);
+    SimpleMatrix matrixRotationRollInverse = SimpleMatrix.identity(4);
+    SimpleMatrix matrixRotation = SimpleMatrix.identity(4);
+    SimpleMatrix matrixRotationInverse = SimpleMatrix.identity(4);
+    SimpleMatrix matrixScaling = SimpleMatrix.identity(4);
+    SimpleMatrix matrixScalingInverse = SimpleMatrix.identity(4);
     boolean needTransformationRecalc = false;
-    DoubleMatrix matrixTransformToLocal = DoubleMatrix.eye(4);
-    DoubleMatrix matrixTransformToGlobal = DoubleMatrix.eye(4);
+    SimpleMatrix matrixTransformToLocal = SimpleMatrix.identity(4);
+    SimpleMatrix matrixTransformToGlobal = SimpleMatrix.identity(4);
 
     public SubWorldTransformationHandler(World thisHolderWorld) {
         this.holderWorld = thisHolderWorld;
@@ -132,12 +132,12 @@ public class SubWorldTransformationHandler {
             this.translationX = newX;
             this.translationY = newY;
             this.translationZ = newZ;
-            this.matrixTranslation.data[12] = newX;
-            this.matrixTranslation.data[13] = newY;
-            this.matrixTranslation.data[14] = newZ;
-            this.matrixTranslationInverse.data[12] = -newX;
-            this.matrixTranslationInverse.data[13] = -newY;
-            this.matrixTranslationInverse.data[14] = -newZ;
+            this.matrixTranslation.set(0, 3, newX);
+            this.matrixTranslation.set(1, 3, newY);
+            this.matrixTranslation.set(2, 3, newZ);
+            this.matrixTranslationInverse.set(0, 3, -newX);
+            this.matrixTranslationInverse.set(1, 3, -newY);
+            this.matrixTranslationInverse.set(2, 3, -newZ);
             this.needTransformationRecalc = true;
         }
     }
@@ -152,12 +152,12 @@ public class SubWorldTransformationHandler {
             this.centerX = newX;
             this.centerY = newY;
             this.centerZ = newZ;
-            this.matrixCenterTranslation.data[12] = -newX;
-            this.matrixCenterTranslation.data[13] = -newY;
-            this.matrixCenterTranslation.data[14] = -newZ;
-            this.matrixCenterTranslationInverse.data[12] = newX;
-            this.matrixCenterTranslationInverse.data[13] = newY;
-            this.matrixCenterTranslationInverse.data[14] = newZ;
+            this.matrixCenterTranslation.set(0, 3, -newX);
+            this.matrixCenterTranslation.set(1, 3, -newY);
+            this.matrixCenterTranslation.set(2, 3, -newZ);
+            this.matrixCenterTranslationInverse.set(0, 3, newX);
+            this.matrixCenterTranslationInverse.set(1, 3, newY);
+            this.matrixCenterTranslationInverse.set(2, 3, newZ);
             this.needTransformationRecalc = true;
             Vec3 newGlobalPos = this.transformToGlobal(0.0D, 0.0D, 0.0D);
             this.setTranslation(
@@ -172,12 +172,12 @@ public class SubWorldTransformationHandler {
             this.centerX = newX;
             this.centerY = newY;
             this.centerZ = newZ;
-            this.matrixCenterTranslation.data[12] = -newX;
-            this.matrixCenterTranslation.data[13] = -newY;
-            this.matrixCenterTranslation.data[14] = -newZ;
-            this.matrixCenterTranslationInverse.data[12] = newX;
-            this.matrixCenterTranslationInverse.data[13] = newY;
-            this.matrixCenterTranslationInverse.data[14] = newZ;
+            this.matrixCenterTranslation.set(0, 3, -newX);
+            this.matrixCenterTranslation.set(1, 3, -newY);
+            this.matrixCenterTranslation.set(2, 3, -newZ);
+            this.matrixCenterTranslationInverse.set(0, 3, newX);
+            this.matrixCenterTranslationInverse.set(1, 3, newY);
+            this.matrixCenterTranslationInverse.set(2, 3, newZ);
             this.needTransformationRecalc = true;
         }
     }
@@ -187,14 +187,14 @@ public class SubWorldTransformationHandler {
             this.rotationYaw = newYaw;
             this.cosRotationYaw = Math.cos(newYaw * Math.PI / 180.0D);
             this.sinRotationYaw = Math.sin(newYaw * Math.PI / 180.0D);
-            this.matrixRotationYaw.data[0] = this.cosRotationYaw;
-            this.matrixRotationYaw.data[8] = this.sinRotationYaw;
-            this.matrixRotationYaw.data[2] = -this.sinRotationYaw;
-            this.matrixRotationYaw.data[10] = this.cosRotationYaw;
-            this.matrixRotationYawInverse.data[0] = this.cosRotationYaw;
-            this.matrixRotationYawInverse.data[8] = -this.sinRotationYaw;
-            this.matrixRotationYawInverse.data[2] = this.sinRotationYaw;
-            this.matrixRotationYawInverse.data[10] = this.cosRotationYaw;
+            this.matrixRotationYaw.set(0, 0, this.cosRotationYaw);
+            this.matrixRotationYaw.set(2, 2, this.cosRotationYaw);
+            this.matrixRotationYaw.set(0, 2, -this.sinRotationYaw);
+            this.matrixRotationYaw.set(2, 0, this.sinRotationYaw);
+            this.matrixRotationYawInverse.set(0, 0, this.cosRotationYaw);
+            this.matrixRotationYawInverse.set(2, 2, this.cosRotationYaw);
+            this.matrixRotationYawInverse.set(0, 2, this.sinRotationYaw);
+            this.matrixRotationYawInverse.set(2, 0, -this.sinRotationYaw);
             this.needRotationRecalc = true;
             this.needTransformationRecalc = true;
         }
@@ -205,14 +205,14 @@ public class SubWorldTransformationHandler {
             this.rotationPitch = newPitch;
             this.cosRotationPitch = Math.cos(newPitch * Math.PI / 180.0D);
             this.sinRotationPitch = Math.sin(newPitch * Math.PI / 180.0D);
-            this.matrixRotationPitch.data[0] = this.cosRotationPitch;
-            this.matrixRotationPitch.data[1] = this.sinRotationPitch;
-            this.matrixRotationPitch.data[4] = -this.sinRotationPitch;
-            this.matrixRotationPitch.data[5] = this.cosRotationPitch;
-            this.matrixRotationPitchInverse.data[0] = this.cosRotationPitch;
-            this.matrixRotationPitchInverse.data[1] = -this.sinRotationPitch;
-            this.matrixRotationPitchInverse.data[4] = this.sinRotationPitch;
-            this.matrixRotationPitchInverse.data[5] = this.cosRotationPitch;
+            this.matrixRotationPitch.set(0, 0, this.cosRotationPitch);
+            this.matrixRotationPitch.set(1, 1, this.cosRotationPitch);
+            this.matrixRotationPitch.set(0, 1, this.sinRotationPitch);
+            this.matrixRotationPitch.set(1, 0, -this.sinRotationPitch);
+            this.matrixRotationPitchInverse.set(0, 0, this.cosRotationPitch);
+            this.matrixRotationPitchInverse.set(1, 1, this.cosRotationPitch);
+            this.matrixRotationPitchInverse.set(0, 1, -this.sinRotationPitch);
+            this.matrixRotationPitchInverse.set(1, 0, this.sinRotationPitch);
             this.needRotationRecalc = true;
             this.needTransformationRecalc = true;
         }
@@ -223,14 +223,14 @@ public class SubWorldTransformationHandler {
             this.rotationRoll = newRoll;
             this.cosRotationRoll = Math.cos(newRoll * Math.PI / 180.0D);
             this.sinRotationRoll = Math.sin(newRoll * Math.PI / 180.0D);
-            this.matrixRotationRoll.data[5] = this.cosRotationRoll;
-            this.matrixRotationRoll.data[6] = this.sinRotationRoll;
-            this.matrixRotationRoll.data[9] = -this.sinRotationRoll;
-            this.matrixRotationRoll.data[10] = this.cosRotationRoll;
-            this.matrixRotationRollInverse.data[5] = this.cosRotationRoll;
-            this.matrixRotationRollInverse.data[6] = -this.sinRotationRoll;
-            this.matrixRotationRollInverse.data[9] = this.sinRotationRoll;
-            this.matrixRotationRollInverse.data[10] = this.cosRotationRoll;
+            this.matrixRotationRoll.set(1, 1, this.cosRotationRoll);
+            this.matrixRotationRoll.set(2, 2, this.cosRotationRoll);
+            this.matrixRotationRoll.set(1, 2, this.sinRotationRoll);
+            this.matrixRotationRoll.set(2, 1, -this.sinRotationRoll);
+            this.matrixRotationRollInverse.set(1, 1, this.cosRotationRoll);
+            this.matrixRotationRollInverse.set(2, 2, this.cosRotationRoll);
+            this.matrixRotationRollInverse.set(1, 2, -this.sinRotationRoll);
+            this.matrixRotationRollInverse.set(2, 1, this.sinRotationRoll);
             this.needRotationRecalc = true;
             this.needTransformationRecalc = true;
         }
@@ -243,21 +243,21 @@ public class SubWorldTransformationHandler {
 
         if (this.scaling != newScaling) {
             this.scaling = newScaling;
-            this.matrixScaling.data[0] = this.scaling;
-            this.matrixScaling.data[5] = this.scaling;
-            this.matrixScaling.data[10] = this.scaling;
-            this.matrixScalingInverse.data[0] = 1.0D / this.scaling;
-            this.matrixScalingInverse.data[5] = 1.0D / this.scaling;
-            this.matrixScalingInverse.data[10] = 1.0D / this.scaling;
+            this.matrixScaling.set(0, 0, this.scaling);
+            this.matrixScaling.set(1, 1, this.scaling);
+            this.matrixScaling.set(2, 2, this.scaling);
+            this.matrixScalingInverse.set(0, 0, 1.0D / this.scaling);
+            this.matrixScalingInverse.set(1, 1, 1.0D / this.scaling);
+            this.matrixScalingInverse.set(2, 2, 1.0D / this.scaling);
             this.needTransformationRecalc = true;
         }
     }
 
     public void recalcRotationMatrix() {
         if (this.needRotationRecalc) {
-            this.matrixRotation = this.matrixRotationYaw.mmul(this.matrixRotationPitch.mmul(this.matrixRotationRoll));
+            this.matrixRotation = this.matrixRotationYaw.mult(this.matrixRotationPitch.mult(this.matrixRotationRoll));
             this.matrixRotationInverse = this.matrixRotationRollInverse
-                .mmul(this.matrixRotationPitchInverse.mmul(this.matrixRotationYawInverse));
+                .mult(this.matrixRotationPitchInverse.mult(this.matrixRotationYawInverse));
             this.needRotationRecalc = false;
         }
     }
@@ -265,12 +265,12 @@ public class SubWorldTransformationHandler {
     public void recalcTransformationMatrices() {
         this.recalcRotationMatrix();
         if (this.needTransformationRecalc) {
-            this.matrixTransformToGlobal = this.matrixTranslation.mmul(
+            this.matrixTransformToGlobal = this.matrixTranslation.mult(
                 this.matrixCenterTranslationInverse
-                    .mmul(this.matrixScaling.mmul(this.matrixRotation.mmul(this.matrixCenterTranslation))));
-            this.matrixTransformToLocal = this.matrixCenterTranslationInverse.mmul(
-                this.matrixRotationInverse.mmul(
-                    this.matrixScalingInverse.mmul(this.matrixCenterTranslation.mmul(this.matrixTranslationInverse))));
+                    .mult(this.matrixScaling.mult(this.matrixRotation.mult(this.matrixCenterTranslation))));
+            this.matrixTransformToLocal = this.matrixCenterTranslationInverse.mult(
+                this.matrixRotationInverse.mult(
+                    this.matrixScalingInverse.mult(this.matrixCenterTranslation.mult(this.matrixTranslationInverse))));
             this.needTransformationRecalc = false;
         }
     }
@@ -334,22 +334,22 @@ public class SubWorldTransformationHandler {
             || this.scaleChangeRate != 0.0D;
     }
 
-    public DoubleMatrix getRotationMatrix() {
+    public SimpleMatrix getRotationMatrix() {
         this.recalcRotationMatrix();
         return this.matrixRotation;
     }
 
-    public DoubleMatrix getRotationInverseMatrix() {
+    public SimpleMatrix getRotationInverseMatrix() {
         this.recalcRotationMatrix();
         return this.matrixRotationInverse;
     }
 
-    public DoubleMatrix getTransformToLocalMatrix() {
+    public SimpleMatrix getTransformToLocalMatrix() {
         this.recalcTransformationMatrices();
         return this.matrixTransformToLocal;
     }
 
-    public DoubleMatrix getTransformToGlobalMatrix() {
+    public SimpleMatrix getTransformToGlobalMatrix() {
         this.recalcTransformationMatrices();
         return this.matrixTransformToGlobal;
     }
@@ -357,14 +357,14 @@ public class SubWorldTransformationHandler {
     public DoubleBuffer getTransformToLocalMatrixDirectBuffer() {
         this.recalcTransformationMatrices();
         return (DoubleBuffer) BufferUtils.createDoubleBuffer(16)
-            .put(this.matrixTransformToLocal.data)
+            .put(this.matrixTransformToLocal.getDDRM().data)
             .rewind();
     }
 
     public DoubleBuffer getTransformToGlobalMatrixDirectBuffer() {
         this.recalcTransformationMatrices();
         return (DoubleBuffer) BufferUtils.createDoubleBuffer(16)
-            .put(this.matrixTransformToGlobal.data)
+            .put(this.matrixTransformToGlobal.getDDRM().data)
             .rewind();
     }
 
@@ -373,19 +373,21 @@ public class SubWorldTransformationHandler {
     }
 
     public Vec3 transformToLocal(double globalX, double globalY, double globalZ) {
-        DoubleMatrix tempVector = new DoubleMatrix(new double[] { globalX, globalY, globalZ, 1.0D });
+        SimpleMatrix tempVector = new SimpleMatrix(4, 1, true, new double[] { globalX, globalY, globalZ, 1.0D });
         this.transformToLocal(tempVector, tempVector);
-        return Vec3.createVectorHelper(tempVector.data[0], tempVector.data[1], tempVector.data[2]);
+        return Vec3.createVectorHelper(tempVector.get(0, 0), tempVector.get(1, 0), tempVector.get(2, 0));
     }
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors) {
+    public SimpleMatrix transformToLocal(SimpleMatrix globalVectors) {
         return this.getTransformToLocalMatrix()
-            .mmul(globalVectors);
+            .mult(globalVectors);
     }
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors, DoubleMatrix result) {
-        return this.getTransformToLocalMatrix()
-            .mmuli(globalVectors, result);
+    public SimpleMatrix transformToLocal(SimpleMatrix globalVectors, SimpleMatrix result) {
+        result.setTo(
+            this.getTransformToLocalMatrix()
+                .mult(globalVectors));
+        return result;
     }
 
     public Vec3 transformToGlobal(Vec3 localVec) {
@@ -393,19 +395,21 @@ public class SubWorldTransformationHandler {
     }
 
     public Vec3 transformToGlobal(double localX, double localY, double localZ) {
-        DoubleMatrix tempVector = new DoubleMatrix(new double[] { localX, localY, localZ, 1.0D });
+        SimpleMatrix tempVector = new SimpleMatrix(4, 1, true, new double[] { localX, localY, localZ, 1.0D });
         this.transformToGlobal(tempVector, tempVector);
-        return Vec3.createVectorHelper(tempVector.data[0], tempVector.data[1], tempVector.data[2]);
+        return Vec3.createVectorHelper(tempVector.get(0, 0), tempVector.get(1, 0), tempVector.get(2, 0));
     }
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors) {
+    public SimpleMatrix transformToGlobal(SimpleMatrix localVectors) {
         return this.getTransformToGlobalMatrix()
-            .mmul(localVectors);
+            .mult(localVectors);
     }
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors, DoubleMatrix result) {
-        return this.getTransformToGlobalMatrix()
-            .mmuli(localVectors, result);
+    public SimpleMatrix transformToGlobal(SimpleMatrix localVectors, SimpleMatrix result) {
+        result.setTo(
+            this.getTransformToGlobalMatrix()
+                .mult(localVectors));
+        return result;
     }
 
     public Vec3 transformLocalToOther(World targetWorld, Vec3 localVec) {
@@ -422,33 +426,34 @@ public class SubWorldTransformationHandler {
         } else if (targetWorld == this.holderWorld) {
             return Vec3.createVectorHelper(localX, localY, localZ);
         } else {
-            DoubleMatrix tempVector = new DoubleMatrix(new double[] { localX, localY, localZ, 1.0D });
+            SimpleMatrix tempVector = new SimpleMatrix(4, 1, true, new double[] { localX, localY, localZ, 1.0D });
             this.transformLocalToOther(targetWorld, tempVector, tempVector);
-            return Vec3.createVectorHelper(tempVector.data[0], tempVector.data[1], tempVector.data[2]);
+            return Vec3.createVectorHelper(tempVector.get(0, 0), tempVector.get(1, 0), tempVector.get(2, 0));
         }
     }
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors) {
+    public SimpleMatrix transformLocalToOther(World targetWorld, SimpleMatrix localVectors) {
         if (targetWorld == null) {
             targetWorld = ((IMixinWorld) this.holderWorld).getParentWorld();
         }
 
         if (targetWorld == this.holderWorld) {
-            return localVectors.dup();
+            return localVectors.copy();
         } else {
-            DoubleMatrix tempVectors = this.transformToGlobal(localVectors);
+            SimpleMatrix tempVectors = this.transformToGlobal(localVectors);
             return !((IMixinWorld) targetWorld).isSubWorld() ? tempVectors
                 : ((IMixinWorld) targetWorld).transformToLocal(tempVectors, tempVectors);
         }
     }
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors, DoubleMatrix result) {
+    public SimpleMatrix transformLocalToOther(World targetWorld, SimpleMatrix localVectors, SimpleMatrix result) {
         if (targetWorld == null) {
             targetWorld = ((IMixinWorld) this.holderWorld).getParentWorld();
         }
 
         if (targetWorld == this.holderWorld) {
-            return result.copy(localVectors);
+            result.setTo(localVectors);
+            return result;
         } else {
             localVectors = this.transformToGlobal(localVectors, result);
             return !((IMixinWorld) targetWorld).isSubWorld() ? localVectors
@@ -470,21 +475,21 @@ public class SubWorldTransformationHandler {
         } else if (sourceWorld == this.holderWorld) {
             return Vec3.createVectorHelper(otherX, otherY, otherZ);
         } else {
-            DoubleMatrix tempVector = new DoubleMatrix(new double[] { otherX, otherY, otherZ, 1.0D });
+            SimpleMatrix tempVector = new SimpleMatrix(4, 1, true, new double[] { otherX, otherY, otherZ, 1.0D });
             this.transformOtherToLocal(sourceWorld, tempVector, tempVector);
-            return Vec3.createVectorHelper(tempVector.data[0], tempVector.data[1], tempVector.data[2]);
+            return Vec3.createVectorHelper(tempVector.get(0, 0), tempVector.get(1, 0), tempVector.get(2, 0));
         }
     }
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors) {
+    public SimpleMatrix transformOtherToLocal(World sourceWorld, SimpleMatrix otherVectors) {
         if (sourceWorld == null) {
             sourceWorld = ((IMixinWorld) this.holderWorld).getParentWorld();
         }
 
         if (sourceWorld == this.holderWorld) {
-            return otherVectors.dup();
+            return otherVectors.copy();
         } else {
-            DoubleMatrix tempVectors = otherVectors;
+            SimpleMatrix tempVectors = otherVectors;
             if (((IMixinWorld) sourceWorld).isSubWorld()) {
                 tempVectors = ((IMixinWorld) sourceWorld).transformToGlobal(otherVectors);
             }
@@ -493,13 +498,14 @@ public class SubWorldTransformationHandler {
         }
     }
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors, DoubleMatrix result) {
+    public SimpleMatrix transformOtherToLocal(World sourceWorld, SimpleMatrix otherVectors, SimpleMatrix result) {
         if (sourceWorld == null) {
             sourceWorld = ((IMixinWorld) this.holderWorld).getParentWorld();
         }
 
         if (sourceWorld == this.holderWorld) {
-            return result.copy(otherVectors);
+            result.setTo(otherVectors);
+            return result;
         } else {
             if (((IMixinWorld) sourceWorld).isSubWorld()) {
                 otherVectors = ((IMixinWorld) sourceWorld).transformToGlobal(otherVectors, result);
@@ -514,14 +520,14 @@ public class SubWorldTransformationHandler {
     }
 
     public Vec3 rotateToGlobal(double localX, double localY, double localZ) {
-        DoubleMatrix tempVector = new DoubleMatrix(new double[] { localX, localY, localZ, 1.0D });
+        SimpleMatrix tempVector = new SimpleMatrix(4, 1, true, new double[] { localX, localY, localZ, 1.0D });
         tempVector = this.rotateToGlobal(tempVector);
-        return Vec3.createVectorHelper(tempVector.data[0], tempVector.data[1], tempVector.data[2]);
+        return Vec3.createVectorHelper(tempVector.get(0, 0), tempVector.get(1, 0), tempVector.get(2, 0));
     }
 
-    public DoubleMatrix rotateToGlobal(DoubleMatrix localVectors) {
+    public SimpleMatrix rotateToGlobal(SimpleMatrix localVectors) {
         return this.getRotationMatrix()
-            .mmul(localVectors);
+            .mult(localVectors);
     }
 
     public Vec3 rotateToLocal(Vec3 globalVec) {
@@ -529,14 +535,14 @@ public class SubWorldTransformationHandler {
     }
 
     public Vec3 rotateToLocal(double globalX, double globalY, double globalZ) {
-        DoubleMatrix tempVector = new DoubleMatrix(new double[] { globalX, globalY, globalZ, 1.0D });
+        SimpleMatrix tempVector = new SimpleMatrix(4, 1, true, new double[] { globalX, globalY, globalZ, 1.0D });
         tempVector = this.rotateToLocal(tempVector);
-        return Vec3.createVectorHelper(tempVector.data[0], tempVector.data[1], tempVector.data[2]);
+        return Vec3.createVectorHelper(tempVector.get(0, 0), tempVector.get(1, 0), tempVector.get(2, 0));
     }
 
-    public DoubleMatrix rotateToLocal(DoubleMatrix globalVectors) {
+    public SimpleMatrix rotateToLocal(SimpleMatrix globalVectors) {
         return this.getRotationInverseMatrix()
-            .mmul(globalVectors);
+            .mult(globalVectors);
     }
 
     public Vec3 rotateYawToGlobal(Vec3 localVec) {
@@ -544,13 +550,13 @@ public class SubWorldTransformationHandler {
     }
 
     public Vec3 rotateYawToGlobal(double localX, double localY, double localZ) {
-        DoubleMatrix tempVector = new DoubleMatrix(new double[] { localX, localY, localZ, 1.0D });
+        SimpleMatrix tempVector = new SimpleMatrix(4, 1, true, new double[] { localX, localY, localZ, 1.0D });
         tempVector = this.rotateYawToGlobal(tempVector);
-        return Vec3.createVectorHelper(tempVector.data[0], tempVector.data[1], tempVector.data[2]);
+        return Vec3.createVectorHelper(tempVector.get(0, 0), tempVector.get(1, 0), tempVector.get(2, 0));
     }
 
-    public DoubleMatrix rotateYawToGlobal(DoubleMatrix localVectors) {
-        return this.matrixRotationYaw.mmul(localVectors);
+    public SimpleMatrix rotateYawToGlobal(SimpleMatrix localVectors) {
+        return this.matrixRotationYaw.mult(localVectors);
     }
 
     public Vec3 rotateYawToLocal(Vec3 globalVec) {
@@ -558,12 +564,12 @@ public class SubWorldTransformationHandler {
     }
 
     public Vec3 rotateYawToLocal(double globalX, double globalY, double globalZ) {
-        DoubleMatrix tempVector = new DoubleMatrix(new double[] { globalX, globalY, globalZ, 1.0D });
+        SimpleMatrix tempVector = new SimpleMatrix(4, 1, true, new double[] { globalX, globalY, globalZ, 1.0D });
         tempVector = this.rotateYawToLocal(tempVector);
-        return Vec3.createVectorHelper(tempVector.data[0], tempVector.data[1], tempVector.data[2]);
+        return Vec3.createVectorHelper(tempVector.get(0, 0), tempVector.get(1, 0), tempVector.get(2, 0));
     }
 
-    public DoubleMatrix rotateYawToLocal(DoubleMatrix globalVectors) {
-        return this.matrixRotationYawInverse.mmul(globalVectors);
+    public SimpleMatrix rotateYawToLocal(SimpleMatrix globalVectors) {
+        return this.matrixRotationYawInverse.mult(globalVectors);
     }
 }
