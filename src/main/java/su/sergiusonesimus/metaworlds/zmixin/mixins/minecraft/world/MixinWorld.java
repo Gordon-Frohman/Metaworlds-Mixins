@@ -26,7 +26,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 
-import org.jblas.DoubleMatrix;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -270,12 +270,12 @@ public abstract class MixinWorld implements IMixinWorld {
         return Vec3.createVectorHelper(localX, localY, localZ);
     }
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors) {
+    public INDArray transformToGlobal(INDArray localVectors) {
         return localVectors.dup();
     }
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors, DoubleMatrix result) {
-        result.copy(localVectors);
+    public INDArray transformToGlobal(INDArray localVectors, INDArray result) {
+        result.assign(localVectors);
         return result;
     }
 
@@ -291,12 +291,12 @@ public abstract class MixinWorld implements IMixinWorld {
         return Vec3.createVectorHelper(globalX, globalY, globalZ);
     }
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors) {
+    public INDArray transformToLocal(INDArray globalVectors) {
         return globalVectors.dup();
     }
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors, DoubleMatrix result) {
-        result.copy(globalVectors);
+    public INDArray transformToLocal(INDArray globalVectors, INDArray result) {
+        result.assign(globalVectors);
         return result;
     }
 
@@ -314,12 +314,12 @@ public abstract class MixinWorld implements IMixinWorld {
             : ((IMixinWorld) targetWorld).transformToLocal(localX, localY, localZ);
     }
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors) {
+    public INDArray transformLocalToOther(World targetWorld, INDArray localVectors) {
         return targetWorld == null ? localVectors.dup() : ((IMixinWorld) targetWorld).transformToLocal(localVectors);
     }
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors, DoubleMatrix result) {
-        return targetWorld == null ? result.copy(localVectors)
+    public INDArray transformLocalToOther(World targetWorld, INDArray localVectors, INDArray result) {
+        return targetWorld == null ? result.assign(localVectors)
             : ((IMixinWorld) targetWorld).transformToLocal(localVectors, result);
     }
 
@@ -337,12 +337,12 @@ public abstract class MixinWorld implements IMixinWorld {
             : ((IMixinWorld) sourceWorld).transformToGlobal(otherX, otherY, otherZ);
     }
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors) {
+    public INDArray transformOtherToLocal(World sourceWorld, INDArray otherVectors) {
         return sourceWorld == null ? otherVectors.dup() : ((IMixinWorld) sourceWorld).transformToGlobal(otherVectors);
     }
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors, DoubleMatrix result) {
-        return sourceWorld == null ? result.copy(otherVectors)
+    public INDArray transformOtherToLocal(World sourceWorld, INDArray otherVectors, INDArray result) {
+        return sourceWorld == null ? result.assign(otherVectors)
             : ((IMixinWorld) sourceWorld).transformToGlobal(otherVectors, result);
     }
 
@@ -354,7 +354,7 @@ public abstract class MixinWorld implements IMixinWorld {
         return Vec3.createVectorHelper(localX, localY, localZ);
     }
 
-    public DoubleMatrix rotateToGlobal(DoubleMatrix localVectors) {
+    public INDArray rotateToGlobal(INDArray localVectors) {
         return localVectors;
     }
 
@@ -366,7 +366,7 @@ public abstract class MixinWorld implements IMixinWorld {
         return Vec3.createVectorHelper(globalX, globalY, globalZ);
     }
 
-    public DoubleMatrix rotateToLocal(DoubleMatrix globalVectors) {
+    public INDArray rotateToLocal(INDArray globalVectors) {
         return globalVectors;
     }
 

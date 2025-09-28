@@ -32,7 +32,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
 
-import org.jblas.DoubleMatrix;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
@@ -378,11 +378,11 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.transformationHandler.transformToLocal(globalX, globalY, globalZ);
     }
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors) {
+    public INDArray transformToLocal(INDArray globalVectors) {
         return this.transformationHandler.transformToLocal(globalVectors);
     }
 
-    public DoubleMatrix transformToLocal(DoubleMatrix globalVectors, DoubleMatrix result) {
+    public INDArray transformToLocal(INDArray globalVectors, INDArray result) {
         return this.transformationHandler.transformToLocal(globalVectors, result);
     }
 
@@ -394,11 +394,11 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.transformationHandler.transformToGlobal(localX, localY, localZ);
     }
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors) {
+    public INDArray transformToGlobal(INDArray localVectors) {
         return this.transformationHandler.transformToGlobal(localVectors);
     }
 
-    public DoubleMatrix transformToGlobal(DoubleMatrix localVectors, DoubleMatrix result) {
+    public INDArray transformToGlobal(INDArray localVectors, INDArray result) {
         return this.transformationHandler.transformToGlobal(localVectors, result);
     }
 
@@ -410,11 +410,11 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.transformationHandler.transformLocalToOther(targetWorld, localX, localY, localZ);
     }
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors) {
+    public INDArray transformLocalToOther(World targetWorld, INDArray localVectors) {
         return this.transformationHandler.transformLocalToOther(targetWorld, localVectors);
     }
 
-    public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors, DoubleMatrix result) {
+    public INDArray transformLocalToOther(World targetWorld, INDArray localVectors, INDArray result) {
         return this.transformationHandler.transformLocalToOther(targetWorld, localVectors, result);
     }
 
@@ -426,11 +426,11 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.transformationHandler.transformOtherToLocal(sourceWorld, otherX, otherY, otherZ);
     }
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors) {
+    public INDArray transformOtherToLocal(World sourceWorld, INDArray otherVectors) {
         return this.transformationHandler.transformOtherToLocal(sourceWorld, otherVectors);
     }
 
-    public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors, DoubleMatrix result) {
+    public INDArray transformOtherToLocal(World sourceWorld, INDArray otherVectors, INDArray result) {
         return this.transformationHandler.transformOtherToLocal(sourceWorld, otherVectors, result);
     }
 
@@ -442,7 +442,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.transformationHandler.rotateToGlobal(localX, localY, localZ);
     }
 
-    public DoubleMatrix rotateToGlobal(DoubleMatrix localVectors) {
+    public INDArray rotateToGlobal(INDArray localVectors) {
         return this.transformationHandler.rotateToGlobal(localVectors);
     }
 
@@ -454,7 +454,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.transformationHandler.rotateToLocal(globalX, globalY, globalZ);
     }
 
-    public DoubleMatrix rotateToLocal(DoubleMatrix globalVectors) {
+    public INDArray rotateToLocal(INDArray globalVectors) {
         return this.transformationHandler.rotateToLocal(globalVectors);
     }
 
@@ -466,7 +466,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.transformationHandler.rotateYawToGlobal(localX, localY, localZ);
     }
 
-    public DoubleMatrix rotateYawToGlobal(DoubleMatrix localVectors) {
+    public INDArray rotateYawToGlobal(INDArray localVectors) {
         return this.transformationHandler.rotateYawToGlobal(localVectors);
     }
 
@@ -478,7 +478,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.transformationHandler.rotateYawToLocal(globalX, globalY, globalZ);
     }
 
-    public DoubleMatrix rotateYawToLocal(DoubleMatrix globalVectors) {
+    public INDArray rotateYawToLocal(INDArray globalVectors) {
         return this.transformationHandler.rotateYawToLocal(globalVectors);
     }
 

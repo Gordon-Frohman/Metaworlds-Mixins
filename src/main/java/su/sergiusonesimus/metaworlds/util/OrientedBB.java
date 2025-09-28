@@ -12,14 +12,15 @@ import org.apache.commons.math3.geometry.euclidean.threed.Plane;
 import org.apache.commons.math3.geometry.euclidean.threed.Segment;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
-import org.jblas.DoubleMatrix;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class OrientedBB extends AxisAlignedBB {
 
-    public DoubleMatrix vertices = new DoubleMatrix(4, 8);
+    public INDArray vertices = Nd4j.create(4, 8);
     public Vec3 dimensions = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
     public World lastTransformedBy = null;
 
@@ -36,7 +37,7 @@ public class OrientedBB extends AxisAlignedBB {
 
     public AxisAlignedBB copy() {
         OrientedBB newOBB = OBBPool.createOBB(this);
-        newOBB.vertices.copy(this.vertices);
+        newOBB.vertices.assign(this.vertices);
         newOBB.dimensions.setComponents(this.dimensions.xCoord, this.dimensions.yCoord, this.dimensions.zCoord);
         return newOBB;
     }
@@ -44,7 +45,7 @@ public class OrientedBB extends AxisAlignedBB {
     public void setBB(AxisAlignedBB par1AxisAlignedBB) {
         super.setBB(par1AxisAlignedBB);
         if (par1AxisAlignedBB instanceof OrientedBB) {
-            this.vertices.copy(((OrientedBB) par1AxisAlignedBB).vertices);
+            this.vertices.assign(((OrientedBB) par1AxisAlignedBB).vertices);
             this.dimensions.setComponents(
                 ((OrientedBB) par1AxisAlignedBB).dimensions.xCoord,
                 ((OrientedBB) par1AxisAlignedBB).dimensions.yCoord,
@@ -72,8 +73,8 @@ public class OrientedBB extends AxisAlignedBB {
                 double rotatedX = translatedX * cosYaw - translatedZ * sinYaw;
                 double rotatedZ = translatedX * sinYaw + translatedZ * cosYaw;
 
-                vertices.data[i * 4] = centerX + rotatedX;
-                vertices.data[i * 4 + 2] = centerZ + rotatedZ;
+                vertices.putScalar(i * 4, centerX + rotatedX);
+                vertices.putScalar(i * 4 + 2, centerZ + rotatedZ);
             }
 
             recalcAABB();
@@ -113,15 +114,15 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public double getX(int index) {
-        return this.vertices.data[index * 4];
+        return this.vertices.getDouble(index * 4);
     }
 
     public double getY(int index) {
-        return this.vertices.data[index * 4 + 1];
+        return this.vertices.getDouble(index * 4 + 1);
     }
 
     public double getZ(int index) {
-        return this.vertices.data[index * 4 + 2];
+        return this.vertices.getDouble(index * 4 + 2);
     }
 
     public void fromAABB(AxisAlignedBB sourceBB) {
@@ -135,67 +136,67 @@ public class OrientedBB extends AxisAlignedBB {
     }
 
     public void setVerticesAndDimensions(AxisAlignedBB sourceBB) {
-        this.vertices.data[0] = sourceBB.minX;
-        this.vertices.data[1] = sourceBB.minY;
-        this.vertices.data[2] = sourceBB.minZ;
-        this.vertices.data[3] = 1.0D;
-        this.vertices.data[4] = sourceBB.minX;
-        this.vertices.data[5] = sourceBB.minY;
-        this.vertices.data[6] = sourceBB.maxZ;
-        this.vertices.data[7] = 1.0D;
-        this.vertices.data[8] = sourceBB.maxX;
-        this.vertices.data[9] = sourceBB.minY;
-        this.vertices.data[10] = sourceBB.minZ;
-        this.vertices.data[11] = 1.0D;
-        this.vertices.data[12] = sourceBB.maxX;
-        this.vertices.data[13] = sourceBB.minY;
-        this.vertices.data[14] = sourceBB.maxZ;
-        this.vertices.data[15] = 1.0D;
-        this.vertices.data[16] = sourceBB.minX;
-        this.vertices.data[17] = sourceBB.maxY;
-        this.vertices.data[18] = sourceBB.minZ;
-        this.vertices.data[19] = 1.0D;
-        this.vertices.data[20] = sourceBB.minX;
-        this.vertices.data[21] = sourceBB.maxY;
-        this.vertices.data[22] = sourceBB.maxZ;
-        this.vertices.data[23] = 1.0D;
-        this.vertices.data[24] = sourceBB.maxX;
-        this.vertices.data[25] = sourceBB.maxY;
-        this.vertices.data[26] = sourceBB.minZ;
-        this.vertices.data[27] = 1.0D;
-        this.vertices.data[28] = sourceBB.maxX;
-        this.vertices.data[29] = sourceBB.maxY;
-        this.vertices.data[30] = sourceBB.maxZ;
-        this.vertices.data[31] = 1.0D;
+        this.vertices.putScalar(0, sourceBB.minX);
+        this.vertices.putScalar(1, sourceBB.minY);
+        this.vertices.putScalar(2, sourceBB.minZ);
+        this.vertices.putScalar(3, 1.0D);
+        this.vertices.putScalar(4, sourceBB.minX);
+        this.vertices.putScalar(5, sourceBB.minY);
+        this.vertices.putScalar(6, sourceBB.maxZ);
+        this.vertices.putScalar(7, 1.0D);
+        this.vertices.putScalar(8, sourceBB.maxX);
+        this.vertices.putScalar(9, sourceBB.minY);
+        this.vertices.putScalar(10, sourceBB.minZ);
+        this.vertices.putScalar(11, 1.0D);
+        this.vertices.putScalar(12, sourceBB.maxX);
+        this.vertices.putScalar(13, sourceBB.minY);
+        this.vertices.putScalar(14, sourceBB.maxZ);
+        this.vertices.putScalar(15, 1.0D);
+        this.vertices.putScalar(16, sourceBB.minX);
+        this.vertices.putScalar(17, sourceBB.maxY);
+        this.vertices.putScalar(18, sourceBB.minZ);
+        this.vertices.putScalar(19, 1.0D);
+        this.vertices.putScalar(20, sourceBB.minX);
+        this.vertices.putScalar(21, sourceBB.maxY);
+        this.vertices.putScalar(22, sourceBB.maxZ);
+        this.vertices.putScalar(23, 1.0D);
+        this.vertices.putScalar(24, sourceBB.maxX);
+        this.vertices.putScalar(25, sourceBB.maxY);
+        this.vertices.putScalar(26, sourceBB.minZ);
+        this.vertices.putScalar(27, 1.0D);
+        this.vertices.putScalar(28, sourceBB.maxX);
+        this.vertices.putScalar(29, sourceBB.maxY);
+        this.vertices.putScalar(30, sourceBB.maxZ);
+        this.vertices.putScalar(31, 1.0D);
         this.dimensions
             .setComponents(sourceBB.maxX - sourceBB.minX, sourceBB.maxY - sourceBB.minY, sourceBB.maxZ - sourceBB.minZ);
     }
 
     public void recalcAABB() {
-        this.minX = this.vertices.data[0];
-        this.minY = this.vertices.data[1];
-        this.minZ = this.vertices.data[2];
-        this.maxX = this.vertices.data[0];
-        this.maxY = this.vertices.data[1];
-        this.maxZ = this.vertices.data[2];
+        this.minX = this.vertices.getDouble(0);
+        this.minY = this.vertices.getDouble(1);
+        this.minZ = this.vertices.getDouble(2);
+        this.maxX = this.vertices.getDouble(0);
+        this.maxY = this.vertices.getDouble(1);
+        this.maxZ = this.vertices.getDouble(2);
 
         for (int i = 4; i < 32; i += 4) {
-            if (this.vertices.data[i] < this.minX) {
-                this.minX = this.vertices.data[i];
-            } else if (this.vertices.data[i] > this.maxX) {
-                this.maxX = this.vertices.data[i];
+            if (this.vertices.getDouble(i) < this.minX) {
+                this.minX = this.vertices.getDouble(i);
+            } else if (this.vertices.getDouble(i) > this.maxX) {
+                this.maxX = this.vertices.getDouble(i);
             }
 
-            if (this.vertices.data[i + 1] < this.minY) {
-                this.minY = this.vertices.data[i + 1];
-            } else if (this.vertices.data[i + 1] > this.maxY) {
-                this.maxY = this.vertices.data[i + 1];
+            if (this.vertices.getDouble(i + 1) < this.minY) {
+                this.minY = this.vertices.getDouble(i + 1);
+            } else if (this.vertices.getDouble(i + 1) > this.maxY) {
+                this.maxY = this.vertices.getDouble(i + 1);
             }
 
-            if (this.vertices.data[i + 2] < this.minZ) {
-                this.minZ = this.vertices.data[i + 2];
-            } else if (this.vertices.data[i + 2] > this.maxZ) {
-                this.maxZ = this.vertices.data[i + 2];
+            if (this.vertices.getDouble(i + 2) < this.minZ) {
+                this.minZ = this.vertices.getDouble(i + 2);
+            } else if (this.vertices.getDouble(i + 2) > this.maxZ) {
+                this.maxZ = this.vertices.getDouble(i + 2);
             }
         }
     }
@@ -226,9 +227,9 @@ public class OrientedBB extends AxisAlignedBB {
         super.offset(par1, par3, par5);
 
         for (int i = 0; i < 8; ++i) {
-            this.vertices.data[i * 4] += par1;
-            this.vertices.data[i * 4 + 1] += par3;
-            this.vertices.data[i * 4 + 2] += par5;
+            this.vertices.putScalar(i * 4, this.vertices.getDouble(i * 4) + par1);
+            this.vertices.putScalar(i * 4 + 1, this.vertices.getDouble(i * 4 + 1) + par3);
+            this.vertices.putScalar(i * 4 + 2, this.vertices.getDouble(i * 4 + 2) + par5);
         }
 
         return this;
@@ -249,6 +250,7 @@ public class OrientedBB extends AxisAlignedBB {
         }
     }
 
+    @SuppressWarnings("deprecation")
     public boolean intersectsWithOBB(OrientedBB par1OrientedBB) {
         // Getting vertices for every face of both OBBs
         Vector3D[][] faces1 = { { this.getVertice(0), this.getVertice(1), this.getVertice(3), this.getVertice(2) },
@@ -464,6 +466,7 @@ public class OrientedBB extends AxisAlignedBB {
     private static double subworldExpander = 0.5;
     private static double subworldExtenderHorizontal = 0.01;
 
+    @SuppressWarnings("deprecation")
     public double calculateXOffset(AxisAlignedBB aabb, double xOffset) {
         double worldRotation = Math.abs(((IMixinWorld) this.lastTransformedBy).getRotationYaw()) % 90;
         if (worldRotation > 45) worldRotation = 90 - worldRotation;
@@ -845,6 +848,7 @@ public class OrientedBB extends AxisAlignedBB {
         return xOffset;
     }
 
+    @SuppressWarnings("deprecation")
     public double calculateYOffset(AxisAlignedBB aabb, double yOffset) {
         double worldRotation = Math.abs(((IMixinWorld) this.lastTransformedBy).getRotationYaw()) % 90;
         if (worldRotation != 0) {
@@ -1143,6 +1147,7 @@ public class OrientedBB extends AxisAlignedBB {
         return yOffset;
     }
 
+    @SuppressWarnings("deprecation")
     public double calculateZOffset(AxisAlignedBB aabb, double zOffset) {
         double worldRotation = Math.abs(((IMixinWorld) this.lastTransformedBy).getRotationYaw()) % 90;
         if (worldRotation > 45) worldRotation = 90 - worldRotation;

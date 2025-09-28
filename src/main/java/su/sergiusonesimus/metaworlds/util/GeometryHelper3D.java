@@ -37,6 +37,7 @@ public class GeometryHelper3D {
         return false;
     }
 
+    @SuppressWarnings("deprecation")
     public static Segment segmentFromPoints(Vector3D start, Vector3D end) {
         return new Segment(start, end, new Line(start, end));
     }

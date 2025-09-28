@@ -11,7 +11,7 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import org.jblas.DoubleMatrix;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 public interface SubWorld {
 
@@ -148,9 +148,9 @@ public interface SubWorld {
 
     Vec3 transformToLocal(double var1, double var3, double var5);
 
-    DoubleMatrix transformToLocal(DoubleMatrix var1);
+    INDArray transformToLocal(INDArray var1);
 
-    DoubleMatrix transformToLocal(DoubleMatrix var1, DoubleMatrix var2);
+    INDArray transformToLocal(INDArray var1, INDArray var2);
 
     /**
      * Should only be applied to subworlds aligned by the coordinate axes
@@ -176,9 +176,9 @@ public interface SubWorld {
 
     Vec3 transformToGlobal(double var1, double var3, double var5);
 
-    DoubleMatrix transformToGlobal(DoubleMatrix var1);
+    INDArray transformToGlobal(INDArray var1);
 
-    DoubleMatrix transformToGlobal(DoubleMatrix var1, DoubleMatrix var2);
+    INDArray transformToGlobal(INDArray var1, INDArray var2);
 
     Vec3 transformLocalToOther(World var1, Entity var2);
 
@@ -186,9 +186,9 @@ public interface SubWorld {
 
     Vec3 transformLocalToOther(World var1, double var2, double var4, double var6);
 
-    DoubleMatrix transformLocalToOther(World var1, DoubleMatrix var2);
+    INDArray transformLocalToOther(World var1, INDArray var2);
 
-    DoubleMatrix transformLocalToOther(World var1, DoubleMatrix var2, DoubleMatrix var3);
+    INDArray transformLocalToOther(World var1, INDArray var2, INDArray var3);
 
     Vec3 transformOtherToLocal(World var1, Entity var2);
 
@@ -196,33 +196,33 @@ public interface SubWorld {
 
     Vec3 transformOtherToLocal(World var1, double var2, double var4, double var6);
 
-    DoubleMatrix transformOtherToLocal(World var1, DoubleMatrix var2);
+    INDArray transformOtherToLocal(World var1, INDArray var2);
 
-    DoubleMatrix transformOtherToLocal(World var1, DoubleMatrix var2, DoubleMatrix var3);
+    INDArray transformOtherToLocal(World var1, INDArray var2, INDArray var3);
 
     Vec3 rotateToGlobal(Vec3 var1);
 
     Vec3 rotateToGlobal(double var1, double var3, double var5);
 
-    DoubleMatrix rotateToGlobal(DoubleMatrix var1);
+    INDArray rotateToGlobal(INDArray var1);
 
     Vec3 rotateToLocal(Vec3 var1);
 
     Vec3 rotateToLocal(double var1, double var3, double var5);
 
-    DoubleMatrix rotateToLocal(DoubleMatrix var1);
+    INDArray rotateToLocal(INDArray var1);
 
     Vec3 rotateYawToGlobal(Vec3 var1);
 
     Vec3 rotateYawToGlobal(double var1, double var3, double var5);
 
-    DoubleMatrix rotateYawToGlobal(DoubleMatrix var1);
+    INDArray rotateYawToGlobal(INDArray var1);
 
     Vec3 rotateYawToLocal(Vec3 var1);
 
     Vec3 rotateYawToLocal(double var1, double var3, double var5);
 
-    DoubleMatrix rotateYawToLocal(DoubleMatrix var1);
+    INDArray rotateYawToLocal(INDArray var1);
 
     List<AxisAlignedBB> getCollidingBoundingBoxesLocal(Entity var1, AxisAlignedBB var2);
 

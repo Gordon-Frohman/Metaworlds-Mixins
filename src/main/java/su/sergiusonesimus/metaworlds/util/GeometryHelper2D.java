@@ -40,6 +40,7 @@ public class GeometryHelper2D {
         return false;
     }
 
+    @SuppressWarnings("deprecation")
     public static Segment segmentFromPoints(Vector2D start, Vector2D end) {
         return new Segment(start, end, new Line(start, end));
     }
