@@ -86,7 +86,7 @@ public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
     @Shadow(remap = true)
     private ServerConfigurationManager serverConfigManager;
 
-    @Shadow(remap = true)
+    @Shadow(remap = false)
     public Hashtable<Integer, long[]> worldTickTimes;
 
     @SuppressWarnings("rawtypes")

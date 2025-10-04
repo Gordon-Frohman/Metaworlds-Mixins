@@ -9,6 +9,10 @@ public interface IMixinWorldInfo {
 
     public int getNextSubWorldID();
 
+    public int getRespawnWorldID();
+
+    public void setRespawnWorldID(int id);
+
     public Collection<Integer> getSubWorldIDs(int dimId);
 
     public void updateSubWorldInfo(SubWorld subWorldToUpdate);

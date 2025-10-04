@@ -3,6 +3,7 @@ package su.sergiusonesimus.metaworlds.entity.player;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -23,8 +24,10 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.network.NetworkManagerSubWorldProxy;
 import su.sergiusonesimus.metaworlds.server.management.ItemInWorldManagerForProxy;
+import su.sergiusonesimus.metaworlds.util.Direction;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -110,6 +113,9 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
     }
 
     public EntityPlayer.EnumStatus sleepInBedAt(int par1, int par2, int par3) {
+        Vec3 worldDir = ((SubWorld) this.worldObj).rotateToGlobal(0, -1, 0);
+        if (Direction.getNearest(worldDir) != Direction.DOWN) return EntityPlayer.EnumStatus.OTHER_PROBLEM;
+
         EntityPlayer.EnumStatus result = super.sleepInBedAt(par1, par2, par3);
         if (result == EntityPlayer.EnumStatus.OK) {
             EntityPlayer player = this.getRealPlayer();
@@ -219,6 +225,23 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
      */
     @Override
     public boolean attackEntityFrom(DamageSource source, float amount) {
-        return this.realPlayer.attackEntityFrom(source, amount);
+        return source == DamageSource.outOfWorld ? false : this.realPlayer.attackEntityFrom(source, amount);
+    }
+
+    @Override
+    public void wakeUpPlayer(boolean wakeImmediatly, boolean updateWorldFlag, boolean setSpawn) {
+        ChunkCoordinates chunkcoordinates = this.playerLocation;
+        Block block = chunkcoordinates == null ? null
+            : worldObj.getBlock(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ);
+
+        if (chunkcoordinates != null
+            && block.isBed(worldObj, chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ, this)
+            && setSpawn) {
+            ((IMixinEntityPlayer) this.realPlayer).setSpawnWorldID(((IMixinWorld) this.worldObj).getSubWorldID());
+            this.getRealPlayer()
+                .setSpawnChunk(this.playerLocation, false);
+        }
+
+        super.wakeUpPlayer(wakeImmediatly, updateWorldFlag, setSpawn);
     }
 }

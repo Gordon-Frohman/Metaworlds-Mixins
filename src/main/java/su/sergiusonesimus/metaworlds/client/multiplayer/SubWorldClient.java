@@ -34,6 +34,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 
 import org.jblas.DoubleMatrix;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.client.renderer.RenderGlobalSubWorld;
@@ -87,8 +88,8 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     public SubWorldClient(WorldClient parentWorld, int newSubWorldID, NetHandlerPlayClient par1NetClientHandler,
         WorldSettings par2WorldSettings, int par3, EnumDifficulty par4, Profiler par5Profiler) {
         super(par1NetClientHandler, par2WorldSettings, par3, par4, par5Profiler);
-        this.m_parentWorld = parentWorld;
         this.isRemote = true;
+        this.m_parentWorld = parentWorld;
         this.subWorldID = newSubWorldID;
         this.setRotationYaw(0.0D);
         this.setTranslation(0.0D, 0.0D, 0.0D);
@@ -603,102 +604,128 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     }
 
     public void tickPosition(int count) {
-        if (count != 0) {
-            if (getIsInMotion()) {
-                double prevRotationYaw = this.getRotationYaw();
-                boolean skipDragging = this.lastTickRotationPitch == 0 && this.lastTickRotationYaw == 0
-                    && this.lastTickRotationRoll == 0
-                    && this.lastTickX == 0
-                    && this.lastTickY == 0
-                    && this.lastTickZ == 0;
-                Iterator<Entry<Entity, Vec3>> i$;
-                Entry<Entity, Vec3> curEntry;
+        if (count > 0 && getIsInMotion()) {
+            double prevRotationYaw = this.getRotationYaw();
+            boolean skipDragging = this.lastTickRotationPitch == 0 && this.lastTickRotationYaw == 0
+                && this.lastTickRotationRoll == 0
+                && this.lastTickX == 0
+                && this.lastTickY == 0
+                && this.lastTickZ == 0;
+            Iterator<Entry<Entity, Vec3>> i$;
+            Entry<Entity, Vec3> entry;
 
-                if (canUpdate && !skipDragging) {
-                    i$ = this.entitiesToDrag.entrySet()
-                        .iterator();
+            if (canUpdate && !skipDragging) {
+                if (this.subWorldID == 8) MetaworldsMod.LOGGER.info("Ticking subworld position with count " + count);
+                i$ = this.entitiesToDrag.entrySet()
+                    .iterator();
 
-                    while (i$.hasNext()) {
-                        curEntry = i$.next();
-                        curEntry.setValue(this.transformToLocal((Entity) curEntry.getKey()));
-                    }
-
-                    i$ = this.entitiesToNotDrag.entrySet()
-                        .iterator();
-
-                    while (i$.hasNext()) {
-                        curEntry = i$.next();
-                        curEntry.setValue(this.transformToGlobal((Entity) curEntry.getKey()));
-                    }
-                }
-
-                this.setTranslation(
-                    this.getTranslationX() + this.getMotionX() * (double) count,
-                    this.getTranslationY() + this.getMotionY() * (double) count,
-                    this.getTranslationZ() + this.getMotionZ() * (double) count);
-                this.setRotationYaw(this.getRotationYaw() + this.getRotationYawSpeed() * (double) count);
-                this.setRotationPitch(this.getRotationPitch() + this.getRotationPitchSpeed() * (double) count);
-                this.setRotationRoll(this.getRotationRoll() + this.getRotationRollSpeed() * (double) count);
-                this.setScaling(this.getScaling() + this.getScaleChangeRate() * (double) count);
-
-                float newEntityPrevRotationYawDiff1;
-                if (canUpdate && !skipDragging) {
-                    for (i$ = this.entitiesToDrag.entrySet()
-                        .iterator(); i$
-                            .hasNext(); curEntry.getKey().prevRotationYaw = newEntityPrevRotationYawDiff1
-                                + curEntry.getKey().rotationYaw) {
-                        curEntry = i$.next();
-                        Entity newPosition = curEntry.getKey();
-                        double newEntityPrevRotationYawDiff = ((IMixinEntity) newPosition).getTractionFactor();
-                        double globalWeight = 1.0D - newEntityPrevRotationYawDiff;
-                        Vec3 newPosition1 = this.transformToGlobal(curEntry.getValue());
-                        curEntry.getKey()
-                            .setPosition(
-                                newPosition.posX * globalWeight + newPosition1.xCoord * newEntityPrevRotationYawDiff,
-                                newPosition.posY * globalWeight + newPosition1.yCoord * newEntityPrevRotationYawDiff,
-                                newPosition.posZ * globalWeight + newPosition1.zCoord * newEntityPrevRotationYawDiff);
-                        newEntityPrevRotationYawDiff1 = curEntry.getKey().prevRotationYaw
-                            - (curEntry.getKey().rotationYaw - (float) (this.getRotationYaw() - prevRotationYaw));
-                        curEntry.getKey()
-                            .setRotation(
-                                curEntry.getKey().rotationYaw - (float) (this.getRotationYaw() - prevRotationYaw),
-                                curEntry.getKey().rotationPitch);
-                        if (curEntry.getKey() instanceof EntityLivingBase) {
-                            // Making sure player's body is rotating with the world
-                            EntityLivingBase curEntity = (EntityLivingBase) curEntry.getKey();
-                            curEntity.prevRenderYawOffset = curEntity.prevRenderYawOffset
-                                - (float) this.getRotationYawSpeed() / 2;
-                            curEntity.renderYawOffset = curEntity.renderYawOffset
-                                - (float) this.getRotationYawSpeed() / 2;
-                        }
-                    }
-
-                    float newEntityPrevRotationYawDiff2;
-                    for (i$ = this.entitiesToNotDrag.entrySet()
-                        .iterator(); i$
-                            .hasNext(); curEntry.getKey().prevRotationYaw = newEntityPrevRotationYawDiff2
-                                + curEntry.getKey().rotationYaw) {
-                        curEntry = i$.next();
-                        Vec3 newPosition2 = this.transformToLocal((Vec3) curEntry.getValue());
-                        curEntry.getKey()
-                            .setPosition(newPosition2.xCoord, newPosition2.yCoord, newPosition2.zCoord);
-                        newEntityPrevRotationYawDiff2 = curEntry.getKey().prevRotationYaw
-                            - (curEntry.getKey().rotationYaw + (float) (this.getRotationYaw() - prevRotationYaw));
-                        curEntry.getKey()
-                            .setRotation(
-                                curEntry.getKey().rotationYaw + (float) (this.getRotationYaw() - prevRotationYaw),
-                                curEntry.getKey().rotationPitch);
+                while (i$.hasNext()) {
+                    entry = i$.next();
+                    entry.setValue(this.transformToLocal(entry.getKey()));
+                    if (this.subWorldID == 8 && entry.getKey() instanceof EntityPlayer) {
+                        Vec3 localPos = entry.getValue();
+                        MetaworldsMod.LOGGER.info(
+                            "Player local position: " + localPos.xCoord
+                                + ", "
+                                + localPos.yCoord
+                                + ", "
+                                + localPos.zCoord);
                     }
                 }
 
-                this.nextTickX = this.getTranslationX();
-                this.nextTickY = this.getTranslationY();
-                this.nextTickZ = this.getTranslationZ();
-                this.nextTickRotationYaw = this.getRotationYaw();
-                this.nextTickRotationPitch = this.getRotationPitch();
-                this.nextTickRotationRoll = this.getRotationRoll();
-                this.nextTickScaling = this.getScaling();
+                i$ = this.entitiesToNotDrag.entrySet()
+                    .iterator();
+
+                while (i$.hasNext()) {
+                    entry = i$.next();
+                    entry.setValue(this.transformToGlobal(entry.getKey()));
+                }
+            } else {
+                if (this.subWorldID == 8) MetaworldsMod.LOGGER.info("Skipped ticking subworld position");
             }
+
+            double oldY = this.getTranslationY();
+            if (this.subWorldID == 8) MetaworldsMod.LOGGER.info("Old subworld Y translation: " + oldY);
+
+            this.setTranslation(
+                this.getTranslationX() + this.getMotionX() * (double) count,
+                this.getTranslationY() + this.getMotionY() * (double) count,
+                this.getTranslationZ() + this.getMotionZ() * (double) count);
+
+            if (this.subWorldID == 8)
+                MetaworldsMod.LOGGER.info("New subworld Y translation: " + this.getTranslationY());
+            if (this.subWorldID == 8) MetaworldsMod.LOGGER.info("Total Y movement: " + (this.getTranslationY() - oldY));
+
+            this.setRotationYaw(this.getRotationYaw() + this.getRotationYawSpeed() * (double) count);
+            this.setRotationPitch(this.getRotationPitch() + this.getRotationPitchSpeed() * (double) count);
+            this.setRotationRoll(this.getRotationRoll() + this.getRotationRollSpeed() * (double) count);
+            this.setScaling(this.getScaling() + this.getScaleChangeRate() * (double) count);
+
+            float newEntityPrevRotationYawDiff1;
+            if (canUpdate && !skipDragging) {
+                i$ = this.entitiesToDrag.entrySet()
+                    .iterator();
+                while (i$.hasNext()) {
+                    entry = i$.next();
+                    Entity entity = entry.getKey();
+                    double subworldWeight = ((IMixinEntity) entity).getTractionFactor();
+                    double globalWeight = 1.0D - subworldWeight;
+                    Vec3 transformedPos = this.transformToGlobal(entry.getValue());
+
+                    if (this.subWorldID == 8 && entity instanceof EntityPlayer player) {
+                        MetaworldsMod.LOGGER.info("Old player Y position: " + player.posY);
+                        oldY = player.posY;
+                    }
+
+                    entity.setPosition(
+                        entity.posX * globalWeight + transformedPos.xCoord * subworldWeight,
+                        entity.posY * globalWeight + transformedPos.yCoord * subworldWeight,
+                        entity.posZ * globalWeight + transformedPos.zCoord * subworldWeight);
+
+                    if (this.subWorldID == 8 && entity instanceof EntityPlayer player) {
+                        MetaworldsMod.LOGGER.info("New player Y position: " + player.posY);
+                        MetaworldsMod.LOGGER.info("Total player Y movement: " + (player.posY - oldY));
+                        MetaworldsMod.LOGGER.info("");
+                    }
+
+                    newEntityPrevRotationYawDiff1 = entity.prevRotationYaw
+                        - (entity.rotationYaw - (float) (this.getRotationYaw() - prevRotationYaw));
+                    entity.setRotation(
+                        entity.rotationYaw - (float) (this.getRotationYaw() - prevRotationYaw),
+                        entity.rotationPitch);
+                    entry.getKey().prevRotationYaw = newEntityPrevRotationYawDiff1 + entry.getKey().rotationYaw;
+                    if (entity instanceof EntityLivingBase elb) {
+                        // Making sure player's body is rotating with the world
+                        elb.prevRenderYawOffset = elb.prevRenderYawOffset - (float) this.getRotationYawSpeed() / 2;
+                        elb.renderYawOffset = elb.renderYawOffset - (float) this.getRotationYawSpeed() / 2;
+                    }
+                }
+
+                float rotationYawDiff;
+                i$ = this.entitiesToNotDrag.entrySet()
+                    .iterator();
+                while (i$.hasNext()) {
+                    entry = i$.next();
+                    Vec3 localPos = this.transformToLocal(entry.getValue());
+                    entry.getKey()
+                        .setPosition(localPos.xCoord, localPos.yCoord, localPos.zCoord);
+                    rotationYawDiff = entry.getKey().prevRotationYaw
+                        - (entry.getKey().rotationYaw + (float) (this.getRotationYaw() - prevRotationYaw));
+                    entry.getKey()
+                        .setRotation(
+                            entry.getKey().rotationYaw + (float) (this.getRotationYaw() - prevRotationYaw),
+                            entry.getKey().rotationPitch);
+                    entry.getKey().prevRotationYaw = rotationYawDiff + entry.getKey().rotationYaw;
+                }
+            }
+
+            this.nextTickX = this.getTranslationX();
+            this.nextTickY = this.getTranslationY();
+            this.nextTickZ = this.getTranslationZ();
+            this.nextTickRotationYaw = this.getRotationYaw();
+            this.nextTickRotationPitch = this.getRotationPitch();
+            this.nextTickRotationRoll = this.getRotationRoll();
+            this.nextTickScaling = this.getScaling();
         }
     }
 
@@ -711,41 +738,39 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                 && this.lastTickZ == 0;
             Iterator<Entry<Entity, Vec3>> i$;
 
-            Entry<Entity, Vec3> curEntry;
-            Entity newPosition;
-            double curEntity;
+            Entry<Entity, Vec3> entry;
+            Entity entity;
+            double newX;
+            double newY;
+            double newZ;
+            double subworldWeight;
             double globalWeight;
-            double newPosition1;
             Vec3 curEntityPos;
 
             if (canUpdate && !skipDragging) {
                 i$ = this.entitiesToDrag.entrySet()
                     .iterator();
                 while (i$.hasNext()) {
-                    curEntry = i$.next();
-                    newPosition = (Entity) curEntry.getKey();
-                    curEntity = newPosition.prevPosX + (newPosition.posX - newPosition.prevPosX) * interpolationFactor;
-                    globalWeight = newPosition.prevPosY
-                        + (newPosition.posY - newPosition.prevPosY) * interpolationFactor;
-                    newPosition1 = newPosition.prevPosZ
-                        + (newPosition.posZ - newPosition.prevPosZ) * interpolationFactor;
-                    curEntityPos = this.transformToLocal(curEntity, globalWeight, newPosition1);
-                    curEntry.setValue(curEntityPos);
+                    entry = i$.next();
+                    entity = entry.getKey();
+                    newX = entity.prevPosX + (entity.posX - entity.prevPosX) * interpolationFactor;
+                    newY = entity.prevPosY + (entity.posY - entity.prevPosY) * interpolationFactor;
+                    newZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * interpolationFactor;
+                    curEntityPos = this.transformToLocal(newX, newY, newZ);
+                    entry.setValue(curEntityPos);
                 }
 
                 i$ = this.entitiesToNotDrag.entrySet()
                     .iterator();
 
                 while (i$.hasNext()) {
-                    curEntry = i$.next();
-                    newPosition = (Entity) curEntry.getKey();
-                    curEntity = newPosition.prevPosX + (newPosition.posX - newPosition.prevPosX) * interpolationFactor;
-                    globalWeight = newPosition.prevPosY
-                        + (newPosition.posY - newPosition.prevPosY) * interpolationFactor;
-                    newPosition1 = newPosition.prevPosZ
-                        + (newPosition.posZ - newPosition.prevPosZ) * interpolationFactor;
-                    curEntityPos = this.transformToGlobal(curEntity, globalWeight, newPosition1);
-                    curEntry.setValue(curEntityPos);
+                    entry = i$.next();
+                    entity = entry.getKey();
+                    newX = entity.prevPosX + (entity.posX - entity.prevPosX) * interpolationFactor;
+                    newY = entity.prevPosY + (entity.posY - entity.prevPosY) * interpolationFactor;
+                    newZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * interpolationFactor;
+                    curEntityPos = this.transformToGlobal(newX, newY, newZ);
+                    entry.setValue(curEntityPos);
                 }
 
                 this.setTranslation(
@@ -764,46 +789,42 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                 this.setScaling(
                     this.lastTickScaling + (this.nextTickScaling - this.lastTickScaling) * interpolationFactor);
 
-                Vec3 newPosition2;
-                for (i$ = this.entitiesToDrag.entrySet()
-                    .iterator(); i$
-                        .hasNext(); newPosition.prevPosZ = newPosition2.zCoord
-                            + (newPosition2.zCoord - newPosition.posZ) * interpolationFactor
-                                / (1.0D - interpolationFactor)) {
-                    curEntry = i$.next();
-                    newPosition = curEntry.getKey();
-                    curEntity = ((IMixinEntity) newPosition).getTractionFactor();
-                    globalWeight = 1.0D - curEntity;
-                    newPosition2 = this.transformToGlobal((Vec3) curEntry.getValue());
-                    double curEntityX = newPosition.prevPosX
-                        + (newPosition.posX - newPosition.prevPosX) * interpolationFactor;
-                    double curEntityY = newPosition.prevPosY
-                        + (newPosition.posY - newPosition.prevPosY) * interpolationFactor;
-                    double curEntityZ = newPosition.prevPosZ
-                        + (newPosition.posZ - newPosition.prevPosZ) * interpolationFactor;
-                    newPosition2.xCoord = curEntityX * globalWeight + newPosition2.xCoord * curEntity;
-                    newPosition2.yCoord = curEntityY * globalWeight + newPosition2.yCoord * curEntity;
-                    newPosition2.zCoord = curEntityZ * globalWeight + newPosition2.zCoord * curEntity;
-                    newPosition.prevPosX = newPosition2.xCoord
-                        + (newPosition2.xCoord - newPosition.posX) * interpolationFactor / (1.0D - interpolationFactor);
-                    newPosition.prevPosY = newPosition2.yCoord
-                        + (newPosition2.yCoord - newPosition.posY) * interpolationFactor / (1.0D - interpolationFactor);
+                Vec3 globalPos;
+                i$ = this.entitiesToDrag.entrySet()
+                    .iterator();
+                while (i$.hasNext()) {
+                    entry = i$.next();
+                    entity = entry.getKey();
+                    subworldWeight = ((IMixinEntity) entity).getTractionFactor();
+                    globalWeight = 1.0D - subworldWeight;
+                    globalPos = this.transformToGlobal(entry.getValue());
+                    double curEntityX = entity.prevPosX + (entity.posX - entity.prevPosX) * interpolationFactor;
+                    double curEntityY = entity.prevPosY + (entity.posY - entity.prevPosY) * interpolationFactor;
+                    double curEntityZ = entity.prevPosZ + (entity.posZ - entity.prevPosZ) * interpolationFactor;
+                    globalPos.xCoord = curEntityX * globalWeight + globalPos.xCoord * subworldWeight;
+                    globalPos.yCoord = curEntityY * globalWeight + globalPos.yCoord * subworldWeight;
+                    globalPos.zCoord = curEntityZ * globalWeight + globalPos.zCoord * subworldWeight;
+                    entity.prevPosX = globalPos.xCoord
+                        + (globalPos.xCoord - entity.posX) * interpolationFactor / (1.0D - interpolationFactor);
+                    entity.prevPosY = globalPos.yCoord
+                        + (globalPos.yCoord - entity.posY) * interpolationFactor / (1.0D - interpolationFactor);
+                    entity.prevPosZ = globalPos.zCoord
+                        + (globalPos.zCoord - entity.posZ) * interpolationFactor / (1.0D - interpolationFactor);
                 }
 
-                Vec3 newPosition3;
-                Entity curEntity1;
-                for (i$ = this.entitiesToNotDrag.entrySet()
-                    .iterator(); i$
-                        .hasNext(); curEntity1.prevPosZ = newPosition3.zCoord
-                            + (newPosition3.zCoord - curEntity1.posZ) * interpolationFactor
-                                / (1.0D - interpolationFactor)) {
-                    curEntry = i$.next();
-                    newPosition3 = this.transformToLocal((Vec3) curEntry.getValue());
-                    curEntity1 = (Entity) curEntry.getKey();
-                    curEntity1.prevPosX = newPosition3.xCoord
-                        + (newPosition3.xCoord - curEntity1.posX) * interpolationFactor / (1.0D - interpolationFactor);
-                    curEntity1.prevPosY = newPosition3.yCoord
-                        + (newPosition3.yCoord - curEntity1.posY) * interpolationFactor / (1.0D - interpolationFactor);
+                Vec3 localPos;
+                i$ = this.entitiesToNotDrag.entrySet()
+                    .iterator();
+                while (i$.hasNext()) {
+                    entry = i$.next();
+                    localPos = this.transformToLocal((Vec3) entry.getValue());
+                    entity = (Entity) entry.getKey();
+                    entity.prevPosX = localPos.xCoord
+                        + (localPos.xCoord - entity.posX) * interpolationFactor / (1.0D - interpolationFactor);
+                    entity.prevPosY = localPos.yCoord
+                        + (localPos.yCoord - entity.posY) * interpolationFactor / (1.0D - interpolationFactor);
+                    entity.prevPosZ = localPos.zCoord
+                        + (localPos.zCoord - entity.posZ) * interpolationFactor / (1.0D - interpolationFactor);
                 }
             } else {
                 this.setTranslation(this.nextTickX, this.nextTickY, this.nextTickZ);

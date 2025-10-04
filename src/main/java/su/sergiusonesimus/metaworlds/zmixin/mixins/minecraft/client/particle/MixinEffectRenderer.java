@@ -304,7 +304,7 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
     private int storedMeta;
 
     @Inject(
-        method = "func_147215_a(IIILnet/minecraft/block/Block;I)V",
+        method = "addBlockDestroyEffects",
         remap = false,
         at = @At(
             value = "INVOKE",
@@ -322,7 +322,7 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
     }
 
     @WrapOperation(
-        method = "func_147215_a(IIILnet/minecraft/block/Block;I)V",
+        method = "addBlockDestroyEffects",
         remap = false,
         at = @At(
             value = "INVOKE",

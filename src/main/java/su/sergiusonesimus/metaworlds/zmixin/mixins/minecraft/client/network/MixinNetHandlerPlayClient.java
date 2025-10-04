@@ -7,6 +7,7 @@ import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook;
+import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S14PacketEntity;
 import net.minecraft.network.play.server.S18PacketEntityTeleport;
@@ -16,18 +17,25 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.sugar.Local;
 
+import su.sergiusonesimus.metaworlds.EventHookContainer;
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager.SubWorldInfoProvider;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.PacketHandler;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS05PacketSpawnPosition;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS08PacketPlayerPosLook;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS14PacketEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS18PacketEntityTeleport;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 
 @Mixin(NetHandlerPlayClient.class)
 public abstract class MixinNetHandlerPlayClient {
@@ -116,7 +124,8 @@ public abstract class MixinNetHandlerPlayClient {
         float pitch, boolean isOnGround, @Local S08PacketPlayerPosLook packetIn,
         @Local EntityClientPlayerMP entityclientplayermp) {
         int subWorldID = ((IMixinS08PacketPlayerPosLook) packetIn).getSubWorldBelowFeetID();
-        World subworld = ((IMixinWorld) entityclientplayermp.worldObj).getSubWorldsMap()
+        World subworld = ((IMixinWorld) ((IMixinWorld) entityclientplayermp.worldObj).getParentWorld())
+            .getSubWorldsMap()
             .get(subWorldID);
         if (subworld == null && subWorldID != 0) {
             SubWorldInfoProvider provider = SubWorldTypeManager.getSubWorldInfoProvider(
@@ -138,6 +147,21 @@ public abstract class MixinNetHandlerPlayClient {
             ((IMixinWorld) worldBelowFeet).getSubWorldID(),
             ((IMixinEntity) entityclientplayermp).getTractionLossTicks(),
             ((IMixinEntity) entityclientplayermp).isLosingTraction());
+    }
+
+    @Inject(method = "handleSpawnPosition", at = @At(value = "TAIL"))
+    public void handleSpawnPosition(S05PacketSpawnPosition packetIn, CallbackInfo ci) {
+        int spawnWorld = ((IMixinS05PacketSpawnPosition) packetIn).getSpawnWorldID();
+        ((IMixinEntityPlayer) this.gameController.thePlayer).setSpawnWorldID(spawnWorld);
+        ((IMixinWorldInfo) this.gameController.theWorld.getWorldInfo()).setRespawnWorldID(spawnWorld);
+        if (spawnWorld != 0) {
+            World worldBelowFeet = ((IMixinWorld) ((IMixinWorld) this.gameController.thePlayer.worldObj)
+                .getParentWorld()).getSubWorld(spawnWorld);
+            if (worldBelowFeet != null) ((SubWorld) worldBelowFeet).registerEntityToDrag(this.gameController.thePlayer);
+            else EventHookContainer.registerSubworldEvent(
+                spawnWorld,
+                subworld -> { subworld.registerEntityToDrag(this.gameController.thePlayer); });
+        }
     }
 
 }

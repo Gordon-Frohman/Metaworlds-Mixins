@@ -3,6 +3,7 @@ package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.network.play.serve
 import java.io.IOException;
 
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.server.S14PacketEntity;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS14PacketEntity;
 
-@Mixin(targets = "net.minecraft.network.play.server.S14PacketEntity$S17PacketEntityLookMove")
+@Mixin(S14PacketEntity.S17PacketEntityLookMove.class)
 public abstract class MixinS17PacketEntityLookMove {
 
     /**

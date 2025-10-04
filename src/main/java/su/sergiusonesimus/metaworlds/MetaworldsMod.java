@@ -6,6 +6,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -42,6 +45,8 @@ public class MetaworldsMod {
     @Instance("MetaworldsMod")
     public static MetaworldsMod instance;
     public static final String MODID = "metaworlds";
+
+    public static Logger LOGGER = LogManager.getLogger();
 
     public GeneralPacketPipeline networkHandler;
     public static final String CHANNEL = "metaworlds";
@@ -175,5 +180,13 @@ public class MetaworldsMod {
             // Do stuff only for dedicated server *shutdown*, for individual players logging out hook
             // PlayerLoggedOutEvent in an EventBus subscription instead
         }
+    }
+
+    public static void breakpoint() {
+        int x = 0;
+    }
+
+    public static void breakpoint1() {
+        int x = 0;
     }
 }

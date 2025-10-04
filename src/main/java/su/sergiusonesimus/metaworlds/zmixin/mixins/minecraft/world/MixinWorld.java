@@ -49,14 +49,14 @@ public abstract class MixinWorld implements IMixinWorld {
     public Map<Integer, World> childSubWorlds;
     private UnmodifiableSingleObjPlusCollection<World> allWorlds;
 
-    @Shadow(remap = true)
+    @Shadow(remap = false)
     public static double MAX_ENTITY_RADIUS;
 
     @SuppressWarnings("rawtypes")
     @Shadow(remap = true)
     public ArrayList collidingBoundingBoxes;
 
-    @Shadow(remap = true)
+    @Shadow(remap = false)
     public boolean restoringBlockSnapshots;
 
     @Shadow(remap = true)

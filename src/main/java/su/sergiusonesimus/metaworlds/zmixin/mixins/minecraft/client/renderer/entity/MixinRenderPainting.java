@@ -18,7 +18,7 @@ public class MixinRenderPainting extends MixinRender {
 
     @Inject(
         method = "doRender(Lnet/minecraft/entity/item/EntityPainting;DDDFF)V",
-        at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glEnable(I)V"))
+        at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glEnable(I)V", remap = false))
     private void rotatePainting(EntityPainting entity, double x, double y, double z, float rotationYaw,
         float rotationRoll, CallbackInfo ci) {
         float xAngle = 0;

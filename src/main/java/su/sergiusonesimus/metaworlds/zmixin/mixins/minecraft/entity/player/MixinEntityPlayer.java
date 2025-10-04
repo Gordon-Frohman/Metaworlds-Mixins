@@ -1,11 +1,14 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.entity.player;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map.Entry;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
@@ -13,11 +16,14 @@ import net.minecraft.world.IBlockAccess;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -36,6 +42,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private static boolean isTransformingServer = false;
 
     private final boolean isProxyPlayer = this instanceof EntityPlayerProxy;
+
+    /** holds the ID of the spawn world of the player */
+    private int spawnWorldID = 0;
+
+    /** holds the IDs of the spawn worlds of the player for different dimensions */
+    private HashMap<Integer, Integer> spawnSubworldMap = new HashMap<Integer, Integer>();
 
     @Shadow(remap = true)
     public ChunkCoordinates playerLocation;
@@ -84,12 +96,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Inject(method = "wakeUpPlayer", at = @At("TAIL"))
     public void wakeUpPlayer(boolean par1, boolean par2, boolean par3, CallbackInfo ci) {
         if (!this.isProxyPlayer) {
-            Iterator<EntityPlayerProxy> i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
+            Iterator<EntityPlayerProxy> i$ = ((IMixinEntity) this).getPlayerProxyMap()
                 .values()
                 .iterator();
 
             while (i$.hasNext()) {
-                EntityPlayerProxy curPlayerProxy = (EntityPlayerProxy) i$.next();
+                EntityPlayerProxy curPlayerProxy = i$.next();
                 ((EntityPlayer) curPlayerProxy).wakeUpPlayer(par1, par2, par3);
             }
         }
@@ -449,4 +461,75 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private static float transformYawToLocal(float parYaw, Entity transformingEntity) {
         return (float) ((double) parYaw + ((IMixinWorld) transformingEntity.worldObj).getRotationYaw());
     }
+
+    public HashMap<Integer, Integer> getSpawnSubworldMap() {
+        return this.spawnSubworldMap;
+    }
+
+    public int getSpawnWorldID() {
+        return getSpawnWorldID(0);
+    }
+
+    public int getSpawnWorldID(int dimension) {
+        return dimension == 0 ? this.spawnWorldID : this.spawnSubworldMap.get(dimension);
+    }
+
+    public void setSpawnWorldID(int id) {
+        setSpawnWorldID(this.dimension, id);
+    }
+
+    public void setSpawnWorldID(int dimension, int id) {
+        if (dimension == 0) this.spawnWorldID = id;
+        else this.spawnSubworldMap.put(dimension, id);
+    }
+
+    @Inject(
+        method = "readEntityFromNBT",
+        at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayer;spawnForced:Z"),
+        locals = LocalCapture.CAPTURE_FAILHARD)
+    public void readEntityFromNBT(NBTTagCompound tagCompound, CallbackInfo ci) {
+        spawnWorldID = tagCompound.hasKey("SpawnWorldID") ? tagCompound.getInteger("SpawnWorldID") : 0;
+    }
+
+    @Inject(
+        method = "readEntityFromNBT",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/player/EntityPlayer;spawnForcedMap:Ljava/util/HashMap;"),
+        locals = LocalCapture.CAPTURE_FAILHARD)
+    public void readEntityFromNBT(NBTTagCompound tagCompound, CallbackInfo ci,
+        @Local(name = "spawndata") NBTTagCompound spawndata, @Local(name = "spawndim") int spawndim) {
+        int worldID = 0;
+        if (spawndata.hasKey("SpawnWorldID")) {
+            worldID = spawndata.getInteger("SpawnWorldID");
+        }
+        this.spawnSubworldMap.put(spawndim, worldID);
+    }
+
+    @Inject(method = "writeEntityToNBT", at = @At(value = "TAIL"))
+    public void writeEntityToNBT(NBTTagCompound tagCompound, CallbackInfo ci) {
+        tagCompound.setInteger("SpawnWorldID", spawnWorldID);
+    }
+
+    @Inject(
+        method = "writeEntityToNBT",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagList;appendTag(Lnet/minecraft/nbt/NBTBase;)V"),
+        locals = LocalCapture.CAPTURE_FAILHARD)
+    public void writeEntityToNBT(NBTTagCompound tagCompound, CallbackInfo ci,
+        @Local(name = "spawndata") NBTTagCompound spawndata,
+        @Local(name = "entry") Entry<Integer, ChunkCoordinates> entry) {
+        spawndata.setInteger("SpawnWorldID", this.spawnSubworldMap.get(entry.getKey()));
+    }
+
+    @Inject(
+        method = "clonePlayer",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/EntityPlayer;getEntityData()Lnet/minecraft/nbt/NBTTagCompound;",
+            ordinal = 0,
+            shift = Shift.BEFORE))
+    public void clonePlayer(EntityPlayer p_71049_1_, boolean p_71049_2_, CallbackInfo ci) {
+        this.spawnSubworldMap = ((IMixinEntityPlayer) p_71049_1_).getSpawnSubworldMap();
+    }
+
 }

@@ -34,11 +34,16 @@ public class MixinWorldInfo implements IMixinWorldInfo {
     private Map<Integer, Set<Integer>> subWorldIDsByDimension = new TreeMap<Integer, Set<Integer>>();
     private Map<Integer, SubWorldInfoHolder> subWorldInfoByID = new HashMap<Integer, SubWorldInfoHolder>();
     private int nextSubWorldID = 1;// For creating new subWorlds
+    private int respawnWorldID = 0;
 
     @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("TAIL"))
     public void WorldInfo(NBTTagCompound par1NBTTagCompound, CallbackInfo ci) {
         if (par1NBTTagCompound.hasKey("NextSubWorldID")) {
             this.nextSubWorldID = par1NBTTagCompound.getInteger("NextSubWorldID");
+        }
+
+        if (par1NBTTagCompound.hasKey("RespawnWorldID")) {
+            this.respawnWorldID = par1NBTTagCompound.getInteger("RespawnWorldID");
         }
 
         if (par1NBTTagCompound.hasKey("SubWorldIDsByDimension")) {
@@ -71,6 +76,7 @@ public class MixinWorldInfo implements IMixinWorldInfo {
         CallbackInfo ci) {
         // SubWorlds
         par1NBTTagCompound.setInteger("NextSubWorldID", this.nextSubWorldID);
+        par1NBTTagCompound.setInteger("RespawnWorldID", this.respawnWorldID);
 
         NBTTagList subWorldIDslist = new NBTTagList();
         for (WorldServer curDimensionWorld : DimensionManager.getWorlds()) {
@@ -135,6 +141,14 @@ public class MixinWorldInfo implements IMixinWorldInfo {
 
     public Collection<SubWorldInfoHolder> getSubWorldInfos() {
         return this.subWorldInfoByID.values();
+    }
+
+    public int getRespawnWorldID() {
+        return this.respawnWorldID;
+    }
+
+    public void setRespawnWorldID(int id) {
+        this.respawnWorldID = id;
     }
 
 }

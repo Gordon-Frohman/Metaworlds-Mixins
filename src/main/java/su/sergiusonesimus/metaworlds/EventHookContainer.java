@@ -1,11 +1,17 @@
 package su.sergiusonesimus.metaworlds;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
@@ -21,6 +27,17 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWor
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 
 public class EventHookContainer {
+
+    public static Map<Integer, List<Consumer<SubWorld>>> subworldEvents = new HashMap<Integer, List<Consumer<SubWorld>>>();
+
+    public static void registerSubworldEvent(int subworldID, Consumer<SubWorld> event) {
+        List<Consumer<SubWorld>> events = subworldEvents.get(subworldID);
+        if (events == null) {
+            events = new ArrayList<Consumer<SubWorld>>();
+            subworldEvents.put(subworldID, events);
+        }
+        events.add(event);
+    }
 
     @SubscribeEvent
     public void worldLoaded(Load event) {
@@ -42,8 +59,14 @@ public class EventHookContainer {
                             int worldID = curSubWorldID.intValue();
                             SubWorldInfoHolder curSubWorldInfo = ((IMixinWorldInfo) DimensionManager.getWorld(0)
                                 .getWorldInfo()).getSubWorldInfo(worldID);
-                            SubWorldTypeManager.getSubWorldInfoProvider(curSubWorldInfo.subWorldType)
+                            World subworld = SubWorldTypeManager.getSubWorldInfoProvider(curSubWorldInfo.subWorldType)
                                 .create(event.world, worldID);
+                            if (subworldEvents.containsKey(curSubWorldID)) {
+                                for (Consumer<SubWorld> subworldEvent : subworldEvents.get(curSubWorldID)) {
+                                    subworldEvent.accept((SubWorld) subworld);
+                                }
+                                subworldEvents.remove(curSubWorldID);
+                            }
                         }
                     }
                 }

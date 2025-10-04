@@ -758,7 +758,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             Entry<Entity, Vec3> curEntry;
             while (i$.hasNext()) {
                 curEntry = i$.next();
-                curEntry.setValue(this.transformToLocal((Entity) curEntry.getKey()));
+                curEntry.setValue(this.transformToLocal(curEntry.getKey()));
             }
 
             i$ = this.entitiesToNotDrag.entrySet()
@@ -766,7 +766,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
             while (i$.hasNext()) {
                 curEntry = i$.next();
-                curEntry.setValue(this.transformToGlobal((Entity) curEntry.getKey()));
+                curEntry.setValue(this.transformToGlobal(curEntry.getKey()));
             }
 
             this.setTranslation(
@@ -783,29 +783,28 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             Vec3 newPosition;
             while (i$.hasNext()) {
                 curEntry = i$.next();
-                newPosition = this.transformToGlobal((Vec3) curEntry.getValue());
-                if (curEntry.getKey() instanceof EntityLivingBase) {
+                newPosition = this.transformToGlobal(curEntry.getValue());
+                if (curEntry.getKey() instanceof EntityLivingBase elb) {
                     // Making sure player's body is rotating with the world
-                    EntityLivingBase curEntity = (EntityLivingBase) curEntry.getKey();
-                    curEntity.prevRenderYawOffset = curEntity.prevRenderYawOffset
-                        - (float) this.getRotationYawSpeed() / 2;
-                    curEntity.renderYawOffset = curEntity.renderYawOffset - (float) this.getRotationYawSpeed() / 2;
+                    elb.prevRenderYawOffset = elb.prevRenderYawOffset - (float) this.getRotationYawSpeed() / 2;
+                    elb.renderYawOffset = elb.renderYawOffset - (float) this.getRotationYawSpeed() / 2;
                 }
-                if (curEntry.getKey() instanceof EntityPlayer) {
-                    Entity curEntity = (Entity) curEntry.getKey();
-                    double subWorldWeight = ((IMixinEntity) curEntity).getTractionFactor();
+                if (curEntry.getKey() instanceof EntityPlayer player) {
+                    double subWorldWeight = ((IMixinEntity) player).getTractionFactor();
                     double globalWeight = 1.0D - subWorldWeight;
-                    curEntity.setPosition(
-                        curEntity.posX * globalWeight + newPosition.xCoord * subWorldWeight,
-                        curEntity.posY * globalWeight + newPosition.yCoord * subWorldWeight,
-                        curEntity.posZ * globalWeight + newPosition.zCoord * subWorldWeight);
+
+                    player.setPosition(
+                        player.posX * globalWeight + newPosition.xCoord * subWorldWeight,
+                        player.posY * globalWeight + newPosition.yCoord * subWorldWeight,
+                        player.posZ * globalWeight + newPosition.zCoord * subWorldWeight);
                 } else {
-                    ((Entity) curEntry.getKey()).setPositionAndRotation(
+                    Entity curEntity = curEntry.getKey();
+                    curEntity.setPositionAndRotation(
                         newPosition.xCoord,
                         newPosition.yCoord,
                         newPosition.zCoord,
-                        ((Entity) curEntry.getKey()).rotationYaw - (float) this.getRotationYawSpeed(),
-                        ((Entity) curEntry.getKey()).rotationPitch);
+                        curEntity.rotationYaw - (float) this.getRotationYawSpeed(),
+                        curEntity.rotationPitch);
                 }
             }
 
@@ -814,10 +813,9 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
             while (i$.hasNext()) {
                 curEntry = i$.next();
-                newPosition = this.transformToLocal((Vec3) curEntry.getValue());
-                if (curEntry.getKey() instanceof EntityPlayer) {
-                    ((Entity) curEntry.getKey())
-                        .setPosition(newPosition.xCoord, newPosition.yCoord, newPosition.zCoord);
+                newPosition = this.transformToLocal(curEntry.getValue());
+                if (curEntry.getKey() instanceof EntityPlayer player) {
+                    player.setPosition(newPosition.xCoord, newPosition.yCoord, newPosition.zCoord);
                 } else {
                     ((Entity) curEntry.getKey()).setPositionAndRotation(
                         newPosition.xCoord,
