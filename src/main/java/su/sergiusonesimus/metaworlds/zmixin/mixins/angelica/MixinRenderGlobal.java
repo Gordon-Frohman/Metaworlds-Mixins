@@ -37,6 +37,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.zmixin.Mixins;
@@ -300,12 +303,18 @@ public class MixinRenderGlobal {
         }
     }
 
+    @WrapOperation(
+        method = "sortAndRender",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/EntityRenderer;disableLightmap(D)V"))
+    private void sortAndRender(EntityRenderer entityRenderer, double partialTicks, Operation<Void> original) {
+        // We will disable it later
+    }
+
     @SuppressWarnings({ "unused", "unchecked" })
     @Inject(method = "sortAndRender", at = @At("RETURN"), cancellable = true)
     private void sortAndRender(EntityLivingBase entity, int pass, double partialTicks,
         CallbackInfoReturnable<Integer> ci) {
         this.theWorld.theProfiler.startSection("sortchunks");
-        this.mc.entityRenderer.enableLightmap(partialTicks);
 
         if (this.worldRenderersList.size() > 0) for (int j = 0; j < 10; ++j) {
             this.worldRenderersCheckIndex = (this.worldRenderersCheckIndex + 1) % this.worldRenderersList.size();
