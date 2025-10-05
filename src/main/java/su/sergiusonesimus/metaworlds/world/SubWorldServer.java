@@ -1257,8 +1257,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                                                     break;
                                                 }
 
-                                                int heightValue = curChunk.getCollisionLimitYPos(inChunkX, inChunkZ)
-                                                    - 1;
+                                                int heightValue = curChunk.getCollisionLimitYPos(inChunkX, inChunkZ);
                                                 foundBlockCoord = Math.max(foundBlockCoord, heightValue);
                                                 if (foundBlockCoord >= maxY - 1) {
                                                     break;
