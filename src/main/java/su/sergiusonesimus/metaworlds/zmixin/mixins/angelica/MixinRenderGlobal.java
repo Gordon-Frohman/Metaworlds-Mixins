@@ -305,6 +305,7 @@ public class MixinRenderGlobal {
     private void sortAndRender(EntityLivingBase entity, int pass, double partialTicks,
         CallbackInfoReturnable<Integer> ci) {
         this.theWorld.theProfiler.startSection("sortchunks");
+        this.mc.entityRenderer.enableLightmap(partialTicks);
 
         if (this.worldRenderersList.size() > 0) for (int j = 0; j < 10; ++j) {
             this.worldRenderersCheckIndex = (this.worldRenderersCheckIndex + 1) % this.worldRenderersList.size();
@@ -497,6 +498,7 @@ public class MixinRenderGlobal {
             k = b1 + this.renderSortedRenderers(0, this.sortedWorldRenderersList.size(), pass, partialTicks);
         }
 
+        this.mc.entityRenderer.disableLightmap(partialTicks);
         this.theWorld.theProfiler.endSection();
         ci.setReturnValue(k);
         ci.cancel();

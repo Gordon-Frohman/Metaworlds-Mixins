@@ -66,7 +66,6 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWor
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 
-// This says that there is an error, but it reality there isn't because we change WorldServer's superclass at runtime
 public class SubWorldServer extends WorldServer implements SubWorld {
 
     private static final Logger logger = LogManager.getLogger();
