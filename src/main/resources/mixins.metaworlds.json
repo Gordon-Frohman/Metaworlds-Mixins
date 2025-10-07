@@ -52,7 +52,8 @@
   	"minecraft.world.storage.MixinWorldInfo",
   	"forge.MixinFMLProxyPacket",
   	"forgemultipart.MixinPlacementGrid",
-  	"forgemultipart.MixinMicroblockRender"
+  	"forgemultipart.MixinMicroblockRender",
+  	"forgemultipart.MixinMicroblockPlacement"
   ],
   "client": [],
   "server": []
