@@ -51,9 +51,15 @@
   	"minecraft.world.MixinWorldServer",
   	"minecraft.world.storage.MixinWorldInfo",
   	"forge.MixinFMLProxyPacket",
+  	"codechickenlib.MixinRayTracer",
   	"forgemultipart.MixinPlacementGrid",
   	"forgemultipart.MixinMicroblockRender",
-  	"forgemultipart.MixinMicroblockPlacement"
+  	"forgemultipart.MixinMicroblockPlacement",
+  	"forgemultipart.MixinTileMultipart",
+  	"forgemultipart.MixinMultipartSPH",
+  	"forgemultipart.MixinMultipartCPH",
+  	"forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$2",
+  	"forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$5"
   ],
   "client": [],
   "server": []
