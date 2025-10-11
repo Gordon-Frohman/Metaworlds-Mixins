@@ -58,6 +58,7 @@
   	"forgemultipart.MixinTileMultipart",
   	"forgemultipart.MixinMultipartSPH",
   	"forgemultipart.MixinMultipartCPH",
+  	"forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd",
   	"forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$2",
   	"forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$5"
   ],

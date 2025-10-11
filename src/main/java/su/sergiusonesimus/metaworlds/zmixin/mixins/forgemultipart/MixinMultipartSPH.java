@@ -2,6 +2,7 @@ package su.sergiusonesimus.metaworlds.zmixin.mixins.forgemultipart;
 
 import java.util.Iterator;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.chunk.Chunk;
 
@@ -14,7 +15,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import codechicken.lib.packet.PacketCustom;
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
+import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 @Mixin(targets = "codechicken.multipart.handler.MultipartSPH$")
@@ -34,10 +35,16 @@ public class MixinMultipartSPH {
             value = "INVOKE",
             target = "Lcodechicken/lib/packet/PacketCustom;compress()Lcodechicken/lib/packet/PacketCustom;"))
     public PacketCustom writeSubworldID(PacketCustom packet, Operation<PacketCustom> original) {
-        // Writing target subworld ID into packet
-        MetaworldsMod.LOGGER.info("Processing chunk in subworld " + storedSubworldID);
         return original.call(packet)
             .writeInt(storedSubworldID);
+    }
+
+    @WrapOperation(
+        method = { "onChunkWatch", "onChunkUnWatch" },
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;getEntityId()I"),
+        remap = false)
+    public int getSubworldSpecificEntityId(EntityPlayer player, Operation<Integer> original) {
+        return ForgeMultipartIntegration.getSubworldSpecificEntityId(player);
     }
 
 }

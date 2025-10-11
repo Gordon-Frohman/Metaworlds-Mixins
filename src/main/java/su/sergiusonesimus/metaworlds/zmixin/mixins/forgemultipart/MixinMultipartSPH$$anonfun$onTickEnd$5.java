@@ -20,6 +20,7 @@ import scala.collection.JavaConverters;
 import scala.collection.mutable.HashSet;
 import scala.collection.mutable.Set;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
+import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 
 @Mixin(targets = "codechicken.multipart.handler.MultipartSPH$$anonfun$onTickEnd$5")
@@ -44,8 +45,9 @@ public class MixinMultipartSPH$$anonfun$onTickEnd$5 {
 
     private void processPlayer(Map<Object, LinkedList<ChunkCoordIntPair>> newWatchers, EntityPlayer playerToProcess,
         EntityPlayerMP targetPlayer) {
-        if (newWatchers.containsKey(playerToProcess.getEntityId())) {
-            LinkedList<ChunkCoordIntPair> newChunks = newWatchers.get(playerToProcess.getEntityId());
+        int entityID = ForgeMultipartIntegration.getSubworldSpecificEntityId(playerToProcess);
+        if (newWatchers.containsKey(entityID)) {
+            LinkedList<ChunkCoordIntPair> newChunks = newWatchers.get(entityID);
 
             scala.collection.mutable.HashMap<Object, Set<ChunkCoordIntPair>> scalaMap = MultipartSPH$.MODULE$
                 .codechicken$multipart$handler$MultipartSPH$$chunkWatchers();
@@ -64,7 +66,6 @@ public class MixinMultipartSPH$$anonfun$onTickEnd$5 {
                     descPacket.sendToPlayer(targetPlayer);
                 }
 
-                int entityID = playerToProcess.getEntityId();
                 Set<ChunkCoordIntPair> watchersSet = chunkWatchers.get(entityID);
                 if (watchersSet == null) {
                     watchersSet = new HashSet<ChunkCoordIntPair>();

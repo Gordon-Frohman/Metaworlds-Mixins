@@ -17,6 +17,7 @@ import codechicken.multipart.handler.MultipartSPH.MCByteStream;
 import scala.collection.JavaConverters;
 import scala.collection.mutable.Map;
 import scala.collection.mutable.Set;
+import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 @Mixin(targets = "codechicken.multipart.handler.MultipartSPH$$anonfun$onTickEnd$2")
@@ -62,7 +63,8 @@ public class MixinMultipartSPH$$anonfun$onTickEnd$2 {
             worldUpdates = JavaConverters.mapAsJavaMapConverter(updateMap.get(world))
                 .asJava();
 
-            Set<ChunkCoordIntPair> scalaChunks = chunkWatchers.get(player.getEntityId());
+            Set<ChunkCoordIntPair> scalaChunks = chunkWatchers
+                .get(ForgeMultipartIntegration.getSubworldSpecificEntityId(player));
 
             if (scalaChunks == null) {
                 continue;
