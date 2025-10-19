@@ -76,6 +76,7 @@ public class ForgeMultipartIntegration {
                     int slot = microblock.getSlot();
                     if (microblock instanceof CornerMicroblock) {
                         /*
+                         * Slots mapping:
                          * 7 = DWN
                          * 8 = UWN
                          * 9 = DWS
@@ -91,6 +92,7 @@ public class ForgeMultipartIntegration {
                         directionVec.yCoord = (slot & 1) == 1 ? 1 : -1;
                     } else if (microblock instanceof EdgeMicroblock) {
                         /*
+                         * Slots mapping:
                          * 15 = WN
                          * 16 = WS
                          * 17 = EN
@@ -125,6 +127,7 @@ public class ForgeMultipartIntegration {
                         }
                     } else {
                         /*
+                         * Slots mapping:
                          * 0 = down
                          * 1 = up
                          * 2 = north
