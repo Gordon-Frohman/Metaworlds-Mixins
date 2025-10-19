@@ -18,7 +18,9 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -96,8 +98,25 @@ public class BlockContagiousSubWorldCreator extends Block {
                             nbttag = new NBTTagCompound();
                             oldTE.writeToNBT(nbttag);
                             oldTE.invalidate();
-                            newTE = TileEntity.createAndLoadEntity(nbttag);
+                            boolean blockIsMultipart = MetaworldsMod.isForgeMultipartLoaded
+                                && ForgeMultipartIntegration.isBlockMultipart(block);
+                            if (blockIsMultipart) {
+                                newTE = ForgeMultipartIntegration.createTileEntityFromNBT(nbttag);
+                            } else {
+                                newTE = TileEntity.createAndLoadEntity(nbttag);
+                            }
                             newWorld1.setTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ, newTE);
+                            if (blockIsMultipart) {
+                                final TileEntity teToSend = newTE;
+                                ForgeMultipartIntegration.scheduleTask(newWorld1, new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        ForgeMultipartIntegration.sendMultipartUpdate(newWorld1, teToSend);
+                                    }
+
+                                }, 30); // Providing enough delay to let the client world load all the chunks
+                            }
                         }
                         List<Entity> entities = par1World.getEntitiesWithinAABBExcludingEntity(
                             null,

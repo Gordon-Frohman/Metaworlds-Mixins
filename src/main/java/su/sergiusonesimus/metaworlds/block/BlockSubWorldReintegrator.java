@@ -17,7 +17,9 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
@@ -107,13 +109,22 @@ public class BlockSubWorldReintegrator extends Block {
                                 nbttag = new NBTTagCompound();
                                 oldTE.writeToNBT(nbttag);
                                 oldTE.invalidate();
-                                newTE = TileEntity.createAndLoadEntity(nbttag);
+                                boolean blockIsMultipart = MetaworldsMod.isForgeMultipartLoaded
+                                    && ForgeMultipartIntegration.isBlockMultipart(block);
+                                if (blockIsMultipart) {
+                                    newTE = ForgeMultipartIntegration.createTileEntityFromNBT(nbttag);
+                                } else {
+                                    newTE = TileEntity.createAndLoadEntity(nbttag);
+                                }
                                 if (newTE.blockMetadata != -1) newTE.blockMetadata = newMeta;
                                 newTE.xCoord = globalPos.posX;
                                 newTE.yCoord = globalPos.posY;
                                 newTE.zCoord = globalPos.posZ;
                                 newTE.setWorldObj(parentWorld);
                                 parentWorld.setTileEntity(globalPos.posX, globalPos.posY, globalPos.posZ, newTE);
+                                if (blockIsMultipart) {
+                                    ForgeMultipartIntegration.sendMultipartUpdate(parentWorld, newTE);
+                                }
                             }
                         }
                     }

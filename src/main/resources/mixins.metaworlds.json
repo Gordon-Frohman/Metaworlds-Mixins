@@ -51,6 +51,7 @@
   	"minecraft.world.MixinWorldServer",
   	"minecraft.world.storage.MixinWorldInfo",
   	"forge.MixinFMLProxyPacket",
+  	"codechickenlib.MixinPacketCustom",
   	"codechickenlib.MixinRayTracer",
   	"forgemultipart.MixinPlacementGrid",
   	"forgemultipart.MixinMicroblockRender",
