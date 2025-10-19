@@ -91,9 +91,7 @@ public class MetaworldsMod {
         // check if various integrations are required
         isForgeMultipartLoaded = Loader.isModLoaded("McMultipart");
 
-        if (isForgeMultipartLoaded) {
-            ForgeMultipartIntegration.preInit();
-        }
+        if (isForgeMultipartLoaded) ForgeMultipartIntegration.preInit();
     }
 
     @EventHandler
@@ -161,6 +159,8 @@ public class MetaworldsMod {
     public void postInit(FMLPostInitializationEvent event) {
         RotationHelper.init();
         BlockVolatilityMap.init();
+
+        if (isForgeMultipartLoaded) ForgeMultipartIntegration.registerRotators();
     }
 
     @EventHandler
