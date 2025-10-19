@@ -77,14 +77,14 @@ public class ForgeMultipartIntegration {
                     if (microblock instanceof CornerMicroblock) {
                         /*
                          * Slots mapping:
-                         * 7 = DWN
-                         * 8 = UWN
-                         * 9 = DWS
-                         * 10 = UWS
-                         * 11 = DEN
-                         * 12 = UEN
-                         * 13 = DES
-                         * 14 = UES
+                         * 7 = WND
+                         * 8 = WNU
+                         * 9 = WSD
+                         * 10 = WSU
+                         * 11 = END
+                         * 12 = ENU
+                         * 13 = ESD
+                         * 14 = ESU
                          */
                         slot -= 7;
                         directionVec.xCoord = ((slot >> 2) & 1) == 1 ? 1 : -1;
@@ -101,10 +101,10 @@ public class ForgeMultipartIntegration {
                          * 20 = DE
                          * 21 = UW
                          * 22 = UE
-                         * 23 = DN
-                         * 24 = UN
-                         * 25 = DS
-                         * 26 = US
+                         * 23 = ND
+                         * 24 = NU
+                         * 25 = SD
+                         * 26 = SU
                          */
                         slot -= 15;
                         int axis1 = ((slot >> 1) & 1) == 1 ? 1 : -1;
