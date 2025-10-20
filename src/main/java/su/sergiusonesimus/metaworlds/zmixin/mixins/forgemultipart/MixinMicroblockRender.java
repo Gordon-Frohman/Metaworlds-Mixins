@@ -26,8 +26,8 @@ public class MixinMicroblockRender {
     Vec3 dVec;
 
     @Inject(method = "renderHighlight", remap = false, at = @At(value = "HEAD"))
-    public void storeMOP(final EntityPlayer player, final MovingObjectPosition hit, final CommonMicroClass mcrClass,
-        final int size, final int material, CallbackInfo ci) {
+    public void storeMOP(EntityPlayer player, MovingObjectPosition hit, CommonMicroClass mcrClass, int size,
+        int material, CallbackInfo ci) {
         ForgeMultipartIntegration.currentMOP = hit;
     }
 

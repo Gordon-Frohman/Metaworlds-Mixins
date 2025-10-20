@@ -45,7 +45,8 @@ public class MixinMicroblockPlacement {
         method = "<init>",
         at = @At(value = "FIELD", target = "Lnet/minecraft/util/MovingObjectPosition;hitVec:Lnet/minecraft/util/Vec3;"))
     public Vec3 getVhit(MovingObjectPosition mop, Operation<Vec3> original) {
-        return ((IMixinWorld) this.world).transformToLocal(original.call(mop));
+        Vec3 result = original.call(mop);
+        return this.world.isRemote ? ((IMixinWorld) this.world).transformToLocal(result) : result;
     }
 
 }
