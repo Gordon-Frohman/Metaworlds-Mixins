@@ -22,6 +22,7 @@ import codechicken.multipart.BlockMultipart;
 import codechicken.multipart.MultipartHelper;
 import codechicken.multipart.TMultiPart;
 import codechicken.multipart.TileMultipart;
+import codechicken.multipart.minecraft.McSidedMetaPart;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
@@ -192,7 +193,10 @@ public class ForgeMultipartIntegration {
                     }
                     ((Microblock) microblock).setShape(microblock.getSize(), slot);
                 } else {
-                    // TODO Add stuff for vanilla minecraft multiparts
+                    if (part instanceof McSidedMetaPart multipart) {
+                        Block block = multipart.getBlock();
+                        multipart.meta = (byte) RotationHelper.getRotatedMeta(world, block, multipart.getMetadata());
+                    }
                 }
             }
         });
