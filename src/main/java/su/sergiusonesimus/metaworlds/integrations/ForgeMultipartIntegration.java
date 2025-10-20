@@ -47,7 +47,7 @@ public class ForgeMultipartIntegration {
         return block instanceof BlockMultipart;
     }
 
-    public static TileMultipart createTileEntityFromNBT(NBTTagCompound nbtTagCompound) {
+    public static TileEntity createTileEntityFromNBT(NBTTagCompound nbtTagCompound) {
         return TileMultipart.createFromNBT(nbtTagCompound);
     }
 
