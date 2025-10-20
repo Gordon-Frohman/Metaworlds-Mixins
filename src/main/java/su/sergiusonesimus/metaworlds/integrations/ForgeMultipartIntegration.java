@@ -26,7 +26,6 @@ import codechicken.multipart.minecraft.McSidedMetaPart;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import scala.collection.JavaConverters;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.Direction;
@@ -67,11 +66,9 @@ public class ForgeMultipartIntegration {
         RotationHelper.registerTileEntityRotator("multipart", (te, world) -> {
             TileMultipart tem = (TileMultipart) te;
             SubWorld subworld = (SubWorld) world;
-            List<TMultiPart> partList = JavaConverters.seqAsJavaListConverter(tem.partList())
-                .asJava();
             Vec3 directionVec;
 
-            for (TMultiPart part : partList) {
+            for (TMultiPart part : tem.jPartList()) {
                 directionVec = Vec3.createVectorHelper(0, 0, 0);
                 if (part instanceof CommonMicroblock microblock) {
                     int slot = microblock.getSlot();
