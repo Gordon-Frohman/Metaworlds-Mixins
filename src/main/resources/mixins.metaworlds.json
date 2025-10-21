@@ -50,7 +50,9 @@
   	"minecraft.world.MixinWorldIntermediate",
   	"minecraft.world.MixinWorldServer",
   	"minecraft.world.storage.MixinWorldInfo",
-  	"forge.MixinFMLProxyPacket"
+  	"forge.MixinFMLProxyPacket",
+  	"littletiles.MixinLittleTileBlockPos",
+  	"littletiles.MixinPreviewRenderer"
   ],
   "client": [],
   "server": []
