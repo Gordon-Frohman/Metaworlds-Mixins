@@ -47,6 +47,27 @@ public class Mixins implements IMixinConfigPlugin {
                 mixins.add("hee.MixinPlayerDataHandler");
             }
         } catch (ClassNotFoundException e) {}
+        try {
+            if (Class.forName("codechicken.core.launch.CodeChickenCorePlugin") != null) {
+                mixins.add("codechickenlib.MixinPacketCustom");
+                mixins.add("codechickenlib.MixinRayTracer");
+                mixins.add("codechickenlib.MixinVector3");
+            }
+        } catch (ClassNotFoundException e) {}
+        try {
+            if (Class.forName("codechicken.multipart.minecraft.MinecraftMultipartMod") != null) {
+                mixins.add("forgemultipart.MixinPlacementGrid");
+                mixins.add("forgemultipart.MixinMicroblockRender");
+                mixins.add("forgemultipart.MixinMicroblockPlacement");
+                mixins.add("forgemultipart.MixinTileMultipart");
+                mixins.add("forgemultipart.MixinMultipartSPH");
+                mixins.add("forgemultipart.MixinMultipartCPH");
+                mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd");
+                mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$2");
+                mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$5");
+                mixins.add("forgemultipart.MixinIconHitEffects");
+            }
+        } catch (ClassNotFoundException e) {}
         return mixins;
     }
 

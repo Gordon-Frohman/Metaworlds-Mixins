@@ -47,7 +47,7 @@ public class SSubWorldProxyPacket extends MetaWorldsPacket {
             .get()).get();
         if (fmlProxyPacket.getTarget()
             .isClient()) this.networkManager = ((NetHandlerPlayClient) fmlProxyPacket.handler()).getNetworkManager();
-        else return;// this.networkManager = ((NetHandlerPlayServer)fmlProxyPacket.handler()).netManager;
+        else return;
 
         this.subWorldID = buf.readInt();
         PacketBuffer packetbuffer = new PacketBuffer(buf);

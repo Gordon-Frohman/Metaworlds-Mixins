@@ -209,7 +209,7 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
 
                 Iterator<Chunk> iterator3 = arraylist.iterator();
 
-                while (iterator2.hasNext()) {
+                while (iterator3.hasNext()) {
                     chunk = iterator3.next();
                     this.getServerForPlayer()
                         .getEntityTracker()

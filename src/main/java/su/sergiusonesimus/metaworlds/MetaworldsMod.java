@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -31,6 +32,7 @@ import su.sergiusonesimus.metaworlds.command.server.CommandMWAdmin;
 import su.sergiusonesimus.metaworlds.command.server.CommandTPWorlds;
 import su.sergiusonesimus.metaworlds.controls.SubWorldControllerKeyHandler;
 import su.sergiusonesimus.metaworlds.entity.EntitySubWorldController;
+import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.client.CSubWorldProxyPacket;
@@ -56,6 +58,8 @@ public class MetaworldsMod {
         clientSide = "su.sergiusonesimus.metaworlds.ClientProxy",
         serverSide = "su.sergiusonesimus.metaworlds.ServerProxy")
     public static CommonProxy proxy;
+
+    public static boolean isForgeMultipartLoaded = false;
 
     public MetaworldsMod() {
         instance = this;
@@ -83,6 +87,11 @@ public class MetaworldsMod {
 
         SubWorldTypeManager.registerSubWorldType(SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT);
         SubWorldTypeManager.registerSubWorldType(SubWorldTypeManager.SUBWORLD_TYPE_BOAT);
+
+        // check if various integrations are required
+        isForgeMultipartLoaded = Loader.isModLoaded("McMultipart");
+
+        if (isForgeMultipartLoaded) ForgeMultipartIntegration.preInit();
     }
 
     @EventHandler
@@ -150,6 +159,8 @@ public class MetaworldsMod {
     public void postInit(FMLPostInitializationEvent event) {
         RotationHelper.init();
         BlockVolatilityMap.init();
+
+        if (isForgeMultipartLoaded) ForgeMultipartIntegration.registerRotators();
     }
 
     @EventHandler
@@ -182,11 +193,4 @@ public class MetaworldsMod {
         }
     }
 
-    public static void breakpoint() {
-        int x = 0;
-    }
-
-    public static void breakpoint1() {
-        int x = 0;
-    }
 }

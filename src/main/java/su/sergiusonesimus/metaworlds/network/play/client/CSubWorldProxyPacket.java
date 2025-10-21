@@ -81,10 +81,9 @@ public class CSubWorldProxyPacket extends MetaWorldsPacket {
     }
 
     @Override
-    // @SideOnly(Side.SERVER)
     public void execute(INetHandler netHandler, Side side, ChannelHandlerContext ctx) {
         EntityPlayer player;
-        if (side.isClient()) return;// player = Minecraft.getMinecraft().thePlayer;
+        if (side.isClient()) return;
         else player = ((NetHandlerPlayServer) netHandler).playerEntity;
 
         EntityPlayerProxy playerProxy = ((IMixinEntity) player).getPlayerProxyMap()

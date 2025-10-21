@@ -103,17 +103,15 @@ public class RotationHelper {
                     result.zCoord = -1;
                     break;
             }
-            if ((meta / 4) % 2 == 0) {
-                result.yCoord = -1;
-            } else {
-                result.yCoord = 1;
-            }
+            result.yCoord = (meta / 4) % 2 == 0 ? -1 : 1;
             return result;
         }, (originalMeta, vec) -> {
-            if (Math.abs(vec.yCoord) < Math.abs(vec.xCoord) && Math.abs(vec.yCoord) < Math.abs(vec.zCoord))
-                return originalMeta;
+            double absX = Math.abs(vec.xCoord);
+            double absY = Math.abs(vec.yCoord);
+            double absZ = Math.abs(vec.zCoord);
+            if (absY < absX && absY < absZ) return originalMeta;
             int stairsType = vec.yCoord > 0 ? 4 : 0;
-            if (Math.abs(vec.xCoord) > Math.abs(vec.zCoord)) {
+            if (absX > absZ) {
                 if (vec.xCoord < 0) stairsType += 1;
             } else {
                 if (vec.zCoord > 0) stairsType += 2;
@@ -1131,6 +1129,21 @@ public class RotationHelper {
         int meta = world.getBlockMetadata(x, y, z);
         if (world instanceof SubWorld) {
             Block block = world.getBlock(x, y, z);
+            meta = getRotatedMeta(world, block, meta);
+        }
+        return meta;
+    }
+
+    /**
+     * Returns metadata of a subworld block after reintegration
+     * 
+     * @param world - subworld containing block
+     * @param block
+     * @param meta
+     * @return Metadata of the block after reintegration
+     */
+    public static int getRotatedMeta(World world, Block block, int meta) {
+        if (world instanceof SubWorld) {
             String blockType = blockTypes.get(block);
             if (blockType != null) {
                 MetaRotator rotator = metaRotators.get(blockType);
