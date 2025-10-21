@@ -31,14 +31,23 @@ public interface SubWorld {
 
     double getTranslationZ();
 
+    /**
+     * Returns rotation of the world around X axis (in degrees)
+     */
+    double getRotationRoll();
+
+    /**
+     * Returns rotation of the world around Y axis (in degrees)
+     */
     double getRotationYaw();
 
     /** gets the ACTUAL bloody rotation not the nonsense getRotationYaw returns */
     double getRotationActualYaw();
 
+    /**
+     * Returns rotation of the world around Z axis (in degrees)
+     */
     double getRotationPitch();
-
-    double getRotationRoll();
 
     double getCosRotationYaw();
 
