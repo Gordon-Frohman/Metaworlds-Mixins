@@ -60,6 +60,16 @@ public class Mixins implements IMixinConfigPlugin {
             mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$5");
             mixins.add("forgemultipart.MixinIconHitEffects");
         }
+        if (isClassLoaded("com.creativemd.littletiles.LTTags")) {
+            // Looking for tags class, since looking for LittleTiles class causes error for some reason
+            mixins.add("littletiles.MixinLittleTileBlockPos");
+            mixins.add("littletiles.MixinPreviewRenderer");
+            mixins.add("littletiles.MixinItemBlockTiles");
+            mixins.add("littletiles.MixinLittlePlacePacket");
+            mixins.add("littletiles.MixinBlockTile");
+            mixins.add("littletiles.MixinLittleBlockPacket");
+            mixins.add("littletiles.MixinPlacementHelper");
+        }
         return mixins;
     }
 
