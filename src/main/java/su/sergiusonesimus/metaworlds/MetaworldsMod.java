@@ -33,6 +33,7 @@ import su.sergiusonesimus.metaworlds.command.server.CommandTPWorlds;
 import su.sergiusonesimus.metaworlds.controls.SubWorldControllerKeyHandler;
 import su.sergiusonesimus.metaworlds.entity.EntitySubWorldController;
 import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
+import su.sergiusonesimus.metaworlds.integrations.LittleTilesIntegration;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.client.CSubWorldProxyPacket;
@@ -60,6 +61,7 @@ public class MetaworldsMod {
     public static CommonProxy proxy;
 
     public static boolean isForgeMultipartLoaded = false;
+    public static boolean areLittleTilesLoaded = false;
 
     public MetaworldsMod() {
         instance = this;
@@ -90,6 +92,7 @@ public class MetaworldsMod {
 
         // check if various integrations are required
         isForgeMultipartLoaded = Loader.isModLoaded("McMultipart");
+        areLittleTilesLoaded = Loader.isModLoaded("littletiles");
 
         if (isForgeMultipartLoaded) ForgeMultipartIntegration.preInit();
     }
@@ -161,6 +164,7 @@ public class MetaworldsMod {
         BlockVolatilityMap.init();
 
         if (isForgeMultipartLoaded) ForgeMultipartIntegration.registerRotators();
+        if (areLittleTilesLoaded) LittleTilesIntegration.registerRotators();
     }
 
     @EventHandler
