@@ -43,4 +43,5 @@ dependencies {
     compileOnly(files("libs/etfuturum-2.6.2-dev.jar")) // Incompatible with Angelica
     //runtimeOnlyNonPublishable("maven.modrinth:archaicfix:0.7.6:dev")
     compileOnly(rfg.deobf(files("libs/HardcoreEnderExpansion  MC-1.7.10  v1.8.6.jar"))) // Incompatible with Angelica
+    implementation("com.github.GTNewHorizons:LittleTiles:1.6.0:dev")
 }
