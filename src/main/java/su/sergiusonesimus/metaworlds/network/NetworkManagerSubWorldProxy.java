@@ -21,10 +21,12 @@ public class NetworkManagerSubWorldProxy extends NetworkManager {
     @SuppressWarnings("unused")
     private INetHandler netHandlerProxy;
     private int subWorldID;
+    protected boolean clientSide;
 
     public NetworkManagerSubWorldProxy(NetworkManager originalNetworkManager, int targetSubWorldID,
         boolean isClientSide) {
         super(isClientSide);
+        this.clientSide = isClientSide;
         this.parentNetworkManager = originalNetworkManager;
         this.subWorldID = targetSubWorldID;
     }
@@ -37,7 +39,7 @@ public class NetworkManagerSubWorldProxy extends NetworkManager {
     public void scheduleOutboundPacket(Packet packet, GenericFutureListener... p_150725_2_) {
         GeneralPacketPipeline pipeline = MetaworldsMod.instance.networkHandler;
 
-        if (isClientSide) {
+        if (clientSide) {
             CSubWorldProxyPacket proxyPacket = new CSubWorldProxyPacket(
                 this.subWorldID,
                 packet,
