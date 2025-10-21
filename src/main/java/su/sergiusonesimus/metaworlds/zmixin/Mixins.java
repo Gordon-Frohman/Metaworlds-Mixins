@@ -36,39 +36,40 @@ public class Mixins implements IMixinConfigPlugin {
     @Override
     public List<String> getMixins() {
         List<String> mixins = new ArrayList<String>();
-        try {
-            if (Class.forName("com.gtnewhorizons.angelica.AngelicaMod") != null) {
-                mixins.add("angelica.MixinRenderGlobal");
-                mixins.add("angelica.MixinEffectRenderer");
-            }
-        } catch (ClassNotFoundException e) {}
-        try {
-            if (Class.forName("chylex.hee.HardcoreEnderExpansion") != null) {
-                mixins.add("hee.MixinPlayerDataHandler");
-            }
-        } catch (ClassNotFoundException e) {}
-        try {
-            if (Class.forName("codechicken.core.launch.CodeChickenCorePlugin") != null) {
-                mixins.add("codechickenlib.MixinPacketCustom");
-                mixins.add("codechickenlib.MixinRayTracer");
-                mixins.add("codechickenlib.MixinVector3");
-            }
-        } catch (ClassNotFoundException e) {}
-        try {
-            if (Class.forName("codechicken.multipart.minecraft.MinecraftMultipartMod") != null) {
-                mixins.add("forgemultipart.MixinPlacementGrid");
-                mixins.add("forgemultipart.MixinMicroblockRender");
-                mixins.add("forgemultipart.MixinMicroblockPlacement");
-                mixins.add("forgemultipart.MixinTileMultipart");
-                mixins.add("forgemultipart.MixinMultipartSPH");
-                mixins.add("forgemultipart.MixinMultipartCPH");
-                mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd");
-                mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$2");
-                mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$5");
-                mixins.add("forgemultipart.MixinIconHitEffects");
-            }
-        } catch (ClassNotFoundException e) {}
+        if (isClassLoaded("com.gtnewhorizons.angelica.AngelicaMod")) {
+            mixins.add("angelica.MixinRenderGlobal");
+            mixins.add("angelica.MixinEffectRenderer");
+        }
+        if (isClassLoaded("chylex.hee.HardcoreEnderExpansion")) {
+            mixins.add("hee.MixinPlayerDataHandler");
+        }
+        if (isClassLoaded("codechicken.core.launch.CodeChickenCorePlugin")) {
+            mixins.add("codechickenlib.MixinPacketCustom");
+            mixins.add("codechickenlib.MixinRayTracer");
+            mixins.add("codechickenlib.MixinVector3");
+        }
+        if (isClassLoaded("codechicken.multipart.minecraft.MinecraftMultipartMod")) {
+            mixins.add("forgemultipart.MixinPlacementGrid");
+            mixins.add("forgemultipart.MixinMicroblockRender");
+            mixins.add("forgemultipart.MixinMicroblockPlacement");
+            mixins.add("forgemultipart.MixinTileMultipart");
+            mixins.add("forgemultipart.MixinMultipartSPH");
+            mixins.add("forgemultipart.MixinMultipartCPH");
+            mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd");
+            mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$2");
+            mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$5");
+            mixins.add("forgemultipart.MixinIconHitEffects");
+        }
         return mixins;
+    }
+
+    private boolean isClassLoaded(String className) {
+        try {
+            if (Class.forName(className) != null) {
+                return true;
+            }
+        } catch (ClassNotFoundException e) {}
+        return false;
     }
 
     @Override
