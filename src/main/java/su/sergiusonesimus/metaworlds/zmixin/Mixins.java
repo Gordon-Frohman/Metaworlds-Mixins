@@ -51,6 +51,7 @@ public class Mixins implements IMixinConfigPlugin {
             if (Class.forName("codechicken.core.launch.CodeChickenCorePlugin") != null) {
                 mixins.add("codechickenlib.MixinPacketCustom");
                 mixins.add("codechickenlib.MixinRayTracer");
+                mixins.add("codechickenlib.MixinVector3");
             }
         } catch (ClassNotFoundException e) {}
         try {
@@ -64,6 +65,7 @@ public class Mixins implements IMixinConfigPlugin {
                 mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd");
                 mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$2");
                 mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$5");
+                mixins.add("forgemultipart.MixinIconHitEffects");
             }
         } catch (ClassNotFoundException e) {}
         return mixins;

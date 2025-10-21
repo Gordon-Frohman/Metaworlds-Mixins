@@ -14,6 +14,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+import codechicken.lib.vec.Cuboid6;
 import codechicken.microblock.CommonMicroblock;
 import codechicken.microblock.CornerMicroblock;
 import codechicken.microblock.EdgeMicroblock;
@@ -29,6 +30,7 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.Direction;
+import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -197,6 +199,10 @@ public class ForgeMultipartIntegration {
                 }
             }
         });
+    }
+
+    public static OrientedBB createOBB(Cuboid6 cuboid) {
+        return new OrientedBB(cuboid.min.x, cuboid.min.y, cuboid.min.z, cuboid.max.x, cuboid.max.y, cuboid.max.z);
     }
 
     private static final Map<Integer, List<DelayedTask>> worldTasks = new HashMap<Integer, List<DelayedTask>>();

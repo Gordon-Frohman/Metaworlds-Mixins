@@ -23,7 +23,7 @@ public class OrientedBB extends AxisAlignedBB {
     public Vec3 dimensions = Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
     public World lastTransformedBy = null;
 
-    OrientedBB(double par1, double par3, double par5, double par7, double par9, double par11) {
+    public OrientedBB(double par1, double par3, double par5, double par7, double par9, double par11) {
         super(par1, par3, par5, par7, par9, par11);
         this.setVerticesAndDimensions(this);
     }
@@ -54,8 +54,40 @@ public class OrientedBB extends AxisAlignedBB {
         }
     }
 
+    public OrientedBB rotatePitch(double targetPitch) {
+        return rotatePitch(targetPitch, (this.minY + this.maxY) * 0.5D, (this.minZ + this.maxZ) * 0.5D);
+    }
+
     public OrientedBB rotateYaw(double targetYaw) {
         return rotateYaw(targetYaw, (this.minX + this.maxX) * 0.5D, (this.minZ + this.maxZ) * 0.5D);
+    }
+
+    public OrientedBB rotateRoll(double targetRoll) {
+        return rotateRoll(targetRoll, (this.minX + this.maxX) * 0.5D, (this.minY + this.maxY) * 0.5D);
+    }
+
+    public OrientedBB rotatePitch(double targetPitch, double centerY, double centerZ) {
+        if (targetPitch == 0.0D) {
+            return this;
+        } else {
+            double cosPitch = Math.cos(targetPitch * Math.PI / 180.0D);
+            double sinPitch = Math.sin(targetPitch * Math.PI / 180.0D);
+
+            for (int i = 0; i < 8; i++) {
+                double translatedY = this.getY(i) - centerY;
+                double translatedZ = this.getZ(i) - centerZ;
+
+                double rotatedY = translatedY * cosPitch - translatedZ * sinPitch;
+                double rotatedZ = translatedY * sinPitch + translatedZ * cosPitch;
+
+                vertices.data[i * 4 + 1] = centerY + rotatedY;
+                vertices.data[i * 4 + 2] = centerZ + rotatedZ;
+            }
+
+            recalcAABB();
+            dimensions.setComponents(dimensions.xCoord, maxY - minY, maxZ - minZ);
+            return this;
+        }
     }
 
     public OrientedBB rotateYaw(double targetYaw, double centerX, double centerZ) {
@@ -78,6 +110,32 @@ public class OrientedBB extends AxisAlignedBB {
 
             recalcAABB();
             dimensions.setComponents(maxX - minX, dimensions.yCoord, maxZ - minZ);
+            return this;
+        }
+    }
+
+    public OrientedBB rotateRoll(double targetRoll, double centerX, double centerY) {
+        if (targetRoll == 0.0D) {
+            return this;
+        } else {
+            double cosRoll = Math.cos(targetRoll * Math.PI / 180.0D);
+            double sinRoll = Math.sin(targetRoll * Math.PI / 180.0D);
+
+            for (int i = 0; i < 8; i++) {
+                double translatedX = this.getX(i) - centerX;
+                double translatedY = this.getY(i) - centerY;
+
+                // Поворот вокруг оси Z: X и Y меняются, Z остается неизменным
+                double rotatedX = translatedX * cosRoll - translatedY * sinRoll;
+                double rotatedY = translatedX * sinRoll + translatedY * cosRoll;
+
+                vertices.data[i * 4] = centerX + rotatedX; // X координата
+                vertices.data[i * 4 + 1] = centerY + rotatedY; // Y координата
+                // Z координата (vertices.data[i * 4 + 2]) не меняется
+            }
+
+            recalcAABB();
+            dimensions.setComponents(maxX - minX, maxY - minY, dimensions.zCoord);
             return this;
         }
     }
