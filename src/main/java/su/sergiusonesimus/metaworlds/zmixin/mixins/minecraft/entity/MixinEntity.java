@@ -170,6 +170,9 @@ public abstract class MixinEntity implements Comparable<Entity>, IMixinEntity {
     @Shadow(remap = true)
     public int hurtResistantTime;
 
+    @Shadow(remap = true)
+    public int dimension;
+
     // TODO
 
     @Shadow(remap = true)
@@ -983,37 +986,47 @@ public abstract class MixinEntity implements Comparable<Entity>, IMixinEntity {
 
                             if (!collidingBBs.isEmpty()) {
                                 double modifierX = 0;
+                                double modifierY = 0;
                                 double modifierZ = 0;
                                 int modXcount = 0;
+                                int modYcount = 0;
                                 int modZcount = 0;
                                 for (AxisAlignedBB cBB : collidingBBs) {
                                     double dXpos = localEntityBB.minX - cBB.maxX;
                                     double dXneg = cBB.minX - localEntityBB.maxX;
+                                    double dYpos = localEntityBB.minY - cBB.maxY;
+                                    double dYneg = cBB.minY - localEntityBB.maxY;
                                     double dZpos = localEntityBB.minZ - cBB.maxZ;
                                     double dZneg = cBB.minZ - localEntityBB.maxZ;
-                                    if (dXpos < 0 && dXneg < 0 && dZpos < 0 && dZneg < 0) {
+                                    if (dXpos < 0 && dXneg < 0 && dXpos < 0 && dXneg < 0 && dZpos < 0 && dZneg < 0) {
                                         double modX = -dXpos < -dXneg ? -dXpos : dXneg;
+                                        double modY = -dYpos < -dYneg ? -dYpos : dYneg;
                                         double modZ = -dZpos < -dZneg ? -dZpos : dZneg;
-                                        if (Math.abs(modX) < Math.abs(modZ)) {
+                                        if (Math.abs(modX) < Math.abs(modZ) && Math.abs(modX) < Math.abs(modY)) {
                                             modifierX += modX;
                                             modXcount++;
-                                        } else {
+                                        } else if (Math.abs(modZ) < Math.abs(modX) && Math.abs(modZ) < Math.abs(modY)) {
                                             modifierZ += modZ;
                                             modZcount++;
+                                        } else {
+                                            modifierY += modY;
+                                            modYcount++;
                                         }
                                     }
                                 }
                                 if (modXcount > 0) modifierX /= modXcount;
+                                if (modYcount > 0) modifierY /= modYcount;
                                 if (modZcount > 0) modifierZ /= modZcount;
                                 Vec3 localPos = subworld.transformToLocal((Entity) (Object) this);
                                 double multiplier = 1;
                                 Vec3 newlocalPos = localPos
-                                    .addVector(modifierX * multiplier, 0, modifierZ * multiplier);
+                                    .addVector(modifierX * multiplier, modifierY * multiplier, modifierZ * multiplier);
                                 Vec3 entityPos = subworld.transformToGlobal(newlocalPos);
-                                if ((modXcount + modZcount) > 0) {
+                                if ((modXcount + modYcount + modZcount) > 0) {
                                     Vec3 moveVec = this.getGlobalPos()
                                         .subtract(entityPos);
-                                    ((Entity) (Object) this).addVelocity(moveVec.xCoord, 0, moveVec.zCoord);
+                                    ((Entity) (Object) this)
+                                        .addVelocity(moveVec.xCoord, moveVec.yCoord, moveVec.zCoord);
                                     this.setRotation(
                                         this.rotationYaw - (float) subworld.getRotationYawSpeed(),
                                         this.rotationPitch);
