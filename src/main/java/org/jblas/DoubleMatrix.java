@@ -1,28 +1,22 @@
 // --- BEGIN LICENSE BLOCK ---
 /*
  * Copyright (c) 2009-2013, Mikio L. Braun
- *               2011, Nicolas Oury
- *               2013, Alexander Sehlström
- *
+ * 2011, Nicolas Oury
+ * 2013, Alexander Sehlström
  * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- *
- *     * Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimer.
- *
- *     * Redistributions in binary form must reproduce the above
- *       copyright notice, this list of conditions and the following
- *       disclaimer in the documentation and/or other materials provided
- *       with the distribution.
- *
- *     * Neither the name of the Technische Universitaet Berlin nor the
- *       names of its contributors may be used to endorse or promote
- *       products derived from this software without specific prior
- *       written permission.
- *
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above
+ * copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided
+ * with the distribution.
+ * * Neither the name of the Technische Universitaet Berlin nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior
+ * written permission.
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -58,8 +52,7 @@ public class DoubleMatrix {
         length = rows * columns;
 
         if (newData != null && newData.length != newRows * newColumns) {
-            throw new IllegalArgumentException(
-                    "Passed data must match matrix dimensions.");
+            throw new IllegalArgumentException("Passed data must match matrix dimensions.");
         }
 
         data = newData;
@@ -82,7 +75,6 @@ public class DoubleMatrix {
     public int index(int rowIndex, int columnIndex) {
         return rowIndex + rows * columnIndex;
     }
-
 
     public double get(int rowIndex, int columnIndex) {
         return data[index(rowIndex, columnIndex)];
@@ -121,7 +113,6 @@ public class DoubleMatrix {
         return mmuli(other, new DoubleMatrix(rows, other.columns));
     }
 
-
     public DoubleMatrix mmuli(DoubleMatrix other, DoubleMatrix result) {
         if (length == 1 || other.length == 1) {
             throw new RuntimeException("TODO");
@@ -137,7 +128,8 @@ public class DoubleMatrix {
         }
 
         if (result == this || result == other) {
-            /* actually, blas cannot do multiplications in-place. Therefore, we will fake by
+            /*
+             * actually, blas cannot do multiplications in-place. Therefore, we will fake by
              * allocating a temporary object on the side and copy the result later.
              */
             DoubleMatrix temp = new DoubleMatrix(result.rows, result.columns);
@@ -184,24 +176,19 @@ public class DoubleMatrix {
         return out;
     }
 
-    public static DoubleMatrix gemv(double alpha, DoubleMatrix a,
-                                    DoubleMatrix x, double beta, DoubleMatrix y) {
-            if (beta != 0.0) {
-                for (int i = 0; i < y.length; i++)
-                    y.data[i] = beta * y.data[i];
-            } else {
-                for (int i = 0; i < y.length; i++)
-                    y.data[i] = 0.0;
-            }
+    public static DoubleMatrix gemv(double alpha, DoubleMatrix a, DoubleMatrix x, double beta, DoubleMatrix y) {
+        if (beta != 0.0) {
+            for (int i = 0; i < y.length; i++) y.data[i] = beta * y.data[i];
+        } else {
+            for (int i = 0; i < y.length; i++) y.data[i] = 0.0;
+        }
 
-
-            for (int j = 0; j < a.columns; j++) {
-                double xj = x.get(j);
-                if (xj != 0.0) {
-                    for (int i = 0; i < a.rows; i++)
-                        y.data[i] += alpha * a.get(i, j) * xj;
-                }
+        for (int j = 0; j < a.columns; j++) {
+            double xj = x.get(j);
+            if (xj != 0.0) {
+                for (int i = 0; i < a.rows; i++) y.data[i] += alpha * a.get(i, j) * xj;
             }
+        }
         return y;
     }
 
