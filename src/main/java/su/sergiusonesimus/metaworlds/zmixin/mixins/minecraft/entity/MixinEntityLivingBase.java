@@ -129,7 +129,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
     protected void damageEntity(DamageSource p_70665_1_, float p_70665_2_) {}
 
     @Shadow(remap = true)
-    public abstract ItemStack getEquipmentInSlot(int p_71124_1_);
+    public ItemStack getEquipmentInSlot(int p_71124_1_) {
+        return null;
+    }
 
     @Shadow(remap = true)
     public boolean isPotionActive(Potion p_70644_1_) {

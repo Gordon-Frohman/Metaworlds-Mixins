@@ -8,7 +8,5 @@ public interface IMixinEntityLivingBase {
 
     public void setPositionAndRotationLocal(double par1, double par3, double par5, float par7, float par8);
 
-    public void setAnglesLocal(float par1, float par2);
-
     public void setLocationAndAnglesLocal(double par1, double par3, double par5, float par7, float par8);
 }

@@ -33,16 +33,14 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
-import su.sergiusonesimus.metaworlds.world.SubWorldServer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 @Mixin(Entity.class)
-public abstract class MixinEntity implements Comparable<Entity>, IMixinEntity {
+public class MixinEntity implements Comparable<Entity>, IMixinEntity {
 
     @Shadow(remap = true)
     public boolean noClip;
@@ -248,46 +246,57 @@ public abstract class MixinEntity implements Comparable<Entity>, IMixinEntity {
     public void setPositionAndRotation(double par1, double par3, double par5, float par7, float par8) {}
 
     @Shadow(remap = true)
-    public void setAngles(float par1, float par2) {}
-
-    @Shadow(remap = true)
     public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {}
 
     @Shadow(remap = true)
-    public abstract double getDistanceSq(double p_70092_1_, double p_70092_3_, double p_70092_5_);
+    public double getDistanceSq(double p_70092_1_, double p_70092_3_, double p_70092_5_) {
+        return 0;
+    }
 
     @Shadow(remap = true)
-    protected abstract String getSplashSound();
+    protected String getSplashSound() {
+        return "";
+    }
 
     @Shadow(remap = true)
-    public abstract void setFire(int p_70015_1_);
+    public void setFire(int p_70015_1_) {}
 
     @Shadow(remap = true)
-    protected abstract void dealFireDamage(int p_70081_1_);
+    protected void dealFireDamage(int p_70081_1_) {}
 
     @Shadow(remap = true)
-    public abstract boolean isWet();
+    public boolean isWet() {
+        return false;
+    }
 
     @Shadow(remap = true)
-    public abstract void addEntityCrashInfo(CrashReportCategory p_85029_1_);
+    public void addEntityCrashInfo(CrashReportCategory p_85029_1_) {}
 
     @Shadow(remap = true)
-    public abstract void playSound(String p_85030_1_, float p_85030_2_, float p_85030_3_);
+    public void playSound(String p_85030_1_, float p_85030_2_, float p_85030_3_) {}
 
     @Shadow(remap = true)
-    protected abstract String getSwimSound();
+    protected String getSwimSound() {
+        return "";
+    }
 
     @Shadow(remap = true)
-    protected abstract boolean isSneaking();
+    protected boolean isSneaking() {
+        return false;
+    }
 
     @Shadow(remap = true)
-    protected abstract boolean canTriggerWalking();
+    protected boolean canTriggerWalking() {
+        return false;
+    }
 
     @Shadow(remap = true)
     protected void updateFallState(double p_70064_1_, boolean p_70064_3_) {}
 
     @Shadow(remap = true)
-    public abstract boolean isInWater();
+    public boolean isInWater() {
+        return false;
+    }
 
     public World worldBelowFeet;
     protected byte tractionLoss;
@@ -965,8 +974,8 @@ public abstract class MixinEntity implements Comparable<Entity>, IMixinEntity {
     public void handleSubWorldsInteraction() {
         if (this.posX == this.prevPosX && this.posY == this.prevPosY && this.posZ == this.prevPosZ) {
             for (World world : ((IMixinWorld) this.worldObj).getSubWorlds()) {
-                if ((world instanceof SubWorldServer && !((Entity) (Object) this instanceof EntityPlayer))
-                    || (world instanceof SubWorldClient && ((Entity) (Object) this instanceof EntityPlayer))) {
+                if ((!world.isRemote && !((Entity) (Object) this instanceof EntityPlayer))
+                    || (world.isRemote && ((Entity) (Object) this instanceof EntityPlayer))) {
                     SubWorld subworld = (SubWorld) world;
                     if (!subworld.getEntitiesToDrag()
                         .containsKey((Entity) (Object) this) && subworld.getIsInMotion()) {

@@ -1,12 +1,12 @@
 package su.sergiusonesimus.metaworlds.compat.packet;
 
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.DimensionManager;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -67,7 +67,7 @@ public class SubWorldCreatePacket implements IMessage {
                     Integer curSubWorldID = message.subWorldIDs[i];
                     String curSubWorldType = SubWorldTypeManager.getTypeByID(message.subWorldTypes[i]);
                     SubWorldTypeManager.getSubWorldInfoProvider(curSubWorldType)
-                        .create(Minecraft.getMinecraft().theWorld, curSubWorldID);
+                        .create(MetaworldsMod.proxy.getMainWorld(), curSubWorldID);
                 }
             }
             return null;

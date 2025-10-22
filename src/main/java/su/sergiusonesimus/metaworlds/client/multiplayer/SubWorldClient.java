@@ -34,6 +34,8 @@ import net.minecraft.world.biome.BiomeGenBase;
 
 import org.jblas.DoubleMatrix;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
@@ -45,6 +47,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEn
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
+@SideOnly(Side.CLIENT)
 public class SubWorldClient extends WorldClient implements SubWorld {
 
     private WorldClient m_parentWorld;

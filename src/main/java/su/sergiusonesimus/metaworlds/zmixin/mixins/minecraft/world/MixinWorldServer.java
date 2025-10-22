@@ -23,9 +23,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
-import su.sergiusonesimus.metaworlds.world.SubWorldFactory;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.world.WorldManagerSubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
@@ -59,7 +59,7 @@ public class MixinWorldServer extends MixinWorld {
         method = "tick()V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;incrementTotalWorldTime(J)V"))
     public void incrementTotalWorldTime(WorldInfo worldInfo, long par1long) {
-        this.func_82738_a(this.getTotalWorldTime() + 1L);
+        this.worldInfo.incrementTotalWorldTime(this.getTotalWorldTime() + 1L);
     }
 
     @Redirect(
@@ -91,9 +91,7 @@ public class MixinWorldServer extends MixinWorld {
 
     @SuppressWarnings("rawtypes")
     public World createSubWorld(int newSubWorldID) {
-        if (SubWorldFactory.instance == null) return null;
-
-        World newSubWorld = SubWorldFactory.instance.CreateSubWorld((World) (Object) this, newSubWorldID);
+        World newSubWorld = MetaworldsMod.proxy.createSubWorld((World) (Object) this, newSubWorldID);
         if (((IMixinMinecraftServer) MinecraftServer.mcServer).getExistingSubWorlds()
             .put(((IMixinWorld) newSubWorld).getSubWorldID(), newSubWorld) != null) {
             throw new IllegalArgumentException("SubWorld with this ID already exists!");

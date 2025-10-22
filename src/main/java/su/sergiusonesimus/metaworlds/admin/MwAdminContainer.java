@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.minecraft.client.AnvilConverterException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -53,8 +52,8 @@ public class MwAdminContainer extends Container {
             try {
                 i$ = this.player.mcServer.getActiveAnvilConverter()
                     .getSaveList();
-            } catch (AnvilConverterException var10) {
-                var10.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             Iterator<SaveFormatComparator> curSaveInfo = i$.iterator();

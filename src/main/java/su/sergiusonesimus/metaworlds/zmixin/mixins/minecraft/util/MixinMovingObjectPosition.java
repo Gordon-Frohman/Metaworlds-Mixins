@@ -1,6 +1,5 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.util;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
@@ -26,18 +25,6 @@ public abstract class MixinMovingObjectPosition implements IMixinMovingObjectPos
 
     public World getWorld() {
         return this.worldObj;
-    }
-
-    @Inject(method = "<init>(IIIILnet/minecraft/util/Vec3;)V", at = @At("TAIL"))
-    public void MovingObjectPosition(int p_i45481_1_, int p_i45481_2_, int p_i45481_3_, int p_i45481_4_,
-        Vec3 p_i45481_5_, CallbackInfo ci) {
-        this.worldObj = Minecraft.getMinecraft().theWorld;
-    }
-
-    @Inject(method = "<init>(IIIILnet/minecraft/util/Vec3;Z)V", at = @At("TAIL"))
-    public void MovingObjectPosition(int p_i45481_1_, int p_i45481_2_, int p_i45481_3_, int p_i45481_4_,
-        Vec3 p_i45481_5_, boolean p_i45481_6_, CallbackInfo ci) {
-        this.worldObj = Minecraft.getMinecraft().theWorld;
     }
 
     @Inject(method = "<init>(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/Vec3;)V", at = @At("TAIL"))

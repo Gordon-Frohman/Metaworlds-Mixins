@@ -20,7 +20,6 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
-import su.sergiusonesimus.metaworlds.world.SubWorldFactory;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinMovingObjectPosition;
@@ -29,8 +28,6 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWor
 
 @Mixin(value = { WorldClient.class, WorldServer.class })
 public abstract class MixinWorldIntermediate extends MixinWorld implements IMixinWorldIntermediate {
-
-    private static SubWorldFactory subWorldFactory = null;
 
     private List<AxisAlignedBB> collidingBBCacheIntermediate = new ArrayList<AxisAlignedBB>();
 
@@ -292,14 +289,6 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
                 }
             }
         }
-    }
-
-    public void setSubworldFactory(SubWorldFactory subWorldFactory) {
-        MixinWorldIntermediate.subWorldFactory = subWorldFactory;
-    }
-
-    public SubWorldFactory getSubworldFactory() {
-        return subWorldFactory;
     }
 
 }

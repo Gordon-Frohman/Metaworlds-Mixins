@@ -14,6 +14,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.IExtendedEntityProperties;
 import net.minecraftforge.common.MinecraftForge;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.MinecraftSubWorldProxy;
 import su.sergiusonesimus.metaworlds.client.multiplayer.PlayerControllerMPSubWorldProxy;
@@ -25,6 +27,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEn
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
+@SideOnly(Side.CLIENT)
 public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP implements EntityPlayerProxy {
 
     private EntityClientPlayerMP realPlayer;

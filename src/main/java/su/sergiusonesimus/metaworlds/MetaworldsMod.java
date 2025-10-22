@@ -38,7 +38,6 @@ import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.client.CSubWorldProxyPacket;
 import su.sergiusonesimus.metaworlds.network.play.server.SSubWorldProxyPacket;
-import su.sergiusonesimus.metaworlds.serverlist.ServerListButtonAdder;
 import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
 
@@ -111,20 +110,7 @@ public class MetaworldsMod {
             .register(playerTickHandler);
         MinecraftForge.EVENT_BUS.register(playerTickHandler);
 
-        if (event.getSide()
-            .isClient()) {
-            SubWorldClientPreTickHandler swcpth = new SubWorldClientPreTickHandler();
-            FMLCommonHandler.instance()
-                .bus()
-                .register(swcpth);
-            MinecraftForge.EVENT_BUS.register(swcpth);
-
-            ServerListButtonAdder slba = new ServerListButtonAdder();
-            FMLCommonHandler.instance()
-                .bus()
-                .register(slba);
-            MinecraftForge.EVENT_BUS.register(slba);
-        }
+        proxy.onLoad();
 
         MetaMagicNetwork.registerPackets();
 

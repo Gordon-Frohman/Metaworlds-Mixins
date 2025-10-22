@@ -6,13 +6,10 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.RenderList;
 import net.minecraft.entity.Entity;
-import net.minecraft.profiler.Profiler;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
-import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldSettings;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,8 +25,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
-import su.sergiusonesimus.metaworlds.world.SubWorldFactory;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
@@ -47,21 +44,12 @@ public class MixinWorldClient extends MixinWorld {
     @Shadow(remap = true)
     public NetHandlerPlayClient sendQueue;
 
-    @Inject(method = "<init>", at = @At("TAIL"))
-    public void WorldClient(NetHandlerPlayClient p_i45063_1_, WorldSettings p_i45063_2_, int p_i45063_3_,
-        EnumDifficulty p_i45063_4_, Profiler p_i45063_5_, CallbackInfo ci) {
-        if (((IMixinWorldIntermediate) this).getSubworldFactory() == null)
-            ((IMixinWorldIntermediate) this).setSubworldFactory(new SubWorldFactory());
-    }
-
     public World createSubWorld() {
         return this.createSubWorld(this.getUnoccupiedSubworldID());
     }
 
     public World createSubWorld(int newSubWorldID) {
-        if (((IMixinWorldIntermediate) this).getSubworldFactory() == null) return null;
-        ((IMixinWorldIntermediate) this).getSubworldFactory();
-        World newSubWorld = SubWorldFactory.instance.CreateSubWorld(((World) (Object) this), newSubWorldID);
+        World newSubWorld = MetaworldsMod.proxy.createSubWorld(((World) (Object) this), newSubWorldID);
         if (((IMixinWorld) this).getSubWorldsMap()
             .get(((IMixinWorld) newSubWorld).getSubWorldID()) == null) {
             ((IMixinWorld) this).getSubWorldsMap()

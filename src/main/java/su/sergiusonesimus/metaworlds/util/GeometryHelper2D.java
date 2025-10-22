@@ -49,16 +49,7 @@ public class GeometryHelper2D {
             return null;
         }
 
-        Collections.sort(points, new Comparator<Vector2D>() {
-
-            @Override
-            public int compare(Vector2D p1, Vector2D p2) {
-                if (p1.getX() != p2.getX()) {
-                    return Double.compare(p1.getX(), p2.getX());
-                }
-                return Double.compare(p1.getY(), p2.getY());
-            }
-        });
+        Collections.sort(points, new Vector2DComparator());
 
         List<Vector2D> hull = new ArrayList<>();
 
@@ -82,6 +73,17 @@ public class GeometryHelper2D {
         hull.remove(hull.size() - 1);
 
         return new Polygon2D(hull);
+    }
+
+    public static class Vector2DComparator implements Comparator<Vector2D> {
+
+        @Override
+        public int compare(Vector2D p1, Vector2D p2) {
+            if (p1.getX() != p2.getX()) {
+                return Double.compare(p1.getX(), p2.getX());
+            }
+            return Double.compare(p1.getY(), p2.getY());
+        }
     }
 
     private static double crossProduct(Vector2D p1, Vector2D p2, Vector2D p3) {

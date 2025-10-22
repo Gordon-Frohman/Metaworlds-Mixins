@@ -831,8 +831,6 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return new SubWorldUpdatePacket(par1SubWorldServer, updateFlags);
     }
 
-    public void func_82738_a(long par1) {}
-
     public void setWorldTime(long par1) {}
 
     public boolean spawnEntityInWorld(Entity par1Entity) {

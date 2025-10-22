@@ -9,13 +9,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 
-import su.sergiusonesimus.metaworlds.world.SubWorldFactory;
-
 public interface IMixinWorldIntermediate {
-
-    public void setSubworldFactory(SubWorldFactory subWorldFactory);
-
-    public SubWorldFactory getSubworldFactory();
 
     public MovingObjectPosition rayTraceBlocks_do_do_single(Vec3 par1Vec3, Vec3 par2Vec3, boolean par3, boolean par4,
         boolean par5);
