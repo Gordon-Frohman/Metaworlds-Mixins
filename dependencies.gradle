@@ -36,11 +36,14 @@
 dependencies {
     shadowImplementation group: 'org.joml', name: 'joml', version: '1.10.8'
 	shadowImplementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
-    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Angelica:1.0.0-beta44:dev")
+    //devOnlyNonPublishable("com.github.GTNewHorizons:Angelica:1.0.0-beta44:dev")
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.7.49-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:ForgeMultipart:1.6.8:dev") { transitive = false }
     implementation("com.github.GTNewHorizons:CodeChickenCore:1.4.3:dev") // For NEI and ForgeMultipart runtime
     compileOnly("ganymedes01.etfuturum:Et-Futurum-Requiem:2.6.2.6-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Hardcore-Ender-Expansion:1.13.0-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:LittleTiles:1.6.0:dev")
+    implementation rfg.deobf("curse.maven:beddium-1065808:7040653")
+    implementation("com.github.GTNewHorizons:lwjgl3ify:2.1.15") // For Beddium runtime
+    implementation rfg.deobf("curse.maven:fplib-665627:7053321") // For Beddium runtime
 }
