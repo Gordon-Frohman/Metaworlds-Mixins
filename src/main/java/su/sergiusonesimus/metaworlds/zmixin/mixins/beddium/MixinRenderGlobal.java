@@ -1,5 +1,7 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.beddium;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.IntBuffer;
 import java.util.Collections;
 import java.util.List;
@@ -204,9 +206,6 @@ public class MixinRenderGlobal {
     public void checkOcclusionQueryResult(int p_72720_1_, int p_72720_2_) {}
 
     @Shadow(remap = false)
-    private void handler$zcl000$beddium$onReload(CallbackInfo ci) {}
-
-    @Shadow(remap = false)
     public void markRenderersForNewPositionSingle(double par1d, double par2d, double par3d, int subWorldID) {}
 
     @Shadow(remap = false)
@@ -306,7 +305,17 @@ public class MixinRenderGlobal {
             this.renderEntitiesStartupCounter = 2;
         }
         // Have to call Beddium's onReload directly, since we are canceling the method
-        handler$zcl000$beddium$onReload((CallbackInfo) null);
+        for (Method method : RenderGlobal.class.getDeclaredMethods()) {
+            if (method.getName()
+                .endsWith("$beddium$onReload")) {
+                method.setAccessible(true);
+                try {
+                    method.invoke(this, (CallbackInfo) null);
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         ci.cancel();
     }
 
