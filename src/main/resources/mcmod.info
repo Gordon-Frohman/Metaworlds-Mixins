@@ -1,19 +1,17 @@
 [
     {
-        "modid": "metaworlds",
-        "name": "MetaWorlds (Mixins Version)",
+        "modid": "${modId}",
+        "name": "${modName}",
         "description": "A Mod for Minecraft that enables the user to position extra worlds inside other worlds, possibly transposed, scaled and/or rotated. This is the Forge + Mixins based version. Uses JOML (https://github.com/JOML-CI/JOML).",
         "version": "1.4.0",
-        "mcversion": "1.7.10",
+        "mcversion": 1.7.10",
         "url": "https://github.com/Gordon-Frohman/Metaworlds-Mixins",
         "updateUrl": "",
         "authorList": [
         	"Sergius Onesimus 2024-2025",
         	"TCLProject 2020-2021",
         	"MMM_MasterM 2013-2014" ],
-        "credits": [
-        	"Makamys - help with the port",
-        	"DarkShadow44 - replacing JBLAS with JOML, allowing Linux compatibility" ],
+        "credits": "Huge thanks to makamys for much appreciated help with the port and to DarkShadow44 for replacing JBLAS with JOML, allowing Linux compatibility",
         "logoFile": "",
         "screenshots": [],
         "dependencies": [
