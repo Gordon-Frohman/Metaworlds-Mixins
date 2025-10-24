@@ -789,13 +789,13 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                     elb.renderYawOffset = elb.renderYawOffset - (float) this.getRotationYawSpeed() / 2;
                 }
                 if (curEntry.getKey() instanceof EntityPlayer player) {
-                    double subWorldWeight = ((IMixinEntity) player).getTractionFactor();
-                    double globalWeight = 1.0D - subWorldWeight;
-
-                    player.setPosition(
-                        player.posX * globalWeight + newPosition.xCoord * subWorldWeight,
-                        player.posY * globalWeight + newPosition.yCoord * subWorldWeight,
-                        player.posZ * globalWeight + newPosition.zCoord * subWorldWeight);
+                    // double subWorldWeight = ((IMixinEntity) player).getTractionFactor();
+                    // double globalWeight = 1.0D - subWorldWeight;
+                    //
+                    // player.setPosition(
+                    // player.posX * globalWeight + newPosition.xCoord * subWorldWeight,
+                    // player.posY * globalWeight + newPosition.yCoord * subWorldWeight,
+                    // player.posZ * globalWeight + newPosition.zCoord * subWorldWeight);
                 } else {
                     Entity curEntity = curEntry.getKey();
                     curEntity.setPositionAndRotation(
