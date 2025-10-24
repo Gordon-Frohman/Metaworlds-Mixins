@@ -43,4 +43,7 @@ dependencies {
     compileOnly("ganymedes01.etfuturum:Et-Futurum-Requiem:2.6.2.6-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Hardcore-Ender-Expansion:1.13.0-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:LittleTiles:1.6.0:dev")
+    //implementation files("libs/beddium-mc1.7.10-1.0.4-j8-dev.jar")
+    //implementation files("libs/beddium-mc1.7.10-1.0.4-j21-dev.jar")
+    //implementation files("libs/falsepatternlib-mc1.7.10-1.9.1-dev.jar") // For Beddium runtime
 }

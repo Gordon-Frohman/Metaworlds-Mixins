@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 public class Mixins implements IMixinConfigPlugin {
 
     public static final int angelicaPatchPriority = 2001;
+    public static final int beddiumPatchPriority = 901;
     public static final int fmlPatchPriority = 1000;
 
     @Override
@@ -36,6 +37,9 @@ public class Mixins implements IMixinConfigPlugin {
     @Override
     public List<String> getMixins() {
         List<String> mixins = new ArrayList<String>();
+        if (isClassLoaded("com.ventooth.beddium.Beddium")) {
+            mixins.add("beddium.MixinRenderGlobal");
+        }
         if (isClassLoaded("com.gtnewhorizons.angelica.AngelicaMod")) {
             mixins.add("angelica.MixinRenderGlobal");
             mixins.add("angelica.MixinEffectRenderer");
