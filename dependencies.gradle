@@ -36,7 +36,7 @@
 dependencies {
     shadowImplementation group: 'org.joml', name: 'joml', version: '1.10.8'
 	shadowImplementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
-    //devOnlyNonPublishable("com.github.GTNewHorizons:Angelica:1.0.0-beta44:dev")
+    runtimeOnlyNonPublishable("com.github.GTNewHorizons:Angelica:1.0.0-beta44:dev")
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.7.49-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:ForgeMultipart:1.6.8:dev") { transitive = false }
     implementation("com.github.GTNewHorizons:CodeChickenCore:1.4.3:dev") // For NEI and ForgeMultipart runtime
@@ -44,6 +44,6 @@ dependencies {
     compileOnly("com.github.GTNewHorizons:Hardcore-Ender-Expansion:1.13.0-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:LittleTiles:1.6.0:dev")
     //implementation files("libs/beddium-mc1.7.10-1.0.4-j8-dev.jar")
-    implementation files("libs/beddium-mc1.7.10-1.0.4-j21-dev.jar")
-    implementation files("libs/falsepatternlib-mc1.7.10-1.9.1-dev.jar") // For Beddium runtime
+    //implementation files("libs/beddium-mc1.7.10-1.0.4-j21-dev.jar")
+    //implementation files("libs/falsepatternlib-mc1.7.10-1.9.1-dev.jar") // For Beddium runtime
 }
