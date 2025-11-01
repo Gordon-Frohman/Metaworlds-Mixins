@@ -32,7 +32,10 @@
   	"minecraft.world.MixinWorldIntermediate",
   	"minecraft.world.MixinWorldServer",
   	"minecraft.world.storage.MixinWorldInfo",
-  	"forge.MixinFMLProxyPacket"
+  	"forge.MixinFMLNetworkHandler",
+  	"forge.MixinFMLProxyPacket",
+  	"forge.MixinOpenGui",
+  	"forge.MixinOpenGuiHandler"
   ],
   "client": [
   	"minecraft.client.MixinMinecraft",
@@ -57,7 +60,8 @@
   	"minecraft.entity.MixinEntityLivingBaseC",
   	"minecraft.entity.player.MixinEntityPlayerC",
   	"minecraft.util.MixinMovingObjectPositionC",
-  	"minecraft.world.MixinWorldC"
+  	"minecraft.world.MixinWorldC",
+  	"forge.MixinFMLNetworkHandlerC"
   ],
   "server": [
     "minecraft.util.MixinMovingObjectPositionS"

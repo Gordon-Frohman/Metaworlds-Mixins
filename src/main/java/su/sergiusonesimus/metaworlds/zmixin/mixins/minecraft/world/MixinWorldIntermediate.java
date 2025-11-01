@@ -235,8 +235,7 @@ public abstract class MixinWorldIntermediate extends MixinWorld implements IMixi
         boolean result = super.spawnEntityInWorld(par1Entity);
         World curSubWorld;
         Object proxyPlayer;
-        if (!((World) (Object) this).isRemote && !((IMixinWorld) this).isSubWorld()
-            && par1Entity instanceof EntityPlayer) {
+        if (!this.isRemote && !((IMixinWorld) this).isSubWorld() && par1Entity instanceof EntityPlayer) {
             for (Iterator<World> i$ = ((IMixinWorld) this).getSubWorlds()
                 .iterator(); i$.hasNext(); curSubWorld.spawnEntityInWorld((Entity) proxyPlayer)) {
                 curSubWorld = (World) i$.next();

@@ -3,14 +3,12 @@ package su.sergiusonesimus.metaworlds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraftforge.common.MinecraftForge;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.serverlist.ServerListButtonAdder;
-import su.sergiusonesimus.metaworlds.world.SubWorldServer;
 
 public class ClientProxy extends CommonProxy {
 
@@ -34,25 +32,7 @@ public class ClientProxy extends CommonProxy {
                 parentWorld.difficultySetting,
                 parentWorld.theProfiler);
         } else {
-            SubWorldServer.global_newSubWorldID = newSubWorldID;
-            subWorld = new SubWorldServer(
-                (WorldServer) parentWorld,
-                newSubWorldID,
-                ((WorldServer) parentWorld).func_73046_m(),
-                parentWorld.getSaveHandler(),
-                parentWorld.getWorldInfo()
-                    .getWorldName(),
-                parentWorld.provider.dimensionId,
-                new WorldSettings(
-                    0L,
-                    parentWorld.getWorldInfo()
-                        .getGameType(),
-                    false,
-                    parentWorld.getWorldInfo()
-                        .isHardcoreModeEnabled(),
-                    parentWorld.getWorldInfo()
-                        .getTerrainType()),
-                parentWorld.theProfiler);
+            subWorld = super.createSubWorld(parentWorld, newSubWorldID);
         }
         return subWorld;
     }

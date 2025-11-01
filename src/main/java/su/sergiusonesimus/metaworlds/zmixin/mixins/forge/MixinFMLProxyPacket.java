@@ -30,6 +30,7 @@ public class MixinFMLProxyPacket {
         at = @At(
             value = "INVOKE",
             target = "Lcpw/mods/fml/common/FMLLog;severe(Ljava/lang/String;[Ljava/lang/Object;)V",
+            remap = false,
             ordinal = 0,
             opcode = Opcodes.INVOKESTATIC))
     public void wrapSevereHeading(String format, Object[] data, Operation<Void> original) {
@@ -49,6 +50,7 @@ public class MixinFMLProxyPacket {
         at = @At(
             value = "INVOKE",
             target = "Lcpw/mods/fml/common/FMLLog;severe(Ljava/lang/String;[Ljava/lang/Object;)V",
+            remap = false,
             ordinal = 1,
             opcode = Opcodes.INVOKESTATIC))
     public void wrapSevereOffenders(String format, Object[] data, Operation<Void> original) {

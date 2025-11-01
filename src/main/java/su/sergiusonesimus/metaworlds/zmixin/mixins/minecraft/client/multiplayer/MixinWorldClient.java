@@ -10,6 +10,8 @@ import net.minecraft.util.IntHashMap;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,6 +63,7 @@ public class MixinWorldClient extends MixinWorld {
             proxyPlayer.getMinecraft().renderViewEntity = proxyPlayer;
 
             newSubWorld.addWorldAccess(proxyPlayer.getMinecraft().renderGlobal);
+            MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(proxyPlayer, newSubWorld));
 
             ((IMixinRenderGlobal) this.mc.renderGlobal)
                 .loadRenderersForNewSubWorld(((IMixinWorld) newSubWorld).getSubWorldID());

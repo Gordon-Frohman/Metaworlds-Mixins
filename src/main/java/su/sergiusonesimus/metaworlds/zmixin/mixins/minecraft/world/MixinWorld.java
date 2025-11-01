@@ -71,6 +71,9 @@ public abstract class MixinWorld implements IMixinWorld {
     @Shadow(remap = true)
     protected List<IWorldAccess> worldAccesses;
 
+    @Shadow(remap = true)
+    public boolean isRemote;
+
     // TODO
 
     @Shadow(remap = true)
