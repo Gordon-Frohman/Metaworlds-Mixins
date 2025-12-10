@@ -35,6 +35,9 @@ public class MinecraftSubWorldProxy extends Minecraft {
         this.entityRenderer = original.entityRenderer;
 
         this.realMinecraft = original;
+
+        // Variables not set in the original constructor, but required by some classes anyway
+        this.renderEngine = original.renderEngine;
     }
 
     @Override
