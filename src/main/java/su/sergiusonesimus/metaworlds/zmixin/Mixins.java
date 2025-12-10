@@ -72,6 +72,12 @@ public enum Mixins {
                     "MixinLittleBlockPacket",
                     "MixinPlacementHelper"))),
 
+    TERRAFIRMACRAFT_COMPAT(new Builder("Adding subworld data to TerraFirmaCraft tile entity packets")
+        .addTargetedMod(TargetedMod.TERRAFIRMACRAFT)
+        .setSide(Side.BOTH)
+        .setPhase(Phase.LATE)
+        .addMixinClasses(addPrefix("tfc.", "MixinDataBlockPacket", "MixinNetworkTileEntity"))),
+
     ;
 
     private final List<String> mixinClasses;
