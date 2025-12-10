@@ -1,99 +1,232 @@
 package su.sergiusonesimus.metaworlds.zmixin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-import org.spongepowered.asm.lib.tree.ClassNode;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
-import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import cpw.mods.fml.relauncher.FMLLaunchHandler;
 
-public class Mixins implements IMixinConfigPlugin {
+public enum Mixins {
 
-    public static final int angelicaPatchPriority = 2001;
-    public static final int beddiumPatchPriority = 901;
-    public static final int fmlPatchPriority = 1000;
+    BEDDIUM_COMPAT(new Builder(
+        "Reenable vanilla rendering for subworlds disabled by Beddium. Not the best fix, but a fix nevertheless")
+            .addTargetedMod(TargetedMod.BEDDIUM)
+            .setSide(Side.CLIENT)
+            .setPhase(Phase.LATE)
+            .addMixinClasses("beddium.MixinRenderGlobal")),
 
-    @Override
-    public void onLoad(String mixinPackage) {
+    ANGELICA_COMPAT(new Builder(
+        "Reenable vanilla rendering for subworlds disabled by Angelica. Not the best fix, but a fix nevertheless")
+            .addTargetedMod(TargetedMod.ANGELICA)
+            .setSide(Side.CLIENT)
+            .setPhase(Phase.LATE)
+            .addMixinClasses(addPrefix("angelica.", "MixinRenderGlobal", "MixinEffectRenderer"))),
 
+    HARDCORE_ENDER_EXPANSION_COMPAT(new Builder("Disable generation of additional data for player proxies")
+        .addTargetedMod(TargetedMod.HARDCORE_ENDER_EXPANSION)
+        .setSide(Side.BOTH)
+        .setPhase(Phase.LATE)
+        .addMixinClasses("hee.MixinPlayerDataHandler")),
+
+    CODECHICKENCORE_COMPAT(
+        new Builder("Adding subworld data to CodeChickenCore classes (required for ForgeMultipart integration)")
+            .addTargetedMod(TargetedMod.CODECHICKENCORE)
+            .setSide(Side.BOTH)
+            .setPhase(Phase.LATE)
+            .addMixinClasses(addPrefix("codechickenlib.", "MixinPacketCustom", "MixinRayTracer", "MixinVector3"))),
+
+    FORGEMULTIPART_COMPAT(
+        new Builder("Allow multiparts to be placed correctly on subworlds").addTargetedMod(TargetedMod.FORGEMULTIPART)
+            .setSide(Side.BOTH)
+            .setPhase(Phase.LATE)
+            .addMixinClasses(
+                addPrefix(
+                    "forgemultipart.",
+                    "MixinPlacementGrid",
+                    "MixinMicroblockRender",
+                    "MixinMicroblockPlacement",
+                    "MixinTileMultipart",
+                    "MixinMultipartSPH",
+                    "MixinMultipartCPH",
+                    "MixinMultipartSPH$$anonfun$onTickEnd",
+                    "MixinMultipartSPH$$anonfun$onTickEnd$2",
+                    "MixinMultipartSPH$$anonfun$onTickEnd$5",
+                    "MixinIconHitEffects"))),
+
+    LITTLETILES_COMPAT(
+        new Builder("Allow little tiles to be placed correctly on subworlds").addTargetedMod(TargetedMod.LITTLETILES)
+            .setSide(Side.BOTH)
+            .setPhase(Phase.LATE)
+            .addMixinClasses(
+                addPrefix(
+                    "littletiles.",
+                    "MixinLittleTileBlockPos",
+                    "MixinPreviewRenderer",
+                    "MixinItemBlockTiles",
+                    "MixinLittlePlacePacket",
+                    "MixinBlockTile",
+                    "MixinLittleBlockPacket",
+                    "MixinPlacementHelper"))),
+
+    ;
+
+    private final List<String> mixinClasses;
+    private final Supplier<Boolean> applyIf;
+    private final Phase phase;
+    private final Side side;
+    private final List<TargetedMod> targetedMods;
+    private final List<TargetedMod> excludedMods;
+
+    Mixins(Builder builder) {
+        this.mixinClasses = builder.mixinClasses;
+        this.applyIf = builder.applyIf;
+        this.side = builder.side;
+        this.targetedMods = builder.targetedMods;
+        this.excludedMods = builder.excludedMods;
+        this.phase = builder.phase;
+        if (this.targetedMods.isEmpty()) {
+            throw new RuntimeException("No targeted mods specified for " + this.name());
+        }
+        if (this.applyIf == null) {
+            throw new RuntimeException("No ApplyIf function specified for " + this.name());
+        }
     }
 
-    @Override
-    public String getRefMapperConfig() {
-        return null;
-    }
-
-    @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return true;
-    }
-
-    @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-
-    }
-
-    @Override
-    public List<String> getMixins() {
-        List<String> mixins = new ArrayList<String>();
-        if (isClassLoaded("com.ventooth.beddium.Beddium")) {
-            mixins.add("beddium.MixinRenderGlobal");
-        }
-        if (isClassLoaded("com.gtnewhorizons.angelica.AngelicaMod")) {
-            mixins.add("angelica.MixinRenderGlobal");
-            mixins.add("angelica.MixinEffectRenderer");
-        }
-        if (isClassLoaded("chylex.hee.HardcoreEnderExpansion")) {
-            mixins.add("hee.MixinPlayerDataHandler");
-        }
-        if (isClassLoaded("codechicken.core.launch.CodeChickenCorePlugin")) {
-            mixins.add("codechickenlib.MixinPacketCustom");
-            mixins.add("codechickenlib.MixinRayTracer");
-            mixins.add("codechickenlib.MixinVector3");
-        }
-        if (isClassLoaded("codechicken.multipart.minecraft.MinecraftMultipartMod")) {
-            mixins.add("forgemultipart.MixinPlacementGrid");
-            mixins.add("forgemultipart.MixinMicroblockRender");
-            mixins.add("forgemultipart.MixinMicroblockPlacement");
-            mixins.add("forgemultipart.MixinTileMultipart");
-            mixins.add("forgemultipart.MixinMultipartSPH");
-            mixins.add("forgemultipart.MixinMultipartCPH");
-            mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd");
-            mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$2");
-            mixins.add("forgemultipart.MixinMultipartSPH$$anonfun$onTickEnd$5");
-            mixins.add("forgemultipart.MixinIconHitEffects");
-        }
-        if (isClassLoaded("com.creativemd.littletiles.LTTags")) {
-            // Looking for tags class, since looking for LittleTiles class causes error for some reason
-            mixins.add("littletiles.MixinLittleTileBlockPos");
-            mixins.add("littletiles.MixinPreviewRenderer");
-            mixins.add("littletiles.MixinItemBlockTiles");
-            mixins.add("littletiles.MixinLittlePlacePacket");
-            mixins.add("littletiles.MixinBlockTile");
-            mixins.add("littletiles.MixinLittleBlockPacket");
-            mixins.add("littletiles.MixinPlacementHelper");
+    public static List<String> getEarlyMixins(Set<String> loadedCoreMods) {
+        final List<String> mixins = new ArrayList<>();
+        final List<String> notLoading = new ArrayList<>();
+        for (Mixins mixin : Mixins.values()) {
+            if (mixin.phase == Mixins.Phase.EARLY) {
+                if (mixin.shouldLoad(loadedCoreMods, Collections.emptySet())) {
+                    mixins.addAll(mixin.mixinClasses);
+                } else {
+                    notLoading.addAll(mixin.mixinClasses);
+                }
+            }
         }
         return mixins;
     }
 
-    private boolean isClassLoaded(String className) {
-        try {
-            if (Class.forName(className) != null) {
-                return true;
+    public static List<String> getLateMixins(Set<String> loadedMods) {
+        final List<String> mixins = new ArrayList<>();
+        final List<String> notLoading = new ArrayList<>();
+        for (Mixins mixin : Mixins.values()) {
+            if (mixin.phase == Mixins.Phase.LATE) {
+                if (mixin.shouldLoad(Collections.emptySet(), loadedMods)) {
+                    mixins.addAll(mixin.mixinClasses);
+                } else {
+                    notLoading.addAll(mixin.mixinClasses);
+                }
             }
-        } catch (ClassNotFoundException e) {}
-        return false;
+        }
+        return mixins;
     }
 
-    @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
+    private boolean shouldLoadSide() {
+        return side == Side.BOTH || (side == Side.SERVER && FMLLaunchHandler.side()
+            .isServer())
+            || (side == Side.CLIENT && FMLLaunchHandler.side()
+                .isClient());
     }
 
-    @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+    private boolean allModsLoaded(List<TargetedMod> targetedMods, Set<String> loadedCoreMods, Set<String> loadedMods) {
+        if (targetedMods.isEmpty()) return false;
 
+        for (TargetedMod target : targetedMods) {
+            if (target == TargetedMod.VANILLA) continue;
+
+            // Check coremod first
+            if (!loadedCoreMods.isEmpty() && target.coreModClass != null
+                && !loadedCoreMods.contains(target.coreModClass)) return false;
+            else if (!loadedMods.isEmpty() && target.modId != null && !loadedMods.contains(target.modId)) return false;
+        }
+
+        return true;
     }
 
+    private boolean noModsLoaded(List<TargetedMod> targetedMods, Set<String> loadedCoreMods, Set<String> loadedMods) {
+        if (targetedMods.isEmpty()) return true;
+
+        for (TargetedMod target : targetedMods) {
+            if (target == TargetedMod.VANILLA) continue;
+
+            // Check coremod first
+            if (!loadedCoreMods.isEmpty() && target.coreModClass != null
+                && loadedCoreMods.contains(target.coreModClass)) return false;
+            else if (!loadedMods.isEmpty() && target.modId != null && loadedMods.contains(target.modId)) return false;
+        }
+
+        return true;
+    }
+
+    private boolean shouldLoad(Set<String> loadedCoreMods, Set<String> loadedMods) {
+        return (shouldLoadSide() && applyIf.get()
+            && allModsLoaded(targetedMods, loadedCoreMods, loadedMods)
+            && noModsLoaded(excludedMods, loadedCoreMods, loadedMods));
+    }
+
+    private static class Builder {
+
+        private final List<String> mixinClasses = new ArrayList<>();
+        private Supplier<Boolean> applyIf = () -> true;
+        private Side side = Side.BOTH;
+        private Phase phase = Phase.LATE;
+        private final List<TargetedMod> targetedMods = new ArrayList<>();
+        private final List<TargetedMod> excludedMods = new ArrayList<>();
+
+        public Builder(@SuppressWarnings("unused") String description) {}
+
+        public Builder addMixinClasses(String... mixinClasses) {
+            this.mixinClasses.addAll(Arrays.asList(mixinClasses));
+            return this;
+        }
+
+        public Builder setPhase(Phase phase) {
+            this.phase = phase;
+            return this;
+        }
+
+        public Builder setSide(Side side) {
+            this.side = side;
+            return this;
+        }
+
+        public Builder setApplyIf(Supplier<Boolean> applyIf) {
+            this.applyIf = applyIf;
+            return this;
+        }
+
+        public Builder addTargetedMod(TargetedMod mod) {
+            this.targetedMods.add(mod);
+            return this;
+        }
+
+        public Builder addExcludedMod(TargetedMod mod) {
+            this.excludedMods.add(mod);
+            return this;
+        }
+    }
+
+    @SuppressWarnings("SimplifyStreamApiCallChains")
+    private static String[] addPrefix(String prefix, String... values) {
+        return Arrays.stream(values)
+            .map(s -> prefix + s)
+            .collect(Collectors.toList())
+            .toArray(new String[values.length]);
+    }
+
+    private enum Side {
+        BOTH,
+        CLIENT,
+        SERVER
+    }
+
+    private enum Phase {
+        EARLY,
+        LATE,
+    }
 }

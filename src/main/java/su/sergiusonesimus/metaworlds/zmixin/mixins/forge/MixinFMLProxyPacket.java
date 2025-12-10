@@ -13,9 +13,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import cpw.mods.fml.common.network.internal.FMLProxyPacket;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
-import su.sergiusonesimus.metaworlds.zmixin.Mixins;
+import su.sergiusonesimus.metaworlds.zmixin.MixinPriorities;
 
-@Mixin(value = FMLProxyPacket.class, priority = Mixins.fmlPatchPriority)
+@Mixin(value = FMLProxyPacket.class, priority = MixinPriorities.FORGE)
 public class MixinFMLProxyPacket {
 
     // MetaWorlds are not actually causing memory leaks, but forge is unfortunately complaining due to the way some

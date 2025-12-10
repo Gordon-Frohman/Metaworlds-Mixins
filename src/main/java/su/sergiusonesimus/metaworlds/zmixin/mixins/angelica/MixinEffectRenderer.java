@@ -15,9 +15,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.zmixin.Mixins;
+import su.sergiusonesimus.metaworlds.zmixin.MixinPriorities;
 
-@Mixin(value = EffectRenderer.class, priority = Mixins.angelicaPatchPriority)
+@Mixin(value = EffectRenderer.class, priority = MixinPriorities.ANGELICA)
 public class MixinEffectRenderer {
 
     @Shadow(remap = false)

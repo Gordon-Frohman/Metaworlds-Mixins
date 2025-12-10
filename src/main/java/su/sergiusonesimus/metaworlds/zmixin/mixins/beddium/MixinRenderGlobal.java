@@ -38,10 +38,10 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
-import su.sergiusonesimus.metaworlds.zmixin.Mixins;
+import su.sergiusonesimus.metaworlds.zmixin.MixinPriorities;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
-@Mixin(value = RenderGlobal.class, priority = Mixins.beddiumPatchPriority)
+@Mixin(value = RenderGlobal.class, priority = MixinPriorities.BEDDIUM)
 public class MixinRenderGlobal {
 
     @Shadow(remap = false)

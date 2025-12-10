@@ -42,11 +42,11 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
-import su.sergiusonesimus.metaworlds.zmixin.Mixins;
+import su.sergiusonesimus.metaworlds.zmixin.MixinPriorities;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderList;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
-@Mixin(value = RenderGlobal.class, priority = Mixins.angelicaPatchPriority)
+@Mixin(value = RenderGlobal.class, priority = MixinPriorities.ANGELICA)
 public class MixinRenderGlobal {
 
     @Shadow(remap = false)
