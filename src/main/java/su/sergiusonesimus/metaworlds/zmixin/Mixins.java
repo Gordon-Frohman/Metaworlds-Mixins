@@ -78,6 +78,20 @@ public enum Mixins {
         .setPhase(Phase.LATE)
         .addMixinClasses(addPrefix("tfc.", "MixinDataBlockPacket", "MixinNetworkTileEntity"))),
 
+    GREGTECH6_COMPAT(
+        new Builder("Adding subworld data to GregTech tile entity packets").addTargetedMod(TargetedMod.GREGTECH6)
+            .setSide(Side.BOTH)
+            .setPhase(Phase.LATE)
+            .addMixinClasses(
+                addPrefix(
+                    "gregtech6.",
+                    "MixinNetworkHandler",
+                    "MixinPacketCoordinates",
+                    "MixinPacketCoordinatesChild",
+                    "MixinPrefixBlockTileEntity",
+                    "MixinTileEntityBase",
+                    "MixinTileEntityBase01Root"))),
+
     ;
 
     private final List<String> mixinClasses;

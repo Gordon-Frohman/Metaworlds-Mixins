@@ -10,7 +10,8 @@ public enum TargetedMod {
     FORGEMULTIPART("Minecraft Multipart Plugin", "codechicken.multipart.minecraft.MinecraftMultipartMod",
         "McMultipart"),
     LITTLETILES("LittleTiles", "com.creativemd.littletiles.LittleTiles", "littletiles"),
-    TERRAFIRMACRAFT("TerraFirmaCraft", "com.bioxx.tfc.TerraFirmaCraft", "terrafirmacraft");
+    TERRAFIRMACRAFT("TerraFirmaCraft", "com.bioxx.tfc.TerraFirmaCraft", "terrafirmacraft"),
+    GREGTECH6("GregTech", "gregtech.GT6_Main", "gregtech");
 
     /** The "name" in the @Mod annotation */
     public final String modName;
