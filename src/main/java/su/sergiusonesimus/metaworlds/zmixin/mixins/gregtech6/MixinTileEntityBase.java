@@ -52,7 +52,6 @@ public class MixinTileEntityBase extends MixinTileEntity {
     }
 
     private void modifyResult(CallbackInfoReturnable<IPacket> cir) {
-        if (((IMixinWorld) this.getWorldObj()).getSubWorldID() != 0) MetaworldsMod.breakpoint();
         IPacket result = cir.getReturnValue();
         if (result instanceof PacketCoordinates cPacket) cir.setReturnValue(
             ((IMixinPacketCoordinates) cPacket).setSubworldId(((IMixinWorld) this.getWorldObj()).getSubWorldID()));
