@@ -36,7 +36,6 @@ import org.jblas.DoubleMatrix;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.client.renderer.RenderGlobalSubWorld;
@@ -618,22 +617,12 @@ public class SubWorldClient extends WorldClient implements SubWorld {
             Entry<Entity, Vec3> entry;
 
             if (canUpdate && !skipDragging) {
-                if (this.subWorldID == 8) MetaworldsMod.LOGGER.info("Ticking subworld position with count " + count);
                 i$ = this.entitiesToDrag.entrySet()
                     .iterator();
 
                 while (i$.hasNext()) {
                     entry = i$.next();
                     entry.setValue(this.transformToLocal(entry.getKey()));
-                    if (this.subWorldID == 8 && entry.getKey() instanceof EntityPlayer) {
-                        Vec3 localPos = entry.getValue();
-                        MetaworldsMod.LOGGER.info(
-                            "Player local position: " + localPos.xCoord
-                                + ", "
-                                + localPos.yCoord
-                                + ", "
-                                + localPos.zCoord);
-                    }
                 }
 
                 i$ = this.entitiesToNotDrag.entrySet()
@@ -643,21 +632,12 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                     entry = i$.next();
                     entry.setValue(this.transformToGlobal(entry.getKey()));
                 }
-            } else {
-                if (this.subWorldID == 8) MetaworldsMod.LOGGER.info("Skipped ticking subworld position");
             }
-
-            double oldY = this.getTranslationY();
-            if (this.subWorldID == 8) MetaworldsMod.LOGGER.info("Old subworld Y translation: " + oldY);
 
             this.setTranslation(
                 this.getTranslationX() + this.getMotionX() * (double) count,
                 this.getTranslationY() + this.getMotionY() * (double) count,
                 this.getTranslationZ() + this.getMotionZ() * (double) count);
-
-            if (this.subWorldID == 8)
-                MetaworldsMod.LOGGER.info("New subworld Y translation: " + this.getTranslationY());
-            if (this.subWorldID == 8) MetaworldsMod.LOGGER.info("Total Y movement: " + (this.getTranslationY() - oldY));
 
             this.setRotationYaw(this.getRotationYaw() + this.getRotationYawSpeed() * (double) count);
             this.setRotationPitch(this.getRotationPitch() + this.getRotationPitchSpeed() * (double) count);
@@ -675,21 +655,10 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                     double globalWeight = 1.0D - subworldWeight;
                     Vec3 transformedPos = this.transformToGlobal(entry.getValue());
 
-                    if (this.subWorldID == 8 && entity instanceof EntityPlayer player) {
-                        MetaworldsMod.LOGGER.info("Old player Y position: " + player.posY);
-                        oldY = player.posY;
-                    }
-
                     entity.setPosition(
                         entity.posX * globalWeight + transformedPos.xCoord * subworldWeight,
                         entity.posY * globalWeight + transformedPos.yCoord * subworldWeight,
                         entity.posZ * globalWeight + transformedPos.zCoord * subworldWeight);
-
-                    if (this.subWorldID == 8 && entity instanceof EntityPlayer player) {
-                        MetaworldsMod.LOGGER.info("New player Y position: " + player.posY);
-                        MetaworldsMod.LOGGER.info("Total player Y movement: " + (player.posY - oldY));
-                        MetaworldsMod.LOGGER.info("");
-                    }
 
                     newEntityPrevRotationYawDiff1 = entity.prevRotationYaw
                         - (entity.rotationYaw - (float) (this.getRotationYaw() - prevRotationYaw));
