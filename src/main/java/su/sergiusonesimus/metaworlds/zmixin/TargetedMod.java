@@ -3,15 +3,14 @@ package su.sergiusonesimus.metaworlds.zmixin;
 public enum TargetedMod {
 
     VANILLA("Minecraft", null),
-    BEDDIUM("Beddium", "com.ventooth.beddium.Beddium", "beddium"),
-    ANGELICA("Angelica", "com.gtnewhorizons.angelica.AngelicaMod", "angelica"),
-    HARDCORE_ENDER_EXPANSION("Hardcore Ender Expansion", "chylex.hee.HardcoreEnderExpansion", "HardcoreEnderExpansion"),
+    BEDDIUM("Beddium", "com.ventooth.beddium.asm.CoreLoadingPlugin", "beddium"),
+    ANGELICA("Angelica", "com.gtnewhorizons.angelica.loading.AngelicaTweaker", "angelica"),
+    HARDCORE_ENDER_EXPANSION("Hardcore Ender Expansion", "chylex.hee.HEECore", "HardcoreEnderExpansion"),
     CODECHICKENCORE("CodeChicken Core", "codechicken.core.launch.CodeChickenCorePlugin", "CodeChickenCore"),
-    FORGEMULTIPART("Minecraft Multipart Plugin", "codechicken.multipart.minecraft.MinecraftMultipartMod",
-        "McMultipart"),
-    LITTLETILES("LittleTiles", "com.creativemd.littletiles.LittleTiles", "littletiles"),
-    TERRAFIRMACRAFT("TerraFirmaCraft", "com.bioxx.tfc.TerraFirmaCraft", "terrafirmacraft"),
-    GREGTECH6("GregTech", "gregtech.GT6_Main", "gregtech");
+    FORGEMULTIPART("Minecraft Multipart Plugin", null, "McMultipart"),
+    LITTLETILES("LittleTiles", "com.creativemd.littletiles.LittleTilesPatchingLoader", "littletiles"),
+    TERRAFIRMACRAFT("TerraFirmaCraft", "com.bioxx.tfc.TFCASMLoadingPlugin", "terrafirmacraft"),
+    GREGTECH6("GregTech", "gregtech.asm.GT_ASM", "gregtech"),
 
     /** The "name" in the @Mod annotation */
     public final String modName;

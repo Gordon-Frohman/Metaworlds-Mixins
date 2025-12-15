@@ -12,6 +12,73 @@ import cpw.mods.fml.relauncher.FMLLaunchHandler;
 
 public enum Mixins {
 
+    VANILLA_COMMON(new Builder("").addTargetedMod(TargetedMod.VANILLA)
+        .setSide(Side.BOTH)
+        .setPhase(Phase.EARLY)
+        .addMixinClasses(
+            "minecraft.entity.MixinEntity",
+            "minecraft.entity.MixinEntityLivingBase",
+            "minecraft.entity.MixinEntityTrackerEntry",
+            "minecraft.entity.item.MixinEntityItem",
+            "minecraft.entity.player.MixinEntityPlayer",
+            "minecraft.item.MixinItemBucket",
+            "minecraft.network.MixinNetHandlerPlayServer",
+            "minecraft.network.play.client.MixinC03PacketPlayer",
+            "minecraft.network.play.server.MixinS05PacketSpawnPosition",
+            "minecraft.network.play.server.MixinS08PacketPlayerPosLook",
+            "minecraft.network.play.server.MixinS14PacketEntity",
+            "minecraft.network.play.server.MixinS15PacketEntityRelMove",
+            "minecraft.network.play.server.MixinS17PacketEntityLookMove",
+            "minecraft.network.play.server.MixinS18PacketEntityTeleport",
+            "minecraft.server.MixinMinecraftServer",
+            "minecraft.server.management.MixinPlayerManager",
+            "minecraft.server.management.MixinServerConfigurationManager",
+            "minecraft.tileentity.MixinTileEntity",
+            "minecraft.util.MixinAxisAlignedBB",
+            "minecraft.util.MixinMovingObjectPosition",
+            "minecraft.world.MixinWorld",
+            "minecraft.world.MixinWorldIntermediate",
+            "minecraft.world.MixinWorldServer",
+            "minecraft.world.storage.MixinWorldInfo",
+            "forge.MixinFMLNetworkHandler",
+            "forge.MixinFMLProxyPacket",
+            "forge.MixinOpenGui",
+            "forge.MixinOpenGuiHandler")),
+
+    VANILLA_CLIENT(new Builder("").addTargetedMod(TargetedMod.VANILLA)
+        .setSide(Side.CLIENT)
+        .setPhase(Phase.EARLY)
+        .addMixinClasses(
+            "minecraft.client.MixinMinecraft",
+            "minecraft.client.entity.MixinEntityClientPlayerMP",
+            "minecraft.client.multiplayer.MixinPlayerControllerMP",
+            "minecraft.client.multiplayer.MixinWorldClient",
+            "minecraft.client.network.MixinNetHandlerPlayClient",
+            "minecraft.client.particle.MixinEffectRenderer",
+            "minecraft.client.renderer.MixinDestroyBlockProgress",
+            "minecraft.client.renderer.MixinEntityRenderer",
+            "minecraft.client.renderer.MixinEntitySorter",
+            "minecraft.client.renderer.MixinRenderGlobal",
+            "minecraft.client.renderer.MixinRenderList",
+            "minecraft.client.renderer.MixinWorldRenderer",
+            "minecraft.client.renderer.entity.MixinRender",
+            "minecraft.client.renderer.entity.MixinRenderManager",
+            "minecraft.client.renderer.entity.MixinRenderMinecart",
+            "minecraft.client.renderer.entity.MixinRenderPainting",
+            "minecraft.client.renderer.tileentity.MixinRenderItemFrame",
+            "minecraft.client.renderer.tileentity.MixinTileEntityRendererDispatcher",
+            "minecraft.entity.MixinEntityC",
+            "minecraft.entity.MixinEntityLivingBaseC",
+            "minecraft.entity.player.MixinEntityPlayerC",
+            "minecraft.util.MixinMovingObjectPositionC",
+            "minecraft.world.MixinWorldC",
+            "forge.MixinFMLNetworkHandlerC")),
+
+    VANILLA_SERVER(new Builder("").addTargetedMod(TargetedMod.VANILLA)
+        .setSide(Side.SERVER)
+        .setPhase(Phase.EARLY)
+        .addMixinClasses("minecraft.util.MixinMovingObjectPositionS")),
+
     BEDDIUM_COMPAT(new Builder(
         "Reenable vanilla rendering for subworlds disabled by Beddium. Not the best fix, but a fix nevertheless")
             .addTargetedMod(TargetedMod.BEDDIUM)
