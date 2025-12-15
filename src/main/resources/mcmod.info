@@ -19,6 +19,7 @@
         	"before:CodeChickenCore",
         	"before:McMultipart",
         	"before:HardcoreEnderExpansion",
-        	"before:littletiles" ]
+        	"before:littletiles",
+        	"before:backhand" ]
     }
 ]

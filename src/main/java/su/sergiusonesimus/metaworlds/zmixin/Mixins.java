@@ -159,6 +159,17 @@ public enum Mixins {
                     "MixinTileEntityBase",
                     "MixinTileEntityBase01Root"))),
 
+    NO_BACKHAND(new Builder("Mixins only applied if Backhand is not installed").addTargetedMod(TargetedMod.VANILLA)
+        .addExcludedMod(TargetedMod.BACKHAND)
+        .setSide(Side.CLIENT)
+        .setPhase(Phase.EARLY)
+        .addMixinClasses("minecraft.client.MixinMinecraftNoBackhand")),
+
+    BACKHAND(new Builder("Allowing backhand to interact with subworld blocks").addTargetedMod(TargetedMod.BACKHAND)
+        .setSide(Side.CLIENT)
+        .setPhase(Phase.EARLY)
+        .addMixinClasses("backhand.MixinMinecraft")),
+
     ;
 
     private final List<String> mixinClasses;

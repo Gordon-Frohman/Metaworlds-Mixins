@@ -11,6 +11,7 @@ public enum TargetedMod {
     LITTLETILES("LittleTiles", "com.creativemd.littletiles.LittleTilesPatchingLoader", "littletiles"),
     TERRAFIRMACRAFT("TerraFirmaCraft", "com.bioxx.tfc.TFCASMLoadingPlugin", "terrafirmacraft"),
     GREGTECH6("GregTech", "gregtech.asm.GT_ASM", "gregtech"),
+    BACKHAND("Backhand", "xonin.backhand.coremod.BackhandLoadingPlugin", "backhand");
 
     /** The "name" in the @Mod annotation */
     public final String modName;

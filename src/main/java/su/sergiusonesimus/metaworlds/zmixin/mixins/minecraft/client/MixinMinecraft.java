@@ -30,12 +30,13 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import su.sergiusonesimus.metaworlds.client.MinecraftSubWorldProxy;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.compat.CompatUtil;
+import su.sergiusonesimus.metaworlds.zmixin.MixinPriorities;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.multiplayer.IMixinPlayerControllerMP;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinMovingObjectPosition;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
-@Mixin(value = Minecraft.class)
+@Mixin(value = Minecraft.class, priority = MixinPriorities.BACKHAND)
 public abstract class MixinMinecraft {
 
     @Shadow(remap = true)
