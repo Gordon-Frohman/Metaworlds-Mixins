@@ -9,8 +9,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.tileentity.IMixinTileEntity;
@@ -45,11 +47,12 @@ public abstract class MixinTileEntityRendererDispatcher {
 
     // renderTileEntity
 
-    @Redirect(
+    @WrapOperation(
         method = "renderTileEntity(Lnet/minecraft/tileentity/TileEntity;F)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;getDistanceFrom(DDD)D"))
-    private double redirectGetDistanceFromGlobal(TileEntity tileEntity, double x, double y, double z) {
-        return ((IMixinTileEntity) tileEntity).getDistanceFromGlobal(x, y, z);
+    private double redirectGetDistanceFromGlobal(TileEntity instance, double x, double y, double z,
+        Operation<Double> original) {
+        return ((IMixinTileEntity) instance).getDistanceFromGlobal(x, y, z);
     }
 
     @Inject(

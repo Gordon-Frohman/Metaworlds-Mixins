@@ -13,8 +13,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -40,13 +42,14 @@ public abstract class MixinEntityRenderer {
         return ((IMixinAxisAlignedBB) original).getTransformedToGlobalBoundingBox(storedEntity.worldObj);
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "getMouseOver",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/util/AxisAlignedBB;calculateIntercept(Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;"))
-    private MovingObjectPosition calculateInterceptLocal(AxisAlignedBB aabb, Vec3 vec3, Vec3 vec32) {
-        return ((IMixinAxisAlignedBB) aabb).calculateIntercept(vec3, vec32, storedEntity.worldObj);
+    private MovingObjectPosition calculateInterceptLocal(AxisAlignedBB instance, Vec3 vec3, Vec3 vec32,
+        Operation<MovingObjectPosition> original) {
+        return ((IMixinAxisAlignedBB) instance).calculateIntercept(vec3, vec32, storedEntity.worldObj);
     }
 
     // renderWorld

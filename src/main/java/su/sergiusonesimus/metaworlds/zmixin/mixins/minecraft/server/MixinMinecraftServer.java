@@ -35,6 +35,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
@@ -106,73 +108,76 @@ public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
     // To get an empty MinecraftServer variable
     // Firstly - disable the original constructor
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;field_152366_X:Lnet/minecraft/server/management/PlayerProfileCache;",
             opcode = Opcodes.PUTFIELD))
-    private void disableField_152366_X(MinecraftServer minecraftServer, PlayerProfileCache value) {
+    private void disableField_152366_X(MinecraftServer minecraftServer, PlayerProfileCache value,
+        Operation<Void> original) {
         // Do nothing
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;mcServer:Lnet/minecraft/server/MinecraftServer;",
             opcode = Opcodes.PUTSTATIC))
-    private void disableMcServer(MinecraftServer value) {
+    private void disableMcServer(MinecraftServer value, Operation<Void> original) {
         // Do nothing
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;serverProxy:Ljava/net/Proxy;",
             opcode = Opcodes.PUTFIELD))
-    private void disableServerProxy(MinecraftServer minecraftServer, Proxy value) {
+    private void disableServerProxy(MinecraftServer minecraftServer, Proxy value, Operation<Void> original) {
         // Do nothing
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;anvilFile:Ljava/io/File;",
             opcode = Opcodes.PUTFIELD))
-    private void disableAnvilFile(MinecraftServer minecraftServer, File value) {
+    private void disableAnvilFile(MinecraftServer minecraftServer, File value, Operation<Void> original) {
         // Do nothing
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;field_147144_o:Lnet/minecraft/network/NetworkSystem;",
             opcode = Opcodes.PUTFIELD))
-    private void disableField_147144_o(MinecraftServer minecraftServer, NetworkSystem value) {
+    private void disableField_147144_o(MinecraftServer minecraftServer, NetworkSystem value, Operation<Void> original) {
         // Do nothing
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;commandManager:Lnet/minecraft/command/ICommandManager;",
             opcode = Opcodes.PUTFIELD))
-    private void disableCommandManager(MinecraftServer minecraftServer, ICommandManager value) {
+    private void disableCommandManager(MinecraftServer minecraftServer, ICommandManager value,
+        Operation<Void> original) {
         // Do nothing
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;anvilConverterForAnvilFile:Lnet/minecraft/world/storage/ISaveFormat;",
             opcode = Opcodes.PUTFIELD))
-    private void disableAnvilConverterForAnvilFile(MinecraftServer minecraftServer, ISaveFormat value) {
+    private void disableAnvilConverterForAnvilFile(MinecraftServer minecraftServer, ISaveFormat value,
+        Operation<Void> original) {
         // Do nothing
     }
 
@@ -183,13 +188,14 @@ public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
         return (AnvilSaveConverter) MinecraftServer.mcServer.anvilConverterForAnvilFile;
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;field_152364_T:Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;",
             opcode = Opcodes.PUTFIELD))
-    private void disableField_152364_T(MinecraftServer minecraftServer, YggdrasilAuthenticationService value) {
+    private void disableField_152364_T(MinecraftServer minecraftServer, YggdrasilAuthenticationService value,
+        Operation<Void> original) {
         // Do nothing
     }
 
@@ -200,44 +206,46 @@ public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
         return MinecraftServer.mcServer.field_152364_T;
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;field_147143_S:Lcom/mojang/authlib/minecraft/MinecraftSessionService;",
             opcode = Opcodes.PUTFIELD))
-    private void disableField_147143_S(MinecraftServer minecraftServer, MinecraftSessionService value) {
+    private void disableField_147143_S(MinecraftServer minecraftServer, MinecraftSessionService value,
+        Operation<Void> original) {
         // Do nothing
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "INVOKE",
             target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;"))
     public MinecraftSessionService disableCreateMinecraftSessionService(
-        YggdrasilAuthenticationService yggdrasilAuthenticationService) {
+        YggdrasilAuthenticationService yggdrasilAuthenticationService, Operation<MinecraftSessionService> original) {
         // Do nothing, yet
         return null;
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/MinecraftServer;field_152365_W:Lcom/mojang/authlib/GameProfileRepository;",
             opcode = Opcodes.PUTFIELD))
-    private void disableField_152365_W(MinecraftServer minecraftServer, GameProfileRepository value) {
+    private void disableField_152365_W(MinecraftServer minecraftServer, GameProfileRepository value,
+        Operation<Void> original) {
         // Do nothing
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "INVOKE",
             target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createProfileRepository()Lcom/mojang/authlib/GameProfileRepository;"))
     public GameProfileRepository disableCreateProfileRepository(
-        YggdrasilAuthenticationService yggdrasilAuthenticationService) {
+        YggdrasilAuthenticationService yggdrasilAuthenticationService, Operation<GameProfileRepository> original) {
         // Do nothing, yet
         return null;
     }

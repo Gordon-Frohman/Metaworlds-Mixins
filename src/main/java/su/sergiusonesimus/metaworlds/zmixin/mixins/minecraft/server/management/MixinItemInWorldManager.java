@@ -8,7 +8,9 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.compat.CompatUtil;
 
@@ -26,13 +28,13 @@ public abstract class MixinItemInWorldManager {
     @Shadow(remap = true)
     public abstract boolean isCreative();
 
-    @Redirect(
+    @WrapOperation(
         method = "onBlockClicked",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;isCurrentToolAdventureModeExempt(III)Z"))
-    public boolean isCurrentToolAdventureModeExempt(EntityPlayer player, int p_82246_1_, int p_82246_2_,
-        int p_82246_3_) {
+    public boolean isCurrentToolAdventureModeExempt(EntityPlayer player, int p_82246_1_, int p_82246_2_, int p_82246_3_,
+        Operation<Boolean> original) {
         return CompatUtil.isCurrentToolAdventureModeExempt(
             player,
             p_82246_1_,

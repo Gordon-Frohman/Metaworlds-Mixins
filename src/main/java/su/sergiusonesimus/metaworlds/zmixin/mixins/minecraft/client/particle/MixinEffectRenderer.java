@@ -30,7 +30,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -272,22 +271,22 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
         this.storedTarget = target;
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "addBlockHitEffects(IIILnet/minecraft/util/MovingObjectPosition;)V",
         remap = false,
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/client/particle/EffectRenderer;worldObj:Lnet/minecraft/world/World;",
             opcode = Opcodes.GETFIELD))
-    private World getWorldObj(EffectRenderer effectRenderer) {
+    private World getWorldObj(EffectRenderer instance, Operation<World> original) {
         return ((IMixinMovingObjectPosition) storedTarget).getWorld();
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "addBlockHitEffects(IIILnet/minecraft/util/MovingObjectPosition;)V",
         remap = false,
         at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/EffectRenderer;addBlockHitEffects(IIII)V"))
-    private void addBlockHitEffects(EffectRenderer effectRenderer, int x, int y, int z, int side) {
+    private void addBlockHitEffects(EffectRenderer instance, int x, int y, int z, int side, Operation<Void> original) {
         ((IMixinEffectRenderer) this)
             .addBlockHitEffects(x, y, z, side, ((IMixinMovingObjectPosition) storedTarget).getWorld());
     }

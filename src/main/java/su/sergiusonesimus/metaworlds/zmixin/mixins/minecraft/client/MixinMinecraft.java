@@ -299,6 +299,10 @@ public abstract class MixinMinecraft {
 
     // Now we should probably have an empty Minecraft variable
 
+    private WorldClient getCorrectWorld() {
+        return (WorldClient) ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld();
+    }
+
     // func_147115_a
 
     @WrapOperation(
@@ -308,7 +312,7 @@ public abstract class MixinMinecraft {
             target = "Lnet/minecraft/client/Minecraft;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;",
             opcode = Opcodes.GETFIELD))
     private WorldClient wrapTheWorld(Minecraft instance, Operation<WorldClient> original) {
-        return (WorldClient) ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld();
+        return getCorrectWorld();
     }
 
     @WrapOperation(
@@ -318,8 +322,7 @@ public abstract class MixinMinecraft {
             target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;onPlayerDamageBlock(IIII)V"))
     private void wrapOnPlayerDamageBlock(PlayerControllerMP instance, int x, int y, int z, int side,
         Operation<Void> original) {
-        ((IMixinPlayerControllerMP) instance)
-            .onPlayerDamageBlock(x, y, z, side, ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld());
+        ((IMixinPlayerControllerMP) instance).onPlayerDamageBlock(x, y, z, side, getCorrectWorld());
     }
 
     @WrapOperation(
@@ -329,92 +332,75 @@ public abstract class MixinMinecraft {
             target = "Lnet/minecraft/client/entity/EntityClientPlayerMP;isCurrentToolAdventureModeExempt(III)Z"))
     private boolean wrapIsCurrentToolAdventureModeExempt(EntityClientPlayerMP instance, int p_82246_1_, int p_82246_2_,
         int p_82246_3_, Operation<Boolean> original) {
-        return CompatUtil.isCurrentToolAdventureModeExempt(
-            instance,
-            p_82246_1_,
-            p_82246_2_,
-            p_82246_3_,
-            ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld());
+        return CompatUtil
+            .isCurrentToolAdventureModeExempt(instance, p_82246_1_, p_82246_2_, p_82246_3_, getCorrectWorld());
     }
 
     // func_147116_af
 
-    @Redirect(
+    @WrapOperation(
         method = { "func_147116_af", "func_147121_ag" },
         at = @At(
             value = "FIELD",
             opcode = Opcodes.GETFIELD,
             target = "Lnet/minecraft/client/Minecraft;thePlayer:Lnet/minecraft/client/entity/EntityClientPlayerMP;",
             ordinal = 1))
-    private EntityClientPlayerMP redirectThePlayer(Minecraft instance) {
-        return (EntityClientPlayerMP) ((IMixinEntity) this.thePlayer)
-            .getProxyPlayer(((IMixinMovingObjectPosition) this.objectMouseOver).getWorld());
+    private EntityClientPlayerMP redirectThePlayer(Minecraft instance, Operation<EntityClientPlayerMP> original) {
+        return (EntityClientPlayerMP) ((IMixinEntity) this.thePlayer).getProxyPlayer(getCorrectWorld());
     }
 
-    @Redirect(
+    @WrapOperation(
         method = { "func_147116_af", "func_147121_ag" },
         at = @At(
             value = "FIELD",
             opcode = Opcodes.GETFIELD,
             target = "Lnet/minecraft/client/Minecraft;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;",
             ordinal = 0))
-    private WorldClient redirectTheWorld1(Minecraft instance) {
-        return (WorldClient) ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld();
+    private WorldClient redirectTheWorld1(Minecraft instance, Operation<WorldClient> original) {
+        return getCorrectWorld();
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "func_147116_af",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;clickBlock(IIII)V"))
-    private void redirectClickBlock(PlayerControllerMP instance, int x, int y, int z, int side) {
-        ((IMixinPlayerControllerMP) instance)
-            .clickBlock(x, y, z, side, ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld());
+    private void redirectClickBlock(PlayerControllerMP instance, int x, int y, int z, int side,
+        Operation<Void> original) {
+        ((IMixinPlayerControllerMP) instance).clickBlock(x, y, z, side, getCorrectWorld());
     }
 
     // func_147121_ag
 
-    @Redirect(
+    @WrapOperation(
         method = "func_147121_ag",
         at = @At(
             value = "FIELD",
             opcode = Opcodes.GETFIELD,
             target = "Lnet/minecraft/client/Minecraft;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;",
             ordinal = 1))
-    private WorldClient redirectTheWorld2(Minecraft instance) {
-        return (WorldClient) ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld();
-    }
-
-    @Redirect(
-        method = "func_147121_ag",
-        at = @At(
-            value = "FIELD",
-            opcode = Opcodes.GETFIELD,
-            target = "Lnet/minecraft/client/Minecraft;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;",
-            ordinal = 3))
-    private WorldClient redirectTheWorld3(Minecraft instance) {
-        return (WorldClient) ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld();
+    private WorldClient redirectTheWorld2(Minecraft instance, Operation<WorldClient> original) {
+        return getCorrectWorld();
     }
 
     // runTick
 
-    @Redirect(
+    @WrapOperation(
         method = "runTick()V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/WorldClient;updateEntities()V"))
-    public void updateEntities(WorldClient world) {
+    public void updateEntities(WorldClient world, Operation<Void> original) {
         for (World curWorld : ((IMixinWorld) this.theWorld).getWorlds()) curWorld.updateEntities();
     }
 
     // func_147112_ai
 
-    @Redirect(
+    @WrapOperation(
         method = "func_147112_ai",
         at = @At(
             value = "FIELD",
             opcode = Opcodes.GETFIELD,
             target = "Lnet/minecraft/client/Minecraft;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;"))
-    private WorldClient redirectTheWorld4(Minecraft instance) {
-        return ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld() != null
-            ? (WorldClient) ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld()
-            : this.theWorld;
+    private WorldClient redirectTheWorld4(Minecraft instance, Operation<WorldClient> original) {
+        WorldClient world = getCorrectWorld();
+        return world != null ? world : this.theWorld;
     }
 
     // toggleFullscreen

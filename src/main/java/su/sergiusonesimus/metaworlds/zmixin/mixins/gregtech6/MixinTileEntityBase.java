@@ -11,7 +11,6 @@ import gregapi.tileentity.base.TileEntityBase04MultiTileEntities;
 import gregapi.tileentity.base.TileEntityBase06Covers;
 import gregapi.tileentity.notick.TileEntityBase03MultiTileEntities;
 import gregapi.tileentity.notick.TileEntityBase04Covers;
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.gregtech6.IMixinPacketCoordinates;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.tileentity.MixinTileEntity;

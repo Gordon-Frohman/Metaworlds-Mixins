@@ -8,6 +8,7 @@ import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
@@ -23,12 +24,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.compat.CompatUtil;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.multiplayer.IMixinPlayerControllerMP;
@@ -330,62 +330,57 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
         storedWorld = worldIn;
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "onPlayerRightClick",
         at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;xCoord:D", opcode = Opcodes.GETFIELD))
-    private double getXcoord(Vec3 instance) {
+    private double getXcoord(Vec3 instance, Operation<Double> original) {
         return transformedVec.xCoord;
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "onPlayerRightClick",
         at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;yCoord:D", opcode = Opcodes.GETFIELD))
-    private double getYcoord(Vec3 instance) {
+    private double getYcoord(Vec3 instance, Operation<Double> original) {
         return transformedVec.yCoord;
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "onPlayerRightClick",
         at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;zCoord:D", opcode = Opcodes.GETFIELD))
-    private double getZcoord(Vec3 instance) {
+    private double getZcoord(Vec3 instance, Operation<Double> original) {
         return transformedVec.zCoord;
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "onPlayerRightClick",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
             opcode = Opcodes.GETFIELD))
-    private NetHandlerPlayClient getNetClientHandlerOnPlayerRightClick(PlayerControllerMP instance) {
+    private NetHandlerPlayClient getNetClientHandlerOnPlayerRightClick(PlayerControllerMP instance,
+        Operation<NetHandlerPlayClient> original) {
         return ((EntityClientPlayerMP) ((IMixinEntity) (Object) this.mc.thePlayer)
             .getProxyPlayer(storedWorld)).sendQueue;
     }
 
-    // attackEntity
+    // attackEntity, interactWithEntitySendPacket
 
-    @Redirect(
-        method = "attackEntity",
+    private EntityPlayer storedPlayer;
+
+    @Inject(method = { "attackEntity", "interactWithEntitySendPacket" }, at = @At(value = "HEAD"))
+    private void storePlayer(EntityPlayer player, Entity targetEntity, CallbackInfo ci) {
+        storedPlayer = player;
+    }
+
+    @WrapOperation(
+        method = { "attackEntity", "interactWithEntitySendPacket" },
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
             opcode = Opcodes.GETFIELD))
     private NetHandlerPlayClient getNetClientHandlerAttackEntity(PlayerControllerMP instance,
-        @Local EntityPlayer player) {
-        return ((EntityClientPlayerMP) player).sendQueue;
-    }
-
-    // interactWithEntitySendPacket
-
-    @Redirect(
-        method = "interactWithEntitySendPacket",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
-            opcode = Opcodes.GETFIELD))
-    private NetHandlerPlayClient getNetClientHandlerInteractWithEntitySendPacket(PlayerControllerMP instance,
-        @Local EntityPlayer player) {
-        return ((EntityClientPlayerMP) player).sendQueue;
+        Operation<NetHandlerPlayClient> original) {
+        return ((EntityClientPlayerMP) storedPlayer).sendQueue;
     }
 
 }

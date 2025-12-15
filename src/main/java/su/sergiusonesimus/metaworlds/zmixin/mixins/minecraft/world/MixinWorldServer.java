@@ -20,8 +20,10 @@ import net.minecraftforge.event.world.WorldEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
@@ -39,35 +41,35 @@ public class MixinWorldServer extends MixinWorld {
 
     // TODO
 
-    @Redirect(
+    @WrapOperation(
         method = "<init>",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraftforge/common/DimensionManager;setWorld(ILnet/minecraft/world/WorldServer;)V"))
-    public void setWorld(int par1int, WorldServer par2worldServer) {
+    public void setWorld(int par1int, WorldServer par2worldServer, Operation<Void> original) {
         if (!((IMixinWorld) par2worldServer).isSubWorld()) DimensionManager.setWorld(par1int, par2worldServer);
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "tick()V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setWorldTime(J)V"))
-    public void setWorldTimeRedirected(WorldInfo worldInfo, long par1long) {
+    public void setWorldTimeRedirected(WorldInfo worldInfo, long par1long, Operation<Void> original) {
         this.setWorldTime(par1long);
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "tick()V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;incrementTotalWorldTime(J)V"))
-    public void incrementTotalWorldTime(WorldInfo worldInfo, long par1long) {
+    public void incrementTotalWorldTime(WorldInfo worldInfo, long par1long, Operation<Void> original) {
         this.worldInfo.incrementTotalWorldTime(this.getTotalWorldTime() + 1L);
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "tick()V",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/GameRules;getGameRuleBooleanValue(Ljava/lang/String;)Z"))
-    public boolean getGameRuleBooleanValue(GameRules gameRules, String string) {
+    public boolean getGameRuleBooleanValue(GameRules gameRules, String string, Operation<Boolean> original) {
         if (string == "doMobSpawning") return !this.isSubWorld() && this.getGameRules()
             .getGameRuleBooleanValue("doMobSpawning");
         else return gameRules.getGameRuleBooleanValue(string);

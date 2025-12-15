@@ -18,7 +18,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
@@ -117,19 +116,19 @@ public class MixinWorldClient extends MixinWorld {
         }
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "spawnEntityInWorld",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
-    public boolean spawnEntityInWorld(World world, Entity entity) {
+    public boolean spawnEntityInWorld(WorldClient instance, Entity entity, Operation<Boolean> original) {
         return ((IMixinWorldIntermediate) this).spawnEntityInWorldIntermediate(entity);
     }
 
-    @Redirect(
+    @WrapOperation(
         method = "removeEntity",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;removeEntity(Lnet/minecraft/entity/Entity;)V"))
-    public void removeEntity(World world, Entity entity) {
+    public void removeEntity(WorldClient instance, Entity entity, Operation<Void> original) {
         ((IMixinWorldIntermediate) this).removeEntityIntermediate(entity);
     }
 
