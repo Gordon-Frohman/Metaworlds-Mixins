@@ -1504,7 +1504,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public void updateWeatherBody() {}
 
     public long getTotalWorldTime() {
-        return this.m_parentWorld.getTotalWorldTime();
+        return this.m_parentWorld == null ? 0 : this.m_parentWorld.getTotalWorldTime();
     }
 
     public Chunk createNewChunk(int xPos, int zPos) {

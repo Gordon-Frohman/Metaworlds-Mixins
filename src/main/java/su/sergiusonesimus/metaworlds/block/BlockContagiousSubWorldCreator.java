@@ -7,22 +7,14 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityHanging;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
 
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
+import su.sergiusonesimus.metaworlds.util.DisplacementHelper;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class BlockContagiousSubWorldCreator extends Block {
@@ -70,15 +62,19 @@ public class BlockContagiousSubWorldCreator extends Block {
             if (isValid) {
                 World newWorld1 = ((IMixinWorld) par1World).createSubWorld();
                 SubWorld newSubWorld = (SubWorld) newWorld1;
+                newSubWorld.setCenter(
+                    ((IMixinWorld) par1World)
+                        .transformToGlobal((double) par2 + 0.5D, (double) par3 + 0.5D, (double) par4 + 0.5D));
+                newSubWorld.setTranslation(
+                    ((IMixinWorld) par1World).getTranslationX(),
+                    ((IMixinWorld) par1World).getTranslationY(),
+                    ((IMixinWorld) par1World).getTranslationZ());
+                newSubWorld.setRotationYaw(((IMixinWorld) par1World).getRotationYaw());
+                newSubWorld.setRotationPitch(((IMixinWorld) par1World).getRotationPitch());
+                newSubWorld.setRotationRoll(((IMixinWorld) par1World).getRotationRoll());
+                newSubWorld.setScaling(((IMixinWorld) par1World).getScaling());
 
                 ChunkCoordinates curCoord;
-                Block block;
-                int blockMetadata;
-                NBTTagCompound nbttag;
-                TileEntity oldTE;
-                TileEntity newTE;
-                Entity oldEntity;
-                Entity newEntity;
 
                 List<List<ChunkCoordinates>> listsToParse = new ArrayList<List<ChunkCoordinates>>();
                 listsToParse.add(blocksToTake);
@@ -88,62 +84,8 @@ public class BlockContagiousSubWorldCreator extends Block {
                     Iterator<ChunkCoordinates> i$ = currentList.iterator();
                     while (i$.hasNext()) {
                         curCoord = (ChunkCoordinates) i$.next();
-                        block = par1World.getBlock(curCoord.posX, curCoord.posY, curCoord.posZ);
-                        blockMetadata = par1World.getBlockMetadata(curCoord.posX, curCoord.posY, curCoord.posZ);
-                        newWorld1.setBlock(curCoord.posX, curCoord.posY, curCoord.posZ, block, blockMetadata, 0);
-                        newWorld1
-                            .setBlockMetadataWithNotify(curCoord.posX, curCoord.posY, curCoord.posZ, blockMetadata, 0);
-                        if (block.hasTileEntity(blockMetadata)) {
-                            oldTE = par1World.getTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ);
-                            nbttag = new NBTTagCompound();
-                            oldTE.writeToNBT(nbttag);
-                            oldTE.invalidate();
-                            boolean blockIsMultipart = MetaworldsMod.isForgeMultipartLoaded
-                                && ForgeMultipartIntegration.isBlockMultipart(block);
-                            if (blockIsMultipart) {
-                                newTE = ForgeMultipartIntegration.createTileEntityFromNBT(nbttag);
-                            } else {
-                                newTE = TileEntity.createAndLoadEntity(nbttag);
-                            }
-                            newWorld1.setTileEntity(curCoord.posX, curCoord.posY, curCoord.posZ, newTE);
-                            if (blockIsMultipart) {
-                                final TileEntity teToSend = newTE;
-                                ForgeMultipartIntegration.scheduleTask(newWorld1, new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        ForgeMultipartIntegration.sendMultipartUpdate(newWorld1, teToSend);
-                                    }
-
-                                }, 30); // Providing enough delay to let the client world load all the chunks
-                            }
-                        }
-                        List<Entity> entities = par1World.getEntitiesWithinAABBExcludingEntity(
-                            null,
-                            AxisAlignedBB
-                                .getBoundingBox(
-                                    curCoord.posX,
-                                    curCoord.posY,
-                                    curCoord.posZ,
-                                    curCoord.posX + 1,
-                                    curCoord.posY + 1,
-                                    curCoord.posZ + 1)
-                                .expand(0.25, 0.25, 0.25));
-                        Iterator<Entity> j$ = entities.iterator();
-                        while (j$.hasNext()) {
-                            oldEntity = j$.next();
-                            if (oldEntity instanceof EntityMinecart || (oldEntity instanceof EntityHanging
-                                && (((EntityHanging) oldEntity).field_146063_b == curCoord.posX
-                                    && ((EntityHanging) oldEntity).field_146064_c == curCoord.posY
-                                    && ((EntityHanging) oldEntity).field_146062_d == curCoord.posZ))) {
-                                nbttag = new NBTTagCompound();
-                                newEntity = EntityList
-                                    .createEntityByName(EntityList.getEntityString(oldEntity), newWorld1);
-                                newEntity.copyDataFrom(oldEntity, true);
-                                newWorld1.spawnEntityInWorld(newEntity);
-                                oldEntity.setDead();
-                            }
-                        }
+                        DisplacementHelper
+                            .displaceBlock(curCoord.posX, curCoord.posY, curCoord.posZ, par1World, newWorld1);
                     }
                 }
 
@@ -156,20 +98,6 @@ public class BlockContagiousSubWorldCreator extends Block {
                         par1World.setBlockToAir(curCoord.posX, curCoord.posY, curCoord.posZ);
                     }
                 }
-
-                newSubWorld.setCenter(
-                    ((IMixinWorld) par1World).getCenterX(),
-                    ((IMixinWorld) par1World).getCenterY(),
-                    ((IMixinWorld) par1World).getCenterZ());
-                newSubWorld.setTranslation(
-                    ((IMixinWorld) par1World).getTranslationX(),
-                    ((IMixinWorld) par1World).getTranslationY(),
-                    ((IMixinWorld) par1World).getTranslationZ());
-                newSubWorld.setRotationYaw(((IMixinWorld) par1World).getRotationYaw());
-                newSubWorld.setRotationPitch(((IMixinWorld) par1World).getRotationPitch());
-                newSubWorld.setRotationRoll(((IMixinWorld) par1World).getRotationRoll());
-                newSubWorld.setScaling(((IMixinWorld) par1World).getScaling());
-                newSubWorld.setCenter((double) par2 + 0.5D, (double) par3 + 0.5D, (double) par4 + 0.5D);
             }
 
             isBusy = false;

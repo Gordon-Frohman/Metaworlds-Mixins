@@ -20,7 +20,10 @@ import net.minecraftforge.event.world.WorldEvent.Load;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
+import su.sergiusonesimus.metaworlds.event.BlockDisplacementEvent;
+import su.sergiusonesimus.metaworlds.event.EntityDisplacementEvent;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.util.RotationHelper;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -89,6 +92,24 @@ public class EventHookContainer {
             if (canUpdate) {
                 event.canUpdate = true;
             }
+        }
+    }
+
+    @SubscribeEvent
+    public void onBlockReintegration(BlockDisplacementEvent event) {
+        if (event.world instanceof SubWorld && !(event.targetWorld instanceof SubWorld)) {
+            event.blockMetadata = RotationHelper.getRotatedMeta(event.world, event.x, event.y, event.z);
+            if (event.tileEntity != null) {
+                RotationHelper.rotateTileEntity(event.world, event.x, event.y, event.z);
+                event.tileEntity = event.world.getTileEntity(event.x, event.y, event.z);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onEntityReintegration(EntityDisplacementEvent event) {
+        if (event.sourceWorld instanceof SubWorld && !(event.targetWorld instanceof SubWorld)) {
+            RotationHelper.rotateEntity(event.sourceWorld, event.entity);
         }
     }
 }
