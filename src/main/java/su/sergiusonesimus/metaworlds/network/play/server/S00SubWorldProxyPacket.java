@@ -19,20 +19,20 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import su.sergiusonesimus.metaworlds.GeneralPacketPipeline;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
+import su.sergiusonesimus.metaworlds.network.GeneralPacketPipeline;
 import su.sergiusonesimus.metaworlds.network.MetaWorldsPacket;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 
-public class SSubWorldProxyPacket extends MetaWorldsPacket {
+public class S00SubWorldProxyPacket extends MetaWorldsPacket {
 
     public int subWorldID;
     public Packet actualPacket;
     public NetworkManager networkManager;
 
-    public SSubWorldProxyPacket() {}
+    public S00SubWorldProxyPacket() {}
 
-    public SSubWorldProxyPacket(int targetSubWorld, Packet packetToWrap, NetworkManager networkManagerPar) {
+    public S00SubWorldProxyPacket(int targetSubWorld, Packet packetToWrap, NetworkManager networkManagerPar) {
         this.subWorldID = targetSubWorld;
         this.actualPacket = packetToWrap;
 

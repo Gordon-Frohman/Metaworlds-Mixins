@@ -48,10 +48,10 @@ import org.jblas.DoubleMatrix;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.network.play.server.S02SubWorldDestroyPacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S03SubWorldUpdatePacket;
 import su.sergiusonesimus.metaworlds.server.MinecraftServerSubWorldProxy;
 import su.sergiusonesimus.metaworlds.util.SubWorldTransformationHandler;
 import su.sergiusonesimus.metaworlds.world.chunk.ChunkSubWorld;
@@ -156,7 +156,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         }
 
         MetaMagicNetwork.dispatcher.sendToDimension(
-            new SubWorldDestroyPacket(1, new Integer[] { Integer.valueOf(this.getSubWorldID()) }),
+            new S02SubWorldDestroyPacket(1, new Integer[] { Integer.valueOf(this.getSubWorldID()) }),
             this.provider.dimensionId);
     }
 
@@ -827,8 +827,8 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         }
     }
 
-    protected SubWorldUpdatePacket getUpdatePacket(SubWorldServer par1SubWorldServer, int updateFlags) {
-        return new SubWorldUpdatePacket(par1SubWorldServer, updateFlags);
+    protected S03SubWorldUpdatePacket getUpdatePacket(SubWorldServer par1SubWorldServer, int updateFlags) {
+        return new S03SubWorldUpdatePacket(par1SubWorldServer, updateFlags);
     }
 
     public void setWorldTime(long par1) {}

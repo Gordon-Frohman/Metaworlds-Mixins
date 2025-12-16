@@ -9,8 +9,8 @@ import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ClientTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import su.sergiusonesimus.metaworlds.compat.packet.ControllerKeyUpdatePacket;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.network.play.client.C02ControllerKeyUpdatePacket;
 
 public class SubWorldControllerKeyHandler {
 
@@ -119,7 +119,7 @@ public class SubWorldControllerKeyHandler {
 
             if (updateRequired) {
                 MetaMagicNetwork.dispatcher.sendToServer(
-                    new ControllerKeyUpdatePacket(
+                    new C02ControllerKeyUpdatePacket(
                         ctrl_down,
                         s_Down,
                         d_Down,

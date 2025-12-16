@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.compat.packet;
+package su.sergiusonesimus.metaworlds.network.play.client;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -9,18 +9,18 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import su.sergiusonesimus.metaworlds.admin.MwAdminContainer;
 
-public class MwAdminClientActionPacket implements IMessage {
+public class C03MwAdminClientActionPacket implements IMessage {
 
     private int actionId;
     private int actionParameter;
 
-    public MwAdminClientActionPacket() {}
+    public C03MwAdminClientActionPacket() {}
 
-    public MwAdminClientActionPacket(int parActionId) {
+    public C03MwAdminClientActionPacket(int parActionId) {
         this(parActionId, 0);
     }
 
-    public MwAdminClientActionPacket(int parActionId, int parActionParameter) {
+    public C03MwAdminClientActionPacket(int parActionId, int parActionParameter) {
         this.actionId = parActionId;
         this.actionParameter = parActionParameter;
     }
@@ -37,10 +37,10 @@ public class MwAdminClientActionPacket implements IMessage {
         buf.writeInt(this.actionParameter);
     }
 
-    public static class Handler implements IMessageHandler<MwAdminClientActionPacket, IMessage> {
+    public static class Handler implements IMessageHandler<C03MwAdminClientActionPacket, IMessage> {
 
         @Override
-        public IMessage onMessage(MwAdminClientActionPacket message, MessageContext ctx) {
+        public IMessage onMessage(C03MwAdminClientActionPacket message, MessageContext ctx) {
             if (!ctx.side.isClient()) {
                 EntityPlayerMP player = ((NetHandlerPlayServer) ctx.getServerHandler()).playerEntity;
                 if (player.openContainer != null && player.openContainer instanceof MwAdminContainer) {

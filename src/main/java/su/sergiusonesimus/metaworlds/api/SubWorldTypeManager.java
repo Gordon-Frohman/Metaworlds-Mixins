@@ -7,7 +7,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S01SubWorldCreatePacket;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -78,7 +78,7 @@ public class SubWorldTypeManager {
         }
 
         public IMessage getCreatePacket(SubWorld sourceWorld) {
-            return new SubWorldCreatePacket(
+            return new S01SubWorldCreatePacket(
                 1,
                 new Integer[] { Integer.valueOf(sourceWorld.getSubWorldID()) },
                 new Integer[] { Integer.valueOf(SubWorldTypeManager.getTypeID(sourceWorld.getSubWorldType())) });

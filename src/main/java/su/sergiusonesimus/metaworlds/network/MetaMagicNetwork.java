@@ -5,15 +5,15 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import su.sergiusonesimus.metaworlds.compat.packet.ControllerKeyUpdatePacket;
-import su.sergiusonesimus.metaworlds.compat.packet.MwAdminClientActionPacket;
-import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiInitPacket;
-import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiSubWorldInfosPacket;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldSpawnPositionPacket;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
-import su.sergiusonesimus.metaworlds.compat.packet.UpdateServerHealthPacket;
+import su.sergiusonesimus.metaworlds.network.play.client.C01UpdateServerHealthPacket;
+import su.sergiusonesimus.metaworlds.network.play.client.C02ControllerKeyUpdatePacket;
+import su.sergiusonesimus.metaworlds.network.play.client.C03MwAdminClientActionPacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S01SubWorldCreatePacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S02SubWorldDestroyPacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S03SubWorldUpdatePacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S04SubWorldSpawnPositionPacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S05MwAdminGuiInitPacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S06MwAdminGuiSubWorldInfosPacket;
 
 public final class MetaMagicNetwork {
 
@@ -26,20 +26,23 @@ public final class MetaMagicNetwork {
         // Registration
         if (!registered) {
             // Client -> Server
-            registerPacket(ControllerKeyUpdatePacket.Handler.class, ControllerKeyUpdatePacket.class, Side.SERVER);
-            registerPacket(MwAdminClientActionPacket.Handler.class, MwAdminClientActionPacket.class, Side.SERVER);
-            registerPacket(UpdateServerHealthPacket.Handler.class, UpdateServerHealthPacket.class, Side.SERVER);
+            registerPacket(C01UpdateServerHealthPacket.Handler.class, C01UpdateServerHealthPacket.class, Side.SERVER);
+            registerPacket(C02ControllerKeyUpdatePacket.Handler.class, C02ControllerKeyUpdatePacket.class, Side.SERVER);
+            registerPacket(C03MwAdminClientActionPacket.Handler.class, C03MwAdminClientActionPacket.class, Side.SERVER);
 
             // Server -> Client
-            registerPacket(MwAdminGuiInitPacket.Handler.class, MwAdminGuiInitPacket.class, Side.CLIENT);
+            registerPacket(S01SubWorldCreatePacket.Handler.class, S01SubWorldCreatePacket.class, Side.CLIENT);
+            registerPacket(S02SubWorldDestroyPacket.Handler.class, S02SubWorldDestroyPacket.class, Side.CLIENT);
+            registerPacket(S03SubWorldUpdatePacket.Handler.class, S03SubWorldUpdatePacket.class, Side.CLIENT);
             registerPacket(
-                MwAdminGuiSubWorldInfosPacket.Handler.class,
-                MwAdminGuiSubWorldInfosPacket.class,
+                S04SubWorldSpawnPositionPacket.Handler.class,
+                S04SubWorldSpawnPositionPacket.class,
                 Side.CLIENT);
-            registerPacket(SubWorldCreatePacket.Handler.class, SubWorldCreatePacket.class, Side.CLIENT);
-            registerPacket(SubWorldDestroyPacket.Handler.class, SubWorldDestroyPacket.class, Side.CLIENT);
-            registerPacket(SubWorldUpdatePacket.Handler.class, SubWorldUpdatePacket.class, Side.CLIENT);
-            registerPacket(SubWorldSpawnPositionPacket.Handler.class, SubWorldSpawnPositionPacket.class, Side.CLIENT);
+            registerPacket(S05MwAdminGuiInitPacket.Handler.class, S05MwAdminGuiInitPacket.class, Side.CLIENT);
+            registerPacket(
+                S06MwAdminGuiSubWorldInfosPacket.Handler.class,
+                S06MwAdminGuiSubWorldInfosPacket.class,
+                Side.CLIENT);
 
             registered = true;
         }

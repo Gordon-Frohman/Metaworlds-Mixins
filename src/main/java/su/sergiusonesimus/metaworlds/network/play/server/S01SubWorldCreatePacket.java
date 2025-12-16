@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.compat.packet;
+package su.sergiusonesimus.metaworlds.network.play.server;
 
 import net.minecraftforge.common.DimensionManager;
 
@@ -11,15 +11,15 @@ import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
-public class SubWorldCreatePacket implements IMessage {
+public class S01SubWorldCreatePacket implements IMessage {
 
     public int subWorldsCount;
     public Integer[] subWorldIDs;
     public Integer[] subWorldTypes;
 
-    public SubWorldCreatePacket() {}
+    public S01SubWorldCreatePacket() {}
 
-    public SubWorldCreatePacket(int numSubWorldsToCreate, Integer[] subWorldIDsArray) {
+    public S01SubWorldCreatePacket(int numSubWorldsToCreate, Integer[] subWorldIDsArray) {
         this.subWorldsCount = numSubWorldsToCreate;
         this.subWorldIDs = subWorldIDsArray;
         this.subWorldTypes = new Integer[subWorldsCount];
@@ -30,7 +30,7 @@ public class SubWorldCreatePacket implements IMessage {
         }
     }
 
-    public SubWorldCreatePacket(int numSubWorldsToCreate, Integer[] subWorldIDsArray, Integer[] subWorldTypesArray) {
+    public S01SubWorldCreatePacket(int numSubWorldsToCreate, Integer[] subWorldIDsArray, Integer[] subWorldTypesArray) {
         this.subWorldsCount = numSubWorldsToCreate;
         this.subWorldIDs = subWorldIDsArray;
         this.subWorldTypes = subWorldTypesArray;
@@ -58,10 +58,10 @@ public class SubWorldCreatePacket implements IMessage {
         }
     }
 
-    public static class Handler implements IMessageHandler<SubWorldCreatePacket, IMessage> {
+    public static class Handler implements IMessageHandler<S01SubWorldCreatePacket, IMessage> {
 
         @Override
-        public IMessage onMessage(SubWorldCreatePacket message, MessageContext ctx) {
+        public IMessage onMessage(S01SubWorldCreatePacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
                 for (int i = 0; i < message.subWorldsCount; ++i) {
                     Integer curSubWorldID = message.subWorldIDs[i];

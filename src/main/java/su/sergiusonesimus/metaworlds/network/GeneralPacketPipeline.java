@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds;
+package su.sergiusonesimus.metaworlds.network;
 
 import java.lang.ref.WeakReference;
 import java.util.EnumMap;
@@ -17,7 +17,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
-import su.sergiusonesimus.metaworlds.network.MetaWorldsPacket;
 
 @ChannelHandler.Sharable
 public class GeneralPacketPipeline extends FMLIndexedMessageToMessageCodec<MetaWorldsPacket> {

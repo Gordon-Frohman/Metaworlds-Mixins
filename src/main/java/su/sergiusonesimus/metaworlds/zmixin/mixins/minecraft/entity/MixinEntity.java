@@ -11,6 +11,7 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -34,6 +35,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
+import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.network.play.server.S07WorldBelowFeetPacket;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
@@ -240,6 +243,9 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
     protected void setPosition(double par1, double par3, double par5) {}
 
     @Shadow(remap = true)
+    public void addVelocity(double x, double y, double z) {}
+
+    @Shadow(remap = true)
     public void setRotation(float par1, float par2) {}
 
     @Shadow(remap = true)
@@ -365,6 +371,7 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
             }
 
             this.worldBelowFeet = newWorldBelowFeet;
+
             if (this.worldBelowFeet != null && ((IMixinWorld) this.worldBelowFeet).isSubWorld()) {
                 ((SubWorld) this.worldBelowFeet).registerEntityToDrag((Entity) (Object) this);
             }
@@ -380,7 +387,7 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
     }
 
     public World getWorldBelowFeet() {
-        return this.worldBelowFeet == null ? ((Entity) (Object) this).worldObj : this.worldBelowFeet;
+        return this.worldBelowFeet == null ? this.worldObj : this.worldBelowFeet;
     }
 
     public int compareTo(Entity par1Obj) {
@@ -388,11 +395,11 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
     }
 
     public Vec3 getGlobalPos() {
-        return ((IMixinWorld) ((Entity) (Object) this).worldObj).transformToGlobal((Entity) (Object) this);
+        return ((IMixinWorld) this.worldObj).transformToGlobal((Entity) (Object) this);
     }
 
     public Vec3 getLocalPos(World referenceWorld) {
-        Entity eThis = ((Entity) (Object) this);
+        Entity eThis = (Entity) (Object) this;
         return referenceWorld == null && eThis.worldObj == null
             ? Vec3.createVectorHelper(eThis.posX, eThis.posY, eThis.posZ)
             : (referenceWorld != eThis.worldObj && referenceWorld != null
@@ -401,8 +408,7 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
     }
 
     public double getGlobalRotationYaw() {
-        return (double) ((Entity) (Object) this).rotationYaw
-            - ((IMixinWorld) ((Entity) (Object) this).worldObj).getRotationYaw();
+        return (double) ((Entity) (Object) this).rotationYaw - ((IMixinWorld) this.worldObj).getRotationYaw();
     }
 
     public double getDistanceSq(double par1, double par3, double par5, World targetWorld) {
@@ -412,8 +418,7 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
     }
 
     public boolean getIsJumping() {
-        return ((Entity) (Object) this) instanceof EntityLivingBase ? (((EntityLivingBase) (Object) this)).isJumping
-            : false;
+        return ((Entity) (Object) this) instanceof EntityLivingBase elb ? elb.isJumping : false;
     }
 
     public EntityPlayer getProxyPlayer(World subWorld) {
@@ -544,16 +549,16 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
                 curAABB = (AxisAlignedBB) list.get(i);
 
                 AxisAlignedBB offsetBB = this.boundingBox.copy();
-                if (curAABB instanceof OrientedBB
-                    && (((IMixinWorld) ((OrientedBB) curAABB).lastTransformedBy).getRotationPitch() % 360 != 0
-                        || ((IMixinWorld) ((OrientedBB) curAABB).lastTransformedBy).getRotationRoll() % 360 != 0)) {
+                if (curAABB instanceof OrientedBB obb
+                    && (((IMixinWorld) obb.lastTransformedBy).getRotationPitch() % 360 != 0
+                        || ((IMixinWorld) obb.lastTransformedBy).getRotationRoll() % 360 != 0)) {
                     offsetBB = offsetBB.addCoord(x, 0, z);
                 }
 
                 yOffset = (curAABB).calculateYOffset(offsetBB, y);
                 if (yOffset != y) {
                     y = yOffset;
-                    if (curAABB instanceof OrientedBB) newWorldBelowFeet = ((OrientedBB) curAABB).lastTransformedBy;
+                    if (curAABB instanceof OrientedBB obb) newWorldBelowFeet = obb.lastTransformedBy;
                     else newWorldBelowFeet = this.worldObj;
                 }
             }
@@ -570,7 +575,8 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
             int j;
 
             for (j = 0; j < list.size(); ++j) {
-                x = ((AxisAlignedBB) list.get(j)).calculateXOffset(this.boundingBox, x);
+                x = list.get(j)
+                    .calculateXOffset(this.boundingBox, x);
             }
 
             this.boundingBox.offset(x, 0.0D, 0.0D);
@@ -582,7 +588,8 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
             }
 
             for (j = 0; j < list.size(); ++j) {
-                z = ((AxisAlignedBB) list.get(j)).calculateZOffset(this.boundingBox, z);
+                z = list.get(j)
+                    .calculateZOffset(this.boundingBox, z);
             }
 
             this.boundingBox.offset(0.0D, 0.0D, z);
@@ -611,7 +618,8 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
                     .getCollidingBoundingBoxes((Entity) (Object) this, this.boundingBox.addCoord(xStored, y, zStored));
 
                 for (k = 0; k < list.size(); ++k) {
-                    y = ((AxisAlignedBB) list.get(k)).calculateYOffset(this.boundingBox, y);
+                    y = list.get(k)
+                        .calculateYOffset(this.boundingBox, y);
                 }
 
                 this.boundingBox.offset(0.0D, y, 0.0D);
@@ -623,7 +631,8 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
                 }
 
                 for (k = 0; k < list.size(); ++k) {
-                    x = ((AxisAlignedBB) list.get(k)).calculateXOffset(this.boundingBox, x);
+                    x = list.get(k)
+                        .calculateXOffset(this.boundingBox, x);
                 }
 
                 this.boundingBox.offset(x, 0.0D, 0.0D);
@@ -635,7 +644,8 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
                 }
 
                 for (k = 0; k < list.size(); ++k) {
-                    z = ((AxisAlignedBB) list.get(k)).calculateZOffset(this.boundingBox, z);
+                    z = list.get(k)
+                        .calculateZOffset(this.boundingBox, z);
                 }
 
                 this.boundingBox.offset(0.0D, 0.0D, z);
@@ -654,7 +664,8 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
                     y = (double) (-this.stepHeight);
 
                     for (k = 0; k < list.size(); ++k) {
-                        y = ((AxisAlignedBB) list.get(k)).calculateYOffset(this.boundingBox, y);
+                        y = list.get(k)
+                            .calculateYOffset(this.boundingBox, y);
                     }
 
                     this.boundingBox.offset(0.0D, y, 0.0D);
@@ -1034,8 +1045,7 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
                                 if ((modXcount + modYcount + modZcount) > 0) {
                                     Vec3 moveVec = this.getGlobalPos()
                                         .subtract(entityPos);
-                                    ((Entity) (Object) this)
-                                        .addVelocity(moveVec.xCoord, moveVec.yCoord, moveVec.zCoord);
+                                    this.addVelocity(moveVec.xCoord, moveVec.yCoord, moveVec.zCoord);
                                     this.setRotation(
                                         this.rotationYaw - (float) subworld.getRotationYawSpeed(),
                                         this.rotationPitch);

@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.compat.packet;
+package su.sergiusonesimus.metaworlds.network.play.server;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,15 +17,15 @@ import su.sergiusonesimus.metaworlds.admin.MwAdminContainer;
 import su.sergiusonesimus.metaworlds.admin.MwAdminContainer.SaveGameInfo;
 import su.sergiusonesimus.metaworlds.admin.MwAdminContainer.SaveGameSubWorldInfo;
 
-public class MwAdminGuiInitPacket implements IMessage {
+public class S05MwAdminGuiInitPacket implements IMessage {
 
     public List<MwAdminContainer.SaveGameInfo> saveGameInfos;
 
     // The basic, no-argument constructor MUST be included to use the new automated handling
-    public MwAdminGuiInitPacket() {}
+    public S05MwAdminGuiInitPacket() {}
 
     // We need to initialize our data, so provide a suitable constructor:
-    public MwAdminGuiInitPacket(List<MwAdminContainer.SaveGameInfo> parInfosList) {
+    public S05MwAdminGuiInitPacket(List<MwAdminContainer.SaveGameInfo> parInfosList) {
         this.saveGameInfos = parInfosList;
     }
 
@@ -67,10 +67,10 @@ public class MwAdminGuiInitPacket implements IMessage {
         }
     }
 
-    public static class Handler implements IMessageHandler<MwAdminGuiInitPacket, IMessage> {
+    public static class Handler implements IMessageHandler<S05MwAdminGuiInitPacket, IMessage> {
 
         @Override
-        public IMessage onMessage(MwAdminGuiInitPacket message, MessageContext ctx) {
+        public IMessage onMessage(S05MwAdminGuiInitPacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
                 if (Minecraft.getMinecraft().currentScreen instanceof GuiMwAdmin) {
                     ((GuiMwAdmin) Minecraft

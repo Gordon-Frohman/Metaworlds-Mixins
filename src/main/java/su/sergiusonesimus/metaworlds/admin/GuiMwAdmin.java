@@ -6,8 +6,8 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.player.EntityPlayer;
 
-import su.sergiusonesimus.metaworlds.compat.packet.MwAdminClientActionPacket;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.network.play.client.C03MwAdminClientActionPacket;
 
 public class GuiMwAdmin extends GuiScreen {
 
@@ -26,7 +26,7 @@ public class GuiMwAdmin extends GuiScreen {
 
     public GuiMwAdmin(EntityPlayer playerPar) {
         this.guiPlayer = playerPar;
-        MetaMagicNetwork.dispatcher.sendToServer(new MwAdminClientActionPacket(1));
+        MetaMagicNetwork.dispatcher.sendToServer(new C03MwAdminClientActionPacket(1));
     }
 
     public void initGui() {
@@ -123,7 +123,7 @@ public class GuiMwAdmin extends GuiScreen {
 
     protected void actionPerformed(GuiButton buttonPar) {
         if (buttonPar.id == 1) {
-            MetaMagicNetwork.dispatcher.sendToServer(new MwAdminClientActionPacket(1));
+            MetaMagicNetwork.dispatcher.sendToServer(new C03MwAdminClientActionPacket(1));
             this.currentTab = 1;
             this.buttonTeleportToSubWorld.visible = true;
             this.buttonTeleportSubWorldHere.visible = true;
@@ -135,7 +135,7 @@ public class GuiMwAdmin extends GuiScreen {
         }
 
         if (buttonPar.id == 2) {
-            MetaMagicNetwork.dispatcher.sendToServer(new MwAdminClientActionPacket(2));
+            MetaMagicNetwork.dispatcher.sendToServer(new C03MwAdminClientActionPacket(2));
             this.currentTab = 2;
             this.buttonTeleportToSubWorld.visible = false;
             this.buttonTeleportSubWorldHere.visible = false;
@@ -150,14 +150,14 @@ public class GuiMwAdmin extends GuiScreen {
         if (buttonPar.id >= 101 && buttonPar.id <= 106 && this.guiSubWorldsList.selElement != -1) {
             actionPar = ((MwAdminContainer.AdminSubWorldInfo) this.guiSubWorldsList.adminSubWorldInfos
                 .get(this.guiSubWorldsList.selElement)).subWorldId;
-            MetaMagicNetwork.dispatcher.sendToServer(new MwAdminClientActionPacket(buttonPar.id, actionPar));
+            MetaMagicNetwork.dispatcher.sendToServer(new C03MwAdminClientActionPacket(buttonPar.id, actionPar));
         }
 
         if (buttonPar.id == 201 && this.guiImportWorldsList.selElement != -1
             && this.guiImportSubWorldsList.selElement != -1
             && this.guiImportSubWorldsList.selElement < this.guiImportSubWorldsList.subWorldsList.size()) {
             actionPar = this.guiImportWorldsList.selElement & 4095 | this.guiImportSubWorldsList.selElement << 12;
-            MetaMagicNetwork.dispatcher.sendToServer(new MwAdminClientActionPacket(buttonPar.id, actionPar));
+            MetaMagicNetwork.dispatcher.sendToServer(new C03MwAdminClientActionPacket(buttonPar.id, actionPar));
         }
     }
 

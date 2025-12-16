@@ -35,9 +35,10 @@ import su.sergiusonesimus.metaworlds.entity.EntitySubWorldController;
 import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 import su.sergiusonesimus.metaworlds.integrations.LittleTilesIntegration;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
+import su.sergiusonesimus.metaworlds.network.GeneralPacketPipeline;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
-import su.sergiusonesimus.metaworlds.network.play.client.CSubWorldProxyPacket;
-import su.sergiusonesimus.metaworlds.network.play.server.SSubWorldProxyPacket;
+import su.sergiusonesimus.metaworlds.network.play.client.C00SubWorldProxyPacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S00SubWorldProxyPacket;
 import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
 
@@ -116,8 +117,8 @@ public class MetaworldsMod {
 
         networkHandler = new GeneralPacketPipeline();
         networkHandler.initialize(CHANNEL2);
-        networkHandler.addDiscriminator(251, CSubWorldProxyPacket.class);
-        networkHandler.addDiscriminator(250, SSubWorldProxyPacket.class);
+        networkHandler.addDiscriminator(251, C00SubWorldProxyPacket.class);
+        networkHandler.addDiscriminator(250, S00SubWorldProxyPacket.class);
 
         NetworkRegistry.INSTANCE.registerGuiHandler("metaworlds", new MwAdminGuiHandler());
         SubWorldImportProgressUpdater swipu = new SubWorldImportProgressUpdater();

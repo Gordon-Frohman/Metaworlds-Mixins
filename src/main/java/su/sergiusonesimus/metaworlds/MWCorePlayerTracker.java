@@ -19,9 +19,9 @@ import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager.SubWorldInfoProvider;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldCreatePacket;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldDestroyPacket;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.network.play.server.S01SubWorldCreatePacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S02SubWorldDestroyPacket;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -62,7 +62,7 @@ public class MWCorePlayerTracker {
     }
 
     private void regenerateSubworlds(EntityPlayer player) {
-        MetaMagicNetwork.dispatcher.sendTo(new SubWorldDestroyPacket(-1, (Integer[]) null), (EntityPlayerMP) player);
+        MetaMagicNetwork.dispatcher.sendTo(new S02SubWorldDestroyPacket(-1, (Integer[]) null), (EntityPlayerMP) player);
         sendSubWorldCreationPackets(player);
     }
 
@@ -80,7 +80,7 @@ public class MWCorePlayerTracker {
             }
         }
         MetaMagicNetwork.dispatcher.sendTo(
-            new SubWorldCreatePacket(batchPacket.size(), batchPacket.toArray(new Integer[0])),
+            new S01SubWorldCreatePacket(batchPacket.size(), batchPacket.toArray(new Integer[0])),
             (EntityPlayerMP) player);
         for (SubWorld subworld : separatePackets) {
             MetaMagicNetwork.dispatcher

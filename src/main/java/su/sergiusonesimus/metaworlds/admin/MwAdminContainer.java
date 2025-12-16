@@ -22,9 +22,9 @@ import net.minecraftforge.common.DimensionManager;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiInitPacket;
-import su.sergiusonesimus.metaworlds.compat.packet.MwAdminGuiSubWorldInfosPacket;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.network.play.server.S05MwAdminGuiInitPacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S06MwAdminGuiSubWorldInfosPacket;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
@@ -103,7 +103,7 @@ public class MwAdminContainer extends Container {
             }
         }
 
-        MetaMagicNetwork.dispatcher.sendTo(new MwAdminGuiInitPacket(this.saveList), this.player);
+        MetaMagicNetwork.dispatcher.sendTo(new S05MwAdminGuiInitPacket(this.saveList), this.player);
     }
 
     public void sendSubWorldInfos() {
@@ -145,7 +145,7 @@ public class MwAdminContainer extends Container {
         }
 
         MetaMagicNetwork.dispatcher
-            .sendTo(new MwAdminGuiSubWorldInfosPacket(this.adminSubWorldInfos.values()), this.player);
+            .sendTo(new S06MwAdminGuiSubWorldInfosPacket(this.adminSubWorldInfos.values()), this.player);
     }
 
     public void teleportPlayerToSubWorld(int subWorldId) {
@@ -185,7 +185,7 @@ public class MwAdminContainer extends Container {
                 info.isSpawned = true;
                 info.dimensionId = ((WorldServer) restoredWorld).provider.dimensionId;
                 MetaMagicNetwork.dispatcher
-                    .sendTo(new MwAdminGuiSubWorldInfosPacket(this.adminSubWorldInfos.values()), this.player);
+                    .sendTo(new S06MwAdminGuiSubWorldInfosPacket(this.adminSubWorldInfos.values()), this.player);
             }
         }
     }
@@ -201,7 +201,7 @@ public class MwAdminContainer extends Container {
 
             info.isSpawned = false;
             MetaMagicNetwork.dispatcher
-                .sendTo(new MwAdminGuiSubWorldInfosPacket(this.adminSubWorldInfos.values()), this.player);
+                .sendTo(new S06MwAdminGuiSubWorldInfosPacket(this.adminSubWorldInfos.values()), this.player);
         }
     }
 

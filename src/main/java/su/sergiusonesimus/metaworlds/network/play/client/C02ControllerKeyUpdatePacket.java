@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.compat.packet;
+package su.sergiusonesimus.metaworlds.network.play.client;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -9,7 +9,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import su.sergiusonesimus.metaworlds.controls.ControllerKeyServerStore;
 
-public class ControllerKeyUpdatePacket implements IMessage {
+public class C02ControllerKeyUpdatePacket implements IMessage {
 
     private boolean ctrlDown;
 
@@ -22,9 +22,9 @@ public class ControllerKeyUpdatePacket implements IMessage {
     private boolean rlDown;
     private boolean rrDown;
 
-    public ControllerKeyUpdatePacket() {}
+    public C02ControllerKeyUpdatePacket() {}
 
-    public ControllerKeyUpdatePacket(boolean isCtrlDown, boolean isSDown, boolean isDDown, boolean isADown,
+    public C02ControllerKeyUpdatePacket(boolean isCtrlDown, boolean isSDown, boolean isDDown, boolean isADown,
         boolean isWDown, boolean isSpaceDown, boolean isRLDown, boolean isRRDown) {
         this.ctrlDown = isCtrlDown;
 
@@ -66,10 +66,10 @@ public class ControllerKeyUpdatePacket implements IMessage {
         buf.writeBoolean(this.rrDown);
     }
 
-    public static class Handler implements IMessageHandler<ControllerKeyUpdatePacket, IMessage> {
+    public static class Handler implements IMessageHandler<C02ControllerKeyUpdatePacket, IMessage> {
 
         @Override
-        public IMessage onMessage(ControllerKeyUpdatePacket message, MessageContext ctx) {
+        public IMessage onMessage(C02ControllerKeyUpdatePacket message, MessageContext ctx) {
             if (!ctx.side.isClient()) {
                 EntityPlayerMP player = ((NetHandlerPlayServer) ctx.getServerHandler()).playerEntity;
                 ControllerKeyServerStore keyStore = (ControllerKeyServerStore) player.getExtendedProperties("LCTRL");

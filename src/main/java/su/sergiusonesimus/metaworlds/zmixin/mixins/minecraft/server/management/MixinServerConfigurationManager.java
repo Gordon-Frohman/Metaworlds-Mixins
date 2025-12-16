@@ -45,8 +45,8 @@ import com.mojang.authlib.GameProfile;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldSpawnPositionPacket;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.network.play.server.S04SubWorldSpawnPositionPacket;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS05PacketSpawnPosition;
@@ -170,7 +170,7 @@ public class MixinServerConfigurationManager {
                     double posYOnSubWorld = subWorldData.getDouble("posYOnSubWorld");
                     double posZOnSubWorld = subWorldData.getDouble("posZOnSubWorld");
                     MetaMagicNetwork.dispatcher.sendTo(
-                        new SubWorldSpawnPositionPacket(posXOnSubWorld, posYOnSubWorld, posZOnSubWorld),
+                        new S04SubWorldSpawnPositionPacket(posXOnSubWorld, posYOnSubWorld, posZOnSubWorld),
                         player);
                     ((IMixinEntity) player).setWorldBelowFeet(newWorldBelowFeet);
                     Vec3 transformedPos = ((IMixinWorld) newWorldBelowFeet)

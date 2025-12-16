@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.compat.packet;
+package su.sergiusonesimus.metaworlds.network.play.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,15 +15,15 @@ import su.sergiusonesimus.metaworlds.admin.GuiMwAdmin;
 import su.sergiusonesimus.metaworlds.admin.MwAdminContainer;
 import su.sergiusonesimus.metaworlds.admin.MwAdminContainer.AdminSubWorldInfo;
 
-public class MwAdminGuiSubWorldInfosPacket implements IMessage {
+public class S06MwAdminGuiSubWorldInfosPacket implements IMessage {
 
     Collection<MwAdminContainer.AdminSubWorldInfo> adminSubWorldInfos;
 
     // The basic, no-argument constructor MUST be included to use the new automated handling
-    public MwAdminGuiSubWorldInfosPacket() {}
+    public S06MwAdminGuiSubWorldInfosPacket() {}
 
     // We need to initialize our data, so provide a suitable constructor:
-    public MwAdminGuiSubWorldInfosPacket(Collection<MwAdminContainer.AdminSubWorldInfo> parAdminSubWorldInfos) {
+    public S06MwAdminGuiSubWorldInfosPacket(Collection<MwAdminContainer.AdminSubWorldInfo> parAdminSubWorldInfos) {
         this.adminSubWorldInfos = parAdminSubWorldInfos;
     }
 
@@ -54,10 +54,10 @@ public class MwAdminGuiSubWorldInfosPacket implements IMessage {
         }
     }
 
-    public static class Handler implements IMessageHandler<MwAdminGuiSubWorldInfosPacket, IMessage> {
+    public static class Handler implements IMessageHandler<S06MwAdminGuiSubWorldInfosPacket, IMessage> {
 
         @Override
-        public IMessage onMessage(MwAdminGuiSubWorldInfosPacket message, MessageContext ctx) {
+        public IMessage onMessage(S06MwAdminGuiSubWorldInfosPacket message, MessageContext ctx) {
             // BattlemodeHookContainerClass.interactWith = message.data.getBoolean("intw");
             if (!ctx.side.isServer()) {
                 if (Minecraft.getMinecraft().currentScreen instanceof GuiMwAdmin) {

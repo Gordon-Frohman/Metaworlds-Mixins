@@ -39,7 +39,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.client.renderer.RenderGlobalSubWorld;
-import su.sergiusonesimus.metaworlds.compat.packet.SubWorldUpdatePacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S03SubWorldUpdatePacket;
 import su.sergiusonesimus.metaworlds.util.SubWorldTransformationHandler;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
@@ -82,7 +82,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     private double maxRadius = 0.0D;
     private String subWorldType = SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT;
     private RenderGlobalSubWorld renderGlobalSubWorld;
-    private SubWorldUpdatePacket updatePacketToHandle;
+    private S03SubWorldUpdatePacket updatePacketToHandle;
     private List<Entity> entitiesWithinAABBExcludingEntityResult = new ArrayList<Entity>();
 
     public boolean canUpdate = false;
@@ -124,11 +124,11 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         }
     }
 
-    public SubWorldUpdatePacket getUpdatePacketToHandle() {
+    public S03SubWorldUpdatePacket getUpdatePacketToHandle() {
         return this.updatePacketToHandle;
     }
 
-    public void setUpdatePacketToHandle(SubWorldUpdatePacket newPacket) {
+    public void setUpdatePacketToHandle(S03SubWorldUpdatePacket newPacket) {
         this.updatePacketToHandle = newPacket;
     }
 
@@ -599,7 +599,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         if (this.getUpdatePacketToHandle() != null) {
             this.getUpdatePacketToHandle()
                 .executeOnTick();
-            this.setUpdatePacketToHandle((SubWorldUpdatePacket) null);
+            this.setUpdatePacketToHandle((S03SubWorldUpdatePacket) null);
         }
 
         this.tickPosition(1);

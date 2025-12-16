@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.compat.packet;
+package su.sergiusonesimus.metaworlds.network.play.server;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -21,7 +21,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.entity.I
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
-public class SubWorldUpdatePacket implements IMessage {
+public class S03SubWorldUpdatePacket implements IMessage {
 
     public int subWorldId;
     public int flags;
@@ -51,9 +51,9 @@ public class SubWorldUpdatePacket implements IMessage {
     public int maxZ;
     public String subWorldType;
 
-    public SubWorldUpdatePacket() {}
+    public S03SubWorldUpdatePacket() {}
 
-    public SubWorldUpdatePacket(SubWorldServer par1SubWorldServer, int updateFlags) {
+    public S03SubWorldUpdatePacket(SubWorldServer par1SubWorldServer, int updateFlags) {
         this.subWorldId = par1SubWorldServer.getSubWorldID();
         this.flags = updateFlags;
         this.serverTick = MinecraftServer.getServer()
@@ -174,7 +174,7 @@ public class SubWorldUpdatePacket implements IMessage {
         }
     }
 
-    public boolean containsSameEntityIDAs(SubWorldUpdatePacket par1Packet) {
+    public boolean containsSameEntityIDAs(S03SubWorldUpdatePacket par1Packet) {
         return par1Packet.subWorldId == this.subWorldId;
     }
 
@@ -254,10 +254,10 @@ public class SubWorldUpdatePacket implements IMessage {
         }
     }
 
-    public static class Handler implements IMessageHandler<SubWorldUpdatePacket, IMessage> {
+    public static class Handler implements IMessageHandler<S03SubWorldUpdatePacket, IMessage> {
 
         @Override
-        public IMessage onMessage(SubWorldUpdatePacket message, MessageContext ctx) {
+        public IMessage onMessage(S03SubWorldUpdatePacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
                 EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
                 World targetWorld = ((IMixinWorld) player.worldObj).getSubWorld(message.subWorldId);

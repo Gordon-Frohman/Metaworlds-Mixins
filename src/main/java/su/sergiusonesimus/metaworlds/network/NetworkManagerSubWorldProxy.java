@@ -10,10 +10,9 @@ import net.minecraft.network.Packet;
 
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.GenericFutureListener;
-import su.sergiusonesimus.metaworlds.GeneralPacketPipeline;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
-import su.sergiusonesimus.metaworlds.network.play.client.CSubWorldProxyPacket;
-import su.sergiusonesimus.metaworlds.network.play.server.SSubWorldProxyPacket;
+import su.sergiusonesimus.metaworlds.network.play.client.C00SubWorldProxyPacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S00SubWorldProxyPacket;
 
 public class NetworkManagerSubWorldProxy extends NetworkManager {
 
@@ -38,13 +37,13 @@ public class NetworkManagerSubWorldProxy extends NetworkManager {
         GeneralPacketPipeline pipeline = MetaworldsMod.instance.networkHandler;
 
         if (isClientSide) {
-            CSubWorldProxyPacket proxyPacket = new CSubWorldProxyPacket(
+            C00SubWorldProxyPacket proxyPacket = new C00SubWorldProxyPacket(
                 this.subWorldID,
                 packet,
                 this.parentNetworkManager);
             pipeline.sendToServer(proxyPacket);
         } else {
-            SSubWorldProxyPacket proxyPacket = new SSubWorldProxyPacket(
+            S00SubWorldProxyPacket proxyPacket = new S00SubWorldProxyPacket(
                 this.subWorldID,
                 packet,
                 this.parentNetworkManager);

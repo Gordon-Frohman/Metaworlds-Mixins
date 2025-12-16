@@ -1,4 +1,4 @@
-package su.sergiusonesimus.metaworlds.compat.packet;
+package su.sergiusonesimus.metaworlds.network.play.server;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -11,14 +11,14 @@ import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
-public class SubWorldDestroyPacket implements IMessage {
+public class S02SubWorldDestroyPacket implements IMessage {
 
     public int subWorldsCount;
     public Integer[] subWorldIDs;
 
-    public SubWorldDestroyPacket() {}
+    public S02SubWorldDestroyPacket() {}
 
-    public SubWorldDestroyPacket(int numSubWorldsToDestroy, Integer[] subWorldIDsArray) {
+    public S02SubWorldDestroyPacket(int numSubWorldsToDestroy, Integer[] subWorldIDsArray) {
         this.subWorldsCount = numSubWorldsToDestroy;
         this.subWorldIDs = subWorldIDsArray;
     }
@@ -49,10 +49,10 @@ public class SubWorldDestroyPacket implements IMessage {
         }
     }
 
-    public static class Handler implements IMessageHandler<SubWorldDestroyPacket, IMessage> {
+    public static class Handler implements IMessageHandler<S02SubWorldDestroyPacket, IMessage> {
 
         @Override
-        public IMessage onMessage(SubWorldDestroyPacket message, MessageContext ctx) {
+        public IMessage onMessage(S02SubWorldDestroyPacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
                 EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
                 if (message.subWorldsCount == -1) {
