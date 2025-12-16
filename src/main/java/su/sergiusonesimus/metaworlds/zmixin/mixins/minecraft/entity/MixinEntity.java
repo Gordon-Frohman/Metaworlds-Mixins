@@ -374,15 +374,18 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
 
             if (this.worldBelowFeet != null && ((IMixinWorld) this.worldBelowFeet).isSubWorld()) {
                 ((SubWorld) this.worldBelowFeet).registerEntityToDrag((Entity) (Object) this);
+                if (!this.worldBelowFeet.isRemote && ((Entity) (Object) this) instanceof EntityPlayerMP playerEntity) {
+                    MetaMagicNetwork.dispatcher.sendTo(
+                        new S07WorldBelowFeetPacket(((SubWorld) this.worldBelowFeet).getSubWorldID()),
+                        playerEntity);
+                }
             }
 
-            if (this.worldBelowFeet != ((Entity) (Object) this).worldObj
-                && ((IMixinWorld) ((Entity) (Object) this).worldObj).isSubWorld()) {
-                ((SubWorld) ((Entity) (Object) this).worldObj).registerDetachedEntity((Entity) (Object) this);
-            } else if (this.worldBelowFeet == ((Entity) (Object) this).worldObj
-                && ((IMixinWorld) ((Entity) (Object) this).worldObj).isSubWorld()) {
-                    ((SubWorld) ((Entity) (Object) this).worldObj).unregisterDetachedEntity((Entity) (Object) this);
-                }
+            if (this.worldBelowFeet != this.worldObj && ((IMixinWorld) this.worldObj).isSubWorld()) {
+                ((SubWorld) this.worldObj).registerDetachedEntity((Entity) (Object) this);
+            } else if (this.worldBelowFeet == this.worldObj && ((IMixinWorld) this.worldObj).isSubWorld()) {
+                ((SubWorld) this.worldObj).unregisterDetachedEntity((Entity) (Object) this);
+            }
         }
     }
 

@@ -14,6 +14,7 @@ import su.sergiusonesimus.metaworlds.network.play.server.S03SubWorldUpdatePacket
 import su.sergiusonesimus.metaworlds.network.play.server.S04SubWorldSpawnPositionPacket;
 import su.sergiusonesimus.metaworlds.network.play.server.S05MwAdminGuiInitPacket;
 import su.sergiusonesimus.metaworlds.network.play.server.S06MwAdminGuiSubWorldInfosPacket;
+import su.sergiusonesimus.metaworlds.network.play.server.S07WorldBelowFeetPacket;
 
 public final class MetaMagicNetwork {
 
@@ -43,6 +44,7 @@ public final class MetaMagicNetwork {
                 S06MwAdminGuiSubWorldInfosPacket.Handler.class,
                 S06MwAdminGuiSubWorldInfosPacket.class,
                 Side.CLIENT);
+            registerPacket(S07WorldBelowFeetPacket.Handler.class, S07WorldBelowFeetPacket.class, Side.CLIENT);
 
             registered = true;
         }
