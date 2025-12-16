@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -20,12 +22,14 @@ import net.minecraftforge.event.world.WorldEvent.Load;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
+import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.event.BlockDisplacementEvent;
 import su.sergiusonesimus.metaworlds.event.EntityDisplacementEvent;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 
@@ -110,6 +114,39 @@ public class EventHookContainer {
     public void onEntityReintegration(EntityDisplacementEvent event) {
         if (event.sourceWorld instanceof SubWorld && !(event.targetWorld instanceof SubWorld)) {
             RotationHelper.rotateEntity(event.sourceWorld, event.entity);
+        }
+    }
+
+    @SubscribeEvent
+    public void displaceSpawnPoint(BlockDisplacementEvent event) {
+        if (event.block.isBed(event.world, event.x, event.y, event.z, null)) {
+            int dimension = event.world.provider.dimensionId;
+            EntityPlayer player;
+            Iterator<EntityPlayer> iter = event.world.playerEntities.iterator();
+            while (iter.hasNext()) {
+                player = iter.next();
+                if (player instanceof EntityPlayerProxy proxy) player = proxy.getRealPlayer();
+                if (((IMixinEntityPlayer) player).getSpawnWorldID(dimension)
+                    == ((IMixinWorld) event.world).getSubWorldID()) {
+                    ChunkCoordinates bedLocation = player.getBedLocation(dimension);
+                    if (bedLocation.posX == event.x && bedLocation.posY == event.y && bedLocation.posZ == event.z) {
+                        Vec3 newBedPos = ((IMixinWorld) event.world).transformLocalToOther(
+                            event.targetWorld,
+                            bedLocation.posX + 0.5D,
+                            bedLocation.posY + 0.5D,
+                            bedLocation.posZ + 0.5D);
+                        int newBedX = MathHelper.floor_double(newBedPos.xCoord);
+                        int newBedY = MathHelper.floor_double(newBedPos.yCoord);
+                        int newBedZ = MathHelper.floor_double(newBedPos.zCoord);
+                        player.setSpawnChunk(
+                            new ChunkCoordinates(newBedX, newBedY, newBedZ),
+                            player.isSpawnForced(dimension),
+                            dimension);
+                        ((IMixinEntityPlayer) player)
+                            .setSpawnWorldID(dimension, ((IMixinWorld) event.targetWorld).getSubWorldID());
+                    }
+                }
+            }
         }
     }
 }
