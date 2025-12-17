@@ -18,7 +18,7 @@ public class EntityDisplacementEvent extends EntityEvent {
      * 
      * @param entity
      * @param sourceWorld - The world from which the entity is being removed
-     * @param targetWorld - The world in which the entity is being placed
+     * @param targetWorld - The world in which the entity is being spawned
      */
     public EntityDisplacementEvent(Entity entity, World sourceWorld, World targetWorld) {
         super(entity);
