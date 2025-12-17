@@ -4,6 +4,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.EntityEvent;
 
+/**
+ * An event fired whenever an entity is displaced from main world to a subworld and vice versa. <br>
+ * Used for entity rotation on subworld reintegration. <br>
+ * Fire this event if you are implementing a custom subworld creation/reintegration technique.
+ */
 public class EntityDisplacementEvent extends EntityEvent {
 
     /** The world from which the entity is being removed */

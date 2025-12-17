@@ -367,8 +367,13 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
 
     private EntityPlayer storedPlayer;
 
-    @Inject(method = { "attackEntity", "interactWithEntitySendPacket" }, at = @At(value = "HEAD"))
+    @Inject(method = "attackEntity", at = @At(value = "HEAD"))
     private void storePlayer(EntityPlayer player, Entity targetEntity, CallbackInfo ci) {
+        storedPlayer = player;
+    }
+
+    @Inject(method = "interactWithEntitySendPacket", at = @At(value = "HEAD"))
+    private void storePlayer(EntityPlayer player, Entity targetEntity, CallbackInfoReturnable<Boolean> cir) {
         storedPlayer = player;
     }
 

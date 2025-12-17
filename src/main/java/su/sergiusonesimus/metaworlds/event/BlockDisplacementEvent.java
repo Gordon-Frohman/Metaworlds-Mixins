@@ -5,6 +5,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.event.world.BlockEvent;
 
+/**
+ * An event fired whenever a block is displaced from main world to a subworld and vice versa. <br>
+ * Used for block rotation on subworld reintegration and for redefining spawn points on bed displacement. <br>
+ * Use {@link MetaworldsEventFactory#onBlockDisplacement()} to fire this event if you are implementing a custom
+ * subworld creation/reintegration technique.
+ */
 public class BlockDisplacementEvent extends BlockEvent {
 
     /** The world in which the block is being placed */
