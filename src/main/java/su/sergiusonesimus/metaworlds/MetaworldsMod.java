@@ -93,8 +93,6 @@ public class MetaworldsMod {
         // check if various integrations are required
         isForgeMultipartLoaded = Loader.isModLoaded("McMultipart");
         areLittleTilesLoaded = Loader.isModLoaded("littletiles");
-
-        if (isForgeMultipartLoaded) ForgeMultipartIntegration.preInit();
     }
 
     @EventHandler

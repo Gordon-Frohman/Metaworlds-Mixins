@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 
 import codechicken.lib.math.MathHelper;
+import su.sergiusonesimus.metaworlds.EventHookContainer;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.event.BlockDisplacementEvent;
@@ -90,7 +91,7 @@ public class DisplacementHelper {
             if (blockIsMultipart) {
                 if (targetWorld instanceof SubWorld) {
                     final TileEntity teToSend = newTE;
-                    ForgeMultipartIntegration.scheduleTask(targetWorld, new Runnable() {
+                    EventHookContainer.scheduleTask(targetWorld, new Runnable() {
 
                         @Override
                         public void run() {

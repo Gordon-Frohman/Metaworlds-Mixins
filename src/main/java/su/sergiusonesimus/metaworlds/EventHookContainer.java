@@ -6,8 +6,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
@@ -17,23 +21,69 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
+import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
+import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.event.BlockDisplacementEvent;
 import su.sergiusonesimus.metaworlds.event.EntityDisplacementEvent;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.entity.IMixinEntityClientPlayerMP;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.storage.IMixinWorldInfo;
 
 public class EventHookContainer {
+
+    private static final ConcurrentHashMap<Integer, ConcurrentLinkedQueue<DelayedTask>> subworldTasks = new ConcurrentHashMap<Integer, ConcurrentLinkedQueue<DelayedTask>>();
+    private static int worldTime = 0;
+
+    @SubscribeEvent
+    public void executeTasks(TickEvent.WorldTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            worldTime++;
+            int dimension = event.world.provider.dimensionId;
+
+            ConcurrentLinkedQueue<DelayedTask> tasks = subworldTasks.get(dimension);
+            if (tasks != null) {
+                Iterator<DelayedTask> it = tasks.iterator();
+                while (it.hasNext()) {
+                    DelayedTask task = it.next();
+                    if (worldTime >= task.scheduledTime) {
+                        task.runnable.run();
+                        it.remove();
+                    }
+                }
+            }
+        }
+    }
+
+    public static void scheduleTask(World world, Runnable task, int delayTicks) {
+        int dimension = world.provider.dimensionId;
+        subworldTasks.computeIfAbsent(dimension, k -> new ConcurrentLinkedQueue<DelayedTask>())
+            .add(new DelayedTask(task, worldTime + delayTicks));
+    }
+
+    private static class DelayedTask {
+
+        final Runnable runnable;
+        final int scheduledTime;
+
+        DelayedTask(Runnable runnable, int scheduledTime) {
+            this.runnable = runnable;
+            this.scheduledTime = scheduledTime;
+        }
+    }
 
     public static Map<Integer, List<Consumer<SubWorld>>> subworldEvents = new HashMap<Integer, List<Consumer<SubWorld>>>();
 
@@ -68,15 +118,24 @@ public class EventHookContainer {
                                 .getWorldInfo()).getSubWorldInfo(worldID);
                             World subworld = SubWorldTypeManager.getSubWorldInfoProvider(curSubWorldInfo.subWorldType)
                                 .create(event.world, worldID);
-                            if (subworldEvents.containsKey(curSubWorldID)) {
-                                for (Consumer<SubWorld> subworldEvent : subworldEvents.get(curSubWorldID)) {
-                                    subworldEvent.accept((SubWorld) subworld);
-                                }
-                                subworldEvents.remove(curSubWorldID);
-                            }
+                            executeSubworldEvents(subworld);
                         }
                     }
                 }
+            }
+        } else {
+            executeSubworldEvents(event.world);
+        }
+    }
+
+    private void executeSubworldEvents(World world) {
+        if (world instanceof SubWorld subworld) {
+            int subworldId = subworld.getSubWorldID();
+            if (subworldEvents.containsKey(subworldId)) {
+                for (Consumer<SubWorld> subworldEvent : subworldEvents.get(subworldId)) {
+                    subworldEvent.accept((SubWorld) subworld);
+                }
+                subworldEvents.remove(subworldId);
             }
         }
     }
@@ -146,6 +205,10 @@ public class EventHookContainer {
                             .setSpawnWorldID(dimension, ((IMixinWorld) event.targetWorld).getSubWorldID());
                     }
                 }
+            }
+        }
+    }
+                runnable.run();
             }
         }
     }
