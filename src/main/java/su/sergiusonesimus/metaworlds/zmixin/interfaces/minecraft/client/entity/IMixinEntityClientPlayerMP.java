@@ -14,4 +14,8 @@ public interface IMixinEntityClientPlayerMP {
 
     public void setSubworldSpawnZ(double z);
 
+    public boolean isSpawnSubworldLoaded();
+
+    public void setSpawnSubworldLoaded(boolean isLoaded);
+
 }

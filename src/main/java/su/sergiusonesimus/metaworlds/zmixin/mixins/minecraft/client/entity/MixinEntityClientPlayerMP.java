@@ -27,6 +27,8 @@ public abstract class MixinEntityClientPlayerMP extends MixinEntityPlayer implem
 
     private double subworldSpawnZ;
 
+    private boolean isSpawnSubworldLoaded = true;
+
     @Shadow(remap = true)
     public boolean wasSprinting;
 
@@ -155,6 +157,14 @@ public abstract class MixinEntityClientPlayerMP extends MixinEntityPlayer implem
 
     public void setSubworldSpawnZ(double z) {
         this.subworldSpawnZ = z;
+    }
+
+    public boolean isSpawnSubworldLoaded() {
+        return this.isSpawnSubworldLoaded;
+    }
+
+    public void setSpawnSubworldLoaded(boolean isLoaded) {
+        this.isSpawnSubworldLoaded = isLoaded;
     }
 
 }

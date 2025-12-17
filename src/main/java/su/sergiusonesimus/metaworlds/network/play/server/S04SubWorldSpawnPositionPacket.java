@@ -47,6 +47,8 @@ public class S04SubWorldSpawnPositionPacket implements IMessage {
                 player.setSubworldSpawnX(message.subworldSpawnX);
                 player.setSubworldSpawnY(message.subworldSpawnY);
                 player.setSubworldSpawnZ(message.subworldSpawnZ);
+
+                player.setSpawnSubworldLoaded(false);
             }
             return null;
         }

@@ -208,7 +208,40 @@ public class EventHookContainer {
             }
         }
     }
-                runnable.run();
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void onSubworldChunkLoad(ChunkEvent.Load event) {
+        if (event.world.isRemote && event.world instanceof SubWorld subworld) {
+            EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+            if (((IMixinEntity) player).getWorldBelowFeet() == subworld
+                && !((IMixinEntityClientPlayerMP) player).isSpawnSubworldLoaded()
+                && MathHelper.floor_double(((IMixinEntityClientPlayerMP) player).getSubworldSpawnX()) >> 4
+                    == event.getChunk().xPosition
+                && MathHelper.floor_double(((IMixinEntityClientPlayerMP) player).getSubworldSpawnZ()) >> 4
+                    == event.getChunk().zPosition) {
+
+//                Runnable runnable = new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        if (((SubWorldClient) subworld).canUpdate) {
+                            subworld.registerEntityToDrag(player);
+                            Vec3 transformedPos = subworld.transformToGlobal(
+                                ((IMixinEntityClientPlayerMP) player).getSubworldSpawnX(),
+                                ((IMixinEntityClientPlayerMP) player).getSubworldSpawnY(),
+                                ((IMixinEntityClientPlayerMP) player).getSubworldSpawnZ());
+                            player.setPositionAndUpdate(
+                                transformedPos.xCoord,
+                                transformedPos.yCoord,
+                                transformedPos.zCoord);
+                            ((IMixinEntityClientPlayerMP) player).setSpawnSubworldLoaded(true);
+//                        } else scheduleTask(event.world, this, 30);
+//                    }
+//
+//                };
+//
+//                runnable.run();
             }
         }
     }
