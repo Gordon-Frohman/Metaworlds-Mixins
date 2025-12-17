@@ -1,60 +1,55 @@
 package su.sergiusonesimus.metaworlds.network.play.server;
 
-import net.minecraftforge.common.DimensionManager;
-
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
-import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class S01SubWorldCreatePacket implements IMessage {
 
-    public int subWorldsCount;
-    public Integer[] subWorldIDs;
-    public Integer[] subWorldTypes;
+    public int subworldId;
+    public int subworldType;
+    public S03SubWorldUpdatePacket generationData;
 
     public S01SubWorldCreatePacket() {}
 
-    public S01SubWorldCreatePacket(int numSubWorldsToCreate, Integer[] subWorldIDsArray) {
-        this.subWorldsCount = numSubWorldsToCreate;
-        this.subWorldIDs = subWorldIDsArray;
-        this.subWorldTypes = new Integer[subWorldsCount];
-        IMixinWorld parentWorld = (IMixinWorld) DimensionManager.getWorld(0);
-        for (int i = 0; i < subWorldsCount; i++) {
-            SubWorld subworld = (SubWorld) parentWorld.getSubWorld(subWorldIDs[i]);
-            subWorldTypes[i] = subworld == null ? 0 : SubWorldTypeManager.getTypeID(subworld.getSubWorldType());
-        }
+    public S01SubWorldCreatePacket(int subworldId) {
+        this(subworldId, 0, null);
     }
 
-    public S01SubWorldCreatePacket(int numSubWorldsToCreate, Integer[] subWorldIDsArray, Integer[] subWorldTypesArray) {
-        this.subWorldsCount = numSubWorldsToCreate;
-        this.subWorldIDs = subWorldIDsArray;
-        this.subWorldTypes = subWorldTypesArray;
+    public S01SubWorldCreatePacket(int subworldId, Integer subworldType) {
+        this(subworldId, subworldType, null);
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        this.subWorldsCount = buf.readInt();
-        this.subWorldIDs = new Integer[this.subWorldsCount];
-        this.subWorldTypes = new Integer[this.subWorldsCount];
+    public S01SubWorldCreatePacket(int subworldId, S03SubWorldUpdatePacket generationData) {
+        this(subworldId, 0, generationData);
+    }
 
-        for (int i = 0; i < this.subWorldsCount; ++i) {
-            this.subWorldIDs[i] = Integer.valueOf(buf.readInt());
-            this.subWorldTypes[i] = Integer.valueOf(buf.readInt());
-        }
+    public S01SubWorldCreatePacket(int subworldId, int subworldType, S03SubWorldUpdatePacket generationData) {
+        this.subworldId = subworldId;
+        this.subworldType = subworldType;
+        this.generationData = generationData;
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeInt(this.subWorldsCount);
+        buf.writeInt(this.subworldId);
+        buf.writeInt(this.subworldType);
+        if (generationData != null) {
+            buf.writeBoolean(true);
+            generationData.toBytes(buf);
+        } else buf.writeBoolean(false);
+    }
 
-        for (int i = 0; i < this.subWorldsCount; ++i) {
-            buf.writeInt(this.subWorldIDs[i]);
-            buf.writeInt(this.subWorldTypes[i]);
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        this.subworldId = buf.readInt();
+        this.subworldType = buf.readInt();
+        if (buf.readBoolean()) {
+            generationData = new S03SubWorldUpdatePacket();
+            generationData.fromBytes(buf);
         }
     }
 
@@ -63,12 +58,9 @@ public class S01SubWorldCreatePacket implements IMessage {
         @Override
         public IMessage onMessage(S01SubWorldCreatePacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
-                for (int i = 0; i < message.subWorldsCount; ++i) {
-                    Integer curSubWorldID = message.subWorldIDs[i];
-                    String curSubWorldType = SubWorldTypeManager.getTypeByID(message.subWorldTypes[i]);
-                    SubWorldTypeManager.getSubWorldInfoProvider(curSubWorldType)
-                        .create(MetaworldsMod.proxy.getMainWorld(), curSubWorldID);
-                }
+                SubWorldTypeManager.getSubWorldInfoProvider(SubWorldTypeManager.getTypeByID(message.subworldType))
+                    .create(MetaworldsMod.proxy.getMainWorld(), message.subworldId);
+                if (message.generationData != null) message.generationData.executeOnTick();
             }
             return null;
         }

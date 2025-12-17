@@ -1,10 +1,5 @@
 package su.sergiusonesimus.metaworlds;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,9 +13,7 @@ import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
-import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager.SubWorldInfoProvider;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
-import su.sergiusonesimus.metaworlds.network.play.server.S01SubWorldCreatePacket;
 import su.sergiusonesimus.metaworlds.network.play.server.S02SubWorldDestroyPacket;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -68,34 +61,10 @@ public class MWCorePlayerTracker {
 
     private void sendSubWorldCreationPackets(EntityPlayer player) {
         IMixinWorld world = (IMixinWorld) player.worldObj;
-        List<Integer> batchPacket = new ArrayList<Integer>();
-        List<SubWorld> separatePackets = new ArrayList<SubWorld>();
-        for (Map.Entry<Integer, World> entry : world.getSubWorldsMap()
-            .entrySet()) {
-            SubWorld subworld = (SubWorld) entry.getValue();
-            if (needsSeparatePacket(subworld)) {
-                separatePackets.add(subworld);
-            } else {
-                batchPacket.add(entry.getKey());
-            }
-        }
-        MetaMagicNetwork.dispatcher.sendTo(
-            new S01SubWorldCreatePacket(batchPacket.size(), batchPacket.toArray(new Integer[0])),
-            (EntityPlayerMP) player);
-        for (SubWorld subworld : separatePackets) {
+        for (World subworld : world.getSubWorldsMap()
+            .values()) {
             MetaMagicNetwork.dispatcher
-                .sendTo(SubWorldTypeManager.getSubWorldCreatePacket(subworld), (EntityPlayerMP) player);
-        }
-    }
-
-    private boolean needsSeparatePacket(SubWorld subworld) {
-        SubWorldInfoProvider sip = SubWorldTypeManager.getSubWorldInfoProvider(subworld);
-        Class<? extends SubWorldInfoProvider> sipClass = sip.getClass();
-        try {
-            Method getCreatePacket = sipClass.getMethod("getCreatePacket", SubWorld.class);
-            return getCreatePacket.getDeclaringClass() != SubWorldInfoProvider.class;
-        } catch (NoSuchMethodException | SecurityException e) {
-            return false;
+                .sendTo(SubWorldTypeManager.getSubWorldCreatePacket((SubWorld) subworld), (EntityPlayerMP) player);
         }
     }
 }

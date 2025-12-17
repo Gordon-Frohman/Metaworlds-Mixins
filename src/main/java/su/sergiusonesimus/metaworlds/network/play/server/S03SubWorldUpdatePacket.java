@@ -13,7 +13,6 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
-import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.world.SubWorldServer;
@@ -180,12 +179,12 @@ public class S03SubWorldUpdatePacket implements IMessage {
 
     @SideOnly(Side.CLIENT)
     public void executeOnTick() {
+        if (this.subWorldId == 0) return;
         EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
         World targetWorld = ((IMixinWorld) player.worldObj).getSubWorld(this.subWorldId);
         if (targetWorld == null) return;
 
-        if (((IMixinWorld) targetWorld).isSubWorld()) {
-            SubWorldClient targetSubWorld = (SubWorldClient) targetWorld;
+        if (targetWorld instanceof SubWorldClient targetSubWorld) {
             float newTickDiff = (float) this.serverTick - (float) targetSubWorld.localTickCounter;
             if (targetSubWorld.lastServerTickReceived == -1) {
                 targetSubWorld.serverTickDiff = newTickDiff;
@@ -199,16 +198,10 @@ public class S03SubWorldUpdatePacket implements IMessage {
             }
 
             targetSubWorld.lastServerTickReceived = this.serverTick;
+            boolean shouldMovePlayer = false;
             if ((this.flags & 4) != 0) {
                 targetSubWorld.setCenterOnCreate(this.centerX, this.centerY, this.centerZ);
-                if (!targetSubWorld.canUpdate && targetSubWorld == ((IMixinEntity) player).getWorldBelowFeet()) {
-                    ((SubWorld) targetSubWorld).registerEntityToDrag(player);
-                    Vec3 transformedPos = ((IMixinWorld) targetSubWorld).transformToGlobal(
-                        ((IMixinEntityClientPlayerMP) player).getSubworldSpawnX(),
-                        ((IMixinEntityClientPlayerMP) player).getSubworldSpawnY(),
-                        ((IMixinEntityClientPlayerMP) player).getSubworldSpawnZ());
-                    player.setPositionAndUpdate(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord);
-                }
+                 if (!targetSubWorld.canUpdate && targetSubWorld == ((IMixinEntity) player).getWorldBelowFeet()) shouldMovePlayer = true;
                 targetSubWorld.canUpdate = true;
             }
 
@@ -250,6 +243,15 @@ public class S03SubWorldUpdatePacket implements IMessage {
 
             if ((this.flags & 16) != 0) {
                 targetSubWorld.setSubWorldType(this.subWorldType);
+            }
+            
+            if(shouldMovePlayer) {
+                targetSubWorld.registerEntityToDrag(player);
+                Vec3 transformedPos = targetSubWorld.transformToGlobal(
+	                 ((IMixinEntityClientPlayerMP) player).getSubworldSpawnX(),
+	                 ((IMixinEntityClientPlayerMP) player).getSubworldSpawnY(),
+	                 ((IMixinEntityClientPlayerMP) player).getSubworldSpawnZ());
+                player.setPositionAndUpdate(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord);
             }
         }
     }
