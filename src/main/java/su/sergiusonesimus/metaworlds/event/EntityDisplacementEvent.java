@@ -13,7 +13,7 @@ public class EntityDisplacementEvent extends EntityEvent {
 
     /**
      * An event fired whenever an entity is displaced from main world to a subworld and vice versa. <br>
-     * Used for block entity on subworld reintegration. <br>
+     * Used for entity rotation on subworld reintegration. <br>
      * Fire this event if you are implementing a custom subworld creation/reintegration technique.
      * 
      * @param entity
