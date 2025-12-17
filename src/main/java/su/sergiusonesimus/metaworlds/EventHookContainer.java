@@ -10,8 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
@@ -21,23 +19,18 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
-import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
-import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.event.BlockDisplacementEvent;
 import su.sergiusonesimus.metaworlds.event.EntityDisplacementEvent;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.entity.IMixinEntityClientPlayerMP;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -205,10 +198,6 @@ public class EventHookContainer {
                             .setSpawnWorldID(dimension, ((IMixinWorld) event.targetWorld).getSubWorldID());
                     }
                 }
-            }
-        }
-    }
-                runnable.run();
             }
         }
     }
