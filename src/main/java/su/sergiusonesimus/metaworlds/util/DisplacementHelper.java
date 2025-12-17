@@ -59,7 +59,6 @@ public class DisplacementHelper {
      */
     public static void displaceBlock(int x, int y, int z, World sourceWorld, World targetWorld,
         CustomBlockDisplacement customDisplacement) {
-        NBTTagCompound nbttag;
         Block block = sourceWorld.getBlock(x, y, z);
         int oldMeta = sourceWorld.getBlockMetadata(x, y, z);
 
@@ -76,7 +75,7 @@ public class DisplacementHelper {
         targetWorld.setBlockMetadataWithNotify(newX, newY, newZ, newMeta, 3);
         if (block.hasTileEntity(oldMeta)) {
             TileEntity oldTE = event.tileEntity;
-            nbttag = new NBTTagCompound();
+            NBTTagCompound nbttag = new NBTTagCompound();
             oldTE.writeToNBT(nbttag);
             oldTE.invalidate();
             boolean blockIsMultipart = MetaworldsMod.isForgeMultipartLoaded
