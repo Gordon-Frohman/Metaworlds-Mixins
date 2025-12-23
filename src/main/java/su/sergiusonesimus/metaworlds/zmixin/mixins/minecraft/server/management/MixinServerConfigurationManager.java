@@ -44,6 +44,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.server.S04SubWorldSpawnPositionPacket;
@@ -159,23 +160,34 @@ public class MixinServerConfigurationManager {
         nethandlerplayserver.sendPacket(new S09PacketHeldItemChange(player.inventory.currentItem));
 
         if (nbttagcompound != null) {
-            NBTTagCompound entityData = nbttagcompound.getCompoundTag("ForgeData");
-            if (entityData.hasKey("SubWorldInfo")) {
-                NBTTagCompound subWorldData = entityData.getCompoundTag("SubWorldInfo");
-                int worldBelowFeetId = subWorldData.getInteger("WorldBelowFeetId");
-                World newWorldBelowFeet = ((IMixinWorld) ((IMixinWorld) player.worldObj).getParentWorld())
-                    .getSubWorld(worldBelowFeetId);
-                if (worldBelowFeetId != 0 && newWorldBelowFeet != null) {
-                    double posXOnSubWorld = subWorldData.getDouble("posXOnSubWorld");
-                    double posYOnSubWorld = subWorldData.getDouble("posYOnSubWorld");
-                    double posZOnSubWorld = subWorldData.getDouble("posZOnSubWorld");
+            MetaworldsMod.breakpoint();
+            int worldBelowFeetId = nbttagcompound.getInteger("WorldBelowFeetId");
+            World newWorldBelowFeet = ((IMixinWorld) ((IMixinWorld) player.worldObj).getParentWorld())
+                .getSubWorld(worldBelowFeetId);
+            if (worldBelowFeetId != 0 && newWorldBelowFeet != null) {
+                Vec3 currentSubworldPosition = ((IMixinEntityPlayer) player).getCurrentSubworldPosition();
+                if (currentSubworldPosition != null) {
                     MetaMagicNetwork.dispatcher.sendTo(
-                        new S04SubWorldSpawnPositionPacket(posXOnSubWorld, posYOnSubWorld, posZOnSubWorld),
+                        new S04SubWorldSpawnPositionPacket(
+                            currentSubworldPosition.xCoord,
+                            currentSubworldPosition.yCoord + player.eyeHeight,
+                            currentSubworldPosition.zCoord),
                         player);
+                    MetaworldsMod.LOGGER.info(
+                        "Player local position on subworld " + worldBelowFeetId
+                            + ": "
+                            + currentSubworldPosition.xCoord
+                            + ", "
+                            + currentSubworldPosition.yCoord
+                            + ", "
+                            + currentSubworldPosition.zCoord);
+                    Vec3 transformedPos = ((IMixinWorld) newWorldBelowFeet).transformToGlobal(currentSubworldPosition);
+                    player.lastTickPosX = player.prevPosX = player.posX = transformedPos.xCoord;
+                    player.lastTickPosY = player.prevPosY = player.posY = transformedPos.yCoord;
+                    player.lastTickPosZ = player.prevPosZ = player.posZ = transformedPos.zCoord;
                     ((IMixinEntity) player).setWorldBelowFeet(newWorldBelowFeet);
-                    Vec3 transformedPos = ((IMixinWorld) newWorldBelowFeet)
-                        .transformToGlobal(posXOnSubWorld, posYOnSubWorld, posZOnSubWorld);
-                    player.setPosition(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord);
+                    ((SubWorld) newWorldBelowFeet).registerEntityToDrag(player);
+                    // ((SubWorldServer) newWorldBelowFeet).playersToDrag.add(player);
                 }
             }
         }

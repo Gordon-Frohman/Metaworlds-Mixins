@@ -22,6 +22,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatAllowedCharacters;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import org.apache.logging.log4j.Logger;
@@ -37,6 +39,7 @@ import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.PacketHandler;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.client.IMixinC03PacketPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -201,10 +204,26 @@ public abstract class MixinNetHandlerPlayServer {
                 double d4;
 
                 if (packetPlayer.func_149466_j()) {
-                    d1 = packetPlayer.func_149464_c();
-                    d2 = packetPlayer.func_149467_d();
-                    d3 = packetPlayer.func_149472_e();
+                    Vec3 subworldPos;
+                    int subworldId = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldBelowFeetId();
+                    World subworld = ((IMixinWorld) this.playerEntity.worldObj).getSubWorld(subworldId);
+                    if (subworldId == 0 || subworld == null) {
+                        subworldPos = null;
+                        d1 = packetPlayer.func_149464_c();
+                        d2 = packetPlayer.func_149467_d();
+                        d3 = packetPlayer.func_149472_e();
+                    } else {
+                        subworldPos = Vec3.createVectorHelper(
+                            ((IMixinC03PacketPlayer) packetPlayer).getSubWorldXPosition(),
+                            ((IMixinC03PacketPlayer) packetPlayer).getSubWorldYPosition(),
+                            ((IMixinC03PacketPlayer) packetPlayer).getSubWorldZPosition());
+                        Vec3 globalPos = ((IMixinWorld) subworld).transformToGlobal(subworldPos);
+                        d1 = globalPos.xCoord;
+                        d2 = globalPos.yCoord;
+                        d3 = globalPos.zCoord;
+                    }
                     d4 = packetPlayer.func_149471_f() - packetPlayer.func_149467_d();
+                    ((IMixinEntityPlayer) this.playerEntity).setCurrentSubworldPosition(subworldPos);
 
                     if (!this.playerEntity.isPlayerSleeping() && (d4 > 1.65D || d4 < 0.1D)) {
                         this.kickPlayerFromServer("Illegal stance");

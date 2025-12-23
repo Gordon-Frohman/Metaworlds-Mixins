@@ -8,6 +8,7 @@ import cpw.mods.fml.relauncher.Side;
 import su.sergiusonesimus.metaworlds.network.play.client.C01UpdateServerHealthPacket;
 import su.sergiusonesimus.metaworlds.network.play.client.C02ControllerKeyUpdatePacket;
 import su.sergiusonesimus.metaworlds.network.play.client.C03MwAdminClientActionPacket;
+import su.sergiusonesimus.metaworlds.network.play.client.C04StopDraggingPlayerPacket;
 import su.sergiusonesimus.metaworlds.network.play.server.S01SubWorldCreatePacket;
 import su.sergiusonesimus.metaworlds.network.play.server.S02SubWorldDestroyPacket;
 import su.sergiusonesimus.metaworlds.network.play.server.S03SubWorldUpdatePacket;
@@ -30,6 +31,7 @@ public final class MetaMagicNetwork {
             registerPacket(C01UpdateServerHealthPacket.Handler.class, C01UpdateServerHealthPacket.class, Side.SERVER);
             registerPacket(C02ControllerKeyUpdatePacket.Handler.class, C02ControllerKeyUpdatePacket.class, Side.SERVER);
             registerPacket(C03MwAdminClientActionPacket.Handler.class, C03MwAdminClientActionPacket.class, Side.SERVER);
+            registerPacket(C04StopDraggingPlayerPacket.Handler.class, C04StopDraggingPlayerPacket.class, Side.SERVER);
 
             // Server -> Client
             registerPacket(S01SubWorldCreatePacket.Handler.class, S01SubWorldCreatePacket.class, Side.CLIENT);

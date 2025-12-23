@@ -153,6 +153,7 @@ public abstract class MixinNetHandlerPlayClient {
         ((IMixinEntity) entityclientplayermp).setWorldBelowFeet(subworld);
 
         World worldBelowFeet = ((IMixinEntity) entityclientplayermp).getWorldBelowFeet();
+        Vec3 localPos = ((IMixinWorld) worldBelowFeet).transformToLocal(entityclientplayermp);
 
         return PacketHandler.getC06PacketPlayerPosLook(
             x,
@@ -164,7 +165,10 @@ public abstract class MixinNetHandlerPlayClient {
             isOnGround,
             ((IMixinWorld) worldBelowFeet).getSubWorldID(),
             ((IMixinEntity) entityclientplayermp).getTractionLossTicks(),
-            ((IMixinEntity) entityclientplayermp).isLosingTraction());
+            ((IMixinEntity) entityclientplayermp).isLosingTraction(),
+            localPos.xCoord,
+            localPos.yCoord,
+            localPos.zCoord);
     }
 
     @Inject(method = "handleSpawnPosition", at = @At(value = "TAIL"))

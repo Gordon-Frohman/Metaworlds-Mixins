@@ -1,12 +1,13 @@
 package su.sergiusonesimus.metaworlds.network.play.server;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Vec3;
 
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.entity.IMixinEntityClientPlayerMP;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 
 public class S04SubWorldSpawnPositionPacket implements IMessage {
 
@@ -15,6 +16,10 @@ public class S04SubWorldSpawnPositionPacket implements IMessage {
     public double subworldSpawnZ;
 
     public S04SubWorldSpawnPositionPacket() {}
+
+    public S04SubWorldSpawnPositionPacket(Vec3 vec) {
+        this(vec.xCoord, vec.yCoord, vec.zCoord);
+    }
 
     public S04SubWorldSpawnPositionPacket(double x, double y, double z) {
         this.subworldSpawnX = x;
@@ -42,11 +47,8 @@ public class S04SubWorldSpawnPositionPacket implements IMessage {
         @Override
         public IMessage onMessage(S04SubWorldSpawnPositionPacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
-                IMixinEntityClientPlayerMP player = (IMixinEntityClientPlayerMP) Minecraft.getMinecraft().thePlayer;
-
-                player.setSubworldSpawnX(message.subworldSpawnX);
-                player.setSubworldSpawnY(message.subworldSpawnY);
-                player.setSubworldSpawnZ(message.subworldSpawnZ);
+                ((IMixinEntityPlayer) Minecraft.getMinecraft().thePlayer)
+                    .setCurrentSubworldPosition(message.subworldSpawnX, message.subworldSpawnY, message.subworldSpawnZ);
             }
             return null;
         }

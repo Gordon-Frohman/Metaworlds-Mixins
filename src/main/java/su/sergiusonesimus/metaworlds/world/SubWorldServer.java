@@ -76,6 +76,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     private SubWorldTransformationHandler transformationHandler = new SubWorldTransformationHandler(this);
     public Map<Entity, Vec3> entitiesToDrag = new TreeMap<Entity, Vec3>();
     private Map<Entity, Vec3> entitiesToNotDrag = new TreeMap<Entity, Vec3>();
+    public List<EntityPlayer> playersToDrag = new ArrayList<EntityPlayer>();
     private ChunkCoordinates minCoordinates = new ChunkCoordinates();
     private ChunkCoordinates maxCoordinates = new ChunkCoordinates();
     private boolean boundariesChanged = true;
@@ -789,13 +790,9 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                     elb.renderYawOffset = elb.renderYawOffset - (float) this.getRotationYawSpeed() / 2;
                 }
                 if (curEntry.getKey() instanceof EntityPlayer player) {
-                    // double subWorldWeight = ((IMixinEntity) player).getTractionFactor();
-                    // double globalWeight = 1.0D - subWorldWeight;
-                    //
-                    // player.setPosition(
-                    // player.posX * globalWeight + newPosition.xCoord * subWorldWeight,
-                    // player.posY * globalWeight + newPosition.yCoord * subWorldWeight,
-                    // player.posZ * globalWeight + newPosition.zCoord * subWorldWeight);
+                    if (this.playersToDrag.contains(player)) {
+                        player.setPosition(newPosition.xCoord, newPosition.yCoord, newPosition.zCoord);
+                    }
                 } else {
                     Entity curEntity = curEntry.getKey();
                     curEntity.setPositionAndRotation(

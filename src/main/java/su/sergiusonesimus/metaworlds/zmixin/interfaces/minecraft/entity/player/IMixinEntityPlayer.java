@@ -2,6 +2,8 @@ package su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player;
 
 import java.util.HashMap;
 
+import net.minecraft.util.Vec3;
+
 public interface IMixinEntityPlayer {
 
     public void setSleeping(boolean newState);
@@ -17,5 +19,17 @@ public interface IMixinEntityPlayer {
     public void setSpawnWorldID(int id);
 
     public void setSpawnWorldID(int dimension, int id);
+
+    Vec3 getCurrentSubworldPosition();
+
+    Double getCurrentSubworldPosX();
+
+    Double getCurrentSubworldPosY();
+
+    Double getCurrentSubworldPosZ();
+
+    void setCurrentSubworldPosition(double x, double y, double z);
+
+    void setCurrentSubworldPosition(Vec3 position);
 
 }

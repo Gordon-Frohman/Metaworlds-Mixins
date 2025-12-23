@@ -19,24 +19,29 @@ import su.sergiusonesimus.metaworlds.command.ISubWorldSelector;
 
 public interface IMixinWorld {
 
-    // Creates a new SubWorld
-    // If this world is a subworld this will function will redirect to parent.CreateSubWorld()
+    /**
+     * Creates a new SubWorld. <br>
+     * If this world is a subworld this will function will redirect to parent.CreateSubWorld()
+     */
     public abstract World createSubWorld();
 
     public abstract World createSubWorld(int newSubWorldID);
 
-    // Returns collection containing this world and all of its subworlds
+    /** Returns collection containing this world and all of its subworlds */
     public Collection<World> getWorlds();
 
-    // Returns collection only containing the subworlds, not this world itself
+    /** Returns collection only containing the subworlds, not this world itself */
     public Collection<World> getSubWorlds();
 
     public int getWorldsCount(); // Including this one. Equal to getSubWorlds().size() + 1 (= getWorlds().size())
 
-    public int getUnoccupiedSubworldID(); // Returns first ID which is not occupied by any subworld
+    /** Returns first ID which is not occupied by any subworld */
+    public int getUnoccupiedSubworldID();
 
-    // The parent worlds always have subWorldID 0. SubWorlds start from ID 1 counting up
-    // The ID is the same as the number suffix of the save folders
+    /**
+     * The parent worlds always have subWorldID 0. SubWorlds start from ID 1 counting up
+     * The ID is the same as the number suffix of the save folders
+     */
     public default int getSubWorldID() {
         return 0;
     }
@@ -51,52 +56,34 @@ public interface IMixinWorld {
 
     public boolean isSubWorld();
 
-    // Returns this world's position and rotation relative to its parent World
+    /** Returns this world's position relative to its parent World */
     public double getTranslationX();
 
+    /** Returns this world's position relative to its parent World */
     public double getTranslationY();
 
+    /** Returns this world's position relative to its parent World */
     public double getTranslationZ();
 
+    /** Returns this world's rotation relative to its parent World */
     public double getRotationYaw();
 
+    /** Returns this world's rotation relative to its parent World */
     public double getRotationPitch();
 
+    /** Returns this world's rotation relative to its parent World */
     public double getRotationRoll();
 
     public double getScaling();
 
-    // Returns the position in local coordinates around which the world is rotating and scaling
+    /** Returns the position in local coordinates around which the world is rotating and scaling */
     public double getCenterX();
 
+    /** Returns the position in local coordinates around which the world is rotating and scaling */
     public double getCenterY();
 
+    /** Returns the position in local coordinates around which the world is rotating and scaling */
     public double getCenterZ();
-
-    // Transform coordinates from global to local
-    // Returns the coordinates inside this (Sub)World's coordinate system which correspond to the given global
-    // coordinates
-    // public double transformToLocalX(double globalPosX, double globalPosZ);
-    // public double transformToLocalY(double globalPosY);
-    // public double transformToLocalZ(double globalPosX, double globalPosZ);
-
-    // Transform coordinates from local to global
-    // Returns the global coordinates which correspond to the given coordinates inside this (Sub)World's coordinate
-    // system
-    // public double transformToGlobalX(double subWorldPosX, double subWorldPosZ);
-    // public double transformToGlobalY(double subWorldPosY);
-    // public double transformToGlobalZ(double subWorldPosX, double subWorldPosZ);
-
-    // Rotate a vector's components from its local direction to its global direction
-    // This does not change the length of the vector, only its direction
-    // public double rotateToGlobalX(double localX, double localZ);
-    // public double rotateToGlobalY(double localY);
-    // public double rotateToGlobalZ(double localX, double localZ);
-
-    // Inverse to rotateToGlobal
-    // public double rotateToLocalX(double globalX, double globalZ);
-    // public double rotateToLocalY(double globalY);
-    // public double rotateToLocalZ(double globalX, double globalZ);
 
     public Vec3 transformToGlobal(Entity localEntity);
 
@@ -120,15 +107,19 @@ public interface IMixinWorld {
     public DoubleMatrix transformToLocal(DoubleMatrix globalVectors, DoubleMatrix result);// In-Place operation for
                                                                                           // smaller memory footprint
 
-    // Transform from this world's coordinates to another world's coordinates
+    /** Transform from this world's coordinates to another world's coordinates */
     public Vec3 transformLocalToOther(World targetWorld, Entity localEntity);
 
+    /** Transform from this world's coordinates to another world's coordinates */
     public Vec3 transformLocalToOther(World targetWorld, Vec3 localVec);
 
+    /** Transform from this world's coordinates to another world's coordinates */
     public Vec3 transformLocalToOther(World targetWorld, double localX, double localY, double localZ);
 
+    /** Transform from this world's coordinates to another world's coordinates */
     public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors);
 
+    /** Transform from this world's coordinates to another world's coordinates */
     public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors, DoubleMatrix result);// In-Place
                                                                                                                  // operation
                                                                                                                  // for
@@ -136,15 +127,19 @@ public interface IMixinWorld {
                                                                                                                  // memory
                                                                                                                  // footprint
 
-    // Transform from another world's coordinates to this world's coordinates
+    /** Transform from another world's coordinates to this world's coordinates */
     public Vec3 transformOtherToLocal(World sourceWorld, Entity otherEntity);
 
+    /** Transform from another world's coordinates to this world's coordinates */
     public Vec3 transformOtherToLocal(World sourceWorld, Vec3 otherVec);
 
+    /** Transform from another world's coordinates to this world's coordinates */
     public Vec3 transformOtherToLocal(World sourceWorld, double otherX, double otherY, double otherZ);
 
+    /** Transform from another world's coordinates to this world's coordinates */
     public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors);
 
+    /** Transform from another world's coordinates to this world's coordinates */
     public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors, DoubleMatrix result);// In-Place
                                                                                                                  // operation
                                                                                                                  // for

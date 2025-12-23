@@ -798,13 +798,13 @@ public class SubWorldClient extends WorldClient implements SubWorld {
                     entity.prevPosZ = localPos.zCoord
                         + (localPos.zCoord - entity.posZ) * interpolationFactor / (1.0D - interpolationFactor);
                 }
-            } else {
-                this.setTranslation(this.nextTickX, this.nextTickY, this.nextTickZ);
-                this.setRotationYaw(this.nextTickRotationYaw);
-                this.setRotationPitch(this.nextTickRotationPitch);
-                this.setRotationRoll(this.nextTickRotationRoll);
-                this.setScaling(this.nextTickScaling);
             }
+        } else {
+            this.setTranslation(this.nextTickX, this.nextTickY, this.nextTickZ);
+            this.setRotationYaw(this.nextTickRotationYaw);
+            this.setRotationPitch(this.nextTickRotationPitch);
+            this.setRotationRoll(this.nextTickRotationRoll);
+            this.setScaling(this.nextTickScaling);
         }
     }
 

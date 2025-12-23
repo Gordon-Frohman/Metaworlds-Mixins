@@ -31,11 +31,15 @@ public class PacketHandler {
 
     @SideOnly(Side.CLIENT)
     public static C04PacketPlayerPosition getC04PacketPlayerPosition(double x, double y, double headY, double z,
-        boolean p_i45253_9_, int worldBelowFeetId, byte tractionLoss, boolean isLosingTraction) {
+        boolean p_i45253_9_, int worldBelowFeetId, byte tractionLoss, boolean isLosingTraction, double localX,
+        double localY, double localZ) {
         C04PacketPlayerPosition c04 = new C04PacketPlayerPosition(x, y, headY, z, p_i45253_9_);
         return (C04PacketPlayerPosition) ((IMixinC03PacketPlayer) (Object) c04).setSubWorldBelowFeetId(worldBelowFeetId)
             .setTractionLoss(tractionLoss)
-            .setLosingTraction(isLosingTraction);
+            .setLosingTraction(isLosingTraction)
+            .setSubWorldXPosition(localX)
+            .setSubWorldYPosition(localY)
+            .setSubWorldZPosition(localZ);
     }
 
     @SideOnly(Side.CLIENT)
@@ -49,11 +53,15 @@ public class PacketHandler {
 
     @SideOnly(Side.CLIENT)
     public static C06PacketPlayerPosLook getC06PacketPlayerPosLook(double x, double y, double headY, double z,
-        float yaw, float pitch, boolean isOnGround, int worldBelowFeetId, byte tractionLoss, boolean isLosingTraction) {
+        float yaw, float pitch, boolean isOnGround, int worldBelowFeetId, byte tractionLoss, boolean isLosingTraction,
+        double localX, double localY, double localZ) {
         C06PacketPlayerPosLook c06 = new C06PacketPlayerPosLook(x, y, headY, z, yaw, pitch, isOnGround);
         return (C06PacketPlayerPosLook) ((IMixinC03PacketPlayer) (Object) c06).setSubWorldBelowFeetId(worldBelowFeetId)
             .setTractionLoss(tractionLoss)
-            .setLosingTraction(isLosingTraction);
+            .setLosingTraction(isLosingTraction)
+            .setSubWorldXPosition(localX)
+            .setSubWorldYPosition(localY)
+            .setSubWorldZPosition(localZ);
     }
 
     public static S08PacketPlayerPosLook getS08PacketPlayerPosLook(double x, double y, double z, float yaw, float pitch,

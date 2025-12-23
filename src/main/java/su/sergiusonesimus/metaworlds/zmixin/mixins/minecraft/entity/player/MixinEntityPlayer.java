@@ -12,6 +12,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,6 +26,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
+import su.sergiusonesimus.metaworlds.EventHookContainer;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntityLivingBase;
@@ -39,13 +42,13 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
     private static boolean isTransformingClient = false;
     private static boolean isTransformingServer = false;
 
-    private final boolean isProxyPlayer = this instanceof EntityPlayerProxy;
-
     /** holds the ID of the spawn world of the player */
     private int spawnWorldID = 0;
 
     /** holds the IDs of the spawn worlds of the player for different dimensions */
     private HashMap<Integer, Integer> spawnSubworldMap = new HashMap<Integer, Integer>();
+
+    private Vec3 currentSubworldPosition = null;
 
     @Shadow(remap = true)
     public ChunkCoordinates playerLocation;
@@ -95,7 +98,7 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
 
     @Inject(method = "wakeUpPlayer", at = @At("TAIL"))
     public void wakeUpPlayer(boolean par1, boolean par2, boolean par3, CallbackInfo ci) {
-        if (!this.isProxyPlayer) {
+        if (!this.isPlayerProxy) {
             Iterator<EntityPlayerProxy> i$ = ((IMixinEntity) this).getPlayerProxyMap()
                 .values()
                 .iterator();
@@ -108,7 +111,7 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
     }
 
     public boolean isOnLadder() {
-        if (this.isProxyPlayer) {
+        if (this.isPlayerProxy) {
             return ((EntityPlayerProxy) this).getRealPlayer()
                 .isOnLadder();
         } else if (super.isOnLadder()) {
@@ -247,8 +250,8 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
                 ((EntityLivingBase) (Object) this).posX,
                 ((EntityLivingBase) (Object) this).posY,
                 ((EntityLivingBase) (Object) this).posZ);
-            EntityPlayerProxy curProxyPlayer;
             if (!this.isPlayerProxy) {
+                EntityPlayerProxy curProxyPlayer;
                 for (Iterator<EntityPlayerProxy> i$ = ((IMixinEntity) (Object) this).getPlayerProxyMap()
                     .values()
                     .iterator(); i$
@@ -439,6 +442,37 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
         else this.spawnSubworldMap.put(dimension, id);
     }
 
+    @Override
+    public Vec3 getCurrentSubworldPosition() {
+        return currentSubworldPosition;
+    }
+
+    @Override
+    public Double getCurrentSubworldPosX() {
+        return currentSubworldPosition == null ? null : currentSubworldPosition.xCoord;
+    }
+
+    @Override
+    public Double getCurrentSubworldPosY() {
+        return currentSubworldPosition == null ? null : currentSubworldPosition.yCoord;
+    }
+
+    @Override
+    public Double getCurrentSubworldPosZ() {
+        return currentSubworldPosition == null ? null : currentSubworldPosition.zCoord;
+    }
+
+    @Override
+    public void setCurrentSubworldPosition(double x, double y, double z) {
+        setCurrentSubworldPosition(Vec3.createVectorHelper(x, y, z));
+    }
+
+    @Override
+    public void setCurrentSubworldPosition(Vec3 position) {
+        MetaworldsMod.breakpoint1();
+        currentSubworldPosition = position;
+    }
+
     @Inject(
         method = "readEntityFromNBT",
         at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayer;spawnForced:Z"),
@@ -462,9 +496,41 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
         this.spawnSubworldMap.put(spawndim, worldID);
     }
 
+    @Inject(method = "readEntityFromNBT", at = @At(value = "TAIL"))
+    public void readSubWorldPosition(NBTTagCompound tagCompound, CallbackInfo ci) {
+        int worldBelowFeetId = tagCompound.getInteger("WorldBelowFeetId");
+        if (worldBelowFeetId != 0 && tagCompound.hasKey("SubWorldPosition")) {
+            NBTTagCompound subworldPos = tagCompound.getCompoundTag("SubWorldPosition");
+            this.currentSubworldPosition = Vec3
+                .createVectorHelper(subworldPos.getDouble("X"), subworldPos.getDouble("Y"), subworldPos.getDouble("Z"));
+            World worldBelowFeet = ((IMixinWorld) this.worldObj).getSubWorld(worldBelowFeetId);
+            if (worldBelowFeet != null) {
+                Vec3 globalVec = ((IMixinWorld) worldBelowFeet).transformToGlobal(this.currentSubworldPosition);
+                this.prevPosX = this.lastTickPosX = this.posX = globalVec.xCoord;
+                this.prevPosY = this.lastTickPosY = this.posY = globalVec.yCoord;
+                this.prevPosZ = this.lastTickPosZ = this.posZ = globalVec.zCoord;
+                this.setPosition(this.posX, this.posY, this.posZ);
+            } else EventHookContainer.registerSubworldEvent(worldBelowFeetId, (subworld) -> {
+                Vec3 globalVec = subworld.transformToGlobal(this.currentSubworldPosition);
+                this.prevPosX = this.lastTickPosX = this.posX = globalVec.xCoord;
+                this.prevPosY = this.lastTickPosY = this.posY = globalVec.yCoord;
+                this.prevPosZ = this.lastTickPosZ = this.posZ = globalVec.zCoord;
+                this.setPosition(this.posX, this.posY, this.posZ);
+            });
+        }
+    }
+
     @Inject(method = "writeEntityToNBT", at = @At(value = "TAIL"))
     public void writeEntityToNBT(NBTTagCompound tagCompound, CallbackInfo ci) {
         tagCompound.setInteger("SpawnWorldID", spawnWorldID);
+        tagCompound.setInteger("WorldBelowFeetId", ((IMixinWorld) this.worldBelowFeet).getSubWorldID());
+        if (this.currentSubworldPosition != null) {
+            NBTTagCompound subworldPos = new NBTTagCompound();
+            subworldPos.setDouble("X", this.currentSubworldPosition.xCoord);
+            subworldPos.setDouble("Y", this.currentSubworldPosition.yCoord);
+            subworldPos.setDouble("Z", this.currentSubworldPosition.zCoord);
+            tagCompound.setTag("SubWorldPosition", subworldPos);
+        }
     }
 
     @Inject(

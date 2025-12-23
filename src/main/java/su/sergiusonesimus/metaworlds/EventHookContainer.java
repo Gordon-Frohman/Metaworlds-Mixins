@@ -10,6 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
@@ -19,16 +21,20 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
+import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.event.BlockDisplacementEvent;
 import su.sergiusonesimus.metaworlds.event.EntityDisplacementEvent;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.network.play.client.C04StopDraggingPlayerPacket;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
@@ -198,6 +204,39 @@ public class EventHookContainer {
                             .setSpawnWorldID(dimension, ((IMixinWorld) event.targetWorld).getSubWorldID());
                     }
                 }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void onSubworldChunkLoad(ChunkEvent.Load event) {
+        if (event.world.isRemote && event.world instanceof SubWorld subworld) {
+            EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+            if (((IMixinEntity) player).getWorldBelowFeet() == subworld
+                && ((IMixinEntityPlayer) player).getCurrentSubworldPosition() != null
+                && MathHelper.floor_double(((IMixinEntityPlayer) player).getCurrentSubworldPosX()) >> 4
+                    == event.getChunk().xPosition
+                && MathHelper.floor_double(((IMixinEntityPlayer) player).getCurrentSubworldPosZ()) >> 4
+                    == event.getChunk().zPosition) {
+                subworld.registerEntityToDrag(player);
+                Vec3 transformedPos = subworld
+                    .transformToGlobal(((IMixinEntityPlayer) player).getCurrentSubworldPosition());
+                player.lastTickPosX = player.prevPosX = player.posX = transformedPos.xCoord;
+                player.lastTickPosY = player.prevPosY = player.posY = transformedPos.yCoord;
+                player.lastTickPosZ = player.prevPosZ = player.posZ = transformedPos.zCoord;
+                ((IMixinEntity) player).setWorldBelowFeet(event.world);
+                subworld.registerEntityToDrag(player);
+                scheduleTask(event.world, new Runnable() {
+
+                    @Override
+                    public void run() {
+                        MetaMagicNetwork.dispatcher
+                            .sendToServer(new C04StopDraggingPlayerPacket(subworld.getSubWorldID()));
+                    }
+
+                }, 500); // A very, very, VERY band-aid solution to the problem of players falling off of ascending
+                         // worlds when logging in. But hey - at least it works!
             }
         }
     }

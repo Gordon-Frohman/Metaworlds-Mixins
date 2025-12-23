@@ -145,6 +145,15 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
     public double prevPosZ;
 
     @Shadow(remap = true)
+    public double lastTickPosX;
+
+    @Shadow(remap = true)
+    public double lastTickPosY;
+
+    @Shadow(remap = true)
+    public double lastTickPosZ;
+
+    @Shadow(remap = true)
     public float rotationYaw;
 
     @Shadow(remap = true)

@@ -14,12 +14,24 @@ public interface IMixinC03PacketPlayer {
 
     public IMixinC03PacketPlayer setLosingTraction(boolean LT);
 
-    public void setXPosition(double newX);
+    public IMixinC03PacketPlayer setXPosition(double newX);
 
-    public void setYPosition(double newY);
+    public IMixinC03PacketPlayer setYPosition(double newY);
 
-    public void setZPosition(double newZ);
+    public IMixinC03PacketPlayer setZPosition(double newZ);
 
-    public void setStance(double newStance);
+    public IMixinC03PacketPlayer setStance(double newStance);
+
+    public IMixinC03PacketPlayer setSubWorldXPosition(double newX);
+
+    public IMixinC03PacketPlayer setSubWorldYPosition(double newY);
+
+    public IMixinC03PacketPlayer setSubWorldZPosition(double newZ);
+
+    public double getSubWorldXPosition();
+
+    public double getSubWorldYPosition();
+
+    public double getSubWorldZPosition();
 
 }
