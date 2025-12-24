@@ -56,7 +56,7 @@ public class SubWorldImporterThread extends Thread {
             DimensionManager.getWorld(0)
                 .getSaveHandler()
                 .getWorldDirectory(),
-            "SUBWORLD" + this.newSubWorldId);
+            "subworlds/SUBWORLD" + this.newSubWorldId);
         newSubWorldDir1.mkdir();
         this.copySaveFiles(newSubWorldDir1);
         this.generateSubWorldInfo();

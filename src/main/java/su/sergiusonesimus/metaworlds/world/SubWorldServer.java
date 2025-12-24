@@ -165,7 +165,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             .getWorldInfo()).removeSubWorldInfo(this);
         String folder = MinecraftServer.mcServer.worldServers[0].getSaveHandler()
             .getWorldDirectoryName();
-        folder += "/SUBWORLD" + this.subWorldID;
+        folder += "/subworlds/SUBWORLD" + this.subWorldID;
         ISaveFormat isaveformat = MinecraftServer.mcServer.anvilConverterForAnvilFile;
         isaveformat.flushCache();
         return isaveformat.deleteWorldDirectory(folder);
@@ -176,7 +176,10 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         if (this.saveHandler instanceof SaveHandler) {
             File file1 = ((SaveHandler) this.saveHandler).getWorldDirectory();
             if (DimensionManager.getWorld(this.provider.dimensionId) != null) {
-                file1 = new File(file1, "SUBWORLD" + global_newSubWorldID);
+                File oldFile = new File(file1, "SUBWORLD" + global_newSubWorldID);
+                File newFile = new File(file1, "subworlds/SUBWORLD" + global_newSubWorldID);
+                if (oldFile.exists()) oldFile.renameTo(newFile);
+                file1 = newFile;
                 file1.mkdirs();
             }
 
