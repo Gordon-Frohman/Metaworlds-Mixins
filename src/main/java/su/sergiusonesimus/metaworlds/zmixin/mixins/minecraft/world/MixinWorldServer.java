@@ -1,7 +1,5 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.world;
 
-import java.lang.reflect.Method;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
@@ -91,7 +89,6 @@ public class MixinWorldServer extends MixinWorld {
         return this.createSubWorld(this.getUnoccupiedSubworldID());
     }
 
-    @SuppressWarnings("rawtypes")
     public World createSubWorld(int newSubWorldID) {
         World newSubWorld = MetaworldsMod.proxy.createSubWorld((World) (Object) this, newSubWorldID);
         if (((IMixinMinecraftServer) MinecraftServer.mcServer).getExistingSubWorlds()
@@ -106,20 +103,7 @@ public class MixinWorldServer extends MixinWorld {
             .getWorldInfo()).getSubWorldInfo(((IMixinWorld) newSubWorld).getSubWorldID());
         if (curSubWorldInfo != null) curSubWorldInfo.applyToSubWorld((SubWorld) newSubWorld);
 
-        try {
-            Class[] cArg = new Class[1];
-            cArg[0] = World.class;
-            Method loadWorldMethod = ForgeChunkManager.class.getDeclaredMethod("loadWorld", cArg);
-            loadWorldMethod.setAccessible(true);
-            try {
-                loadWorldMethod.invoke(null, newSubWorld);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } catch (NoSuchMethodException e) {
-            System.out.println(e.toString());
-        }
-
+        ForgeChunkManager.loadWorld(newSubWorld);
         newSubWorld.addWorldAccess(
             new WorldManagerSubWorld(((WorldServer) newSubWorld).func_73046_m(), (WorldServer) newSubWorld));
 
