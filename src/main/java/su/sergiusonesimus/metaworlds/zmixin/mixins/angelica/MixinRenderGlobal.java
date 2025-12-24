@@ -303,17 +303,36 @@ public class MixinRenderGlobal {
         }
     }
 
+    private EntityLivingBase storedEntity;
+    private int storedPass;
+
+    @Inject(method = "sortAndRender", at = @At("HEAD"))
+    private void storeVariables(EntityLivingBase entity, int pass, double partialTicks,
+        CallbackInfoReturnable<Integer> cir) {
+        this.storedEntity = entity;
+        this.storedPass = pass;
+    }
+
     @WrapOperation(
         method = "sortAndRender",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/EntityRenderer;disableLightmap(D)V"))
-    private void sortAndRender(EntityRenderer entityRenderer, double partialTicks, Operation<Void> original) {
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/EntityRenderer;disableLightmap(D)V",
+            ordinal = 1))
+    private void wrapDisableLightmap(EntityRenderer entityRenderer, double partialTicks, Operation<Void> original) {
         // We will disable it later
     }
 
-    @SuppressWarnings({ "unused", "unchecked" })
-    @Inject(method = "sortAndRender", at = @At("RETURN"), cancellable = true)
-    private void sortAndRender(EntityLivingBase entity, int pass, double partialTicks,
-        CallbackInfoReturnable<Integer> ci) {
+    private int returnValue;
+
+    @SuppressWarnings({ "unchecked", "unused" })
+    @WrapOperation(
+        method = "sortAndRender",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/EntityRenderer;disableLightmap(D)V",
+            ordinal = 0))
+    private void renderSubworlds(EntityRenderer entityRenderer, double partialTicks, Operation<Void> original) {
         this.theWorld.theProfiler.startSection("sortchunks");
 
         if (this.worldRenderersList.size() > 0) for (int j = 0; j < 10; ++j) {
@@ -325,7 +344,7 @@ public class MixinRenderGlobal {
             }
         }
 
-        if (pass == 0) {
+        if (storedPass == 0) {
             this.renderersLoaded = 0;
             this.dummyRenderInt = 0;
             this.renderersBeingClipped = 0;
@@ -334,24 +353,24 @@ public class MixinRenderGlobal {
             this.renderersSkippingRenderPass = 0;
         }
 
-        double d9 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-        double d1 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-        double d2 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-        double d3 = entity.posX - this.prevSortX;
-        double d4 = entity.posY - this.prevSortY;
-        double d5 = entity.posZ - this.prevSortZ;
+        double d9 = storedEntity.lastTickPosX + (storedEntity.posX - storedEntity.lastTickPosX) * partialTicks;
+        double d1 = storedEntity.lastTickPosY + (storedEntity.posY - storedEntity.lastTickPosY) * partialTicks;
+        double d2 = storedEntity.lastTickPosZ + (storedEntity.posZ - storedEntity.lastTickPosZ) * partialTicks;
+        double d3 = storedEntity.posX - this.prevSortX;
+        double d4 = storedEntity.posY - this.prevSortY;
+        double d5 = storedEntity.posZ - this.prevSortZ;
 
-        if (this.prevChunkSortX != entity.chunkCoordX || this.prevChunkSortY != entity.chunkCoordY
-            || this.prevChunkSortZ != entity.chunkCoordZ
+        if (this.prevChunkSortX != storedEntity.chunkCoordX || this.prevChunkSortY != storedEntity.chunkCoordY
+            || this.prevChunkSortZ != storedEntity.chunkCoordZ
             || d3 * d3 + d4 * d4 + d5 * d5 > 16.0D) {
-            this.prevSortX = entity.posX;
-            this.prevSortY = entity.posY;
-            this.prevSortZ = entity.posZ;
-            this.prevChunkSortX = entity.chunkCoordX;
-            this.prevChunkSortY = entity.chunkCoordY;
-            this.prevChunkSortZ = entity.chunkCoordZ;
-            this.markRenderersForNewPositionSubworlds(entity.posX, entity.posY, entity.posZ);
-            Collections.sort(this.sortedWorldRenderersList, new EntitySorter(entity));
+            this.prevSortX = storedEntity.posX;
+            this.prevSortY = storedEntity.posY;
+            this.prevSortZ = storedEntity.posZ;
+            this.prevChunkSortX = storedEntity.chunkCoordX;
+            this.prevChunkSortY = storedEntity.chunkCoordY;
+            this.prevChunkSortZ = storedEntity.chunkCoordZ;
+            this.markRenderersForNewPositionSubworlds(storedEntity.posX, storedEntity.posY, storedEntity.posZ);
+            Collections.sort(this.sortedWorldRenderersList, new EntitySorter(storedEntity));
         } else {
             boolean rendererPositionsChanged = false;
             for (World curSubWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
@@ -365,23 +384,24 @@ public class MixinRenderGlobal {
                     ((SubWorldClient) curSubWorld).markRendererUpdateDone();
                 }
             }
-            if (rendererPositionsChanged) Collections.sort(this.sortedWorldRenderersList, new EntitySorter(entity));
+            if (rendererPositionsChanged)
+                Collections.sort(this.sortedWorldRenderersList, new EntitySorter(storedEntity));
         }
 
-        double d6 = entity.posX - this.prevRenderSortX;
-        double d7 = entity.posY - this.prevRenderSortY;
-        double d8 = entity.posZ - this.prevRenderSortZ;
+        double d6 = storedEntity.posX - this.prevRenderSortX;
+        double d7 = storedEntity.posY - this.prevRenderSortY;
+        double d8 = storedEntity.posZ - this.prevRenderSortZ;
         int k;
 
         if (d6 * d6 + d7 * d7 + d8 * d8 > 1.0D) {
-            this.prevRenderSortX = entity.posX;
-            this.prevRenderSortY = entity.posY;
-            this.prevRenderSortZ = entity.posZ;
+            this.prevRenderSortX = storedEntity.posX;
+            this.prevRenderSortY = storedEntity.posY;
+            this.prevRenderSortZ = storedEntity.posZ;
 
             if (this.sortedWorldRenderersList.size() > 0) for (k = 0; k < 27; ++k) {
                 if (k >= this.sortedWorldRenderersList.size()) break;
                 this.sortedWorldRenderersList.get(k)
-                    .updateRendererSort(entity);
+                    .updateRendererSort(storedEntity);
             }
         }
 
@@ -390,13 +410,13 @@ public class MixinRenderGlobal {
 
         if (this.occlusionEnabled && this.mc.gameSettings.advancedOpengl
             && !this.mc.gameSettings.anaglyph
-            && pass == 0) {
+            && storedPass == 0) {
             int index = 0;
             for (WorldRenderer curRenderer : this.sortedWorldRenderersList) {
-                if (curRenderer.distanceToEntitySquared(entity) > 675.0f)/*
-                                                                          * 3 * (16/2 + 6)Ġ = 588... let's
-                                                                          * add some space
-                                                                          */
+                if (curRenderer.distanceToEntitySquared(storedEntity) > 675.0f)/*
+                                                                                * 3 * (16/2 + 6)Ġ = 588... let's
+                                                                                * add some space
+                                                                                */
                     break;
                 index++;
             }
@@ -410,7 +430,7 @@ public class MixinRenderGlobal {
             }
 
             this.theWorld.theProfiler.endStartSection("render");
-            k = b1 + this.renderSortedRenderers(b0, l, pass, partialTicks);
+            k = b1 + this.renderSortedRenderers(b0, l, storedPass, partialTicks);
 
             do {
                 this.theWorld.theProfiler.endStartSection("occ");
@@ -446,7 +466,7 @@ public class MixinRenderGlobal {
                         }
 
                         if (curRenderer.isInFrustum && !curRenderer.isWaitingOnOcclusionQuery) {
-                            float f2 = MathHelper.sqrt_float(curRenderer.distanceToEntitySquared(entity));
+                            float f2 = MathHelper.sqrt_float(curRenderer.distanceToEntitySquared(storedEntity));
                             int k1 = (int) (1.0F + f2 / 128.0F);
 
                             if (this.cloudTickCounter % k1 == j1 % k1) {
@@ -500,17 +520,23 @@ public class MixinRenderGlobal {
                 GL11.glEnable(GL11.GL_ALPHA_TEST);
                 GL11.glEnable(GL11.GL_FOG);
                 this.theWorld.theProfiler.endStartSection("render");
-                k += this.renderSortedRenderers(l1, l, pass, partialTicks);
+                k += this.renderSortedRenderers(l1, l, storedPass, partialTicks);
             } while (l < this.sortedWorldRenderersList.size());
         } else {
             this.theWorld.theProfiler.endStartSection("render");
-            k = b1 + this.renderSortedRenderers(0, this.sortedWorldRenderersList.size(), pass, partialTicks);
+            k = b1 + this.renderSortedRenderers(0, this.sortedWorldRenderersList.size(), storedPass, partialTicks);
         }
 
         this.mc.entityRenderer.disableLightmap(partialTicks);
         this.theWorld.theProfiler.endSection();
-        ci.setReturnValue(k);
-        ci.cancel();
+        returnValue = k;
+    }
+
+    @Inject(method = "sortAndRender", at = @At("RETURN"), cancellable = true)
+    private void sortAndRender(EntityLivingBase entity, int pass, double partialTicks,
+        CallbackInfoReturnable<Integer> cir) {
+        cir.setReturnValue(returnValue);
+        cir.cancel();
     }
 
     @Overwrite
