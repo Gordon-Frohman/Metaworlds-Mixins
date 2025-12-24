@@ -39,8 +39,6 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
     private static boolean isTransformingClient = false;
     private static boolean isTransformingServer = false;
 
-    private final boolean isProxyPlayer = this instanceof EntityPlayerProxy;
-
     /** holds the ID of the spawn world of the player */
     private int spawnWorldID = 0;
 
@@ -95,7 +93,7 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
 
     @Inject(method = "wakeUpPlayer", at = @At("TAIL"))
     public void wakeUpPlayer(boolean par1, boolean par2, boolean par3, CallbackInfo ci) {
-        if (!this.isProxyPlayer) {
+        if (!this.isPlayerProxy) {
             Iterator<EntityPlayerProxy> i$ = ((IMixinEntity) this).getPlayerProxyMap()
                 .values()
                 .iterator();
@@ -108,7 +106,7 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
     }
 
     public boolean isOnLadder() {
-        if (this.isProxyPlayer) {
+        if (this.isPlayerProxy) {
             return ((EntityPlayerProxy) this).getRealPlayer()
                 .isOnLadder();
         } else if (super.isOnLadder()) {
