@@ -91,7 +91,7 @@ public enum Mixins {
             .addTargetedMod(TargetedMod.ANGELICA)
             .setSide(Side.CLIENT)
             .setPhase(Phase.LATE)
-            .addMixinClasses(addPrefix("angelica.", "MixinRenderGlobal", "MixinEffectRenderer"))),
+            .addMixinClasses(addPrefix("angelica.", "MixinRenderGlobal", "MixinEffectRenderer", "MixinClientProxy"))),
 
     HARDCORE_ENDER_EXPANSION_COMPAT(new Builder("Disable generation of additional data for player proxies")
         .addTargetedMod(TargetedMod.HARDCORE_ENDER_EXPANSION)
@@ -293,6 +293,7 @@ public enum Mixins {
             return this;
         }
 
+        @SuppressWarnings("unused")
         public Builder setApplyIf(Supplier<Boolean> applyIf) {
             this.applyIf = applyIf;
             return this;
@@ -309,7 +310,6 @@ public enum Mixins {
         }
     }
 
-    @SuppressWarnings("SimplifyStreamApiCallChains")
     private static String[] addPrefix(String prefix, String... values) {
         return Arrays.stream(values)
             .map(s -> prefix + s)
