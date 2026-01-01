@@ -181,7 +181,9 @@ public class EventHookContainer {
                 if (((IMixinEntityPlayer) player).getSpawnWorldID(dimension)
                     == ((IMixinWorld) event.world).getSubWorldID()) {
                     ChunkCoordinates bedLocation = player.getBedLocation(dimension);
-                    if (bedLocation.posX == event.x && bedLocation.posY == event.y && bedLocation.posZ == event.z) {
+                    if (bedLocation != null && bedLocation.posX == event.x
+                        && bedLocation.posY == event.y
+                        && bedLocation.posZ == event.z) {
                         Vec3 newBedPos = ((IMixinWorld) event.world).transformLocalToOther(
                             event.targetWorld,
                             bedLocation.posX + 0.5D,
