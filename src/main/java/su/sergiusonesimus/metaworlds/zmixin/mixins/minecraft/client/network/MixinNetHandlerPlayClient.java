@@ -27,6 +27,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.EventHookContainer;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager.SubWorldInfoProvider;
@@ -99,7 +100,7 @@ public abstract class MixinNetHandlerPlayClient {
     }
 
     @Inject(method = "handleEntityMovement", at = @At(value = "HEAD"))
-    public void handleEntityMovement(S14PacketEntity packetIn, CallbackInfo ci) {
+    public void storePacket(S14PacketEntity packetIn, CallbackInfo ci) {
         storedPacket = packetIn;
     }
 
@@ -135,6 +136,34 @@ public abstract class MixinNetHandlerPlayClient {
         } else entity.setPositionAndRotation2(x, y, z, yaw, pitch, 3);
     }
 
+    @Inject(method = "handlePlayerPosLook", at = @At(value = "HEAD"))
+    public void storePacket(S08PacketPlayerPosLook packetIn, CallbackInfo ci) {
+        storedPacket = packetIn;
+        MetaworldsMod.breakpoint1();
+    }
+
+    // @WrapOperation(
+    // method = "handlePlayerPosLook",
+    // at = @At(
+    // value = "INVOKE",
+    // target = "Lnet/minecraft/client/entity/EntityClientPlayerMP;setPositionAndRotation(DDDFF)V"))
+    // private void setPositionAndRotation(EntityClientPlayerMP instance, double x, double y, double z, float yaw,
+    // float pitch, Operation<Void> original) {
+    // int subWorldID = ((IMixinS08PacketPlayerPosLook) storedPacket).getSubWorldBelowFeetID();
+    // EntityClientPlayerMP entityclientplayermp = this.gameController.thePlayer;
+    // World subworld = ((IMixinWorld) ((IMixinWorld) entityclientplayermp.worldObj).getParentWorld())
+    // .getSubWorldsMap()
+    // .get(subWorldID);
+    // if (subWorldID == 0 || subworld == null) {
+    // original.call(instance, x, y, z, yaw, pitch);
+    // } else {
+    // Vec3 globalPos = ((IMixinWorld) subworld)
+    // .transformToGlobal(((IMixinS08PacketPlayerPosLook) storedPacket).getSubWorldPosition());
+    // original.call(instance, globalPos.xCoord, globalPos.yCoord + entityclientplayermp.eyeHeight, globalPos.zCoord,
+    // yaw, pitch);
+    // }
+    // }
+
     @Redirect(
         method = "handlePlayerPosLook",
         at = @At(value = "NEW", target = "Lnet/minecraft/network/play/client/C03PacketPlayer$C06PacketPlayerPosLook;"))
@@ -153,6 +182,10 @@ public abstract class MixinNetHandlerPlayClient {
         ((IMixinEntity) entityclientplayermp).setWorldBelowFeet(subworld);
 
         World worldBelowFeet = ((IMixinEntity) entityclientplayermp).getWorldBelowFeet();
+        double localPosX = ((IMixinS08PacketPlayerPosLook) packetIn).getSubWorldXPosition();
+        double localPosY = ((IMixinS08PacketPlayerPosLook) packetIn).getSubWorldYPosition();
+        double localPosZ = ((IMixinS08PacketPlayerPosLook) packetIn).getSubWorldZPosition();
+        ((IMixinEntityPlayer) entityclientplayermp).setCurrentSubworldPosition(localPosX, localPosY, localPosZ);
 
         return PacketHandler.getC06PacketPlayerPosLook(
             x,
@@ -164,7 +197,10 @@ public abstract class MixinNetHandlerPlayClient {
             isOnGround,
             ((IMixinWorld) worldBelowFeet).getSubWorldID(),
             ((IMixinEntity) entityclientplayermp).getTractionLossTicks(),
-            ((IMixinEntity) entityclientplayermp).isLosingTraction());
+            ((IMixinEntity) entityclientplayermp).isLosingTraction(),
+            localPosX,
+            localPosY,
+            localPosZ);
     }
 
     @Inject(method = "handleSpawnPosition", at = @At(value = "TAIL"))

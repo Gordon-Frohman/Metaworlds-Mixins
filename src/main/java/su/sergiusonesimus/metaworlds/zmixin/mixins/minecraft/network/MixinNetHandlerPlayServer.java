@@ -22,6 +22,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatAllowedCharacters;
+import net.minecraft.util.Vec3;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 import org.apache.logging.log4j.Logger;
@@ -33,16 +35,19 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import com.llamalad7.mixinextras.sugar.Local;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.IMixinNetHandlerPlayServer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.PacketHandler;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.client.IMixinC03PacketPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 @Mixin(NetHandlerPlayServer.class)
-public abstract class MixinNetHandlerPlayServer {
+public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
 
     @Shadow(remap = true)
     public EntityPlayerMP playerEntity;
@@ -78,21 +83,37 @@ public abstract class MixinNetHandlerPlayServer {
     // TODO
 
     @Shadow(remap = true)
-    public abstract void sendPacket(final Packet packetIn);
+    public void sendPacket(final Packet packetIn) {}
 
     @Shadow(remap = true)
-    public abstract void kickPlayerFromServer(String string);
+    public void kickPlayerFromServer(String string) {}
+
+    private int lastSubworldBelowFeetId;
+
+    private double lastLocalPosX;
+
+    private double lastLocalPosY;
+
+    private double lastLocalPosZ;
 
     /**
      * Moves the player to the specified destination and rotation
      */
     @Overwrite
     public void setPlayerLocation(double x, double y, double z, float yaw, float pitch) {
+        IMixinWorld worldBelowFeet = (IMixinWorld) ((IMixinEntity) this.playerEntity).getWorldBelowFeet();
+        Vec3 localPos = worldBelowFeet.transformToLocal(x, y, z);
         this.hasMoved = false;
         this.lastPosX = x;
         this.lastPosY = y;
         this.lastPosZ = z;
+        this.lastSubworldBelowFeetId = worldBelowFeet.getSubWorldID();
+        this.lastLocalPosX = localPos.xCoord;
+        this.lastLocalPosY = localPos.yCoord;
+        this.lastLocalPosZ = localPos.zCoord;
         this.playerEntity.setPositionAndRotation(x, y, z, yaw, pitch);
+        ((IMixinEntityPlayer) this.playerEntity).setSubworldBelowFeetId(this.lastSubworldBelowFeetId);
+        ((IMixinEntityPlayer) this.playerEntity).setCurrentSubworldPosition(localPos);
         this.playerEntity.playerNetServerHandler.sendPacket(
             PacketHandler.getS08PacketPlayerPosLook(
                 x,
@@ -101,9 +122,39 @@ public abstract class MixinNetHandlerPlayServer {
                 yaw,
                 pitch,
                 false,
-                ((IMixinWorld) ((IMixinEntity) this.playerEntity).getWorldBelowFeet()).getSubWorldID(),
-                SubWorldTypeManager.getTypeID(
-                    ((IMixinWorld) ((IMixinEntity) this.playerEntity).getWorldBelowFeet()).getSubWorldType())));
+                worldBelowFeet.getSubWorldID(),
+                SubWorldTypeManager.getTypeID(worldBelowFeet.getSubWorldType()),
+                localPos.xCoord,
+                localPos.yCoord,
+                localPos.zCoord));
+    }
+
+    public void setPlayerLocation(double x, double y, double z, float yaw, float pitch, int worldBelowFeetId,
+        int worldBelowFeetType, double localPosX, double localPosY, double localPosZ) {
+        this.hasMoved = false;
+        this.lastPosX = x;
+        this.lastPosY = y;
+        this.lastPosZ = z;
+        this.lastSubworldBelowFeetId = worldBelowFeetId;
+        this.lastLocalPosX = localPosX;
+        this.lastLocalPosY = localPosY;
+        this.lastLocalPosZ = localPosZ;
+        this.playerEntity.setPositionAndRotation(x, y, z, yaw, pitch);
+        ((IMixinEntityPlayer) this.playerEntity).setSubworldBelowFeetId(worldBelowFeetId);
+        ((IMixinEntityPlayer) this.playerEntity).setCurrentSubworldPosition(localPosX, localPosY, localPosZ);
+        this.playerEntity.playerNetServerHandler.sendPacket(
+            PacketHandler.getS08PacketPlayerPosLook(
+                x,
+                y + 1.6200000047683716D,
+                z,
+                yaw,
+                pitch,
+                false,
+                worldBelowFeetId,
+                worldBelowFeetType,
+                localPosX,
+                localPosY,
+                localPosZ));
     }
 
     /**
@@ -111,6 +162,7 @@ public abstract class MixinNetHandlerPlayServer {
      */
     @Overwrite
     public void processPlayer(C03PacketPlayer packetPlayer) {
+        MetaworldsMod.breakpoint2();
         WorldServer worldserver = this.serverController.worldServerForDimension(this.playerEntity.dimension);
         this.field_147366_g = true;
 
@@ -198,12 +250,36 @@ public abstract class MixinNetHandlerPlayServer {
                     packetPlayer.func_149469_a(false);
                 }
 
+                int subworldId = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldBelowFeetId();
+                World worldBelowFeet = ((IMixinWorld) this.playerEntity.worldObj).getSubWorld(subworldId);
+                ((IMixinEntityPlayer) this.playerEntity).setSubworldBelowFeetId(subworldId);
+                ((IMixinEntity) this.playerEntity).setWorldBelowFeet(worldBelowFeet);
+                if (((IMixinC03PacketPlayer) packetPlayer).getLosingTraction()) {
+                    ((IMixinEntity) this.playerEntity).slowlyRemoveWorldBelowFeet();
+                    ((IMixinEntity) this.playerEntity)
+                        .setTractionTickCount(((IMixinC03PacketPlayer) packetPlayer).getTractionLoss());
+                }
+
                 double d4;
 
                 if (packetPlayer.func_149466_j()) {
-                    d1 = packetPlayer.func_149464_c();
-                    d2 = packetPlayer.func_149467_d();
-                    d3 = packetPlayer.func_149472_e();
+                    if (subworldId != 0 && worldBelowFeet != null) {
+                        double subworldPosX = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldXPosition();
+                        double subworldPosY = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldYPosition();
+                        double subworldPosZ = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldZPosition();
+                        ((IMixinEntityPlayer) this.playerEntity)
+                            .setCurrentSubworldPosition(subworldPosX, subworldPosY, subworldPosZ);
+                        Vec3 globalPos = ((IMixinWorld) worldBelowFeet)
+                            .transformToGlobal(subworldPosX, subworldPosY, subworldPosZ);
+                        d1 = globalPos.xCoord;
+                        d2 = globalPos.yCoord;
+                        d3 = globalPos.zCoord;
+                    } else {
+                        d1 = packetPlayer.func_149464_c();
+                        d2 = packetPlayer.func_149467_d();
+                        d3 = packetPlayer.func_149472_e();
+                        ((IMixinEntityPlayer) this.playerEntity).setCurrentSubworldPosition(d1, d2, d3);
+                    }
                     d4 = packetPlayer.func_149471_f() - packetPlayer.func_149467_d();
 
                     if (!this.playerEntity.isPlayerSleeping() && (d4 > 1.65D || d4 < 0.1D)) {
@@ -257,12 +333,30 @@ public abstract class MixinNetHandlerPlayServer {
                             + ", "
                             + d9
                             + ")");
-                    this.setPlayerLocation(
-                        this.lastPosX,
-                        this.lastPosY,
-                        this.lastPosZ,
-                        this.playerEntity.rotationYaw,
-                        this.playerEntity.rotationPitch);
+                    IMixinWorld lastSubworldBelowFeet = (IMixinWorld) ((IMixinWorld) this.playerEntity.worldObj)
+                        .getSubWorld(lastSubworldBelowFeetId);
+                    if (this.lastSubworldBelowFeetId == 0 || lastSubworldBelowFeet == null) {
+                        this.setPlayerLocation(
+                            this.lastPosX,
+                            this.lastPosY,
+                            this.lastPosZ,
+                            this.playerEntity.rotationYaw,
+                            this.playerEntity.rotationPitch);
+                    } else {
+                        Vec3 globalPos = lastSubworldBelowFeet
+                            .transformToGlobal(this.lastLocalPosX, this.lastLocalPosY, this.lastLocalPosZ);
+                        this.setPlayerLocation(
+                            globalPos.xCoord,
+                            globalPos.yCoord,
+                            globalPos.zCoord,
+                            this.playerEntity.rotationYaw,
+                            this.playerEntity.rotationPitch,
+                            this.lastSubworldBelowFeetId,
+                            SubWorldTypeManager.getTypeID(lastSubworldBelowFeet.getSubWorldType()),
+                            this.lastLocalPosX,
+                            this.lastLocalPosY,
+                            this.lastLocalPosZ);
+                    }
                     return;
                 }
 
@@ -291,15 +385,6 @@ public abstract class MixinNetHandlerPlayServer {
 
                 for (EntityPlayerProxy curPlayerProxy : curPlayerProxies) {
                     ((EntityPlayer) curPlayerProxy).onGround = this.playerEntity.onGround;
-                }
-
-                ((IMixinEntity) this.playerEntity).setWorldBelowFeet(
-                    ((IMixinWorld) this.playerEntity.worldObj)
-                        .getSubWorld(((IMixinC03PacketPlayer) packetPlayer).getSubWorldBelowFeetId()));
-                if (((IMixinC03PacketPlayer) packetPlayer).getLosingTraction()) {
-                    ((IMixinEntity) this.playerEntity).slowlyRemoveWorldBelowFeet();
-                    ((IMixinEntity) this.playerEntity)
-                        .setTractionTickCount(((IMixinC03PacketPlayer) packetPlayer).getTractionLoss());
                 }
 
                 this.playerEntity.addMovementStat(d4, d5, d6);
@@ -382,7 +467,25 @@ public abstract class MixinNetHandlerPlayServer {
                 }
 
                 if (flag && (flag1 || !flag2) && !this.playerEntity.isPlayerSleeping() && !this.playerEntity.noClip) {
-                    this.setPlayerLocation(this.lastPosX, this.lastPosY, this.lastPosZ, f1, f2);
+                    IMixinWorld lastSubworldBelowFeet = (IMixinWorld) ((IMixinWorld) this.playerEntity.worldObj)
+                        .getSubWorld(lastSubworldBelowFeetId);
+                    if (this.lastSubworldBelowFeetId == 0 || lastSubworldBelowFeet == null) {
+                        this.setPlayerLocation(this.lastPosX, this.lastPosY, this.lastPosZ, f1, f2);
+                    } else {
+                        Vec3 globalPos = lastSubworldBelowFeet
+                            .transformToGlobal(this.lastLocalPosX, this.lastLocalPosY, this.lastLocalPosZ);
+                        this.setPlayerLocation(
+                            globalPos.xCoord,
+                            globalPos.yCoord,
+                            globalPos.zCoord,
+                            f1,
+                            f2,
+                            this.lastSubworldBelowFeetId,
+                            SubWorldTypeManager.getTypeID(lastSubworldBelowFeet.getSubWorldType()),
+                            this.lastLocalPosX,
+                            this.lastLocalPosY,
+                            this.lastLocalPosZ);
+                    }
                     return;
                 }
 
@@ -417,12 +520,30 @@ public abstract class MixinNetHandlerPlayServer {
                     .updatePlayerPertinentChunks(this.playerEntity);
                 this.playerEntity.handleFalling(this.playerEntity.posY - d0, packetPlayer.func_149465_i());
             } else if (this.networkTickCount % 20 == 0) {
-                this.setPlayerLocation(
-                    this.lastPosX,
-                    this.lastPosY,
-                    this.lastPosZ,
-                    this.playerEntity.rotationYaw,
-                    this.playerEntity.rotationPitch);
+                IMixinWorld lastSubworldBelowFeet = (IMixinWorld) ((IMixinWorld) this.playerEntity.worldObj)
+                    .getSubWorld(lastSubworldBelowFeetId);
+                if (this.lastSubworldBelowFeetId == 0 || lastSubworldBelowFeet == null) {
+                    this.setPlayerLocation(
+                        this.lastPosX,
+                        this.lastPosY,
+                        this.lastPosZ,
+                        this.playerEntity.rotationYaw,
+                        this.playerEntity.rotationPitch);
+                } else {
+                    Vec3 globalPos = lastSubworldBelowFeet
+                        .transformToGlobal(this.lastLocalPosX, this.lastLocalPosY, this.lastLocalPosZ);
+                    this.setPlayerLocation(
+                        globalPos.xCoord,
+                        globalPos.yCoord,
+                        globalPos.zCoord,
+                        this.playerEntity.rotationYaw,
+                        this.playerEntity.rotationPitch,
+                        this.lastSubworldBelowFeetId,
+                        SubWorldTypeManager.getTypeID(lastSubworldBelowFeet.getSubWorldType()),
+                        this.lastLocalPosX,
+                        this.lastLocalPosY,
+                        this.lastLocalPosZ);
+                }
             }
         }
     }

@@ -383,15 +383,19 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                         decreaseMotion = false;
                     }
                     World worldBelowFeet = getWorldBelowFeet();
-                    if (worldBelowFeet instanceof SubWorld) {
-                        Vec3 localPos = ((IMixinWorld) worldBelowFeet).transformToLocal((Entity) (Object) this);
-                        if ((!worldBelowFeet.blockExists((int) localPos.xCoord, 0, (int) localPos.zCoord)
-                            || !worldBelowFeet
-                                .getChunkFromBlockCoords((int) localPos.xCoord, (int) localPos.zCoord).isChunkLoaded)) {
+                    if (worldBelowFeet instanceof SubWorld subworld) {
+                        Vec3 localPos = subworld.transformToLocal((Entity) (Object) this);
+                        if (!subworld.canUpdate()
+                            || !worldBelowFeet.blockExists((int) localPos.xCoord, 0, (int) localPos.zCoord)
+                        /*
+                         * || !worldBelowFeet
+                         * .getChunkFromBlockCoords((int) localPos.xCoord, (int) localPos.zCoord).isChunkLoaded
+                         */) {
                             this.motionX = 0.0D;
                             this.motionY = 0.0D;
                             this.motionZ = 0.0D;
-                            ((SubWorld) worldBelowFeet).registerEntityToDrag((Entity) (Object) this);
+                            subworld.registerEntityToDrag((Entity) (Object) this);
+                            this.setWorldBelowFeet(worldBelowFeet);
                             decreaseMotion = false;
                         }
                     }

@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS08PacketPlayerPosLook;
 
 @Mixin(S08PacketPlayerPosLook.class)
-public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlayerPosLook {
+public class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlayerPosLook {
 
     @Shadow(remap = true)
     private double field_148939_c;
@@ -25,6 +25,10 @@ public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlay
 
     private int subWorldBelowFeetType;
 
+    protected double subWorldPosX;
+    protected double subWorldPosY;
+    protected double subWorldPosZ;
+
     public int getSubWorldBelowFeetID() {
         return subWorldBelowFeetID;
     }
@@ -33,14 +37,47 @@ public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlay
         return subWorldBelowFeetType;
     }
 
-    public S08PacketPlayerPosLook setSubWorldBelowFeetID(int ID) {
+    public IMixinS08PacketPlayerPosLook setSubWorldBelowFeetID(int ID) {
         subWorldBelowFeetID = ID;
-        return (S08PacketPlayerPosLook) (Object) this;
+        return this;
     }
 
-    public S08PacketPlayerPosLook setSubWorldBelowFeetType(int type) {
+    public IMixinS08PacketPlayerPosLook setSubWorldBelowFeetType(int type) {
         subWorldBelowFeetType = type;
-        return (S08PacketPlayerPosLook) (Object) this;
+        return this;
+    }
+
+    @Override
+    public IMixinS08PacketPlayerPosLook setSubWorldXPosition(double newX) {
+        this.subWorldPosX = newX;
+        return this;
+    }
+
+    @Override
+    public IMixinS08PacketPlayerPosLook setSubWorldYPosition(double newY) {
+        this.subWorldPosY = newY;
+        return this;
+    }
+
+    @Override
+    public IMixinS08PacketPlayerPosLook setSubWorldZPosition(double newZ) {
+        this.subWorldPosZ = newZ;
+        return this;
+    }
+
+    @Override
+    public double getSubWorldXPosition() {
+        return this.subWorldPosX;
+    }
+
+    @Override
+    public double getSubWorldYPosition() {
+        return this.subWorldPosY;
+    }
+
+    @Override
+    public double getSubWorldZPosition() {
+        return this.subWorldPosZ;
     }
 
     /**
@@ -50,6 +87,9 @@ public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlay
     public void readPacketData(PacketBuffer data, CallbackInfo ci) throws IOException {
         this.subWorldBelowFeetID = data.readInt();
         this.subWorldBelowFeetType = data.readInt();
+        this.subWorldPosX = data.readDouble();
+        this.subWorldPosY = data.readDouble();
+        this.subWorldPosZ = data.readDouble();
     }
 
     /**
@@ -59,6 +99,9 @@ public abstract class MixinS08PacketPlayerPosLook implements IMixinS08PacketPlay
     public void writePacketData(PacketBuffer data, CallbackInfo ci) throws IOException {
         data.writeInt(this.subWorldBelowFeetID);
         data.writeInt(this.subWorldBelowFeetType);
+        data.writeDouble(this.subWorldPosX);
+        data.writeDouble(this.subWorldPosY);
+        data.writeDouble(this.subWorldPosZ);
     }
 
 }

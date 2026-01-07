@@ -204,12 +204,15 @@ public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP impl
                     chunkcoordinates.posZ);
             }
 
-            Vec3 globalPos = ((IMixinWorld) this.worldObj).transformToGlobal(
+            Vec3 localPos = Vec3.createVectorHelper(
                 (double) ((float) chunkcoordinates1.posX + 0.5F),
                 (double) ((float) chunkcoordinates1.posY + this.yOffset + 0.1F),
                 (double) ((float) chunkcoordinates1.posZ + 0.5F));
+            Vec3 globalPos = ((IMixinWorld) this.worldObj).transformToGlobal(localPos);
             this.getRealPlayer()
                 .setPosition(globalPos.xCoord, globalPos.yCoord, globalPos.zCoord);
+            ((IMixinEntity) this.getRealPlayer()).setWorldBelowFeet(worldObj);
+            ((IMixinEntityPlayer) this.getRealPlayer()).setCurrentSubworldPosition(localPos);
 
             if (setSpawn) {
                 ((IMixinEntityPlayer) this.getRealPlayer())

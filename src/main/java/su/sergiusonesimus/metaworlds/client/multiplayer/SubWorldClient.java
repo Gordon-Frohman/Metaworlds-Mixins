@@ -1285,4 +1285,9 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return this.getParentWorld()
             .getBiomeGenForCoordsBody(globalCoords.posX, globalCoords.posZ);
     }
+
+    @Override
+    public boolean canUpdate() {
+        return this.canUpdate;
+    }
 }

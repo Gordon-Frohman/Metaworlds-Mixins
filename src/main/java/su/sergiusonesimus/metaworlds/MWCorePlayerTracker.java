@@ -8,12 +8,10 @@ import java.util.Map;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerRespawnEvent;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
@@ -23,18 +21,13 @@ import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.server.S01SubWorldCreatePacket;
 import su.sergiusonesimus.metaworlds.network.play.server.S02SubWorldDestroyPacket;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class MWCorePlayerTracker {
 
     @SubscribeEvent
-    public void onPlayerLogin(PlayerLoggedInEvent event) {
-        sendSubWorldCreationPackets(event.player);
-    }
-
-    @SubscribeEvent
     public void onPlayerLogout(PlayerLoggedOutEvent event) {
-        // This only works on dedicated servers
         savePlayerData(event.player);
     }
 
@@ -44,10 +37,10 @@ public class MWCorePlayerTracker {
         subWorldData.setInteger(
             "WorldBelowFeetId",
             ((IMixinWorld) ((IMixinEntity) player).getWorldBelowFeet()).getSubWorldID());
-        Vec3 transformedPos = ((IMixinEntity) player).getLocalPos(((IMixinEntity) player).getWorldBelowFeet());
-        subWorldData.setDouble("posXOnSubWorld", transformedPos.xCoord);
-        subWorldData.setDouble("posYOnSubWorld", transformedPos.yCoord);
-        subWorldData.setDouble("posZOnSubWorld", transformedPos.zCoord);
+        IMixinEntityPlayer entityPlayer = (IMixinEntityPlayer) player;
+        subWorldData.setDouble("posXOnSubWorld", entityPlayer.getCurrentSubworldPosX());
+        subWorldData.setDouble("posYOnSubWorld", entityPlayer.getCurrentSubworldPosY());
+        subWorldData.setDouble("posZOnSubWorld", entityPlayer.getCurrentSubworldPosZ());
         entityData.setTag("SubWorldInfo", subWorldData);
     }
 
@@ -66,7 +59,7 @@ public class MWCorePlayerTracker {
         sendSubWorldCreationPackets(player);
     }
 
-    private void sendSubWorldCreationPackets(EntityPlayer player) {
+    public static void sendSubWorldCreationPackets(EntityPlayer player) {
         IMixinWorld world = (IMixinWorld) player.worldObj;
         List<Integer> batchPacket = new ArrayList<Integer>();
         List<SubWorld> separatePackets = new ArrayList<SubWorld>();
@@ -88,7 +81,7 @@ public class MWCorePlayerTracker {
         }
     }
 
-    private boolean needsSeparatePacket(SubWorld subworld) {
+    private static boolean needsSeparatePacket(SubWorld subworld) {
         SubWorldInfoProvider sip = SubWorldTypeManager.getSubWorldInfoProvider(subworld);
         Class<? extends SubWorldInfoProvider> sipClass = sip.getClass();
         try {

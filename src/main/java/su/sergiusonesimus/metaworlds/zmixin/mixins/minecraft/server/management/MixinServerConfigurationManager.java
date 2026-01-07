@@ -44,11 +44,16 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import su.sergiusonesimus.metaworlds.MWCorePlayerTracker;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.server.S04SubWorldSpawnPositionPacket;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.IMixinNetHandlerPlayServer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.PacketHandler;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS05PacketSpawnPosition;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -157,6 +162,8 @@ public class MixinServerConfigurationManager {
             new S05PacketSpawnPosition(chunkcoordinates.posX, chunkcoordinates.posY, chunkcoordinates.posZ));
         nethandlerplayserver.sendPacket(new S39PacketPlayerAbilities(player.capabilities));
         nethandlerplayserver.sendPacket(new S09PacketHeldItemChange(player.inventory.currentItem));
+
+        MWCorePlayerTracker.sendSubWorldCreationPackets(player);
 
         if (nbttagcompound != null) {
             NBTTagCompound entityData = nbttagcompound.getCompoundTag("ForgeData");
@@ -276,6 +283,17 @@ public class MixinServerConfigurationManager {
 
     @WrapOperation(
         method = "respawnPlayer",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;func_72381_a(Lnet/minecraft/entity/player/EntityPlayerMP;Lnet/minecraft/entity/player/EntityPlayerMP;Lnet/minecraft/world/World;)V"))
+    public void func_72381_a(ServerConfigurationManager instance, EntityPlayerMP newPlayer, EntityPlayerMP oldPlayer,
+        World world, Operation<Void> original) {
+        original.call(instance, newPlayer, oldPlayer, world);
+        storedPlayer = newPlayer;
+    }
+
+    @WrapOperation(
+        method = "respawnPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setLocationAndAngles(DDDFF)V"))
     public void setLocationAndAngles(EntityPlayerMP player, double x, double y, double z, float yaw, float pitch,
         Operation<Void> original) {
@@ -285,15 +303,55 @@ public class MixinServerConfigurationManager {
                 .getSubWorld(spawnWorld);
             SubWorld subworld = (SubWorld) worldBelowFeet;
             Vec3 globalPos = subworld.transformToGlobal(x, y, z);
-            player.setLocationAndAngles(
+            ((IMixinEntityPlayer) player).setSpawnWorldID(spawnWorld);
+            ((IMixinEntity) player).setWorldBelowFeet(worldBelowFeet);
+            ((IMixinEntityPlayer) player).setCurrentSubworldPosition(x, y, z);
+            subworld.registerEntityToDrag(player);
+            original.call(
+                player,
                 globalPos.xCoord,
                 globalPos.yCoord,
                 globalPos.zCoord,
                 yaw - (float) (subworld.getRotationYaw() % 360 / 180 * Math.PI),
                 pitch);
-            ((IMixinEntityPlayer) player).setSpawnWorldID(spawnWorld);
-            ((IMixinEntity) player).setWorldBelowFeet(worldBelowFeet);
-            subworld.registerEntityToDrag(player);
+            MetaworldsMod.breakpoint();
+            player.playerNetServerHandler.sendPacket(
+                PacketHandler.getS08PacketPlayerPosLook(
+                    globalPos.xCoord,
+                    globalPos.yCoord + 1.6200000047683716D,
+                    globalPos.zCoord,
+                    yaw - (float) (subworld.getRotationYaw() % 360 / 180 * Math.PI),
+                    pitch,
+                    false,
+                    spawnWorld,
+                    SubWorldTypeManager.getTypeID(((IMixinWorld) worldBelowFeet).getSubWorldType()),
+                    x,
+                    y,
+                    z));
+        }
+    }
+
+    @WrapOperation(
+        method = "respawnPlayer",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;setPlayerLocation(DDDFF)V"))
+    public void setPlayerLocation(NetHandlerPlayServer handler, double x, double y, double z, float yaw, float pitch,
+        Operation<Void> original) {
+        World worldBelowFeet = ((IMixinWorld) ((IMixinWorld) storedPlayer.worldObj).getParentWorld())
+            .getSubWorld(spawnWorld);
+        if (spawnWorld == 0 && worldBelowFeet != null) original.call(handler, x, y, z, yaw, pitch);
+        else {
+            Vec3 localPos = ((IMixinEntityPlayer) storedPlayer).getCurrentSubworldPosition();
+            ((IMixinNetHandlerPlayServer) handler).setPlayerLocation(
+                x,
+                y,
+                z,
+                yaw,
+                pitch,
+                spawnWorld,
+                SubWorldTypeManager.getTypeID(((IMixinWorld) worldBelowFeet).getSubWorldType()),
+                localPos.xCoord,
+                localPos.yCoord,
+                localPos.zCoord);
         }
     }
 
