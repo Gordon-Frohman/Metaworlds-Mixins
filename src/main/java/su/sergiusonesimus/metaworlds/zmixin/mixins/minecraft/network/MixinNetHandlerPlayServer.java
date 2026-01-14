@@ -125,7 +125,7 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                 worldBelowFeet.getSubWorldID(),
                 SubWorldTypeManager.getTypeID(worldBelowFeet.getSubWorldType()),
                 localPos.xCoord,
-                localPos.yCoord,
+                localPos.yCoord + 1.6200000047683716D,
                 localPos.zCoord));
     }
 
@@ -153,7 +153,7 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                 worldBelowFeetId,
                 worldBelowFeetType,
                 localPosX,
-                localPosY,
+                localPosY + 1.6200000047683716D,
                 localPosZ));
     }
 
@@ -170,11 +170,28 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
             double d0;
 
             if (!this.hasMoved) {
-                d0 = packetPlayer.func_149467_d() - this.lastPosY;
-
-                if (packetPlayer.func_149464_c() == this.lastPosX && d0 * d0 < 0.01D
-                    && packetPlayer.func_149472_e() == this.lastPosZ) {
+                if (this.lastSubworldBelowFeetId != ((IMixinC03PacketPlayer) packetPlayer).getSubWorldBelowFeetId()) {
+                    // Player has stepped on a different (sub)world
                     this.hasMoved = true;
+                } else {
+                    if (this.lastSubworldBelowFeetId == 0) {
+                        // Player is still standing on the main world
+                        d0 = packetPlayer.func_149467_d() - this.lastPosY;
+
+                        if (packetPlayer.func_149464_c() == this.lastPosX && d0 * d0 < 0.01D
+                            && packetPlayer.func_149472_e() == this.lastPosZ) {
+                            this.hasMoved = true;
+                        }
+                    } else {
+                        // Player is still standing on a subworld
+                        d0 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldYPosition() - this.lastLocalPosY;
+                        double d1 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldXPosition() - this.lastLocalPosX;
+                        double d2 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldZPosition() - this.lastLocalPosZ;
+
+                        if (d0 * d0 < 0.01D && d1 * d1 < 0.01D && d2 * d2 < 0.01D) {
+                            this.hasMoved = true;
+                        }
+                    }
                 }
             }
 

@@ -78,10 +78,7 @@ public class SubWorldTypeManager {
         }
 
         public IMessage getCreatePacket(SubWorld sourceWorld) {
-            return new S01SubWorldCreatePacket(
-                1,
-                new Integer[] { Integer.valueOf(sourceWorld.getSubWorldID()) },
-                new Integer[] { Integer.valueOf(SubWorldTypeManager.getTypeID(sourceWorld.getSubWorldType())) });
+            return new S01SubWorldCreatePacket(sourceWorld.getSubWorldID());
         }
 
         public SubWorldInfoHolder fromSubworld(SubWorld sourceWorld) {

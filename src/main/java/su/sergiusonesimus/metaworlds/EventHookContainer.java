@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
@@ -17,12 +18,16 @@ import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
+import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
@@ -129,6 +134,24 @@ public class EventHookContainer {
                     subworldEvent.accept((SubWorld) subworld);
                 }
                 subworldEvents.remove(subworldId);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    @SideOnly(Side.CLIENT)
+    public void onChunkLoad(ChunkEvent.Load event) {
+        if (event.world.isRemote && event.world instanceof SubWorld subworld) {
+            EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+            if (((IMixinEntityPlayer) player).getSubworldBelowFeetId() == subworld.getSubWorldID()) {
+                Vec3 localPos = ((IMixinEntityPlayer) player).getCurrentSubworldPosition();
+                int x = MathHelper.floor_double(localPos.xCoord);
+                int z = MathHelper.floor_double(localPos.zCoord);
+                Chunk chunk = event.getChunk();
+                if (chunk.xPosition == x >> 4 && chunk.zPosition == z >> 4) {
+                    Vec3 globalPos = subworld.transformToGlobal(localPos);
+                    player.setPosition(globalPos.xCoord, globalPos.yCoord, globalPos.zCoord);
+                }
             }
         }
     }

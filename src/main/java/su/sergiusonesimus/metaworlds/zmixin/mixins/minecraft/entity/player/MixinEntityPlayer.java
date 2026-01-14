@@ -58,6 +58,9 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
     @Shadow(remap = true)
     protected boolean sleeping;
 
+    @Shadow(remap = true)
+    public float eyeHeight;
+
     // TODO
 
     @Shadow(remap = true)

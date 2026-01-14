@@ -26,6 +26,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntityLivingBase;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -385,12 +386,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements IMixi
                     World worldBelowFeet = getWorldBelowFeet();
                     if (worldBelowFeet instanceof SubWorld subworld) {
                         Vec3 localPos = subworld.transformToLocal((Entity) (Object) this);
-                        if (!subworld.canUpdate()
-                            || !worldBelowFeet.blockExists((int) localPos.xCoord, 0, (int) localPos.zCoord)
-                        /*
-                         * || !worldBelowFeet
-                         * .getChunkFromBlockCoords((int) localPos.xCoord, (int) localPos.zCoord).isChunkLoaded
-                         */) {
+                        int localX = MathHelper.floor_double(localPos.xCoord);
+                        int localZ = MathHelper.floor_double(localPos.zCoord);
+                        if (localX >> 4 == -57 && localZ >> 4 == 53) MetaworldsMod.breakpoint4();
+                        if (!subworld.canUpdate() || !worldBelowFeet.blockExists(localX, 0, localZ)
+                            || !worldBelowFeet.getChunkFromBlockCoords(localX, localZ).isChunkLoaded) {
                             this.motionX = 0.0D;
                             this.motionY = 0.0D;
                             this.motionZ = 0.0D;

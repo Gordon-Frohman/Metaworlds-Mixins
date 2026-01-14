@@ -29,8 +29,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import su.sergiusonesimus.metaworlds.EventHookContainer;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
-import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager.SubWorldInfoProvider;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.PacketHandler;
@@ -142,27 +140,26 @@ public abstract class MixinNetHandlerPlayClient {
         MetaworldsMod.breakpoint1();
     }
 
-    // @WrapOperation(
-    // method = "handlePlayerPosLook",
-    // at = @At(
-    // value = "INVOKE",
-    // target = "Lnet/minecraft/client/entity/EntityClientPlayerMP;setPositionAndRotation(DDDFF)V"))
-    // private void setPositionAndRotation(EntityClientPlayerMP instance, double x, double y, double z, float yaw,
-    // float pitch, Operation<Void> original) {
-    // int subWorldID = ((IMixinS08PacketPlayerPosLook) storedPacket).getSubWorldBelowFeetID();
-    // EntityClientPlayerMP entityclientplayermp = this.gameController.thePlayer;
-    // World subworld = ((IMixinWorld) ((IMixinWorld) entityclientplayermp.worldObj).getParentWorld())
-    // .getSubWorldsMap()
-    // .get(subWorldID);
-    // if (subWorldID == 0 || subworld == null) {
-    // original.call(instance, x, y, z, yaw, pitch);
-    // } else {
-    // Vec3 globalPos = ((IMixinWorld) subworld)
-    // .transformToGlobal(((IMixinS08PacketPlayerPosLook) storedPacket).getSubWorldPosition());
-    // original.call(instance, globalPos.xCoord, globalPos.yCoord + entityclientplayermp.eyeHeight, globalPos.zCoord,
-    // yaw, pitch);
-    // }
-    // }
+    @WrapOperation(
+        method = "handlePlayerPosLook",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/entity/EntityClientPlayerMP;setPositionAndRotation(DDDFF)V"))
+    private void setPositionAndRotation(EntityClientPlayerMP instance, double x, double y, double z, float yaw,
+        float pitch, Operation<Void> original) {
+        int subWorldID = ((IMixinS08PacketPlayerPosLook) storedPacket).getSubWorldBelowFeetID();
+        EntityClientPlayerMP entityclientplayermp = this.gameController.thePlayer;
+        World subworld = ((IMixinWorld) ((IMixinWorld) entityclientplayermp.worldObj).getParentWorld())
+            .getSubWorldsMap()
+            .get(subWorldID);
+        if (subWorldID == 0 || subworld == null) {
+            original.call(instance, x, y, z, yaw, pitch);
+        } else {
+            Vec3 globalPos = ((IMixinWorld) subworld)
+                .transformToGlobal(((IMixinS08PacketPlayerPosLook) storedPacket).getSubWorldPosition());
+            original.call(instance, globalPos.xCoord, globalPos.yCoord, globalPos.zCoord, yaw, pitch);
+        }
+    }
 
     @Redirect(
         method = "handlePlayerPosLook",
@@ -171,15 +168,9 @@ public abstract class MixinNetHandlerPlayClient {
         float pitch, boolean isOnGround, @Local S08PacketPlayerPosLook packetIn,
         @Local EntityClientPlayerMP entityclientplayermp) {
         int subWorldID = ((IMixinS08PacketPlayerPosLook) packetIn).getSubWorldBelowFeetID();
-        World subworld = ((IMixinWorld) ((IMixinWorld) entityclientplayermp.worldObj).getParentWorld())
-            .getSubWorldsMap()
-            .get(subWorldID);
-        if (subworld == null && subWorldID != 0) {
-            SubWorldInfoProvider provider = SubWorldTypeManager.getSubWorldInfoProvider(
-                SubWorldTypeManager.getTypeByID(((IMixinS08PacketPlayerPosLook) packetIn).getSubWorldBelowFeetType()));
-            subworld = provider.create(entityclientplayermp.worldObj, subWorldID);
-        }
+        World subworld = ((IMixinWorld) entityclientplayermp.worldObj).getSubWorld(subWorldID);
         ((IMixinEntity) entityclientplayermp).setWorldBelowFeet(subworld);
+        ((IMixinEntityPlayer) entityclientplayermp).setSubworldBelowFeetId(subWorldID);
 
         World worldBelowFeet = ((IMixinEntity) entityclientplayermp).getWorldBelowFeet();
         double localPosX = ((IMixinS08PacketPlayerPosLook) packetIn).getSubWorldXPosition();
@@ -199,7 +190,7 @@ public abstract class MixinNetHandlerPlayClient {
             ((IMixinEntity) entityclientplayermp).getTractionLossTicks(),
             ((IMixinEntity) entityclientplayermp).isLosingTraction(),
             localPosX,
-            localPosY,
+            localPosY - entityclientplayermp.eyeHeight,
             localPosZ);
     }
 

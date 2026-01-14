@@ -830,7 +830,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         }
     }
 
-    protected S03SubWorldUpdatePacket getUpdatePacket(SubWorldServer par1SubWorldServer, int updateFlags) {
+    public S03SubWorldUpdatePacket getUpdatePacket(SubWorldServer par1SubWorldServer, int updateFlags) {
         return new S03SubWorldUpdatePacket(par1SubWorldServer, updateFlags);
     }
 
