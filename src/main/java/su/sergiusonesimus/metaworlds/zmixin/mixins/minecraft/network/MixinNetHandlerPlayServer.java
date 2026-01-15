@@ -175,7 +175,7 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                     this.hasMoved = true;
                 } else {
                     // First - checking if the player has moved globally (or if the world he/she is standing on was
-                    // rotated)
+                    // moved or rotated)
                     d0 = packetPlayer.func_149467_d() - this.lastPosY;
 
                     if (packetPlayer.func_149464_c() == this.lastPosX && d0 * d0 < 0.01D
