@@ -174,16 +174,16 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                     // Player has stepped on a different (sub)world
                     this.hasMoved = true;
                 } else {
-                    if (this.lastSubworldBelowFeetId == 0) {
-                        // Player is still standing on the main world
-                        d0 = packetPlayer.func_149467_d() - this.lastPosY;
+                    // First - checking if the player has moved globally (or if the world he/she is standing on was
+                    // rotated)
+                    d0 = packetPlayer.func_149467_d() - this.lastPosY;
 
-                        if (packetPlayer.func_149464_c() == this.lastPosX && d0 * d0 < 0.01D
-                            && packetPlayer.func_149472_e() == this.lastPosZ) {
-                            this.hasMoved = true;
-                        }
-                    } else {
-                        // Player is still standing on a subworld
+                    if (packetPlayer.func_149464_c() == this.lastPosX && d0 * d0 < 0.01D
+                        && packetPlayer.func_149472_e() == this.lastPosZ) {
+                        this.hasMoved = true;
+                    }
+                    if (!this.hasMoved) {
+                        // Then - if the player has moved locally
                         d0 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldYPosition() - this.lastLocalPosY;
                         double d1 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldXPosition() - this.lastLocalPosX;
                         double d2 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldZPosition() - this.lastLocalPosZ;
