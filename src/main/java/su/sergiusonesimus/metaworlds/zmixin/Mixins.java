@@ -114,15 +114,23 @@ public enum Mixins {
             .addMixinClasses(
                 addPrefix(
                     "forgemultipart.",
-                    "MixinPlacementGrid",
-                    "MixinMicroblockRender",
                     "MixinMicroblockPlacement",
                     "MixinTileMultipart",
                     "MixinMultipartSPH",
-                    "MixinMultipartCPH",
                     "MixinMultipartSPH$$anonfun$onTickEnd",
                     "MixinMultipartSPH$$anonfun$onTickEnd$2",
-                    "MixinMultipartSPH$$anonfun$onTickEnd$5",
+                    "MixinMultipartSPH$$anonfun$onTickEnd$5"))),
+
+    FORGEMULTIPART_COMPAT_CLIENT(
+        new Builder("Allow multiparts to be placed correctly on subworlds").addTargetedMod(TargetedMod.FORGEMULTIPART)
+            .setSide(Side.CLIENT)
+            .setPhase(Phase.LATE)
+            .addMixinClasses(
+                addPrefix(
+                    "forgemultipart.",
+                    "MixinPlacementGrid",
+                    "MixinMicroblockRender",
+                    "MixinMultipartCPH",
                     "MixinIconHitEffects"))),
 
     LITTLETILES_COMPAT(

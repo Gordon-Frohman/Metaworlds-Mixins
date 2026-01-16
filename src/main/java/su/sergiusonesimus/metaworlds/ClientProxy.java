@@ -2,6 +2,7 @@ package su.sergiusonesimus.metaworlds;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import net.minecraftforge.common.MinecraftForge;
@@ -53,6 +54,10 @@ public class ClientProxy extends CommonProxy {
 
     public World getMainWorld() {
         return Minecraft.getMinecraft().theWorld;
+    }
+
+    public EntityPlayer getClientPlayer() {
+        return Minecraft.getMinecraft().thePlayer;
     }
 
 }

@@ -96,7 +96,6 @@ public class SubWorldServer extends WorldServer implements SubWorld {
             par6Profiler);
         this.m_parentWorld = parentWorld;
         this.subWorldID = newSubWorldID;
-        this.setRotationYaw(45.0D);
         this.setTranslation(0.0D, 0.0D, 0.0D);
         this.setBoundaries(
             Integer.MAX_VALUE,

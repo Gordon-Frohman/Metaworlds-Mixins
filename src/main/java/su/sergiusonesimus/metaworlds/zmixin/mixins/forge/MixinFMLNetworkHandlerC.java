@@ -26,9 +26,23 @@ public class MixinFMLNetworkHandlerC {
             value = "INVOKE",
             target = "Lcpw/mods/fml/common/FMLCommonHandler;showGuiScreen(Ljava/lang/Object;)V",
             remap = false,
+            shift = Shift.BEFORE),
+        locals = LocalCapture.CAPTURE_FAILHARD)
+    private static void openGui1(EntityPlayer entityPlayer, Object mod, int modGuiId, World world, int x, int y, int z,
+        CallbackInfo ci, @Local(name = "guiContainer") Object guiContainer) {
+        if (guiContainer != null) entityPlayer.openContainer = ((GuiContainer) guiContainer).inventorySlots;
+    }
+
+    @Inject(
+        method = "openGui",
+        remap = false,
+        at = @At(
+            value = "INVOKE",
+            target = "Lcpw/mods/fml/common/FMLCommonHandler;showGuiScreen(Ljava/lang/Object;)V",
+            remap = false,
             shift = Shift.AFTER),
         locals = LocalCapture.CAPTURE_FAILHARD)
-    private static void openGui(EntityPlayer entityPlayer, Object mod, int modGuiId, World world, int x, int y, int z,
+    private static void openGui2(EntityPlayer entityPlayer, Object mod, int modGuiId, World world, int x, int y, int z,
         CallbackInfo ci, @Local(name = "guiContainer") Object guiContainer) {
         if (guiContainer instanceof GuiContainer container && entityPlayer instanceof EntityPlayerSP clientPlayer) {
             container.mc = clientPlayer.mc;

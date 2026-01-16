@@ -11,6 +11,7 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
 import su.sergiusonesimus.metaworlds.block.BlockDummyReobfTracker;
+import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 
 public class BlockVolatilityMap {
 
@@ -27,27 +28,29 @@ public class BlockVolatilityMap {
         int blockId = Block.getIdFromBlock(block);
         Boolean isVolatile = (Boolean) blockVolatilityMap.get(Integer.valueOf(blockId));
         if (isVolatile == null) {
-            try {
-                if (block.getClass()
-                    .getMethod(
-                        BlockDummyReobfTracker.canBlockStayMethodName,
-                        new Class[] { World.class, Integer.TYPE, Integer.TYPE, Integer.TYPE })
-                    .getDeclaringClass()
-                    .equals(Block.class)
-                    && block.getClass()
+            if (ForgeMultipartIntegration.isBlockMultipart(block)) {
+                isVolatile = true;
+            } else {
+                try {
+                    if (block.getClass()
                         .getMethod(
-                            BlockDummyReobfTracker.onNeighborBlockChange,
-                            new Class[] { World.class, Integer.TYPE, Integer.TYPE, Integer.TYPE, Block.class })
+                            BlockDummyReobfTracker.canBlockStayMethodName,
+                            new Class[] { World.class, Integer.TYPE, Integer.TYPE, Integer.TYPE })
                         .getDeclaringClass()
-                        .equals(Block.class)) {
-                    isVolatile = Boolean.valueOf(false);
-                } else {
-                    isVolatile = Boolean.valueOf(true);
+                        .equals(Block.class)
+                        && block.getClass()
+                            .getMethod(
+                                BlockDummyReobfTracker.onNeighborBlockChange,
+                                new Class[] { World.class, Integer.TYPE, Integer.TYPE, Integer.TYPE, Block.class })
+                            .getDeclaringClass()
+                            .equals(Block.class)) {
+                        isVolatile = false;
+                    } else {
+                        isVolatile = true;
+                    }
+                } catch (Exception e) {
+
                 }
-            } catch (SecurityException var15) {
-                ;
-            } catch (NoSuchMethodException var16) {
-                ;
             }
 
             blockVolatilityMap.put(Integer.valueOf(blockId), isVolatile);

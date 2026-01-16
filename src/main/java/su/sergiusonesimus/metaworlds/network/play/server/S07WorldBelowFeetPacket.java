@@ -1,6 +1,5 @@
 package su.sergiusonesimus.metaworlds.network.play.server;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
@@ -9,6 +8,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import su.sergiusonesimus.metaworlds.EventHookContainer;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -38,7 +38,7 @@ public class S07WorldBelowFeetPacket implements IMessage {
         @Override
         public IMessage onMessage(S07WorldBelowFeetPacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
-                EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+                EntityPlayer player = MetaworldsMod.proxy.getClientPlayer();
 
                 World world = ((IMixinWorld) player.getEntityWorld()).getSubWorld(message.subworldId);
                 if (world != null) {

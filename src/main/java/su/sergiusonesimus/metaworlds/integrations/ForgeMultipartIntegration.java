@@ -27,7 +27,6 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWor
 
 public class ForgeMultipartIntegration {
 
-    private static ForgeMultipartIntegration instance = new ForgeMultipartIntegration();
     public static MovingObjectPosition currentMOP;
 
     public static int getSubworldSpecificEntityId(EntityPlayer player) {

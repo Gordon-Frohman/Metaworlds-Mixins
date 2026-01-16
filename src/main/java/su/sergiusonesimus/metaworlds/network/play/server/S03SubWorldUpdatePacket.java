@@ -1,7 +1,6 @@
 package su.sergiusonesimus.metaworlds.network.play.server;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityClientPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -13,6 +12,7 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
@@ -180,7 +180,7 @@ public class S03SubWorldUpdatePacket implements IMessage {
 
     @SideOnly(Side.CLIENT)
     public void executeOnTick() {
-        EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+        EntityPlayer player = MetaworldsMod.proxy.getClientPlayer();
         World targetWorld = ((IMixinWorld) player.worldObj).getSubWorld(this.subWorldId);
         if (targetWorld == null) return;
 
@@ -263,7 +263,7 @@ public class S03SubWorldUpdatePacket implements IMessage {
         @Override
         public IMessage onMessage(S03SubWorldUpdatePacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
-                EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
+                EntityPlayer player = MetaworldsMod.proxy.getClientPlayer();
                 World targetWorld = ((IMixinWorld) player.worldObj).getSubWorld(message.subWorldId);
                 if (targetWorld == null) return null;
 
