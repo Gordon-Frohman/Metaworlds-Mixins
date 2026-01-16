@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
@@ -365,7 +364,6 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
     }
 
     public void setWorldBelowFeet(World newWorldBelowFeet) {
-        if (((Entity) (Object) this) instanceof EntityPlayer) MetaworldsMod.breakpoint5();
         this.losingTraction = false;
         this.tractionLoss = 0;
         if (newWorldBelowFeet != this.worldBelowFeet) {

@@ -25,7 +25,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntityLivingBase;
@@ -528,7 +527,6 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
 
     @Override
     public void setCurrentSubworldPosY(double y) {
-        MetaworldsMod.breakpoint3();
         this.currentSubworldY = y;
     }
 

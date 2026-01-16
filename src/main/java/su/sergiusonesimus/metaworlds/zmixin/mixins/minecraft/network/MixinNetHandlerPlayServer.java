@@ -35,7 +35,6 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 import com.llamalad7.mixinextras.sugar.Local;
 
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
@@ -162,11 +161,6 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
      */
     @Overwrite
     public void processPlayer(C03PacketPlayer packetPlayer) {
-        // if((packetPlayer instanceof C04PacketPlayerPosition || packetPlayer instanceof C06PacketPlayerPosLook) &&
-        // net.minecraft.util.MathHelper.floor_double(packetPlayer.func_149464_c()) != -791 &&
-        // net.minecraft.util.MathHelper.floor_double(packetPlayer.func_149467_d()) != 67 &&
-        // net.minecraft.util.MathHelper.floor_double(packetPlayer.func_149472_e()) != 873)
-        MetaworldsMod.breakpoint2();
         WorldServer worldserver = this.serverController.worldServerForDimension(this.playerEntity.dimension);
         this.field_147366_g = true;
 

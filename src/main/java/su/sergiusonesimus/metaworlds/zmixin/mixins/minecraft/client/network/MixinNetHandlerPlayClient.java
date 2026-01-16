@@ -27,7 +27,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.EventHookContainer;
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
@@ -137,7 +136,6 @@ public abstract class MixinNetHandlerPlayClient {
     @Inject(method = "handlePlayerPosLook", at = @At(value = "HEAD"))
     public void storePacket(S08PacketPlayerPosLook packetIn, CallbackInfo ci) {
         storedPacket = packetIn;
-        MetaworldsMod.breakpoint1();
     }
 
     @WrapOperation(
