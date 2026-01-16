@@ -40,6 +40,7 @@ import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.server.S07WorldBelowFeetPacket;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -373,13 +374,19 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
             }
 
             this.worldBelowFeet = newWorldBelowFeet;
-
-            if (this.worldBelowFeet != null && ((IMixinWorld) this.worldBelowFeet).isSubWorld()) {
-                ((SubWorld) this.worldBelowFeet).registerEntityToDrag((Entity) (Object) this);
+            if (this.worldBelowFeet != null) {
+                if (((IMixinWorld) this.worldBelowFeet).isSubWorld()) {
+                    ((SubWorld) this.worldBelowFeet).registerEntityToDrag((Entity) (Object) this);
+                }
                 if (!this.worldBelowFeet.isRemote && ((Entity) (Object) this) instanceof EntityPlayerMP playerEntity) {
-                    MetaMagicNetwork.dispatcher.sendTo(
-                        new S07WorldBelowFeetPacket(((SubWorld) this.worldBelowFeet).getSubWorldID()),
-                        playerEntity);
+                    int subworldId = ((IMixinWorld) this.worldBelowFeet).getSubWorldID();
+                    ((IMixinEntityPlayer) this).setSubworldBelowFeetId(subworldId);
+                    MetaMagicNetwork.dispatcher.sendTo(new S07WorldBelowFeetPacket(subworldId), playerEntity);
+                }
+            } else {
+                if (!this.worldObj.isRemote && ((Entity) (Object) this) instanceof EntityPlayerMP playerEntity) {
+                    ((IMixinEntityPlayer) this).setSubworldBelowFeetId(0);
+                    MetaMagicNetwork.dispatcher.sendTo(new S07WorldBelowFeetPacket(0), playerEntity);
                 }
             }
 
