@@ -736,8 +736,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
     public void doTickPartial(double interpolationFactor) {
         if (interpolationFactor != 1.0D) {
-            boolean skipDragging = this.lastTickRotationPitch == 0
-                && (this.lastTickRotationYaw == 0/* || this.lastTickRotationYaw == 45 */)
+            boolean skipDragging = this.lastTickRotationPitch == 0 && this.lastTickRotationYaw == 0
                 && this.lastTickRotationRoll == 0
                 && this.lastTickX == 0
                 && this.lastTickY == 0
@@ -847,8 +846,7 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         Iterator<Entry<Entity, Vec3>> rotationDiff = this.entitiesToDrag.entrySet()
             .iterator();
 
-        boolean skipDragging = this.lastTickRotationPitch == 0
-            && (this.lastTickRotationYaw == 0/* || this.lastTickRotationYaw == 45 */)
+        boolean skipDragging = this.lastTickRotationPitch == 0 && this.lastTickRotationYaw == 0
             && this.lastTickRotationRoll == 0
             && this.lastTickX == 0
             && this.lastTickY == 0
@@ -1319,6 +1317,23 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         ChunkCoordinates globalCoords = this.transformBlockToGlobal(x, (int) this.getCenterY(), z);
         return this.getParentWorld()
             .getBiomeGenForCoordsBody(globalCoords.posX, globalCoords.posZ);
+    }
+
+    @Override
+    public void alignSubWorld() {
+        this.UpdatePositionAndRotation(
+            (double) Math.round(getTranslationX()),
+            (double) Math.round(getTranslationY()),
+            (double) Math.round(getTranslationZ()),
+            (double) Math.round(getRotationYaw() / 90.0D) * 90.0D,
+            (double) Math.round(getRotationPitch() / 90.0D) * 90.0D,
+            (double) Math.round(getRotationRoll() / 90.0D) * 90.0D,
+            this.getScaling());
+        setMotion(0.0D, 0.0D, 0.0D);
+        setRotationYawSpeed(0.0D);
+        setRotationPitchSpeed(0.0D);
+        setRotationRollSpeed(0.0D);
+        setScaleChangeRate(0.0D);
     }
 
     @Override
