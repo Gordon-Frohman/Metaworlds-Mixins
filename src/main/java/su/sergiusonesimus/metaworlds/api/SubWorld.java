@@ -299,4 +299,8 @@ public interface SubWorld {
         setRotationRollSpeed(0.0D);
         setScaleChangeRate(0.0D);
     }
+
+    default boolean canUpdate() {
+        return true;
+    }
 }

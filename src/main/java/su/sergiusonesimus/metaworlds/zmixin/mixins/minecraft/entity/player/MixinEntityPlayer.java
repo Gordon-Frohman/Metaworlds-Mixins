@@ -45,11 +45,20 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
     /** holds the IDs of the spawn worlds of the player for different dimensions */
     private HashMap<Integer, Integer> spawnSubworldMap = new HashMap<Integer, Integer>();
 
+    protected int worldBelowFeetId = 0;
+
+    private double currentSubworldX;
+    private double currentSubworldY;
+    private double currentSubworldZ;
+
     @Shadow(remap = true)
     public ChunkCoordinates playerLocation;
 
     @Shadow(remap = true)
     protected boolean sleeping;
+
+    @Shadow(remap = true)
+    public float eyeHeight;
 
     // TODO
 
@@ -484,6 +493,46 @@ public class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEn
             shift = Shift.BEFORE))
     public void clonePlayer(EntityPlayer p_71049_1_, boolean p_71049_2_, CallbackInfo ci) {
         this.spawnSubworldMap = ((IMixinEntityPlayer) p_71049_1_).getSpawnSubworldMap();
+    }
+
+    @Override
+    public int getSubworldBelowFeetId() {
+        return this.worldBelowFeetId;
+    }
+
+    @Override
+    public void setSubworldBelowFeetId(int id) {
+        this.worldBelowFeetId = id;
+    }
+
+    @Override
+    public double getCurrentSubworldPosX() {
+        return this.currentSubworldX;
+    }
+
+    @Override
+    public double getCurrentSubworldPosY() {
+        return this.currentSubworldY;
+    }
+
+    @Override
+    public double getCurrentSubworldPosZ() {
+        return this.currentSubworldZ;
+    }
+
+    @Override
+    public void setCurrentSubworldPosX(double x) {
+        this.currentSubworldX = x;
+    }
+
+    @Override
+    public void setCurrentSubworldPosY(double y) {
+        this.currentSubworldY = y;
+    }
+
+    @Override
+    public void setCurrentSubworldPosZ(double z) {
+        this.currentSubworldZ = z;
     }
 
 }

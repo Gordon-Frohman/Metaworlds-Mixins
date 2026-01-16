@@ -14,11 +14,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.client.IMixinC03PacketPlayer;
 
 @Mixin(C03PacketPlayer.class)
-public abstract class MixinC03PacketPlayer implements IMixinC03PacketPlayer {
+public class MixinC03PacketPlayer implements IMixinC03PacketPlayer {
 
     protected int subWorldBelowFeetID;
     protected byte tractionLoss;
     protected boolean losingTraction;
+    protected double subWorldPosX;
+    protected double subWorldPosY;
+    protected double subWorldPosZ;
 
     @Shadow(remap = true)
     private double field_149479_a;
@@ -59,20 +62,51 @@ public abstract class MixinC03PacketPlayer implements IMixinC03PacketPlayer {
         return this;
     }
 
-    public void setXPosition(double newX) {
+    public IMixinC03PacketPlayer setXPosition(double newX) {
         this.field_149479_a = newX;
+        return this;
     }
 
-    public void setYPosition(double newY) {
+    public IMixinC03PacketPlayer setYPosition(double newY) {
         this.field_149477_b = newY;
+        return this;
     }
 
-    public void setZPosition(double newZ) {
+    public IMixinC03PacketPlayer setZPosition(double newZ) {
         this.field_149478_c = newZ;
+        return this;
     }
 
-    public void setStance(double newStance) {
+    public IMixinC03PacketPlayer setStance(double newStance) {
         this.field_149475_d = newStance;
+        return this;
+    }
+
+    public IMixinC03PacketPlayer setSubWorldXPosition(double newX) {
+        this.subWorldPosX = newX;
+        return this;
+    }
+
+    public IMixinC03PacketPlayer setSubWorldYPosition(double newY) {
+        this.subWorldPosY = newY;
+        return this;
+    }
+
+    public IMixinC03PacketPlayer setSubWorldZPosition(double newZ) {
+        this.subWorldPosZ = newZ;
+        return this;
+    }
+
+    public double getSubWorldXPosition() {
+        return this.subWorldPosX;
+    }
+
+    public double getSubWorldYPosition() {
+        return this.subWorldPosY;
+    }
+
+    public double getSubWorldZPosition() {
+        return this.subWorldPosZ;
     }
 
     /**

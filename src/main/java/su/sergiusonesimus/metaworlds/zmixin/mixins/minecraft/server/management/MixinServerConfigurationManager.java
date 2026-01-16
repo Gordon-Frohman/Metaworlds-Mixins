@@ -43,12 +43,18 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 
+import codechicken.lib.math.MathHelper;
 import cpw.mods.fml.common.FMLCommonHandler;
+import su.sergiusonesimus.metaworlds.MWCorePlayerTracker;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
 import su.sergiusonesimus.metaworlds.network.play.server.S04SubWorldSpawnPositionPacket;
+import su.sergiusonesimus.metaworlds.world.SubWorldServer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.IMixinNetHandlerPlayServer;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.PacketHandler;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.network.play.server.IMixinS05PacketSpawnPosition;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -158,6 +164,8 @@ public class MixinServerConfigurationManager {
         nethandlerplayserver.sendPacket(new S39PacketPlayerAbilities(player.capabilities));
         nethandlerplayserver.sendPacket(new S09PacketHeldItemChange(player.inventory.currentItem));
 
+        MWCorePlayerTracker.sendSubWorldCreationPackets(player);
+
         if (nbttagcompound != null) {
             NBTTagCompound entityData = nbttagcompound.getCompoundTag("ForgeData");
             if (entityData.hasKey("SubWorldInfo")) {
@@ -262,16 +270,29 @@ public class MixinServerConfigurationManager {
         boolean forcedSpawn, Operation<ChunkCoordinates> original) {
         if (spawnWorld == 0) return original.call(world, spawnCoordinates, forcedSpawn);
         else {
-            ChunkCoordinates result = EntityPlayer.verifyRespawnCoordinates(
-                ((IMixinWorld) ((IMixinWorld) world).getParentWorld()).getSubWorld(spawnWorld),
-                spawnCoordinates,
-                forcedSpawn);
+            World subworld = ((IMixinWorld) ((IMixinWorld) world).getParentWorld()).getSubWorld(spawnWorld);
+            ChunkCoordinates result = EntityPlayer.verifyRespawnCoordinates(subworld, spawnCoordinates, forcedSpawn);
             if (result == null) {
                 ((IMixinEntityPlayer) storedPlayer).setSpawnWorldID(0);
                 spawnWorld = 0;
+            } else {
+                ChunkCoordinates localSpawn = ((SubWorld) subworld).transformBlockToLocal(spawnCoordinates);
+                subworld.getChunkProvider()
+                    .loadChunk(localSpawn.posX >> 4, localSpawn.posZ >> 4);
             }
             return result;
         }
+    }
+
+    @WrapOperation(
+        method = "respawnPlayer",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;func_72381_a(Lnet/minecraft/entity/player/EntityPlayerMP;Lnet/minecraft/entity/player/EntityPlayerMP;Lnet/minecraft/world/World;)V"))
+    public void func_72381_a(ServerConfigurationManager instance, EntityPlayerMP newPlayer, EntityPlayerMP oldPlayer,
+        World world, Operation<Void> original) {
+        original.call(instance, newPlayer, oldPlayer, world);
+        storedPlayer = newPlayer;
     }
 
     @WrapOperation(
@@ -285,15 +306,76 @@ public class MixinServerConfigurationManager {
                 .getSubWorld(spawnWorld);
             SubWorld subworld = (SubWorld) worldBelowFeet;
             Vec3 globalPos = subworld.transformToGlobal(x, y, z);
-            player.setLocationAndAngles(
+            ((IMixinEntityPlayer) player).setSpawnWorldID(spawnWorld);
+            ((IMixinEntity) player).setWorldBelowFeet(worldBelowFeet);
+            ((IMixinEntityPlayer) player).setCurrentSubworldPosition(x, y, z);
+            subworld.registerEntityToDrag(player);
+            original.call(
+                player,
                 globalPos.xCoord,
                 globalPos.yCoord,
                 globalPos.zCoord,
                 yaw - (float) (subworld.getRotationYaw() % 360 / 180 * Math.PI),
                 pitch);
-            ((IMixinEntityPlayer) player).setSpawnWorldID(spawnWorld);
-            ((IMixinEntity) player).setWorldBelowFeet(worldBelowFeet);
-            subworld.registerEntityToDrag(player);
+            player.playerNetServerHandler.sendPacket(
+                PacketHandler.getS08PacketPlayerPosLook(
+                    globalPos.xCoord,
+                    globalPos.yCoord + 1.6200000047683716D,
+                    globalPos.zCoord,
+                    yaw - (float) (subworld.getRotationYaw() % 360 / 180 * Math.PI),
+                    pitch,
+                    false,
+                    spawnWorld,
+                    SubWorldTypeManager.getTypeID(((IMixinWorld) worldBelowFeet).getSubWorldType()),
+                    x,
+                    y + 1.6200000047683716D,
+                    z));
+        }
+    }
+
+    @Inject(
+        method = "respawnPlayer",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
+    public void loadSubworldChunk(EntityPlayerMP player, int dimension, boolean conqueredEnd,
+        CallbackInfoReturnable<EntityPlayerMP> cir) {
+        World worldBelowFeet = ((IMixinEntity) player).getWorldBelowFeet();
+        if (worldBelowFeet instanceof SubWorldServer subworld) {
+            Vec3 localPos = subworld.transformToLocal(player);
+            subworld.theChunkProviderServer.loadChunk(
+                MathHelper.floor_double(localPos.xCoord) >> 4,
+                MathHelper.floor_double(localPos.zCoord) >> 4);
+
+            worldBelowFeet.markBlockForUpdate(
+                MathHelper.floor_double(localPos.xCoord),
+                0,
+                MathHelper.floor_double(localPos.zCoord));
+        }
+    }
+
+    @WrapOperation(
+        method = "respawnPlayer",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;setPlayerLocation(DDDFF)V"))
+    public void setPlayerLocation(NetHandlerPlayServer handler, double x, double y, double z, float yaw, float pitch,
+        Operation<Void> original) {
+        World worldBelowFeet = ((IMixinWorld) ((IMixinWorld) storedPlayer.worldObj).getParentWorld()).getSubWorldsMap()
+            .get(spawnWorld);
+        if (spawnWorld == 0 || worldBelowFeet == null) original.call(handler, x, y, z, yaw, pitch);
+        else {
+            Vec3 localPos = ((IMixinEntityPlayer) storedPlayer).getCurrentSubworldPosition();
+            Vec3 globalPos = ((IMixinWorld) worldBelowFeet).transformToGlobal(localPos);
+            ((IMixinNetHandlerPlayServer) handler).setPlayerLocation(
+                globalPos.xCoord,
+                globalPos.yCoord,
+                globalPos.zCoord,
+                yaw,
+                pitch,
+                spawnWorld,
+                SubWorldTypeManager.getTypeID(((IMixinWorld) worldBelowFeet).getSubWorldType()),
+                localPos.xCoord,
+                localPos.yCoord,
+                localPos.zCoord);
         }
     }
 

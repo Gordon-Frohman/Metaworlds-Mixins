@@ -19,7 +19,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import su.sergiusonesimus.metaworlds.MWCorePlayerTracker;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
+import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
+import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
+import su.sergiusonesimus.metaworlds.network.play.server.S02SubWorldDestroyPacket;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.server.management.IMixinPlayerManager;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -99,35 +103,25 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
         }
     }
 
-    /**
-     * Removes an EntityPlayerMP from the PlayerManager.
-     */
-    @Overwrite
-    public void removePlayer(EntityPlayerMP p_72695_1_) {
-        int i = (int) p_72695_1_.managedPosX >> 4;
-        int j = (int) p_72695_1_.managedPosZ >> 4;
-
-        for (int k = i - this.playerViewRadius; k <= i + this.playerViewRadius; ++k) {
-            for (int l = j - this.playerViewRadius; l <= j + this.playerViewRadius; ++l) {
-                PlayerManager.PlayerInstance playerinstance = this.getOrCreateChunkWatcher(k, l, false);
-
-                if (playerinstance != null) {
-                    playerinstance.removePlayer(p_72695_1_);
-                }
-            }
-        }
-
-        this.players.remove(p_72695_1_);
-
+    @Inject(method = "removePlayer", at = { @At(value = "TAIL") })
+    public void removePlayer(EntityPlayerMP player, CallbackInfo ci) {
         for (World curSubWorld : ((IMixinWorld) this.theWorldServer).getSubWorlds()) {
-            EntityPlayer proxyPlayer = ((IMixinEntity) p_72695_1_).getProxyPlayer(curSubWorld);
+            EntityPlayer proxyPlayer = ((IMixinEntity) player).getProxyPlayer(curSubWorld);
             ((WorldServer) curSubWorld).getPlayerManager()
                 .removePlayer((EntityPlayerMP) proxyPlayer);
             // Sadly we need to do this check because minecraft in inconsequentian in the order it removes the player
             // from a)the World and b)the PlayerManager
-            if (!curSubWorld.playerEntities.contains(proxyPlayer)) ((IMixinEntity) p_72695_1_).getPlayerProxyMap()
+            if (!curSubWorld.playerEntities.contains(proxyPlayer)) ((IMixinEntity) player).getPlayerProxyMap()
                 .remove(((IMixinWorld) curSubWorld).getSubWorldID());
         }
+        // Also unloading all client subworlds to regenerate them later
+        if (!(player instanceof EntityPlayerProxy))
+            MetaMagicNetwork.dispatcher.sendTo(new S02SubWorldDestroyPacket(-1, (Integer[]) null), player);
+    }
+
+    @Inject(method = "addPlayer", at = { @At(value = "TAIL") })
+    public void addPlayer(EntityPlayerMP player, CallbackInfo ci) {
+        if (!(player instanceof EntityPlayerProxy)) MWCorePlayerTracker.sendSubWorldCreationPackets(player);
     }
 
     /**

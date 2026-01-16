@@ -111,8 +111,41 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return ((IMixinWorld) this.m_parentWorld).createSubWorld();
     }
 
+    public World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        return ((IMixinWorld) this.m_parentWorld).createSubWorld(
+            centerX,
+            centerY,
+            centerZ,
+            translationX,
+            translationY,
+            translationZ,
+            rotationPitch,
+            rotationYaw,
+            rotationRoll,
+            scaling);
+    }
+
     public World CreateSubWorld(int newSubWorldID) {
         return ((IMixinWorld) this.m_parentWorld).createSubWorld(newSubWorldID);
+    }
+
+    public World createSubWorld(int newSubWorldID, double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        return ((IMixinWorld) this.m_parentWorld).createSubWorld(
+            newSubWorldID,
+            centerX,
+            centerY,
+            centerZ,
+            translationX,
+            translationY,
+            translationZ,
+            rotationPitch,
+            rotationYaw,
+            rotationRoll,
+            scaling);
     }
 
     public void removeSubWorld() {
@@ -1284,5 +1317,27 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         ChunkCoordinates globalCoords = this.transformBlockToGlobal(x, (int) this.getCenterY(), z);
         return this.getParentWorld()
             .getBiomeGenForCoordsBody(globalCoords.posX, globalCoords.posZ);
+    }
+
+    @Override
+    public void alignSubWorld() {
+        this.UpdatePositionAndRotation(
+            (double) Math.round(getTranslationX()),
+            (double) Math.round(getTranslationY()),
+            (double) Math.round(getTranslationZ()),
+            (double) Math.round(getRotationYaw() / 90.0D) * 90.0D,
+            (double) Math.round(getRotationPitch() / 90.0D) * 90.0D,
+            (double) Math.round(getRotationRoll() / 90.0D) * 90.0D,
+            this.getScaling());
+        setMotion(0.0D, 0.0D, 0.0D);
+        setRotationYawSpeed(0.0D);
+        setRotationPitchSpeed(0.0D);
+        setRotationRollSpeed(0.0D);
+        setScaleChangeRate(0.0D);
+    }
+
+    @Override
+    public boolean canUpdate() {
+        return this.canUpdate;
     }
 }

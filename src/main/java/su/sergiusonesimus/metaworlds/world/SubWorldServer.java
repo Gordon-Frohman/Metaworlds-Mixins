@@ -112,8 +112,41 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         return ((IMixinWorld) this.m_parentWorld).createSubWorld();
     }
 
+    public World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        return ((IMixinWorld) this.m_parentWorld).createSubWorld(
+            centerX,
+            centerY,
+            centerZ,
+            translationX,
+            translationY,
+            translationZ,
+            rotationPitch,
+            rotationYaw,
+            rotationRoll,
+            scaling);
+    }
+
     public World CreateSubWorld(int newSubWorldID) {
         return ((IMixinWorld) this.m_parentWorld).createSubWorld(newSubWorldID);
+    }
+
+    public World createSubWorld(int newSubWorldID, double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        return ((IMixinWorld) this.m_parentWorld).createSubWorld(
+            newSubWorldID,
+            centerX,
+            centerY,
+            centerZ,
+            translationX,
+            translationY,
+            translationZ,
+            rotationPitch,
+            rotationYaw,
+            rotationRoll,
+            scaling);
     }
 
     @SuppressWarnings("rawtypes")
@@ -830,7 +863,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
         }
     }
 
-    protected S03SubWorldUpdatePacket getUpdatePacket(SubWorldServer par1SubWorldServer, int updateFlags) {
+    public S03SubWorldUpdatePacket getUpdatePacket(SubWorldServer par1SubWorldServer, int updateFlags) {
         return new S03SubWorldUpdatePacket(par1SubWorldServer, updateFlags);
     }
 

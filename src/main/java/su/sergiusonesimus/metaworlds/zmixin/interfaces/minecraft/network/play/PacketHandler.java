@@ -31,11 +31,15 @@ public class PacketHandler {
 
     @SideOnly(Side.CLIENT)
     public static C04PacketPlayerPosition getC04PacketPlayerPosition(double x, double y, double headY, double z,
-        boolean p_i45253_9_, int worldBelowFeetId, byte tractionLoss, boolean isLosingTraction) {
+        boolean p_i45253_9_, int worldBelowFeetId, byte tractionLoss, boolean isLosingTraction, double subworldPosX,
+        double subworldPosY, double subworldPosZ) {
         C04PacketPlayerPosition c04 = new C04PacketPlayerPosition(x, y, headY, z, p_i45253_9_);
         return (C04PacketPlayerPosition) ((IMixinC03PacketPlayer) (Object) c04).setSubWorldBelowFeetId(worldBelowFeetId)
             .setTractionLoss(tractionLoss)
-            .setLosingTraction(isLosingTraction);
+            .setLosingTraction(isLosingTraction)
+            .setSubWorldXPosition(subworldPosX)
+            .setSubWorldYPosition(subworldPosY)
+            .setSubWorldZPosition(subworldPosZ);
     }
 
     @SideOnly(Side.CLIENT)
@@ -49,22 +53,31 @@ public class PacketHandler {
 
     @SideOnly(Side.CLIENT)
     public static C06PacketPlayerPosLook getC06PacketPlayerPosLook(double x, double y, double headY, double z,
-        float yaw, float pitch, boolean isOnGround, int worldBelowFeetId, byte tractionLoss, boolean isLosingTraction) {
+        float yaw, float pitch, boolean isOnGround, int worldBelowFeetId, byte tractionLoss, boolean isLosingTraction,
+        double subworldPosX, double subworldPosY, double subworldPosZ) {
         C06PacketPlayerPosLook c06 = new C06PacketPlayerPosLook(x, y, headY, z, yaw, pitch, isOnGround);
         return (C06PacketPlayerPosLook) ((IMixinC03PacketPlayer) (Object) c06).setSubWorldBelowFeetId(worldBelowFeetId)
             .setTractionLoss(tractionLoss)
-            .setLosingTraction(isLosingTraction);
+            .setLosingTraction(isLosingTraction)
+            .setSubWorldXPosition(subworldPosX)
+            .setSubWorldYPosition(subworldPosY)
+            .setSubWorldZPosition(subworldPosZ);
     }
 
     public static S08PacketPlayerPosLook getS08PacketPlayerPosLook(double x, double y, double z, float yaw, float pitch,
-        boolean isOnGround, int subWorldBelowFeetID, int subWorldBelowFeetType) {
-        return ((IMixinS08PacketPlayerPosLook) ((IMixinS08PacketPlayerPosLook) new S08PacketPlayerPosLook(
+        boolean isOnGround, int subWorldBelowFeetID, int subWorldBelowFeetType, double subworldPosX,
+        double subworldPosY, double subworldPosZ) {
+        return (S08PacketPlayerPosLook) ((IMixinS08PacketPlayerPosLook) new S08PacketPlayerPosLook(
             x,
             y,
             z,
             yaw,
             pitch,
-            isOnGround)).setSubWorldBelowFeetID(subWorldBelowFeetID)).setSubWorldBelowFeetType(subWorldBelowFeetType);
+            isOnGround)).setSubWorldBelowFeetID(subWorldBelowFeetID)
+                .setSubWorldBelowFeetType(subWorldBelowFeetType)
+                .setSubWorldXPosition(subworldPosX)
+                .setSubWorldYPosition(subworldPosY)
+                .setSubWorldZPosition(subworldPosZ);
     }
 
     public static S14PacketEntity getS14PacketEntity(int entityID, int subWorldBelowFeetId, byte tractionLoss,

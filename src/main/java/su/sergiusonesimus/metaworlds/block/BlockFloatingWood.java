@@ -16,15 +16,14 @@ public class BlockFloatingWood extends Block {
         this.setCreativeTab(MetaworldsItems.creativeTab);
     }
 
-    public void onBlockAdded(World par1World, int par2, int par3, int par4) {
-        if (!((IMixinWorld) par1World).isSubWorld()) {
-            World newWorld = ((IMixinWorld) par1World).createSubWorld();
+    public void onBlockAdded(World world, int x, int y, int z) {
+        if (!((IMixinWorld) world).isSubWorld()) {
+            World newWorld = ((IMixinWorld) world)
+                .createSubWorld(x + 0.5D, y + 0.5D, z + 0.5D, 0, 0, 0, 0, 45.0D, 0, 1.0D);
             SubWorld newSubWorld = (SubWorld) newWorld;
             newSubWorld.setSubWorldType(SubWorldTypeManager.SUBWORLD_TYPE_BOAT);
-            newSubWorld.setTranslation((double) par2, newSubWorld.getTranslationY(), (double) par4);
-            newWorld.setBlock(0, par3, 0, this);
-            par1World.setBlockToAir(par2, par3, par4);
-            newSubWorld.setRotationYaw(45.0D);
+            newWorld.setBlock(x, y, z, this);
+            world.setBlockToAir(x, y, z);
         }
     }
 }

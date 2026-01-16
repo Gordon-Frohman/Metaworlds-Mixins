@@ -6,7 +6,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.entity.IMixinEntityClientPlayerMP;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 
 public class S04SubWorldSpawnPositionPacket implements IMessage {
 
@@ -42,11 +42,11 @@ public class S04SubWorldSpawnPositionPacket implements IMessage {
         @Override
         public IMessage onMessage(S04SubWorldSpawnPositionPacket message, MessageContext ctx) {
             if (!ctx.side.isServer()) {
-                IMixinEntityClientPlayerMP player = (IMixinEntityClientPlayerMP) Minecraft.getMinecraft().thePlayer;
+                IMixinEntityPlayer player = (IMixinEntityPlayer) Minecraft.getMinecraft().thePlayer;
 
-                player.setSubworldSpawnX(message.subworldSpawnX);
-                player.setSubworldSpawnY(message.subworldSpawnY);
-                player.setSubworldSpawnZ(message.subworldSpawnZ);
+                player.setCurrentSubworldPosX(message.subworldSpawnX);
+                player.setCurrentSubworldPosY(message.subworldSpawnY);
+                player.setCurrentSubworldPosZ(message.subworldSpawnZ);
             }
             return null;
         }

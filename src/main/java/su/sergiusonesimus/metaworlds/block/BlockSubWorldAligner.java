@@ -6,7 +6,6 @@ import net.minecraft.world.World;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class BlockSubWorldAligner extends Block {
 
@@ -16,6 +15,6 @@ public class BlockSubWorldAligner extends Block {
     }
 
     public void onBlockAdded(World world, int x, int y, int z) {
-        if (((IMixinWorld) world).isSubWorld()) ((SubWorld) world).alignSubWorld();
+        if (world instanceof SubWorld subworld) subworld.alignSubWorld();
     }
 }

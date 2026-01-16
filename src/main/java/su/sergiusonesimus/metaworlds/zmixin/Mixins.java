@@ -24,6 +24,7 @@ public enum Mixins {
             "minecraft.item.MixinItemBucket",
             "minecraft.network.MixinNetHandlerPlayServer",
             "minecraft.network.play.client.MixinC03PacketPlayer",
+            "minecraft.network.play.client.MixinC0XPacketPlayerPosition",
             "minecraft.network.play.server.MixinS05PacketSpawnPosition",
             "minecraft.network.play.server.MixinS08PacketPlayerPosLook",
             "minecraft.network.play.server.MixinS14PacketEntity",
