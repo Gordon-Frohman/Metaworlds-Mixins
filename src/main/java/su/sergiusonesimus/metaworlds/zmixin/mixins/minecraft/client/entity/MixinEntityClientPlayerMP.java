@@ -148,7 +148,8 @@ public abstract class MixinEntityClientPlayerMP extends MixinEntityPlayer {
             target = "Lnet/minecraft/client/network/NetHandlerPlayClient;addToSendQueue(Lnet/minecraft/network/Packet;)V"))
     private void wrapAddToSendQueue(NetHandlerPlayClient instance, Packet packet, Operation<Void> original) {
         if (packet instanceof C03PacketPlayer && this.worldBelowFeet instanceof SubWorldClient subworld
-            && !subworld.canUpdate) {
+            && (!subworld.canUpdate
+                || (subworld.getCenterX() == 0 && subworld.getCenterY() == 0 && subworld.getCenterZ() == 0))) {
             // Skipping packets until world below feet is loaded
         } else {
             original.call(instance, packet);

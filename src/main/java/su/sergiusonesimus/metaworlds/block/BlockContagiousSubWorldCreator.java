@@ -9,9 +9,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
 import su.sergiusonesimus.metaworlds.util.DisplacementHelper;
@@ -26,7 +26,7 @@ public class BlockContagiousSubWorldCreator extends Block {
         this.setCreativeTab(MetaworldsItems.creativeTab);
     }
 
-    public void onBlockAdded(World par1World, int par2, int par3, int par4) {
+    public void onBlockAdded(World world, int x, int y, int z) {
         if (!isBusy) {
             isBusy = true;
             ArrayList<ChunkCoordinates> blocksToTake = new ArrayList<ChunkCoordinates>();
@@ -35,13 +35,13 @@ public class BlockContagiousSubWorldCreator extends Block {
             HashSet<ChunkCoordinates> prevMargin = new HashSet<ChunkCoordinates>();
             HashSet<ChunkCoordinates> margin = new HashSet<ChunkCoordinates>();
             HashSet<ChunkCoordinates> newMargin = new HashSet<ChunkCoordinates>();
-            blocksToTake.add(new ChunkCoordinates(par2, par3, par4));
-            margin.add(new ChunkCoordinates(par2, par3, par4));
+            blocksToTake.add(new ChunkCoordinates(x, y, z));
+            margin.add(new ChunkCoordinates(x, y, z));
             boolean isValid = true;
 
             do {
                 isValid = this.expandAtMargin(
-                    par1World,
+                    world,
                     blocksToTake,
                     blocksToTakeSolidVolatile,
                     blocksToTakeVolatile,
@@ -60,19 +60,19 @@ public class BlockContagiousSubWorldCreator extends Block {
             } while (margin.size() > 0);
 
             if (isValid) {
-                World newWorld1 = ((IMixinWorld) par1World).createSubWorld();
-                SubWorld newSubWorld = (SubWorld) newWorld1;
-                newSubWorld.setCenter(
-                    ((IMixinWorld) par1World)
-                        .transformToGlobal((double) par2 + 0.5D, (double) par3 + 0.5D, (double) par4 + 0.5D));
-                newSubWorld.setTranslation(
-                    ((IMixinWorld) par1World).getTranslationX(),
-                    ((IMixinWorld) par1World).getTranslationY(),
-                    ((IMixinWorld) par1World).getTranslationZ());
-                newSubWorld.setRotationYaw(((IMixinWorld) par1World).getRotationYaw());
-                newSubWorld.setRotationPitch(((IMixinWorld) par1World).getRotationPitch());
-                newSubWorld.setRotationRoll(((IMixinWorld) par1World).getRotationRoll());
-                newSubWorld.setScaling(((IMixinWorld) par1World).getScaling());
+                Vec3 center = ((IMixinWorld) world)
+                    .transformToGlobal((double) x + 0.5D, (double) y + 0.5D, (double) z + 0.5D);
+                World newWorld1 = ((IMixinWorld) world).createSubWorld(
+                    center.xCoord,
+                    center.yCoord,
+                    center.zCoord,
+                    ((IMixinWorld) world).getTranslationX(),
+                    ((IMixinWorld) world).getTranslationY(),
+                    ((IMixinWorld) world).getTranslationZ(),
+                    ((IMixinWorld) world).getRotationPitch(),
+                    ((IMixinWorld) world).getRotationYaw(),
+                    ((IMixinWorld) world).getRotationRoll(),
+                    ((IMixinWorld) world).getScaling());
 
                 ChunkCoordinates curCoord;
 
@@ -84,8 +84,7 @@ public class BlockContagiousSubWorldCreator extends Block {
                     Iterator<ChunkCoordinates> i$ = currentList.iterator();
                     while (i$.hasNext()) {
                         curCoord = (ChunkCoordinates) i$.next();
-                        DisplacementHelper
-                            .displaceBlock(curCoord.posX, curCoord.posY, curCoord.posZ, par1World, newWorld1);
+                        DisplacementHelper.displaceBlock(curCoord.posX, curCoord.posY, curCoord.posZ, world, newWorld1);
                     }
                 }
 
@@ -95,7 +94,7 @@ public class BlockContagiousSubWorldCreator extends Block {
                     Iterator<ChunkCoordinates> i$ = currentList.iterator();
                     while (i$.hasNext()) {
                         curCoord = (ChunkCoordinates) i$.next();
-                        par1World.setBlockToAir(curCoord.posX, curCoord.posY, curCoord.posZ);
+                        world.setBlockToAir(curCoord.posX, curCoord.posY, curCoord.posZ);
                     }
                 }
             }

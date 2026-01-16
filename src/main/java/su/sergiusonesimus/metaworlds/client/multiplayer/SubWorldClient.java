@@ -111,8 +111,41 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         return ((IMixinWorld) this.m_parentWorld).createSubWorld();
     }
 
+    public World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        return ((IMixinWorld) this.m_parentWorld).createSubWorld(
+            centerX,
+            centerY,
+            centerZ,
+            translationX,
+            translationY,
+            translationZ,
+            rotationPitch,
+            rotationYaw,
+            rotationRoll,
+            scaling);
+    }
+
     public World CreateSubWorld(int newSubWorldID) {
         return ((IMixinWorld) this.m_parentWorld).createSubWorld(newSubWorldID);
+    }
+
+    public World createSubWorld(int newSubWorldID, double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        return ((IMixinWorld) this.m_parentWorld).createSubWorld(
+            newSubWorldID,
+            centerX,
+            centerY,
+            centerZ,
+            translationX,
+            translationY,
+            translationZ,
+            rotationPitch,
+            rotationYaw,
+            rotationRoll,
+            scaling);
     }
 
     public void removeSubWorld() {
@@ -703,7 +736,8 @@ public class SubWorldClient extends WorldClient implements SubWorld {
 
     public void doTickPartial(double interpolationFactor) {
         if (interpolationFactor != 1.0D) {
-            boolean skipDragging = this.lastTickRotationPitch == 0 && this.lastTickRotationYaw == 0
+            boolean skipDragging = this.lastTickRotationPitch == 0
+                && (this.lastTickRotationYaw == 0/* || this.lastTickRotationYaw == 45 */)
                 && this.lastTickRotationRoll == 0
                 && this.lastTickX == 0
                 && this.lastTickY == 0
@@ -813,7 +847,8 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         Iterator<Entry<Entity, Vec3>> rotationDiff = this.entitiesToDrag.entrySet()
             .iterator();
 
-        boolean skipDragging = this.lastTickRotationPitch == 0 && this.lastTickRotationYaw == 0
+        boolean skipDragging = this.lastTickRotationPitch == 0
+            && (this.lastTickRotationYaw == 0/* || this.lastTickRotationYaw == 45 */)
             && this.lastTickRotationRoll == 0
             && this.lastTickX == 0
             && this.lastTickY == 0

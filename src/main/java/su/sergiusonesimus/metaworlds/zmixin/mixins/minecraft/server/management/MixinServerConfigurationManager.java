@@ -46,7 +46,6 @@ import com.mojang.authlib.GameProfile;
 import codechicken.lib.math.MathHelper;
 import cpw.mods.fml.common.FMLCommonHandler;
 import su.sergiusonesimus.metaworlds.MWCorePlayerTracker;
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.network.MetaMagicNetwork;
@@ -318,7 +317,6 @@ public class MixinServerConfigurationManager {
                 globalPos.zCoord,
                 yaw - (float) (subworld.getRotationYaw() % 360 / 180 * Math.PI),
                 pitch);
-            MetaworldsMod.breakpoint();
             player.playerNetServerHandler.sendPacket(
                 PacketHandler.getS08PacketPlayerPosLook(
                     globalPos.xCoord,

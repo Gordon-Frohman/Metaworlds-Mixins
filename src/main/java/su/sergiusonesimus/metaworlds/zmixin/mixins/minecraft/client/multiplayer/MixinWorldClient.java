@@ -27,6 +27,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -49,7 +50,46 @@ public class MixinWorldClient extends MixinWorld {
         return this.createSubWorld(this.getUnoccupiedSubworldID());
     }
 
+    @Override
+    public World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        return this.createSubWorld(
+            this.getUnoccupiedSubworldID(),
+            centerX,
+            centerY,
+            centerZ,
+            translationX,
+            translationY,
+            translationZ,
+            rotationPitch,
+            rotationYaw,
+            rotationRoll,
+            scaling);
+    }
+
     public World createSubWorld(int newSubWorldID) {
+        return this.generateSubWorld(newSubWorldID);
+    }
+
+    @Override
+    public World createSubWorld(int newSubWorldID, double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        World newSubWorld = this.generateSubWorld(newSubWorldID);
+        SubWorld subworld = (SubWorld) newSubWorld;
+
+        subworld.setCenter(centerX, centerY, centerZ);
+        subworld.setTranslation(translationX, translationY, translationZ);
+        subworld.setRotationYaw(rotationYaw);
+        subworld.setRotationPitch(rotationPitch);
+        subworld.setRotationRoll(rotationRoll);
+        subworld.setScaling(scaling);
+
+        return newSubWorld;
+    }
+
+    protected World generateSubWorld(int newSubWorldID) {
         World newSubWorld = MetaworldsMod.proxy.createSubWorld(((World) (Object) this), newSubWorldID);
         if (((IMixinWorld) this).getSubWorldsMap()
             .get(((IMixinWorld) newSubWorld).getSubWorldID()) == null) {

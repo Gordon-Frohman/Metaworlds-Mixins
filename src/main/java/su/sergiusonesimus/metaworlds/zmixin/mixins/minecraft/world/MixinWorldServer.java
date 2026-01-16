@@ -89,7 +89,52 @@ public class MixinWorldServer extends MixinWorld {
         return this.createSubWorld(this.getUnoccupiedSubworldID());
     }
 
+    @Override
+    public World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        return this.createSubWorld(
+            this.getUnoccupiedSubworldID(),
+            centerX,
+            centerY,
+            centerZ,
+            translationX,
+            translationY,
+            translationZ,
+            rotationPitch,
+            rotationYaw,
+            rotationRoll,
+            scaling);
+    }
+
     public World createSubWorld(int newSubWorldID) {
+        World newSubWorld = this.generateSubWorld(newSubWorldID);
+
+        MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(newSubWorld));
+
+        return newSubWorld;
+    }
+
+    @Override
+    public World createSubWorld(int newSubWorldID, double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling) {
+        World newSubWorld = this.generateSubWorld(newSubWorldID);
+        SubWorld subworld = (SubWorld) newSubWorld;
+
+        subworld.setCenter(centerX, centerY, centerZ);
+        subworld.setTranslation(translationX, translationY, translationZ);
+        subworld.setRotationYaw(rotationYaw);
+        subworld.setRotationPitch(rotationPitch);
+        subworld.setRotationRoll(rotationRoll);
+        subworld.setScaling(scaling);
+
+        MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(newSubWorld));
+
+        return newSubWorld;
+    }
+
+    protected World generateSubWorld(int newSubWorldID) {
         World newSubWorld = MetaworldsMod.proxy.createSubWorld((World) (Object) this, newSubWorldID);
         if (((IMixinMinecraftServer) MinecraftServer.mcServer).getExistingSubWorlds()
             .put(((IMixinWorld) newSubWorld).getSubWorldID(), newSubWorld) != null) {
@@ -141,8 +186,6 @@ public class MixinWorldServer extends MixinWorld {
             ((WorldServer) newSubWorld).getPlayerManager()
                 .addPlayer(proxyPlayer);
         }
-
-        MinecraftForge.EVENT_BUS.post(new WorldEvent.Load(newSubWorld));
 
         return newSubWorld;
     }

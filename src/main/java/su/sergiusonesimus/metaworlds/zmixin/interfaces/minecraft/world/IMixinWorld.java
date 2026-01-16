@@ -23,7 +23,15 @@ public interface IMixinWorld {
     // If this world is a subworld this will function will redirect to parent.CreateSubWorld()
     public abstract World createSubWorld();
 
+    public abstract World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
+        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
+        double scaling);
+
     public abstract World createSubWorld(int newSubWorldID);
+
+    public abstract World createSubWorld(int newSubWorldID, double centerX, double centerY, double centerZ,
+        double translationX, double translationY, double translationZ, double rotationPitch, double rotationYaw,
+        double rotationRoll, double scaling);
 
     // Returns collection containing this world and all of its subworlds
     public Collection<World> getWorlds();
