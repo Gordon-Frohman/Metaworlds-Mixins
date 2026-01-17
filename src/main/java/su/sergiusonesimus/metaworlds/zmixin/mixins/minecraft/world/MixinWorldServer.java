@@ -23,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.world.SubWorldInfoHolder;
@@ -85,28 +84,6 @@ public class MixinWorldServer extends MixinWorld {
         }
     }
 
-    public World createSubWorld() {
-        return this.createSubWorld(this.getUnoccupiedSubworldID());
-    }
-
-    @Override
-    public World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
-        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
-        double scaling) {
-        return this.createSubWorld(
-            this.getUnoccupiedSubworldID(),
-            centerX,
-            centerY,
-            centerZ,
-            translationX,
-            translationY,
-            translationZ,
-            rotationPitch,
-            rotationYaw,
-            rotationRoll,
-            scaling);
-    }
-
     public World createSubWorld(int newSubWorldID) {
         World newSubWorld = this.generateSubWorld(newSubWorldID);
 
@@ -134,15 +111,15 @@ public class MixinWorldServer extends MixinWorld {
         return newSubWorld;
     }
 
-    protected World generateSubWorld(int newSubWorldID) {
-        World newSubWorld = MetaworldsMod.proxy.createSubWorld((World) (Object) this, newSubWorldID);
+    @Override
+    protected void registerSubWorld(World newSubWorld) {
         if (((IMixinMinecraftServer) MinecraftServer.mcServer).getExistingSubWorlds()
             .put(((IMixinWorld) newSubWorld).getSubWorldID(), newSubWorld) != null) {
             throw new IllegalArgumentException("SubWorld with this ID already exists!");
         } else this.childSubWorlds.put(((IMixinWorld) newSubWorld).getSubWorldID(), newSubWorld);
 
         newSubWorld.worldInfo = this.worldInfo;
-        ((WorldServer) newSubWorld).difficultySetting = EnumDifficulty.EASY;// Fixes AI crashes
+        ((WorldServer) newSubWorld).difficultySetting = EnumDifficulty.EASY; // Fixes AI crashes
 
         SubWorldInfoHolder curSubWorldInfo = ((IMixinWorldInfo) DimensionManager.getWorld(0)
             .getWorldInfo()).getSubWorldInfo(((IMixinWorld) newSubWorld).getSubWorldID());
@@ -179,15 +156,14 @@ public class MixinWorldServer extends MixinWorld {
                 // real player
             }
 
-            proxyPlayer.theItemInWorldManager.setWorld((WorldServer) newSubWorld);// make sure the right one is assigned
-                                                                                  // if the player is not in
-                                                                                  // playerEntities somehow
+            proxyPlayer.theItemInWorldManager.setWorld((WorldServer) newSubWorld); // make sure the right one is
+                                                                                   // assigned
+                                                                                   // if the player is not in
+                                                                                   // playerEntities somehow
 
             ((WorldServer) newSubWorld).getPlayerManager()
                 .addPlayer(proxyPlayer);
         }
-
-        return newSubWorld;
     }
 
     public boolean spawnEntityInWorld(Entity par1Entity) {

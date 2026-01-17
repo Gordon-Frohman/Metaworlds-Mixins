@@ -19,32 +19,83 @@ import su.sergiusonesimus.metaworlds.command.ISubWorldSelector;
 
 public interface IMixinWorld {
 
-    // Creates a new SubWorld
-    // If this world is a subworld this will function will redirect to parent.CreateSubWorld()
-    public abstract World createSubWorld();
+    /**
+     * Creates a new SubWorld with the first unoccupied id <br>
+     * If this world is a subworld this will function will redirect to parent.createSubWorld()
+     * 
+     * @return new subworld
+     */
+    public default World createSubWorld() {
+        return this.createSubWorld(this.getUnoccupiedSubworldID());
+    }
 
-    public abstract World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
+    /**
+     * Creates a new SubWorld with the first unoccupied id and given parameters <br>
+     * If this world is a subworld this will function will redirect to parent.createSubWorld()
+     * 
+     * @return new subworld
+     */
+    public default World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
         double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
-        double scaling);
+        double scaling) {
+        return this.createSubWorld(
+            this.getUnoccupiedSubworldID(),
+            centerX,
+            centerY,
+            centerZ,
+            translationX,
+            translationY,
+            translationZ,
+            rotationPitch,
+            rotationYaw,
+            rotationRoll,
+            scaling);
+    }
 
+    /**
+     * Creates a new SubWorld with the given id <br>
+     * If this world is a subworld this will function will redirect to parent.createSubWorld()
+     * 
+     * @return new subworld
+     */
     public abstract World createSubWorld(int newSubWorldID);
 
+    /**
+     * Creates a new SubWorld with the given id and parameters <br>
+     * If this world is a subworld this will function will redirect to parent.createSubWorld()
+     * 
+     * @return new subworld
+     */
     public abstract World createSubWorld(int newSubWorldID, double centerX, double centerY, double centerZ,
         double translationX, double translationY, double translationZ, double rotationPitch, double rotationYaw,
         double rotationRoll, double scaling);
 
-    // Returns collection containing this world and all of its subworlds
+    /**
+     * @return collection containing this world and all of its subworlds
+     */
     public Collection<World> getWorlds();
 
-    // Returns collection only containing the subworlds, not this world itself
+    /**
+     * @return collection only containing the subworlds, not this world itself
+     */
     public Collection<World> getSubWorlds();
 
-    public int getWorldsCount(); // Including this one. Equal to getSubWorlds().size() + 1 (= getWorlds().size())
+    /**
+     * @return amount of worlds including this one. Equal to getSubWorlds().size() + 1 (= getWorlds().size())
+     */
+    public int getWorldsCount();
 
-    public int getUnoccupiedSubworldID(); // Returns first ID which is not occupied by any subworld
+    /**
+     * @return first ID which is not occupied by any subworld
+     */
+    public int getUnoccupiedSubworldID();
 
-    // The parent worlds always have subWorldID 0. SubWorlds start from ID 1 counting up
-    // The ID is the same as the number suffix of the save folders
+    /**
+     * The parent worlds always have subWorldID 0. SubWorlds start from ID 1 counting up <br>
+     * The ID is the same as the number suffix of the save folders
+     * 
+     * @return ID of the current world
+     */
     public default int getSubWorldID() {
         return 0;
     }
@@ -53,58 +104,74 @@ public interface IMixinWorld {
         return SubWorldTypeManager.SUBWORLD_TYPE_DEFAULT;
     }
 
+    /**
+     * If this world is not subworld will return itself
+     * 
+     * @return the parent world of this one
+     */
     public World getParentWorld();
 
+    /**
+     * @param targetSubWorldID
+     * @return subworld with the given ID <br>
+     *         null if there's none
+     */
     public World getSubWorld(int targetSubWorldID);
 
+    /**
+     * @return true if this world is instance of SubWorld
+     */
     public boolean isSubWorld();
 
-    // Returns this world's position and rotation relative to its parent World
+    /**
+     * @return This world's X position relative to its parent World
+     */
     public double getTranslationX();
 
+    /**
+     * @return This world's Y position relative to its parent World
+     */
     public double getTranslationY();
 
+    /**
+     * @return This world's Z position relative to its parent World
+     */
     public double getTranslationZ();
 
+    /**
+     * @return This world's rotation around Y axis relative to its parent World
+     */
     public double getRotationYaw();
 
+    /**
+     * @return This world's rotation around X axis relative to its parent World
+     */
     public double getRotationPitch();
 
+    /**
+     * @return This world's rotation around Z axis relative to its parent World
+     */
     public double getRotationRoll();
 
+    /**
+     * @return This world's scaling relative to its parent World
+     */
     public double getScaling();
 
-    // Returns the position in local coordinates around which the world is rotating and scaling
+    /**
+     * @return The local X coordinate of a point around which the world is rotating and scaling
+     */
     public double getCenterX();
 
+    /**
+     * @return The local Y coordinate of a point around which the world is rotating and scaling
+     */
     public double getCenterY();
 
+    /**
+     * @return The local Z coordinate of a point around which the world is rotating and scaling
+     */
     public double getCenterZ();
-
-    // Transform coordinates from global to local
-    // Returns the coordinates inside this (Sub)World's coordinate system which correspond to the given global
-    // coordinates
-    // public double transformToLocalX(double globalPosX, double globalPosZ);
-    // public double transformToLocalY(double globalPosY);
-    // public double transformToLocalZ(double globalPosX, double globalPosZ);
-
-    // Transform coordinates from local to global
-    // Returns the global coordinates which correspond to the given coordinates inside this (Sub)World's coordinate
-    // system
-    // public double transformToGlobalX(double subWorldPosX, double subWorldPosZ);
-    // public double transformToGlobalY(double subWorldPosY);
-    // public double transformToGlobalZ(double subWorldPosX, double subWorldPosZ);
-
-    // Rotate a vector's components from its local direction to its global direction
-    // This does not change the length of the vector, only its direction
-    // public double rotateToGlobalX(double localX, double localZ);
-    // public double rotateToGlobalY(double localY);
-    // public double rotateToGlobalZ(double localX, double localZ);
-
-    // Inverse to rotateToGlobal
-    // public double rotateToLocalX(double globalX, double globalZ);
-    // public double rotateToLocalY(double globalY);
-    // public double rotateToLocalZ(double globalX, double globalZ);
 
     public Vec3 transformToGlobal(Entity localEntity);
 
@@ -128,15 +195,52 @@ public interface IMixinWorld {
     public DoubleMatrix transformToLocal(DoubleMatrix globalVectors, DoubleMatrix result);// In-Place operation for
                                                                                           // smaller memory footprint
 
-    // Transform from this world's coordinates to another world's coordinates
+    /**
+     * Transform from this world's coordinates to another world's coordinates
+     * 
+     * @param targetWorld
+     * @param localEntity
+     * @return
+     */
     public Vec3 transformLocalToOther(World targetWorld, Entity localEntity);
 
+    /**
+     * Transform from this world's coordinates to another world's coordinates
+     * 
+     * @param targetWorld
+     * @param localVec
+     * @return
+     */
     public Vec3 transformLocalToOther(World targetWorld, Vec3 localVec);
 
+    /**
+     * Transform from this world's coordinates to another world's coordinates
+     * 
+     * @param targetWorld
+     * @param localX
+     * @param localY
+     * @param localZ
+     * @return
+     */
     public Vec3 transformLocalToOther(World targetWorld, double localX, double localY, double localZ);
 
+    /**
+     * Transform from this world's coordinates to another world's coordinates
+     * 
+     * @param targetWorld
+     * @param localVectors
+     * @return
+     */
     public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors);
 
+    /**
+     * Transform from this world's coordinates to another world's coordinates
+     * 
+     * @param targetWorld
+     * @param localVectors
+     * @param result
+     * @return
+     */
     public DoubleMatrix transformLocalToOther(World targetWorld, DoubleMatrix localVectors, DoubleMatrix result);// In-Place
                                                                                                                  // operation
                                                                                                                  // for
@@ -144,15 +248,52 @@ public interface IMixinWorld {
                                                                                                                  // memory
                                                                                                                  // footprint
 
-    // Transform from another world's coordinates to this world's coordinates
+    /**
+     * Transform from another world's coordinates to this world's coordinates
+     * 
+     * @param sourceWorld
+     * @param otherEntity
+     * @return
+     */
     public Vec3 transformOtherToLocal(World sourceWorld, Entity otherEntity);
 
+    /**
+     * Transform from another world's coordinates to this world's coordinates
+     * 
+     * @param sourceWorld
+     * @param otherVec
+     * @return
+     */
     public Vec3 transformOtherToLocal(World sourceWorld, Vec3 otherVec);
 
+    /**
+     * Transform from another world's coordinates to this world's coordinates
+     * 
+     * @param sourceWorld
+     * @param otherX
+     * @param otherY
+     * @param otherZ
+     * @return
+     */
     public Vec3 transformOtherToLocal(World sourceWorld, double otherX, double otherY, double otherZ);
 
+    /**
+     * Transform from another world's coordinates to this world's coordinates
+     * 
+     * @param sourceWorld
+     * @param otherVectors
+     * @return
+     */
     public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors);
 
+    /**
+     * Transform from another world's coordinates to this world's coordinates
+     * 
+     * @param sourceWorld
+     * @param otherVectors
+     * @param result
+     * @return
+     */
     public DoubleMatrix transformOtherToLocal(World sourceWorld, DoubleMatrix otherVectors, DoubleMatrix result);// In-Place
                                                                                                                  // operation
                                                                                                                  // for
@@ -196,18 +337,43 @@ public interface IMixinWorld {
     public void doTickPartial(double interpolationFactor);
 
     /**
-     * Will get all subworlds intersecting the specified AABB excluding the one passed into it. Args: subworldToExclude,
-     * aabb
+     * Will get all subworlds intersecting the specified AABB excluding the one passed into it.
+     * 
+     * @param subworld
+     * @param bb
+     * @return
      */
     public List<World> getSubworldsWithinAABBExcludingSubworld(SubWorld subworld, AxisAlignedBB bb);
 
+    /**
+     * Will get all subworlds intersecting the specified AABB excluding the one passed into it.
+     * 
+     * @param subworld
+     * @param bb
+     * @param selector
+     * @return
+     */
     public List<World> getSubworldsWithinAABBExcludingSubworld(SubWorld subworld, AxisAlignedBB bb,
         ISubWorldSelector selector);
 
     /**
-     * Returns all subworlds of the specified class type which intersect with the AABB. Args: entityClass, aabb
+     * Returns all subworlds of the specified class type which intersect with the AABB.
+     * 
+     * @param <T>
+     * @param subworldClass
+     * @param bb
+     * @return
      */
     public <T> List<T> getSubworldsWithinAABB(Class<T> subworldClass, AxisAlignedBB bb);
 
+    /**
+     * Returns all subworlds of the specified class type which intersect with the AABB.
+     * 
+     * @param <T>
+     * @param subworldClass
+     * @param bb
+     * @param selector
+     * @return
+     */
     public <T> List<T> getSubworldsWithinAABB(Class<T> subworldClass, AxisAlignedBB bb, ISubWorldSelector selector);
 }

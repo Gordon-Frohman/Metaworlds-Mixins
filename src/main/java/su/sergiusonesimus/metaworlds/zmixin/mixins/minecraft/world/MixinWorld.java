@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.command.ISubWorldSelector;
 import su.sergiusonesimus.metaworlds.util.UnmodifiableSingleObjPlusCollection;
@@ -178,6 +179,22 @@ public abstract class MixinWorld implements IMixinWorld {
     public boolean chunkExists(int p_72916_1_, int p_72916_2_) {
         return false;
     }
+
+    protected World generateSubWorld(int newSubWorldID) {
+        World newSubWorld = MetaworldsMod.proxy.createSubWorld((World) (Object) this, newSubWorldID);
+        registerSubWorld(newSubWorld);
+        return newSubWorld;
+    }
+
+    /**
+     * Registers a newly created world as a child world of this world. <br>
+     * SHOULD ONLY BE CALLED ON SUBWORLD CREATION <br>
+     * Was moved to a separate method to simplify registration process for various SubWorld superclasses <br>
+     * Access it using the @Shadow annotation
+     * 
+     * @param subworld
+     */
+    protected abstract void registerSubWorld(World newSubWorld);
 
     public Collection<World> getWorlds() {
         return this.allWorlds;

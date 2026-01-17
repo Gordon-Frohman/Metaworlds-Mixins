@@ -26,7 +26,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
@@ -45,28 +44,6 @@ public class MixinWorldClient extends MixinWorld {
 
     @Shadow(remap = true)
     public NetHandlerPlayClient sendQueue;
-
-    public World createSubWorld() {
-        return this.createSubWorld(this.getUnoccupiedSubworldID());
-    }
-
-    @Override
-    public World createSubWorld(double centerX, double centerY, double centerZ, double translationX,
-        double translationY, double translationZ, double rotationPitch, double rotationYaw, double rotationRoll,
-        double scaling) {
-        return this.createSubWorld(
-            this.getUnoccupiedSubworldID(),
-            centerX,
-            centerY,
-            centerZ,
-            translationX,
-            translationY,
-            translationZ,
-            rotationPitch,
-            rotationYaw,
-            rotationRoll,
-            scaling);
-    }
 
     public World createSubWorld(int newSubWorldID) {
         return this.generateSubWorld(newSubWorldID);
@@ -89,8 +66,8 @@ public class MixinWorldClient extends MixinWorld {
         return newSubWorld;
     }
 
-    protected World generateSubWorld(int newSubWorldID) {
-        World newSubWorld = MetaworldsMod.proxy.createSubWorld(((World) (Object) this), newSubWorldID);
+    @Override
+    protected void registerSubWorld(World newSubWorld) {
         if (((IMixinWorld) this).getSubWorldsMap()
             .get(((IMixinWorld) newSubWorld).getSubWorldID()) == null) {
             ((IMixinWorld) this).getSubWorldsMap()
@@ -111,7 +88,6 @@ public class MixinWorldClient extends MixinWorld {
                 this.mc.renderGlobal.allRenderLists[i] = new RenderList();
             }
         }
-        return newSubWorld;
     }
 
     /**
