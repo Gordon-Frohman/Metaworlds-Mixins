@@ -24,6 +24,8 @@ import su.sergiusonesimus.metaworlds.event.BlockDisplacementEvent;
 import su.sergiusonesimus.metaworlds.event.EntityDisplacementEvent;
 import su.sergiusonesimus.metaworlds.event.MetaworldsEventFactory;
 import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class DisplacementHelper {
@@ -112,6 +114,17 @@ public class DisplacementHelper {
         Entity entity;
         while (j$.hasNext()) {
             entity = j$.next();
+            if (!(sourceWorld instanceof SubWorld) && targetWorld instanceof SubWorld
+                && entity instanceof EntityPlayer
+                && entity.posX >= x
+                && entity.posX <= (x + 1)
+                && entity.posZ >= z
+                && entity.posZ <= (z + 1)
+                && entity.posY >= (y + block.getBlockBoundsMaxY())) {
+                ((IMixinEntity) entity).setWorldBelowFeet(targetWorld);
+                ((IMixinEntityPlayer) entity).setCurrentSubworldPosition(entity.posX, entity.posY, entity.posZ);
+                continue;
+            }
             if ((entity instanceof EntityMinecart && entity.posX >= x
                 && entity.posX <= (x + 1)
                 && entity.posZ >= z
