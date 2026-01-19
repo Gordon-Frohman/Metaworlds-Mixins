@@ -372,20 +372,18 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
             }
 
             this.worldBelowFeet = newWorldBelowFeet;
+            int subworldId = 0;
             if (this.worldBelowFeet != null) {
                 if (((IMixinWorld) this.worldBelowFeet).isSubWorld()) {
                     ((SubWorld) this.worldBelowFeet).registerEntityToDrag((Entity) (Object) this);
                 }
-                if (!this.worldBelowFeet.isRemote && ((Entity) (Object) this) instanceof EntityPlayerMP playerEntity) {
-                    int subworldId = ((IMixinWorld) this.worldBelowFeet).getSubWorldID();
-                    ((IMixinEntityPlayer) this).setSubworldBelowFeetId(subworldId);
-                    MetaMagicNetwork.dispatcher.sendTo(new S07WorldBelowFeetPacket(subworldId), playerEntity);
-                }
-            } else {
-                if (!this.worldObj.isRemote && ((Entity) (Object) this) instanceof EntityPlayerMP playerEntity) {
-                    ((IMixinEntityPlayer) this).setSubworldBelowFeetId(0);
-                    MetaMagicNetwork.dispatcher.sendTo(new S07WorldBelowFeetPacket(0), playerEntity);
-                }
+                subworldId = ((IMixinWorld) this.worldBelowFeet).getSubWorldID();
+            }
+            if (((Entity) (Object) this) instanceof EntityPlayer playerEntity
+                && !(playerEntity instanceof EntityPlayerProxy)) {
+                ((IMixinEntityPlayer) this).setSubworldBelowFeetId(subworldId);
+                if (!this.worldObj.isRemote) MetaMagicNetwork.dispatcher
+                    .sendTo(new S07WorldBelowFeetPacket(subworldId), (EntityPlayerMP) playerEntity);
             }
 
             if (this.worldBelowFeet != this.worldObj && ((IMixinWorld) this.worldObj).isSubWorld()) {
