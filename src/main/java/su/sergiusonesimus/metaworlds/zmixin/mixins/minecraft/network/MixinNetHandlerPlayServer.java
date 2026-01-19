@@ -232,6 +232,11 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                         this.lastPosX = this.playerEntity.posX;
                         this.lastPosY = this.playerEntity.posY;
                         this.lastPosZ = this.playerEntity.posZ;
+                        this.lastSubworldBelowFeetId = ((IMixinEntityPlayer) this.playerEntity)
+                            .getSubworldBelowFeetId();
+                        this.lastLocalPosX = ((IMixinEntityPlayer) this.playerEntity).getCurrentSubworldPosX();
+                        this.lastLocalPosY = ((IMixinEntityPlayer) this.playerEntity).getCurrentSubworldPosY();
+                        this.lastLocalPosZ = ((IMixinEntityPlayer) this.playerEntity).getCurrentSubworldPosZ();
                     }
 
                     worldserver.updateEntity(this.playerEntity);
@@ -254,6 +259,10 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                 this.lastPosX = this.playerEntity.posX;
                 this.lastPosY = this.playerEntity.posY;
                 this.lastPosZ = this.playerEntity.posZ;
+                this.lastSubworldBelowFeetId = ((IMixinEntityPlayer) this.playerEntity).getSubworldBelowFeetId();
+                this.lastLocalPosX = ((IMixinEntityPlayer) this.playerEntity).getCurrentSubworldPosX();
+                this.lastLocalPosY = ((IMixinEntityPlayer) this.playerEntity).getCurrentSubworldPosY();
+                this.lastLocalPosZ = ((IMixinEntityPlayer) this.playerEntity).getCurrentSubworldPosZ();
                 d1 = this.playerEntity.posX;
                 d2 = this.playerEntity.posY;
                 d3 = this.playerEntity.posZ;
@@ -317,7 +326,16 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
 
                 this.playerEntity.onUpdateEntity();
                 this.playerEntity.ySize = 0.0F;
-                this.playerEntity.setPositionAndRotation(this.lastPosX, this.lastPosY, this.lastPosZ, f1, f2);
+                IMixinWorld lastSubworldBelowFeet = (IMixinWorld) ((IMixinWorld) this.playerEntity.worldObj)
+                    .getSubWorld(lastSubworldBelowFeetId);
+                if (this.lastSubworldBelowFeetId == 0 || lastSubworldBelowFeet == null) {
+                    this.playerEntity.setPositionAndRotation(this.lastPosX, this.lastPosY, this.lastPosZ, f1, f2);
+                } else {
+                    Vec3 globalPos = lastSubworldBelowFeet
+                        .transformToGlobal(this.lastLocalPosX, this.lastLocalPosY, this.lastLocalPosZ);
+                    this.playerEntity
+                        .setPositionAndRotation(globalPos.xCoord, globalPos.yCoord, globalPos.zCoord, f1, f2);
+                }
 
                 if (!this.hasMoved) {
                     return;
@@ -348,7 +366,7 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                             + ", "
                             + d9
                             + ")");
-                    IMixinWorld lastSubworldBelowFeet = (IMixinWorld) ((IMixinWorld) this.playerEntity.worldObj)
+                    lastSubworldBelowFeet = (IMixinWorld) ((IMixinWorld) this.playerEntity.worldObj)
                         .getSubWorld(lastSubworldBelowFeetId);
                     if (this.lastSubworldBelowFeetId == 0 || lastSubworldBelowFeet == null) {
                         this.setPlayerLocation(
@@ -482,7 +500,7 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                 }
 
                 if (flag && (flag1 || !flag2) && !this.playerEntity.isPlayerSleeping() && !this.playerEntity.noClip) {
-                    IMixinWorld lastSubworldBelowFeet = (IMixinWorld) ((IMixinWorld) this.playerEntity.worldObj)
+                    lastSubworldBelowFeet = (IMixinWorld) ((IMixinWorld) this.playerEntity.worldObj)
                         .getSubWorld(lastSubworldBelowFeetId);
                     if (this.lastSubworldBelowFeetId == 0 || lastSubworldBelowFeet == null) {
                         this.setPlayerLocation(this.lastPosX, this.lastPosY, this.lastPosZ, f1, f2);
