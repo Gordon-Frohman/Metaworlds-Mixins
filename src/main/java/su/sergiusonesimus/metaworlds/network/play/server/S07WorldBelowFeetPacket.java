@@ -10,6 +10,7 @@ import io.netty.buffer.ByteBuf;
 import su.sergiusonesimus.metaworlds.EventHookContainer;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.player.IMixinEntityPlayer;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class S07WorldBelowFeetPacket implements IMessage {
@@ -42,15 +43,21 @@ public class S07WorldBelowFeetPacket implements IMessage {
 
                 World world = ((IMixinWorld) player.getEntityWorld()).getSubWorld(message.subworldId);
                 if (world != null) {
-                    ((IMixinEntity) player).setWorldBelowFeet(world);
+                    setWorldBelowFeet(player, world);
                 } else {
                     EventHookContainer.registerSubworldEvent(
                         message.subworldId,
-                        (subworld) -> { ((IMixinEntity) player).setWorldBelowFeet((World) subworld); });
+                        (subworld) -> { setWorldBelowFeet(player, (World) subworld); });
                 }
             }
             return null;
         }
+
+        public void setWorldBelowFeet(EntityPlayer player, World world) {
+            ((IMixinEntity) player).setWorldBelowFeet(world);
+            ((IMixinEntityPlayer) player).setCurrentSubworldPosition(((IMixinWorld) world).transformToGlobal(player));
+        }
+
     }
 
 }
