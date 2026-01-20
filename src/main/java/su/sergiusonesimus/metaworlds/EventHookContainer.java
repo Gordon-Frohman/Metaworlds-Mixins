@@ -239,7 +239,8 @@ public class EventHookContainer {
         if (event.isCanceled() || !mc.gameSettings.showDebugInfo || event.left.isEmpty()) return;
 
         World worldBelowFeet = ((IMixinEntity) mc.thePlayer).getWorldBelowFeet();
-        if (worldBelowFeet instanceof SubWorld subworld) {
+        EntityPlayer proxy = ((IMixinEntity) mc.thePlayer).getProxyPlayer(worldBelowFeet);
+        if (worldBelowFeet instanceof SubWorld subworld && proxy != null) {
             event.left.add(null);
             event.left.add("Subworld below feet:");
             String type = subworld.getSubWorldType();
@@ -270,7 +271,6 @@ public class EventHookContainer {
                     subworld.getRotationYaw() % 360D,
                     subworld.getRotationRoll() % 360D));
             event.left.add(null);
-            EntityPlayer proxy = ((IMixinEntity) mc.thePlayer).getProxyPlayer(worldBelowFeet);
             int bX = MathHelper.floor_double(proxy.posX);
             int bY = MathHelper.floor_double(proxy.posY);
             int bZ = MathHelper.floor_double(proxy.posZ);
