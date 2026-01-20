@@ -25,6 +25,7 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -43,7 +44,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 
-import codechicken.lib.math.MathHelper;
 import cpw.mods.fml.common.FMLCommonHandler;
 import su.sergiusonesimus.metaworlds.MWCorePlayerTracker;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
