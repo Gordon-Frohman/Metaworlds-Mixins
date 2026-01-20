@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -13,17 +14,21 @@ import java.util.function.Consumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.Direction;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.EntityEvent.CanUpdate;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent.Load;
 
+import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
@@ -224,6 +229,80 @@ public class EventHookContainer {
                     }
                 }
             }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SideOnly(Side.CLIENT)
+    public void onRenderOverlay(RenderGameOverlayEvent.Text event) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (event.isCanceled() || !mc.gameSettings.showDebugInfo || event.left.isEmpty()) return;
+
+        World worldBelowFeet = ((IMixinEntity) mc.thePlayer).getWorldBelowFeet();
+        if (worldBelowFeet instanceof SubWorld subworld) {
+            event.left.add(null);
+            event.left.add("Subworld below feet:");
+            String type = subworld.getSubWorldType();
+            event.left.add(
+                "id: " + subworld.getSubWorldID()
+                    + " / type: "
+                    + type
+                    + " ("
+                    + SubWorldTypeManager.getTypeID(type)
+                    + ") / scaling: "
+                    + subworld.getScaling());
+            event.left.add(
+                String.format(
+                    "Center: %.3f / %.3f / %.3f",
+                    subworld.getCenterX(),
+                    subworld.getCenterY(),
+                    subworld.getCenterZ()));
+            event.left.add(
+                String.format(
+                    "Translation: %.3f / %.3f / %.3f",
+                    subworld.getTranslationX(),
+                    subworld.getTranslationY(),
+                    subworld.getTranslationZ()));
+            event.left.add(
+                String.format(
+                    "Rotation: %.3f° / %.3f° / %.3f°",
+                    subworld.getRotationPitch() % 360D,
+                    subworld.getRotationYaw() % 360D,
+                    subworld.getRotationRoll() % 360D));
+            event.left.add(null);
+            EntityPlayer proxy = ((IMixinEntity) mc.thePlayer).getProxyPlayer(worldBelowFeet);
+            int bX = MathHelper.floor_double(proxy.posX);
+            int bY = MathHelper.floor_double(proxy.posY);
+            int bZ = MathHelper.floor_double(proxy.posZ);
+            event.left.add(String.format("XYZ: %.3f / %.5f / %.3f", proxy.posX, proxy.boundingBox.minY, proxy.posZ));
+            event.left.add(String.format("Block: %d %d %d [%d %d %d]", bX, bY, bZ, bX & 15, bY & 15, bZ & 15));
+            event.left.add(String.format("Chunk: %d %d %d", bX >> 4, bY >> 4, bZ >> 4));
+            int heading = MathHelper.floor_double((double) (proxy.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+            String heading_str = switch (heading) {
+                case 0 -> "Towards positive Z";
+                case 1 -> "Towards negative X";
+                case 2 -> "Towards negative Z";
+                case 3 -> "Towards positive X";
+                default -> throw new RuntimeException();
+            };
+            event.left.add(
+                String.format(
+                    "Facing: %s (%s) (%.1f / %.1f)",
+                    Direction.directions[heading].toLowerCase(Locale.ROOT),
+                    heading_str,
+                    MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw),
+                    MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationPitch)));
+
+            Chunk chunk = worldBelowFeet.getChunkFromBlockCoords(bX, bZ);
+            event.left.add(
+                String.format(
+                    "lc: %d b: %s bl: %d sl: %d rl: %d",
+                    chunk.getTopFilledSegment() + 15,
+                    chunk.getBiomeGenForWorldCoords(bX & 15, bZ & 15, worldBelowFeet.getWorldChunkManager()).biomeName,
+                    chunk.getSavedLightValue(EnumSkyBlock.Block, bX & 15, MathHelper.clamp_int(bY, 0, 255), bZ & 15),
+                    chunk.getSavedLightValue(EnumSkyBlock.Sky, bX & 15, MathHelper.clamp_int(bY, 0, 255), bZ & 15),
+                    chunk.getBlockLightValue(bX & 15, MathHelper.clamp_int(bY, 0, 255), bZ & 15, 0)));
+
         }
     }
 }
