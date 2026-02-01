@@ -1066,4 +1066,24 @@ public class MixinEntity implements Comparable<Entity>, IMixinEntity {
         }
     }
 
+    @WrapOperation(
+        method = "updateFallState",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/entity/Entity;fallDistance:F",
+            opcode = Opcodes.PUTFIELD,
+            ordinal = 1))
+    public void setFallDistance(Entity instance, float newFallDistance, Operation<Void> original) {
+        World worldBelowFeet = ((IMixinEntity) instance).getWorldBelowFeet();
+        if (worldBelowFeet instanceof SubWorld subworld) {
+            Vec3 localPos = subworld.transformToLocal(instance);
+            if (!worldBelowFeet
+                .getChunkFromBlockCoords(
+                    MathHelper.floor_double(localPos.xCoord),
+                    MathHelper.floor_double(localPos.zCoord))
+                .isEmpty()) newFallDistance = 0;
+        }
+        original.call(instance, newFallDistance);
+    }
+
 }

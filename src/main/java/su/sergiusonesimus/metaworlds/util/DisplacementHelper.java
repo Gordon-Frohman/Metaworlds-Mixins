@@ -20,6 +20,7 @@ import net.minecraftforge.common.MinecraftForge;
 import su.sergiusonesimus.metaworlds.EventHookContainer;
 import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.event.BlockDisplacementEvent;
 import su.sergiusonesimus.metaworlds.event.EntityDisplacementEvent;
 import su.sergiusonesimus.metaworlds.event.MetaworldsEventFactory;
@@ -114,15 +115,32 @@ public class DisplacementHelper {
         Entity entity;
         while (j$.hasNext()) {
             entity = j$.next();
-            if (!(sourceWorld instanceof SubWorld) && targetWorld instanceof SubWorld
-                && entity instanceof EntityPlayer
-                && entity.posX >= x
-                && entity.posX <= (x + 1)
-                && entity.posZ >= z
-                && entity.posZ <= (z + 1)
-                && entity.posY >= (y + block.getBlockBoundsMaxY())) {
-                ((IMixinEntity) entity).setWorldBelowFeet(targetWorld);
-                ((IMixinEntityPlayer) entity).setCurrentSubworldPosition(entity.posX, entity.posY, entity.posZ);
+            if (entity instanceof EntityPlayer player) {
+                AxisAlignedBB playerBB = player.boundingBox;
+                AxisAlignedBB blockBB = block.getCollisionBoundingBoxFromPool(sourceWorld, x, y, z);
+                if (playerBB.minX <= blockBB.maxX && playerBB.maxX >= blockBB.minX
+                    && playerBB.minZ <= blockBB.maxZ
+                    && playerBB.maxZ >= blockBB.minZ
+                    && playerBB.minY >= blockBB.maxY) {
+                    if (sourceWorld instanceof SubWorld subworld) {
+                        if (player instanceof EntityPlayerProxy proxy) {
+                            EntityPlayer realPlayer = proxy.getRealPlayer();
+                            if (!sourceWorld.isRemote && !(targetWorld instanceof SubWorld)
+                                && ((IMixinEntityPlayer) realPlayer).getSubworldBelowFeetId()
+                                    == subworld.getSubWorldID()) {
+                                Vec3 globalPos = subworld
+                                    .transformToGlobal(((IMixinEntityPlayer) realPlayer).getCurrentSubworldPosition());
+                                realPlayer.setPositionAndUpdate(globalPos.xCoord, globalPos.yCoord, globalPos.zCoord);
+                            }
+                        }
+                    } else {
+                        if (targetWorld instanceof SubWorld) {
+                            ((IMixinEntity) entity).setWorldBelowFeet(targetWorld);
+                            ((IMixinEntityPlayer) entity)
+                                .setCurrentSubworldPosition(entity.posX, entity.posY, entity.posZ);
+                        }
+                    }
+                }
                 continue;
             }
             if ((entity instanceof EntityMinecart && entity.posX >= x

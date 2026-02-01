@@ -70,7 +70,10 @@ public class S02SubWorldDestroyPacket implements IMessage {
                     for (int i$ = 0; i$ < subworldIDs.length; ++i$) {
                         Integer curSubWorldID = subworldIDs[i$];
                         SubWorld curSubWorld = (SubWorld) ((IMixinWorld) player.worldObj).getSubWorld(curSubWorldID);
-                        if (curSubWorld != null) curSubWorld.removeSubWorld();
+                        if (curSubWorld != null) {
+                            curSubWorld.alignSubWorld();
+                            curSubWorld.removeSubWorld();
+                        }
                         ((IMixinEntity) player).getPlayerProxyMap()
                             .remove(curSubWorldID);
                     }
