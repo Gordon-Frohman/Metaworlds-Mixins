@@ -101,4 +101,9 @@ public class MinecraftSubWorldProxy extends Minecraft {
             logger.error("Couldn\'t toggle fullscreen", exception);
         }
     }
+
+    @Override
+    public void func_152348_aa() {
+        this.realMinecraft.func_152348_aa();
+    }
 }
