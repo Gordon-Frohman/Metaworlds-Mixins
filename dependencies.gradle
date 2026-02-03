@@ -46,7 +46,12 @@ dependencies {
     //runtimeOnlyNonPublishable files("libs/beddium-mc1.7.10-1.0.4-j8-dev.jar")
     //runtimeOnlyNonPublishable files("libs/beddium-mc1.7.10-1.0.4-j21-dev.jar")
     //runtimeOnlyNonPublishable files("libs/falsepatternlib-mc1.7.10-1.9.1-dev.jar") // For Beddium runtime
-    compileOnly(rfg.deobf(files("libs/1.7.10-TerraFirmaCraft-0.79.30.925.jar")))
+    implementation(rfg.deobf(files("libs/AdvancedRocketry-TFRU-1.4.1.jar")))
+    implementation(rfg.deobf(files("libs/LibVulpes-1.7.10-0.2.8-37-universal.jar"))) // For TFRU AdvancedRocketry runtime
+    //compileOnly(rfg.deobf(files("libs/gregtech6-TFRU-6.17.05.5.jar")))
+    implementation(rfg.deobf(files("libs/TerraFirmaCraft-TFRU-1.7.10-0.82.4.jar")))
+    implementation(files("libs/Yamcl-0.6.0-dev.jar")) // For TFRU TFC runtime
+    //compileOnly(rfg.deobf(files("libs/1.7.10-TerraFirmaCraft-0.79.30.925.jar")))
     compileOnly(rfg.deobf(files("libs/gregtech_1.7.10-6.17.01-RU_1.00.jar")))
     compileOnly("com.github.GTNewHorizons:Backhand:1.8.2:dev")
 }
