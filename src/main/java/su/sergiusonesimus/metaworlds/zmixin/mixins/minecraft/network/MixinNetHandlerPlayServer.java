@@ -171,7 +171,7 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                 if (this.lastSubworldBelowFeetId != 0 && this.lastSubworldBelowFeetId
                     != ((IMixinC03PacketPlayer) packetPlayer).getSubWorldBelowFeetId()) {
                     // Player has stepped on a different (sub)world
-                    // Ignoring the first packet
+                    this.hasMoved = true;
                 } else {
                     // First - checking if the player has moved globally
                     // Or if the world he/she is standing on was moved or rotated
