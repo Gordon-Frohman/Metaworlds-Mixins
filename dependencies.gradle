@@ -40,7 +40,7 @@ dependencies {
     runtimeOnlyNonPublishable("com.github.GTNewHorizons:NotEnoughItems:2.7.49-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:ForgeMultipart:1.6.8:dev") { transitive = false }
     implementation("com.github.GTNewHorizons:CodeChickenCore:1.4.3:dev") // For NEI and ForgeMultipart runtime
-    compileOnly("ganymedes01.etfuturum:Et-Futurum-Requiem:2.6.2.6-GTNH:dev") { transitive = false }
+    //compileOnly("ganymedes01.etfuturum:Et-Futurum-Requiem:2.6.2.6-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Hardcore-Ender-Expansion:1.13.0-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:LittleTiles:1.6.0:dev")
     //runtimeOnlyNonPublishable files("libs/beddium-mc1.7.10-1.0.4-j8-dev.jar")
