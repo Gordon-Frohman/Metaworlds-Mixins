@@ -10,6 +10,7 @@ public enum TargetedMod {
     FORGEMULTIPART("Minecraft Multipart Plugin", null, "McMultipart"),
     LITTLETILES("LittleTiles", "com.creativemd.littletiles.LittleTilesPatchingLoader", "littletiles"),
     TERRAFIRMACRAFT("TerraFirmaCraft", "com.bioxx.tfc.TFCASMLoadingPlugin", "terrafirmacraft"),
+    TERRAFIRMACRAFT_PLUS("TerraFirmaCraft+", "com.dunk.tfc.TFCASMLoadingPlugin", "terrafirmacraftplus"),
     GREGTECH6("GregTech", "gregtech.asm.GT_ASM", "gregtech"),
     BACKHAND("Backhand", "xonin.backhand.coremod.BackhandLoadingPlugin", "backhand");
 

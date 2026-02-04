@@ -150,9 +150,17 @@ public enum Mixins {
 
     TERRAFIRMACRAFT_COMPAT(new Builder("Adding subworld data to TerraFirmaCraft tile entity packets")
         .addTargetedMod(TargetedMod.TERRAFIRMACRAFT)
+        .addExcludedMod(TargetedMod.TERRAFIRMACRAFT_PLUS)
         .setSide(Side.BOTH)
         .setPhase(Phase.LATE)
         .addMixinClasses(addPrefix("tfc.", "MixinDataBlockPacket", "MixinNetworkTileEntity"))),
+
+    TERRAFIRMACRAFT_PLUS_COMPAT(new Builder("Adding subworld data to TerraFirmaCraft+ tile entity packets")
+        .addTargetedMod(TargetedMod.TERRAFIRMACRAFT_PLUS)
+        .addExcludedMod(TargetedMod.TERRAFIRMACRAFT)
+        .setSide(Side.BOTH)
+        .setPhase(Phase.LATE)
+        .addMixinClasses(addPrefix("tfcPlus.", "MixinDataBlockPacket", "MixinNetworkTileEntity"))),
 
     GREGTECH6_COMPAT(
         new Builder("Adding subworld data to GregTech tile entity packets").addTargetedMod(TargetedMod.GREGTECH6)

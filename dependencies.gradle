@@ -47,6 +47,7 @@ dependencies {
     //runtimeOnlyNonPublishable files("libs/beddium-mc1.7.10-1.0.4-j21-dev.jar")
     //runtimeOnlyNonPublishable files("libs/falsepatternlib-mc1.7.10-1.9.1-dev.jar") // For Beddium runtime
     compileOnly(rfg.deobf(files("libs/1.7.10-TerraFirmaCraft-0.79.30.925.jar")))
+    compileOnly(rfg.deobf(files("libs/[1.7.10]TerraFirmaCraftPlus-0.89.1.jar")))
     compileOnly(rfg.deobf(files("libs/gregtech_1.7.10-6.17.01-RU_1.00.jar")))
     compileOnly("com.github.GTNewHorizons:Backhand:1.8.2:dev")
 }
