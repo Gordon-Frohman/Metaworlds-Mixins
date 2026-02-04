@@ -57,4 +57,5 @@ dependencies {
     implementation(rfg.deobf(files("libs/ktfruaddon-0.2.6.jar"))) // For GT6 runtime
     implementation(rfg.deobf(files("libs/TerraFirmaCraft-TFRU-1.7.10-0.82.4.jar")))
     implementation(files("libs/Yamcl-0.6.0-dev.jar")) // For TFC runtime
+    implementation(rfg.deobf(files("libs/TFCTech-TFRU-0.3.0.jar")))
 }
