@@ -10,6 +10,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import cpw.mods.fml.common.registry.FMLControlledNamespacedRegistry;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.block.BlockDummyReobfTracker;
 import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 
@@ -28,7 +29,7 @@ public class BlockVolatilityMap {
         int blockId = Block.getIdFromBlock(block);
         Boolean isVolatile = (Boolean) blockVolatilityMap.get(Integer.valueOf(blockId));
         if (isVolatile == null) {
-            if (ForgeMultipartIntegration.isBlockMultipart(block)) {
+            if (MetaworldsMod.isForgeMultipartLoaded && ForgeMultipartIntegration.isBlockMultipart(block)) {
                 isVolatile = true;
             } else {
                 try {
