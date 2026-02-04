@@ -32,7 +32,8 @@ public class MixinOpenGuiHandler {
         remap = false,
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/client/Minecraft;thePlayer:Lnet/minecraft/client/entity/EntityClientPlayerMP;"))
+            target = "Lnet/minecraft/client/Minecraft;thePlayer:Lnet/minecraft/client/entity/EntityClientPlayerMP;",
+            remap = true))
     protected EntityClientPlayerMP getThePlayer(Minecraft instance, Operation<EntityClientPlayerMP> original) {
         return (EntityClientPlayerMP) ((IMixinEntity) original.call(instance))
             .getProxyPlayer(((IMixinOpenGui) storedMessage).getSubworldId());
