@@ -12,7 +12,8 @@ public enum TargetedMod {
     TERRAFIRMACRAFT("TerraFirmaCraft", "com.bioxx.tfc.TFCASMLoadingPlugin", "terrafirmacraft"),
     TERRAFIRMACRAFT_PLUS("TerraFirmaCraft+", "com.dunk.tfc.TFCASMLoadingPlugin", "terrafirmacraftplus"),
     GREGTECH6("GregTech", "gregtech.asm.GT_ASM", "gregtech"),
-    BACKHAND("Backhand", "xonin.backhand.coremod.BackhandLoadingPlugin", "backhand");
+    BACKHAND("Backhand", "xonin.backhand.coremod.BackhandLoadingPlugin", "backhand"),
+    WAILA("WAILA", null, "Waila");
 
     /** The "name" in the @Mod annotation */
     public final String modName;

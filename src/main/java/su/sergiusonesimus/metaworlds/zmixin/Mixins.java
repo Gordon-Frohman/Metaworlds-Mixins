@@ -187,6 +187,11 @@ public enum Mixins {
         .setPhase(Phase.EARLY)
         .addMixinClasses("backhand.MixinMinecraft")),
 
+    WAILA_COMPAT(new Builder("Allowing WAILA to get info about subworld blocks").addTargetedMod(TargetedMod.WAILA)
+        .setSide(Side.CLIENT)
+        .setPhase(Phase.LATE)
+        .addMixinClasses(addPrefix("waila.", "MixinRayTracing", "MixinWailaTickHandler"))),
+
     ;
 
     private final List<String> mixinClasses;
