@@ -277,6 +277,7 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/client/particle/EffectRenderer;worldObj:Lnet/minecraft/world/World;",
+            remap = true,
             opcode = Opcodes.GETFIELD))
     private World getWorldObj(EffectRenderer instance, Operation<World> original) {
         return ((IMixinMovingObjectPosition) storedTarget).getWorld();
@@ -285,7 +286,10 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
     @WrapOperation(
         method = "addBlockHitEffects(IIILnet/minecraft/util/MovingObjectPosition;)V",
         remap = false,
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/EffectRenderer;addBlockHitEffects(IIII)V"))
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/particle/EffectRenderer;addBlockHitEffects(IIII)V",
+            remap = true))
     private void addBlockHitEffects(EffectRenderer instance, int x, int y, int z, int side, Operation<Void> original) {
         ((IMixinEffectRenderer) this)
             .addBlockHitEffects(x, y, z, side, ((IMixinMovingObjectPosition) storedTarget).getWorld());
@@ -307,7 +311,8 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
         remap = false,
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/particle/EffectRenderer;addEffect(Lnet/minecraft/client/particle/EntityFX;)V"))
+            target = "Lnet/minecraft/client/particle/EffectRenderer;addEffect(Lnet/minecraft/client/particle/EntityFX;)V",
+            remap = true))
     private void storeData(int x, int y, int z, Block block, int meta, CallbackInfo ci, @Local(name = "d0") double d0,
         @Local(name = "d1") double d1, @Local(name = "d2") double d2) {
         storedD0 = d0;
@@ -325,7 +330,8 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
         remap = false,
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/particle/EffectRenderer;addEffect(Lnet/minecraft/client/particle/EntityFX;)V"))
+            target = "Lnet/minecraft/client/particle/EffectRenderer;addEffect(Lnet/minecraft/client/particle/EntityFX;)V",
+            remap = true))
     private void wrapAddEffect(EffectRenderer instance, EntityFX value, Operation<Void> original) {
         if (worldObj instanceof SubWorld) {
             World parentWorld = ((SubWorld) this.worldObj).getParentWorld();

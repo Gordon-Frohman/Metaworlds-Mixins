@@ -17,7 +17,7 @@ public class MixinPlacementHelper {
     @WrapOperation(
         method = "getPreviewTiles",
         remap = false,
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isSneaking()Z"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isSneaking()Z", remap = true))
     private boolean isSneaking(EntityPlayer instance, Operation<Boolean> original) {
         return original.call(instance instanceof EntityPlayerProxy proxy ? proxy.getRealPlayer() : instance);
     }

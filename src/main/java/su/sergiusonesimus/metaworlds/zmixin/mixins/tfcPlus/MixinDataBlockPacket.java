@@ -43,6 +43,7 @@ public class MixinDataBlockPacket implements IMixinDataBlockPacket {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/network/PacketBuffer;writeInt(I)Lio/netty/buffer/ByteBuf;",
+            remap = true,
             ordinal = 1,
             shift = Shift.AFTER),
         locals = LocalCapture.CAPTURE_FAILHARD)
@@ -57,6 +58,7 @@ public class MixinDataBlockPacket implements IMixinDataBlockPacket {
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/network/PacketBuffer;readInt()I",
+            remap = true,
             ordinal = 1,
             shift = Shift.AFTER),
         locals = LocalCapture.CAPTURE_FAILHARD)
@@ -70,7 +72,8 @@ public class MixinDataBlockPacket implements IMixinDataBlockPacket {
         remap = false,
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/player/EntityPlayer;worldObj:Lnet/minecraft/world/World;"))
+            target = "Lnet/minecraft/entity/player/EntityPlayer;worldObj:Lnet/minecraft/world/World;",
+            remap = true))
     public World getSubworld(EntityPlayer player, Operation<World> original) {
         World playerWorld = original.call(player);
         World subworld = ((IMixinWorld) playerWorld).getSubWorld(subworldID);

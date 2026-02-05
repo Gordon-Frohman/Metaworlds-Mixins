@@ -27,7 +27,8 @@ public class MixinMinecraft {
         at = @At(
             value = "FIELD",
             opcode = Opcodes.GETFIELD,
-            target = "Lnet/minecraft/client/Minecraft;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;"))
+            target = "Lnet/minecraft/client/Minecraft;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;",
+            remap = true))
     private WorldClient getCorrectWorld(Minecraft instance, Operation<WorldClient> original) {
         return (WorldClient) ((IMixinMovingObjectPosition) this.objectMouseOver).getWorld();
     }

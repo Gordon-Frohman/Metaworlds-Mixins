@@ -48,7 +48,8 @@ public class MixinRayTracer {
         remap = false,
         at = @At(
             value = "INVOKE",
-            target = "Lcodechicken/lib/raytracer/RayTracer;getCorrectedHeadVec(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/util/Vec3;"))
+            target = "Lcodechicken/lib/raytracer/RayTracer;getCorrectedHeadVec(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/util/Vec3;",
+            remap = true))
     private static Vec3 getCorrectedHeadVec(EntityPlayer player, Operation<Vec3> original) {
         return original.call(playerProxy);
     }
@@ -59,7 +60,8 @@ public class MixinRayTracer {
         remap = false,
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/entity/player/EntityPlayer;getLook(F)Lnet/minecraft/util/Vec3;"))
+            target = "Lnet/minecraft/entity/player/EntityPlayer;getLook(F)Lnet/minecraft/util/Vec3;",
+            remap = true))
     private static Vec3 getLook(EntityPlayer player, float distance, Operation<Vec3> original) {
         return original.call(playerProxy, distance);
     }

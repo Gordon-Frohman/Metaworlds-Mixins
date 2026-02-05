@@ -37,6 +37,7 @@ public class MixinPacketCustom {
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;playerEntityList:Ljava/util/List;",
+            remap = true,
             shift = Shift.BEFORE),
         locals = LocalCapture.CAPTURE_FAILHARD)
     private static void storePlayerManager(Packet packet, World world, int chunkX, int chunkZ, CallbackInfo ci,
@@ -50,7 +51,8 @@ public class MixinPacketCustom {
         remap = false,
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/server/management/ServerConfigurationManager;playerEntityList:Ljava/util/List;"))
+            target = "Lnet/minecraft/server/management/ServerConfigurationManager;playerEntityList:Ljava/util/List;",
+            remap = true))
     private static List<EntityPlayerMP> getPlayersList(ServerConfigurationManager instance,
         Operation<List<EntityPlayerMP>> original) {
         return storedPlayerManager.players;
@@ -61,7 +63,8 @@ public class MixinPacketCustom {
         remap = false,
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerManager;isPlayerWatchingChunk(Lnet/minecraft/entity/player/EntityPlayerMP;II)Z"))
+            target = "Lnet/minecraft/server/management/PlayerManager;isPlayerWatchingChunk(Lnet/minecraft/entity/player/EntityPlayerMP;II)Z",
+            remap = true))
     private static boolean isPlayerWatchingChunk(PlayerManager instance, EntityPlayerMP player, int x, int z,
         Operation<Boolean> original) {
         if (player instanceof EntityPlayerProxy) {
@@ -86,7 +89,8 @@ public class MixinPacketCustom {
         remap = false,
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/entity/player/EntityPlayerMP;playerNetServerHandler:Lnet/minecraft/network/NetHandlerPlayServer;"))
+            target = "Lnet/minecraft/entity/player/EntityPlayerMP;playerNetServerHandler:Lnet/minecraft/network/NetHandlerPlayServer;",
+            remap = true))
     private static NetHandlerPlayServer getPlayerNetServerHandler(EntityPlayerMP player,
         Operation<NetHandlerPlayServer> original) {
         return original.call(player instanceof EntityPlayerProxy playerProxy ? playerProxy.getRealPlayer() : player);

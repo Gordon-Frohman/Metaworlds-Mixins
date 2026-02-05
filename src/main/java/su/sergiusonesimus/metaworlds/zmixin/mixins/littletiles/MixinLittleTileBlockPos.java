@@ -32,7 +32,7 @@ public class MixinLittleTileBlockPos implements IMixinLittleTileBlockPos {
     @WrapOperation(
         method = "fromMovingObjectPosition",
         remap = false,
-        at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;xCoord:D"))
+        at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;xCoord:D", remap = true))
     private static double getLocalX(Vec3 instance, Operation<Double> original) {
         return localVec.xCoord;
     }
@@ -40,7 +40,7 @@ public class MixinLittleTileBlockPos implements IMixinLittleTileBlockPos {
     @WrapOperation(
         method = "fromMovingObjectPosition",
         remap = false,
-        at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;yCoord:D"))
+        at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;yCoord:D", remap = true))
     private static double getLocalY(Vec3 instance, Operation<Double> original) {
         return localVec.yCoord;
     }
@@ -48,7 +48,7 @@ public class MixinLittleTileBlockPos implements IMixinLittleTileBlockPos {
     @WrapOperation(
         method = "fromMovingObjectPosition",
         remap = false,
-        at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;zCoord:D"))
+        at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;zCoord:D", remap = true))
     private static double getLocalZ(Vec3 instance, Operation<Double> original) {
         return localVec.zCoord;
     }

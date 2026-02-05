@@ -81,14 +81,14 @@ public enum Mixins {
         .addMixinClasses("minecraft.util.MixinMovingObjectPositionS")),
 
     BEDDIUM_COMPAT(new Builder(
-        "Reenable vanilla rendering for subworlds disabled by Beddium. Not the best fix, but a fix nevertheless")
+        "Reenable vanilla rendering disabled by Beddium for subworlds. Not the best fix, but a fix nevertheless")
             .addTargetedMod(TargetedMod.BEDDIUM)
             .setSide(Side.CLIENT)
             .setPhase(Phase.LATE)
             .addMixinClasses("beddium.MixinRenderGlobal")),
 
     ANGELICA_COMPAT(new Builder(
-        "Reenable vanilla rendering for subworlds disabled by Angelica. Not the best fix, but a fix nevertheless")
+        "Reenable vanilla rendering disabled by Angelica for subworlds. Not the best fix, but a fix nevertheless")
             .addTargetedMod(TargetedMod.ANGELICA)
             .setSide(Side.CLIENT)
             .setPhase(Phase.LATE)
