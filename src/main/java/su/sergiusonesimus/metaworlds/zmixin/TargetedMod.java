@@ -13,7 +13,8 @@ public enum TargetedMod {
     TERRAFIRMACRAFT_PLUS("TerraFirmaCraft+", "com.dunk.tfc.TFCASMLoadingPlugin", "terrafirmacraftplus"),
     GREGTECH6("GregTech", "gregtech.asm.GT_ASM", "gregtech"),
     BACKHAND("Backhand", "xonin.backhand.coremod.BackhandLoadingPlugin", "backhand"),
-    WAILA("WAILA", null, "Waila");
+    WAILA("WAILA", null, "Waila"),
+    NOTENOUGHITEMS("NotEnoughItems", "codechicken.nei.asm.NEICorePlugin", "NotEnoughItems");
 
     /** The "name" in the @Mod annotation */
     public final String modName;

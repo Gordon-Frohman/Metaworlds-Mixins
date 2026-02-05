@@ -192,6 +192,12 @@ public enum Mixins {
         .setPhase(Phase.LATE)
         .addMixinClasses(addPrefix("waila.", "MixinRayTracing", "MixinWailaTickHandler"))),
 
+    NOTENOUGHITEMS_COMPAT(
+        new Builder("Allowing NEI to get info about subworld blocks").addTargetedMod(TargetedMod.NOTENOUGHITEMS)
+            .setSide(Side.CLIENT)
+            .setPhase(Phase.LATE)
+            .addMixinClasses("nei.MixinHUDRenderer")),
+
     ;
 
     private final List<String> mixinClasses;
