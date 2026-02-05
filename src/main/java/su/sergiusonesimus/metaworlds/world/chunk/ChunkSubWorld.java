@@ -94,7 +94,7 @@ public class ChunkSubWorld extends Chunk {
     }
 
     /**
-     * Gets the height of the topmost block, whether it is solid or not
+     * Gets the height of the topmost block that isn't air
      */
     public int getCollisionLimitYPos(int x, int z) {
         int k = x | z << 4;
@@ -118,5 +118,12 @@ public class ChunkSubWorld extends Chunk {
         }
 
         return l;
+    }
+
+    /**
+     * Sets the height of the topmost block that isn't air
+     */
+    public void setCollisionLimitYPos(int x, int z, int height) {
+        this.collisionLimitsMapYPos[x | z << 4] = height;
     }
 }

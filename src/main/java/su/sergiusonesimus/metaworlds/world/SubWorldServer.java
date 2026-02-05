@@ -1239,6 +1239,9 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public boolean setBlock(int x, int y, int z, Block block, int meta, int flags) {
         boolean result = super.setBlock(x, y, z, block, meta, flags);
         if (result) {
+            ChunkSubWorld curChunk;
+            int inChunkX;
+            int inChunkZ;
             if (block != Blocks.air) {
                 if (this.isEmpty) {
                     this.setBoundaries(x, y, z, x + 1, y + 1, z + 1);
@@ -1251,6 +1254,12 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                         Math.max(this.maxCoordinates.posY, y + 1),
                         Math.max(this.maxCoordinates.posZ, z + 1));
                 }
+                curChunk = (ChunkSubWorld) this.getChunkFromBlockCoords(x, z);
+                inChunkX = x & 15;
+                inChunkZ = z & 15;
+                if (y >= curChunk.getCollisionLimitYPos(inChunkX, inChunkZ)) {
+                    curChunk.setCollisionLimitYPos(inChunkX, inChunkZ, y + 1);
+                }
             } else if (!this.isEmpty) {
                 int minX = this.getMinX();
                 int minY = this.getMinY();
@@ -1260,11 +1269,8 @@ public class SubWorldServer extends WorldServer implements SubWorld {
                 int maxZ = this.getMaxZ();
                 boolean nowEmpty = this.isEmpty();
                 int foundBlockCoord;
-                ChunkSubWorld curChunk;
                 int curChunkX;
                 int curChunkZ;
-                int inChunkX;
-                int inChunkZ;
                 int curX;
                 int curY;
                 int curZ;
