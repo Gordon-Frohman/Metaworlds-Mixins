@@ -18,7 +18,7 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinMovi
 @Mixin(targets = "codechicken.microblock.PlacementGrid$class")
 public class MixinPlacementGrid {
 
-    @Inject(method = "glTransformFace", remap = false, at = { @At(value = "HEAD") }, cancellable = true)
+    @Inject(method = "glTransformFace", remap = false, at = @At(value = "HEAD"), cancellable = true)
     private static void glTransformFace(PlacementGrid $this, Vector3 hit, int side, CallbackInfo ci) {
         if (((IMixinMovingObjectPosition) ForgeMultipartIntegration.currentMOP)
             .getWorld() instanceof SubWorld subworld) {

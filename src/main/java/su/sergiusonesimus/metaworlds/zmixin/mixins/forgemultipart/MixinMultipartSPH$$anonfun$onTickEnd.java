@@ -17,9 +17,9 @@ import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 public class MixinMultipartSPH$$anonfun$onTickEnd {
 
     @WrapOperation(
-        method = { "apply" },
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getEntityId()I"),
-        remap = false)
+        method = "apply",
+        remap = false,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getEntityId()I", remap = true))
     public int getSubworldSpecificEntityId(EntityPlayerMP player, Operation<Integer> original) {
         return ForgeMultipartIntegration.getSubworldSpecificEntityId(player);
     }

@@ -1,14 +1,11 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.codechickenlib;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.server.management.PlayerManager;
-import net.minecraft.server.management.PlayerManager.PlayerInstance;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.world.World;
 
@@ -68,19 +65,8 @@ public class MixinPacketCustom {
     private static boolean isPlayerWatchingChunk(PlayerManager instance, EntityPlayerMP player, int x, int z,
         Operation<Boolean> original) {
         if (player instanceof EntityPlayerProxy) {
-            Method getOrCreateChunkWatcher;
-            try {
-                getOrCreateChunkWatcher = instance.getClass()
-                    .getDeclaredMethod("getOrCreateChunkWatcher", int.class, int.class, boolean.class);
-                getOrCreateChunkWatcher.setAccessible(true);
-                PlayerManager.PlayerInstance playerinstance = (PlayerInstance) getOrCreateChunkWatcher
-                    .invoke(instance, x, z, false);
-                return playerinstance != null && playerinstance.playersWatchingChunk.contains(player);
-            } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-                | InvocationTargetException e) {
-                e.printStackTrace();
-                return false;
-            }
+            PlayerManager.PlayerInstance playerinstance = instance.getOrCreateChunkWatcher(x, z, false);
+            return playerinstance != null && playerinstance.playersWatchingChunk.contains(player);
         } else return original.call(instance, player, x, z);
     }
 

@@ -41,8 +41,8 @@ public class MixinMultipartSPH {
 
     @WrapOperation(
         method = { "onChunkWatch", "onChunkUnWatch" },
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;getEntityId()I"),
-        remap = false)
+        remap = false,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;getEntityId()I", remap = true))
     public int getSubworldSpecificEntityId(EntityPlayer player, Operation<Integer> original) {
         return ForgeMultipartIntegration.getSubworldSpecificEntityId(player);
     }
