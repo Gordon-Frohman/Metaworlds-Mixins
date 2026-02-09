@@ -31,7 +31,7 @@ public class SubWorldTypeManager {
     public static int getTypeID(String subworldType) {
         int i = 0;
         for (String type : subworldTypes.keySet()) {
-            if (type == subworldType) return i;
+            if (type.equals(subworldType)) return i;
             i++;
         }
         return 0;
@@ -75,6 +75,21 @@ public class SubWorldTypeManager {
 
         public World create(World parentWorld, int id) {
             return ((IMixinWorld) parentWorld).createSubWorld(id);
+        }
+
+        public World create(World parentWorld, SubWorldInfoHolder info) {
+            return ((IMixinWorld) parentWorld).createSubWorld(
+                info.subWorldId,
+                info.centerX,
+                info.centerY,
+                info.centerZ,
+                info.translationX,
+                info.translationY,
+                info.translationZ,
+                info.rotationPitch,
+                info.rotationYaw,
+                info.rotationRoll,
+                info.scaling);
         }
 
         public IMessage getCreatePacket(SubWorld sourceWorld) {

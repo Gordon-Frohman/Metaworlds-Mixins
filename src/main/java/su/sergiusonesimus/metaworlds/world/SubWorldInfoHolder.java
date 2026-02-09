@@ -88,7 +88,7 @@ public class SubWorldInfoHolder {
 
     public SubWorldInfoHolder(NBTTagCompound sourceNBT) {
         this.subWorldId = sourceNBT.getInteger("subWorldId");
-        if (sourceNBT.hasKey("subWorldType", 3)) {
+        if (sourceNBT.hasKey("subWorldType")) {
             this.subWorldType = sourceNBT.getString("subWorldType");
         }
 

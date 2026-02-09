@@ -120,7 +120,7 @@ public class EventHookContainer {
                             SubWorldInfoHolder curSubWorldInfo = ((IMixinWorldInfo) DimensionManager.getWorld(0)
                                 .getWorldInfo()).getSubWorldInfo(worldID);
                             World subworld = SubWorldTypeManager.getSubWorldInfoProvider(curSubWorldInfo.subWorldType)
-                                .create(event.world, worldID);
+                                .create(event.world, curSubWorldInfo);
                             executeSubworldEvents(subworld);
                         }
                     }
