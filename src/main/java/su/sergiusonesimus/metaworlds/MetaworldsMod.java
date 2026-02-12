@@ -5,6 +5,8 @@ import net.minecraft.command.ServerCommandManager;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,12 +65,18 @@ public class MetaworldsMod {
     public static boolean isForgeMultipartLoaded = false;
     public static boolean areLittleTilesLoaded = false;
 
+    public static boolean usePlayerControls;
+
     public MetaworldsMod() {
         instance = this;
     }
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        // load config
+        Configuration config = new Configuration(event.getSuggestedConfigurationFile());
+        loadConfiguration(config);
+
         FMLCommonHandler.instance()
             .bus()
             .register(new EventHookContainer());
@@ -93,6 +101,21 @@ public class MetaworldsMod {
         // check if various integrations are required
         isForgeMultipartLoaded = Loader.isModLoaded("McMultipart");
         areLittleTilesLoaded = Loader.isModLoaded("littletiles");
+    }
+
+    private void loadConfiguration(Configuration configFile) {
+        configFile.load();
+
+        Property playerControls = configFile.get("controls", "usePlayerControls", true);
+        playerControls.comment = "If the mod should use player controls for subworld movement. "
+            + "When set to 'false' enables new keybindings. Enabled by default.\n"
+            + "On true  (default): Movement = WASD,       Up = Space, Down = Ctrl\n"
+            + "On false (default): Movement = Arrow keys, Up = NUM+,  Down = NUM-";
+        usePlayerControls = playerControls.getBoolean();
+
+        if (configFile.hasChanged()) {
+            configFile.save();
+        }
     }
 
     @EventHandler

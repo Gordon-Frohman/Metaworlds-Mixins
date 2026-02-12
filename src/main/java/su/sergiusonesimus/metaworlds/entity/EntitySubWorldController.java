@@ -4,11 +4,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.controls.ControllerKeyServerStore;
 import su.sergiusonesimus.metaworlds.controls.SubWorldControllerKeyHandler;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class EntitySubWorldController extends Entity {
@@ -101,75 +103,81 @@ public class EntitySubWorldController extends Entity {
 
             subWorldObj.setRotationYawSpeed(rotationSpeed);
 
-            boolean jumping1 = false;
-            boolean sinking = false;
+            boolean up = false;
+            boolean down = false;
 
-            boolean left = false;
-            boolean back1 = false;
             boolean forward = false;
+            boolean backward = false;
+            boolean left = false;
             boolean right = false;
 
-            boolean rollright = false;
-            boolean rollleft = false;
+            boolean rollForward = false;
+            boolean rollBackward = false;
+            boolean rollRight = false;
+            boolean rollLeft = false;
 
             if (this.controlledWorld.isRemote) {
-                sinking = SubWorldControllerKeyHandler.ctrl_down;
-                jumping1 = SubWorldControllerKeyHandler.space_Down;
+                up = SubWorldControllerKeyHandler.up_Pressed;
+                down = SubWorldControllerKeyHandler.down_Pressed;
 
-                left = SubWorldControllerKeyHandler.a_Down;
-                back1 = SubWorldControllerKeyHandler.d_Down;
-                forward = SubWorldControllerKeyHandler.w_Down;
-                right = SubWorldControllerKeyHandler.s_Down;
+                forward = SubWorldControllerKeyHandler.forward_Pressed;
+                backward = SubWorldControllerKeyHandler.right_Pressed;
+                left = SubWorldControllerKeyHandler.left_Pressed;
+                right = SubWorldControllerKeyHandler.backward_Pressed;
 
-                rollright = SubWorldControllerKeyHandler.rl_Down;
-                rollleft = SubWorldControllerKeyHandler.rr_Down;
+                rollForward = SubWorldControllerKeyHandler.rollForward_Pressed;
+                rollBackward = SubWorldControllerKeyHandler.rollBackward_Pressed;
+                rollRight = SubWorldControllerKeyHandler.rollLeft_Pressed;
+                rollLeft = SubWorldControllerKeyHandler.rollRight_Pressed;
             } else {
                 ControllerKeyServerStore newMotionY1 = (ControllerKeyServerStore) this.riddenByEntity
                     .getExtendedProperties("LCTRL");
                 if (newMotionY1 != null) {
-                    sinking = newMotionY1.ctrlDown;
-                    jumping1 = newMotionY1.spaceDown;
+                    up = newMotionY1.upPressed;
+                    down = newMotionY1.downPressed;
 
-                    left = newMotionY1.aDown;
-                    back1 = newMotionY1.dDown;
-                    forward = newMotionY1.wDown;
-                    right = newMotionY1.sDown;
+                    forward = newMotionY1.forwardPressed;
+                    backward = newMotionY1.backwardPressed;
+                    left = newMotionY1.leftPressed;
+                    right = newMotionY1.rightPressed;
 
-                    rollright = newMotionY1.rlDown;
-                    rollleft = newMotionY1.rrDown;
+                    rollForward = newMotionY1.rollForwardPressed;
+                    rollBackward = newMotionY1.rollBackwardPressed;
+                    rollRight = newMotionY1.rollRightPressed;
+                    rollLeft = newMotionY1.rollLeftPressed;
                 }
             }
 
-            // System.out.println(sinking + "1");
-            // System.out.println(jumping1 + "2");
-            //
-            // System.out.println(left + "3");
-            // System.out.println(back1 + "4");
-            // System.out.println(forward + "5");
-            // System.out.println(right + "6");
-            //
-            // System.out.println(decelerating1 + "7");
-            // System.out.println(accelerating + "8");
-
             double curStrafe = (double) (left ? (right ? 0 : 1) : (right ? -1 : 0));
-            double curForward = (forward ? (back1 ? 0 : 1D) : (back1 ? -1D : 0));
-            double curRoll = (rollright ? (rollleft ? 0 : 1D) : (rollleft ? -1D : 0));
+            double curForward = (forward ? (backward ? 0 : 1D) : (backward ? -1D : 0));
 
-            subWorldObj.setRotationRollSpeed(curRoll);
+            if (this.riddenByEntity instanceof EntityPlayer player) {
+                EntityPlayer proxy = ((IMixinEntity) player).getProxyPlayer(controlledWorld);
+                double curRotationLR = (rollRight ? (rollLeft ? 0 : 1D) : (rollLeft ? -1D : 0));
+                double curRotationFB = (rollForward ? (rollBackward ? 0 : 1D) : (rollBackward ? -1D : 0));
+
+                Vec3 forwardVec = proxy.getLookVec();
+                forwardVec.yCoord = 0;
+
+                Vec3 rightVec = forwardVec.normalize();
+                rightVec.rotateAroundY((float) -Math.PI / 2f);
+
+                forwardVec = forwardVec.normalize();
+                forwardVec.xCoord *= curRotationFB;
+                forwardVec.zCoord *= curRotationFB;
+
+                rightVec.xCoord *= curRotationLR;
+                rightVec.zCoord *= curRotationLR;
+
+                Vec3 totalVec = forwardVec.addVector(rightVec.xCoord, 0, rightVec.zCoord);
+
+                subWorldObj.setRotationPitchSpeed(-totalVec.xCoord);
+                subWorldObj.setRotationRollSpeed(totalVec.zCoord);
+            }
 
             boolean shouldCancelAccel = false;
 
-            // System.out.println(subWorldObj.hasCollision());
-
-            if (subWorldObj.hasCollision()) {
-                // curStrafe = -curStrafe;
-                // curForward = -curForward;
-                // boolean tempSink = sinking;
-                // sinking = jumping1;
-                // jumping1 = tempSink;
-
-                shouldCancelAccel = true;
-            }
+            if (subWorldObj.hasCollision()) shouldCancelAccel = true;
 
             double newMotionX = subWorldObj.getMotionX();
             double newMotionZ = subWorldObj.getMotionZ();
@@ -194,9 +202,9 @@ public class EntitySubWorldController extends Entity {
             }
 
             accelerationY = 0.0D;
-            if (jumping1) {
+            if (up) {
                 accelerationY = 0.01D;
-            } else if (sinking) {
+            } else if (down) {
                 accelerationY = -0.01D;
             } else {
                 accelerationY = -subWorldObj.getMotionY() * 0.1D;

@@ -1,3 +1,15 @@
+key.categories.metaworlds=MetaWorlds
+key.metaworlds.up=Move Subworld up
+key.metaworlds.down=Move Subworld down
+key.metaworlds.forward=Move Subworld forward
+key.metaworlds.backward=Move Subworld backward
+key.metaworlds.left=Move Subworld left
+key.metaworlds.right=Move Subworld right
+key.metaworlds.rollForward=Roll Subworld forward
+key.metaworlds.rollBackward=Roll Subworld backward
+key.metaworlds.rollLeft=Roll Subworld left
+key.metaworlds.rollRight=Roll Subworld right
+
 tile.blankSubWorldCreator.name=Blank SubWorld Creator
 tile.contagiousSubWorldCreator.name=Contagious SubWorld Creator
 tile.subWorldAligner.name=SubWorld Aligner

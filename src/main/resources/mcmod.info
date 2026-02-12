@@ -3,7 +3,7 @@
         "modid": "${modId}",
         "name": "${modName}",
         "description": "A Mod for Minecraft that enables the user to position extra worlds inside other worlds, possibly transposed, scaled and/or rotated. This is the Forge + Mixins based version. Uses JOML (https://github.com/JOML-CI/JOML).",
-        "version": "1.5.0",
+        "version": "1.5.2",
         "mcversion": 1.7.10",
         "url": "https://github.com/Gordon-Frohman/Metaworlds-Mixins",
         "updateUrl": "",

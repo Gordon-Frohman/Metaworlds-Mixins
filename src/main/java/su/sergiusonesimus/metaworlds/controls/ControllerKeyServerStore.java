@@ -7,14 +7,18 @@ import net.minecraftforge.common.IExtendedEntityProperties;
 
 public class ControllerKeyServerStore implements IExtendedEntityProperties {
 
-    public boolean ctrlDown = false;
-    public boolean sDown = false;
-    public boolean wDown = false;
-    public boolean dDown = false;
-    public boolean aDown = false;
-    public boolean spaceDown = false;
-    public boolean rlDown = false;
-    public boolean rrDown = false;
+    public boolean upPressed = false;
+    public boolean downPressed = false;
+
+    public boolean forwardPressed = false;
+    public boolean backwardPressed = false;
+    public boolean leftPressed = false;
+    public boolean rightPressed = false;
+
+    public boolean rollForwardPressed = false;
+    public boolean rollBackwardPressed = false;
+    public boolean rollLeftPressed = false;
+    public boolean rollRightPressed = false;
 
     public void saveNBTData(NBTTagCompound compound) {}
 

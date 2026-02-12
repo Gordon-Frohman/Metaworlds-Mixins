@@ -1,3 +1,15 @@
+key.categories.metaworlds=Метамиры
+key.metaworlds.up=Переместить Метамир вверх
+key.metaworlds.down=Переместить Метамир вниз
+key.metaworlds.forward=Переместить Метамир вперёд
+key.metaworlds.backward=Переместить Метамир назад
+key.metaworlds.left=Переместить Метамир влево
+key.metaworlds.right=Переместить Метамир вправо
+key.metaworlds.rollForward=Наклонить Метамир вперёд
+key.metaworlds.rollBackward=Наклонить Метамир назад
+key.metaworlds.rollLeft=Наклонить Метамир влево
+key.metaworlds.rollRight=Наклонить Метамир вправо
+
 tile.blankSubWorldCreator.name=Генератор Метамира
 tile.contagiousSubWorldCreator.name=Заразный генератор Метамира
 tile.subWorldAligner.name=Выравниватель Метамира

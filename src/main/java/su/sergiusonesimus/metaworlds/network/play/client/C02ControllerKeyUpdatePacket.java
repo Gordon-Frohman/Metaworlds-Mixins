@@ -11,59 +11,68 @@ import su.sergiusonesimus.metaworlds.controls.ControllerKeyServerStore;
 
 public class C02ControllerKeyUpdatePacket implements IMessage {
 
-    private boolean ctrlDown;
+    private boolean upPressed;
+    private boolean downPressed;
 
-    private boolean sDown;
-    private boolean dDown;
-    private boolean aDown;
-    private boolean wDown;
+    private boolean forwardPressed;
+    private boolean backwardPressed;
+    private boolean leftPressed;
+    private boolean rightPressed;
 
-    private boolean spaceDown;
-    private boolean rlDown;
-    private boolean rrDown;
+    private boolean rollForwardPressed;
+    private boolean rollBackwardPressed;
+    private boolean rollLeftPressed;
+    private boolean rollRightPressed;
 
     public C02ControllerKeyUpdatePacket() {}
 
-    public C02ControllerKeyUpdatePacket(boolean isCtrlDown, boolean isSDown, boolean isDDown, boolean isADown,
-        boolean isWDown, boolean isSpaceDown, boolean isRLDown, boolean isRRDown) {
-        this.ctrlDown = isCtrlDown;
+    public C02ControllerKeyUpdatePacket(boolean isUpPressed, boolean isDownPressed, boolean isForwardPressed,
+        boolean isBackwardPressed, boolean isLeftPressed, boolean isRightPressed, boolean isRollForwardPressed,
+        boolean isRollBackwardPressed, boolean isRollLeftPressed, boolean isRollRightPressed) {
+        this.upPressed = isUpPressed;
+        this.downPressed = isDownPressed;
 
-        this.sDown = isSDown;
-        this.dDown = isDDown;
-        this.aDown = isADown;
-        this.wDown = isWDown;
+        this.forwardPressed = isForwardPressed;
+        this.backwardPressed = isBackwardPressed;
+        this.leftPressed = isLeftPressed;
+        this.rightPressed = isRightPressed;
 
-        this.spaceDown = isSpaceDown;
-        this.rlDown = isRLDown;
-        this.rrDown = isRRDown;
+        this.rollForwardPressed = isRollForwardPressed;
+        this.rollBackwardPressed = isRollBackwardPressed;
+        this.rollLeftPressed = isRollLeftPressed;
+        this.rollRightPressed = isRollRightPressed;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.ctrlDown = buf.readBoolean();
+        this.upPressed = buf.readBoolean();
+        this.downPressed = buf.readBoolean();
 
-        this.sDown = buf.readBoolean();
-        this.dDown = buf.readBoolean();
-        this.aDown = buf.readBoolean();
-        this.wDown = buf.readBoolean();
+        this.forwardPressed = buf.readBoolean();
+        this.backwardPressed = buf.readBoolean();
+        this.leftPressed = buf.readBoolean();
+        this.rightPressed = buf.readBoolean();
 
-        this.spaceDown = buf.readBoolean();
-        this.rlDown = buf.readBoolean();
-        this.rrDown = buf.readBoolean();
+        this.rollForwardPressed = buf.readBoolean();
+        this.rollBackwardPressed = buf.readBoolean();
+        this.rollLeftPressed = buf.readBoolean();
+        this.rollRightPressed = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeBoolean(this.ctrlDown);
+        buf.writeBoolean(this.upPressed);
+        buf.writeBoolean(this.downPressed);
 
-        buf.writeBoolean(this.sDown);
-        buf.writeBoolean(this.dDown);
-        buf.writeBoolean(this.aDown);
-        buf.writeBoolean(this.wDown);
+        buf.writeBoolean(this.forwardPressed);
+        buf.writeBoolean(this.backwardPressed);
+        buf.writeBoolean(this.leftPressed);
+        buf.writeBoolean(this.rightPressed);
 
-        buf.writeBoolean(this.spaceDown);
-        buf.writeBoolean(this.rlDown);
-        buf.writeBoolean(this.rrDown);
+        buf.writeBoolean(this.rollForwardPressed);
+        buf.writeBoolean(this.rollBackwardPressed);
+        buf.writeBoolean(this.rollLeftPressed);
+        buf.writeBoolean(this.rollRightPressed);
     }
 
     public static class Handler implements IMessageHandler<C02ControllerKeyUpdatePacket, IMessage> {
@@ -78,16 +87,18 @@ public class C02ControllerKeyUpdatePacket implements IMessage {
                     player.registerExtendedProperties("LCTRL", keyStore);
                 }
 
-                keyStore.ctrlDown = message.ctrlDown;
+                keyStore.upPressed = message.upPressed;
+                keyStore.downPressed = message.downPressed;
 
-                keyStore.sDown = message.sDown;
-                keyStore.dDown = message.dDown;
-                keyStore.aDown = message.aDown;
-                keyStore.wDown = message.wDown;
+                keyStore.forwardPressed = message.forwardPressed;
+                keyStore.backwardPressed = message.backwardPressed;
+                keyStore.leftPressed = message.leftPressed;
+                keyStore.rightPressed = message.rightPressed;
 
-                keyStore.spaceDown = message.spaceDown;
-                keyStore.rlDown = message.rlDown;
-                keyStore.rrDown = message.rrDown;
+                keyStore.rollForwardPressed = message.rollForwardPressed;
+                keyStore.rollBackwardPressed = message.rollBackwardPressed;
+                keyStore.rollLeftPressed = message.rollLeftPressed;
+                keyStore.rollRightPressed = message.rollRightPressed;
             }
             return null;
         }
