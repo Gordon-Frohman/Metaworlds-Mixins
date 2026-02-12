@@ -69,13 +69,25 @@ public class SubWorldControllerKeyHandler {
         if (keyBindRollLeft == null || keyBindRollRight == null
             || keyBindRollForward == null
             || keyBindRollBackward == null) {
-            keyBindRollForward = new KeyBinding(keyMetaworlds + "rollForward", Keyboard.KEY_NUMPAD8, categoryName);
+            keyBindRollForward = new KeyBinding(
+                keyMetaworlds + (MetaworldsMod.enableViewBasedRotation ? "rollForward" : "rollZPos"),
+                Keyboard.KEY_NUMPAD8,
+                categoryName);
             ClientRegistry.registerKeyBinding(keyBindRollForward);
-            keyBindRollBackward = new KeyBinding(keyMetaworlds + "rollBackward", Keyboard.KEY_NUMPAD2, categoryName);
+            keyBindRollBackward = new KeyBinding(
+                keyMetaworlds + (MetaworldsMod.enableViewBasedRotation ? "rollBackward" : "rollZNeg"),
+                Keyboard.KEY_NUMPAD2,
+                categoryName);
             ClientRegistry.registerKeyBinding(keyBindRollBackward);
-            keyBindRollLeft = new KeyBinding(keyMetaworlds + "rollLeft", Keyboard.KEY_NUMPAD4, categoryName);
+            keyBindRollLeft = new KeyBinding(
+                keyMetaworlds + (MetaworldsMod.enableViewBasedRotation ? "rollLeft" : "rollXNeg"),
+                Keyboard.KEY_NUMPAD4,
+                categoryName);
             ClientRegistry.registerKeyBinding(keyBindRollLeft);
-            keyBindRollRight = new KeyBinding(keyMetaworlds + "rollRight", Keyboard.KEY_NUMPAD6, categoryName);
+            keyBindRollRight = new KeyBinding(
+                keyMetaworlds + (MetaworldsMod.enableViewBasedRotation ? "rollRight" : "rollXPos"),
+                Keyboard.KEY_NUMPAD6,
+                categoryName);
             ClientRegistry.registerKeyBinding(keyBindRollRight);
             resetBinding = true;
         }

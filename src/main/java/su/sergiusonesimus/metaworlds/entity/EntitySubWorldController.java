@@ -7,6 +7,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.controls.ControllerKeyServerStore;
 import su.sergiusonesimus.metaworlds.controls.SubWorldControllerKeyHandler;
@@ -150,11 +151,11 @@ public class EntitySubWorldController extends Entity {
 
             double curStrafe = (double) (left ? (right ? 0 : 1) : (right ? -1 : 0));
             double curForward = (forward ? (backward ? 0 : 1D) : (backward ? -1D : 0));
+            double curRotationLR = (rollRight ? (rollLeft ? 0 : 1D) : (rollLeft ? -1D : 0));
+            double curRotationFB = (rollForward ? (rollBackward ? 0 : 1D) : (rollBackward ? -1D : 0));
 
-            if (this.riddenByEntity instanceof EntityPlayer player) {
+            if (MetaworldsMod.enableViewBasedRotation && this.riddenByEntity instanceof EntityPlayer player) {
                 EntityPlayer proxy = ((IMixinEntity) player).getProxyPlayer(controlledWorld);
-                double curRotationLR = (rollRight ? (rollLeft ? 0 : 1D) : (rollLeft ? -1D : 0));
-                double curRotationFB = (rollForward ? (rollBackward ? 0 : 1D) : (rollBackward ? -1D : 0));
 
                 Vec3 forwardVec = proxy.getLookVec();
                 forwardVec.yCoord = 0;
@@ -173,6 +174,9 @@ public class EntitySubWorldController extends Entity {
 
                 subWorldObj.setRotationPitchSpeed(-totalVec.xCoord);
                 subWorldObj.setRotationRollSpeed(totalVec.zCoord);
+            } else {
+                subWorldObj.setRotationPitchSpeed(curRotationLR);
+                subWorldObj.setRotationRollSpeed(curRotationFB);
             }
 
             boolean shouldCancelAccel = false;

@@ -9,6 +9,10 @@ key.metaworlds.rollForward=Наклонить Метамир вперёд
 key.metaworlds.rollBackward=Наклонить Метамир назад
 key.metaworlds.rollLeft=Наклонить Метамир влево
 key.metaworlds.rollRight=Наклонить Метамир вправо
+key.metaworlds.rollXPos=Увеличить наклон Метамира по оси X
+key.metaworlds.rollXNeg=Уменьшить наклон Метамира по оси X
+key.metaworlds.rollZPos=Увеличить наклон Метамира по оси Z
+key.metaworlds.rollZNeg=Уменьшить наклон Метамира по оси Z
 
 tile.blankSubWorldCreator.name=Генератор Метамира
 tile.contagiousSubWorldCreator.name=Заразный генератор Метамира

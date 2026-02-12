@@ -9,6 +9,10 @@ key.metaworlds.rollForward=Roll Subworld forward
 key.metaworlds.rollBackward=Roll Subworld backward
 key.metaworlds.rollLeft=Roll Subworld left
 key.metaworlds.rollRight=Roll Subworld right
+key.metaworlds.rollXPos=Increase Subworld X rotation
+key.metaworlds.rollXNeg=Decrease Subworld X rotation
+key.metaworlds.rollZPos=Increase Subworld Z rotation
+key.metaworlds.rollZNeg=Decrease Subworld Z rotation
 
 tile.blankSubWorldCreator.name=Blank SubWorld Creator
 tile.contagiousSubWorldCreator.name=Contagious SubWorld Creator

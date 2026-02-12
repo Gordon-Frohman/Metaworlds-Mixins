@@ -66,6 +66,7 @@ public class MetaworldsMod {
     public static boolean areLittleTilesLoaded = false;
 
     public static boolean usePlayerControls;
+    public static boolean enableViewBasedRotation;
 
     public MetaworldsMod() {
         instance = this;
@@ -112,6 +113,12 @@ public class MetaworldsMod {
             + "On true  (default): Movement = WASD,       Up = Space, Down = Ctrl\n"
             + "On false (default): Movement = Arrow keys, Up = NUM+,  Down = NUM-";
         usePlayerControls = playerControls.getBoolean();
+
+        Property viewBasedRotation = configFile.get("controls", "viewBasedRotation", false);
+        viewBasedRotation.comment = "[EXPERIMENTAL] Enable subworld rotation control based on where the player is looking, "
+            + "similar to position control. Setting it to 'false' allows you to control rotation of subworld around X and Z axis.\n"
+            + "Disabled by default.";
+        enableViewBasedRotation = viewBasedRotation.getBoolean();
 
         if (configFile.hasChanged()) {
             configFile.save();
