@@ -125,13 +125,11 @@ public class OrientedBB extends AxisAlignedBB {
                 double translatedX = this.getX(i) - centerX;
                 double translatedY = this.getY(i) - centerY;
 
-                // Поворот вокруг оси Z: X и Y меняются, Z остается неизменным
                 double rotatedX = translatedX * cosRoll - translatedY * sinRoll;
                 double rotatedY = translatedX * sinRoll + translatedY * cosRoll;
 
-                vertices.data[i * 4] = centerX + rotatedX; // X координата
-                vertices.data[i * 4 + 1] = centerY + rotatedY; // Y координата
-                // Z координата (vertices.data[i * 4 + 2]) не меняется
+                vertices.data[i * 4] = centerX + rotatedX;
+                vertices.data[i * 4 + 1] = centerY + rotatedY;
             }
 
             recalcAABB();
