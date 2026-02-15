@@ -12,6 +12,10 @@ public class GeometryHelper3D {
         return new Vector3D(vector.xCoord, vector.yCoord, vector.zCoord);
     }
 
+    public static Vec3 transformVector(Vector3D vector) {
+        return Vec3.createVectorHelper(vector.getX(), vector.getY(), vector.getZ());
+    }
+
     public static boolean pointOnSegment(Vector3D point, Segment segment) {
         if (segment.getLine()
             .contains(point)) {

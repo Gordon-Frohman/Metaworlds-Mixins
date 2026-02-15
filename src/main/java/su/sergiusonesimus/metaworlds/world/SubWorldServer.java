@@ -1121,8 +1121,9 @@ public class SubWorldServer extends WorldServer implements SubWorld {
     public List<AxisAlignedBB> getCollidingBoundingBoxesLocalWithMovement(Entity entity, AxisAlignedBB aabb,
         Vec3 movement) {
         AxisAlignedBB localBB = ((IMixinAxisAlignedBB) aabb).getTransformedToLocalBoundingBox(this);
-        localBB = AxisAlignedBB
-            .getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
+        // Disabling this on server side, since it is causing collision issues
+        // localBB = AxisAlignedBB
+        // .getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
         if (movement != null && movement.lengthVector() != 0) {
             Vec3 start = Vec3.createVectorHelper(aabb.minX, aabb.minY, aabb.minZ);
             Vec3 finish = start.addVector(movement.xCoord, movement.yCoord, movement.zCoord);

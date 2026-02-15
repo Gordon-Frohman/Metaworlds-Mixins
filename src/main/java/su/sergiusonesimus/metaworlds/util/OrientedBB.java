@@ -290,6 +290,21 @@ public class OrientedBB extends AxisAlignedBB {
         return this;
     }
 
+    public AxisAlignedBB addCoord(double x, double y, double z) {
+        if (this.lastTransformedBy == null) return this;
+        AxisAlignedBB localBB = ((IMixinAxisAlignedBB) this).getTransformedToLocalBoundingBox(this.lastTransformedBy);
+        localBB = AxisAlignedBB
+            .getBoundingBox(localBB.minX, localBB.minY, localBB.minZ, localBB.maxX, localBB.maxY, localBB.maxZ);
+        Vec3 start = GeometryHelper3D.transformVector(this.getVertice(0));
+        Vec3 finish = start.addVector(x, y, z);
+        start = ((IMixinWorld) this.lastTransformedBy).transformToLocal(start);
+        finish = ((IMixinWorld) this.lastTransformedBy).transformToLocal(finish);
+        Vec3 localMovement = start.subtract(finish);
+        localBB = localBB.addCoord(localMovement.xCoord, localMovement.yCoord, localMovement.zCoord);
+        this.setBB(((IMixinAxisAlignedBB) this).getTransformedToGlobalBoundingBox(this.lastTransformedBy));
+        return this;
+    }
+
     public OrientedBB getOrientedBB() {
         return this;
     }
@@ -654,24 +669,24 @@ public class OrientedBB extends AxisAlignedBB {
                             if (localXOffset != xOffset) xOffset = localXOffset;
                         } else {
                             // AABB doesn't intersect any edges. Let's check negative x faces then
-                            List<Plane> faces = new ArrayList<Plane>();
+                            List<CubeFace> faces = new ArrayList<CubeFace>();
                             // Checking the closest face anyway
                             faces.add(
-                                new Plane(
+                                new CubeFace(
                                     this.getVertice(curMaxIndex),
                                     this.getVertice(neighbourIndexes[0]),
                                     this.getVertice(neighbourIndexes[1])));
                             if (this.getX(neighbourIndexes[1]) != curMaxX) {
                                 // Checking second face if BB is rotated around at least one axis
                                 faces.add(
-                                    new Plane(
+                                    new CubeFace(
                                         this.getVertice(curMaxIndex),
                                         this.getVertice(neighbourIndexes[0]),
                                         this.getVertice(neighbourIndexes[2])));
                                 if (this.getX(neighbourIndexes[0]) != curMaxX) {
                                     // Checking third face if BB is rotated around both y and z axises
                                     faces.add(
-                                        new Plane(
+                                        new CubeFace(
                                             this.getVertice(curMaxIndex),
                                             this.getVertice(neighbourIndexes[1]),
                                             this.getVertice(neighbourIndexes[2])));
@@ -679,11 +694,12 @@ public class OrientedBB extends AxisAlignedBB {
                             }
 
                             localXOffset = xOffset;
-                            for (Plane face : faces) {
+                            for (CubeFace face : faces) {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection != null && intersection.getX() >= curMaxX
+                                    if (intersection != null && face.contains(intersection)
+                                        && intersection.getX() >= curMaxX
                                         && aabb.maxX <= intersection.getX() + subworldExpander) {
                                         newXOffset = intersection.getX() - aabb.maxX - subworldExtenderHorizontal;
                                         if (newXOffset < localXOffset) {
@@ -777,24 +793,24 @@ public class OrientedBB extends AxisAlignedBB {
                             if (localXOffset != xOffset) xOffset = localXOffset;
                         } else {
                             // AABB doesn't intersect any edges. Let's check positive x faces then
-                            List<Plane> faces = new ArrayList<Plane>();
+                            List<CubeFace> faces = new ArrayList<CubeFace>();
                             // Checking the closest face anyway
                             faces.add(
-                                new Plane(
+                                new CubeFace(
                                     this.getVertice(curMaxIndex),
                                     this.getVertice(neighbourIndexes[0]),
                                     this.getVertice(neighbourIndexes[1])));
                             if (this.getX(neighbourIndexes[1]) != curMaxX) {
                                 // Checking second face if BB is rotated around at least one axis
                                 faces.add(
-                                    new Plane(
+                                    new CubeFace(
                                         this.getVertice(curMaxIndex),
                                         this.getVertice(neighbourIndexes[0]),
                                         this.getVertice(neighbourIndexes[2])));
                                 if (this.getX(neighbourIndexes[0]) != curMaxX) {
                                     // Checking third face if BB is rotated around both y and z axises
                                     faces.add(
-                                        new Plane(
+                                        new CubeFace(
                                             this.getVertice(curMaxIndex),
                                             this.getVertice(neighbourIndexes[1]),
                                             this.getVertice(neighbourIndexes[2])));
@@ -802,11 +818,12 @@ public class OrientedBB extends AxisAlignedBB {
                             }
 
                             localXOffset = xOffset;
-                            for (Plane face : faces) {
+                            for (CubeFace face : faces) {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection != null && intersection.getX() <= curMaxX
+                                    if (intersection != null && face.contains(intersection)
+                                        && intersection.getX() <= curMaxX
                                         && aabb.minX >= intersection.getX() - subworldExpander) {
                                         newXOffset = intersection.getX() - aabb.minX + subworldExtenderHorizontal;
                                         if (newXOffset > localXOffset) {
@@ -1016,7 +1033,7 @@ public class OrientedBB extends AxisAlignedBB {
                                 && intersection.getZ() >= aabb.minZ) {
                                 liesOnEdge = true;
                                 if (intersection != null && aabb.maxY <= intersection.getY() + subworldExpander) {
-                                    newYOffset = curMaxY - aabb.maxY - 0.01D;
+                                    newYOffset = intersection.getY() - aabb.maxY - 0.01D;
                                     if (newYOffset < localYOffset) {
                                         localYOffset = newYOffset;
                                     }
@@ -1029,24 +1046,24 @@ public class OrientedBB extends AxisAlignedBB {
                         if (localYOffset != yOffset) yOffset = localYOffset;
                     } else {
                         // AABB doesn't intersect any edges. Let's check bottom faces then
-                        List<Plane> faces = new ArrayList<Plane>();
+                        List<CubeFace> faces = new ArrayList<CubeFace>();
                         // Checking the lowest face anyway
                         faces.add(
-                            new Plane(
+                            new CubeFace(
                                 this.getVertice(curMaxIndex),
                                 this.getVertice(neighbourIndexes[0]),
                                 this.getVertice(neighbourIndexes[1])));
                         if (this.getY(neighbourIndexes[1]) != curMaxY) {
                             // Checking second face if BB is rotated around at least one axis
                             faces.add(
-                                new Plane(
+                                new CubeFace(
                                     this.getVertice(curMaxIndex),
                                     this.getVertice(neighbourIndexes[0]),
                                     this.getVertice(neighbourIndexes[2])));
                             if (this.getY(neighbourIndexes[0]) != curMaxY) {
                                 // Checking third face if BB is rotated around both x and z axises
                                 faces.add(
-                                    new Plane(
+                                    new CubeFace(
                                         this.getVertice(curMaxIndex),
                                         this.getVertice(neighbourIndexes[1]),
                                         this.getVertice(neighbourIndexes[2])));
@@ -1054,11 +1071,12 @@ public class OrientedBB extends AxisAlignedBB {
                         }
 
                         localYOffset = yOffset;
-                        for (Plane face : faces) {
+                        for (CubeFace face : faces) {
                             for (int i = 0; i < 4; i++) {
                                 Vector3D intersection = face.intersection(corners[i]);
 
-                                if (intersection != null && intersection.getY() >= curMaxY
+                                if (intersection != null && face.contains(intersection)
+                                    && intersection.getY() >= curMaxY
                                     && aabb.maxY <= intersection.getY() + subworldExpander) {
                                     newYOffset = intersection.getY() - aabb.maxY - 0.01D;
                                     if (newYOffset < localYOffset) {
@@ -1139,7 +1157,7 @@ public class OrientedBB extends AxisAlignedBB {
                                 && intersection.getZ() >= aabb.minZ) {
                                 liesOnEdge = true;
                                 if (intersection != null && aabb.minY >= intersection.getY() - subworldExpander) {
-                                    newYOffset = curMaxY - aabb.minY + 0.01D;
+                                    newYOffset = intersection.getY() - aabb.minY + 0.01D;
                                     if (newYOffset > localYOffset) {
                                         localYOffset = newYOffset;
                                     }
@@ -1152,24 +1170,24 @@ public class OrientedBB extends AxisAlignedBB {
                         if (localYOffset != yOffset) yOffset = localYOffset;
                     } else {
                         // AABB doesn't intersect any edges. Let's check top faces then
-                        List<Plane> faces = new ArrayList<Plane>();
+                        List<CubeFace> faces = new ArrayList<CubeFace>();
                         // Checking the highest face anyway
                         faces.add(
-                            new Plane(
+                            new CubeFace(
                                 this.getVertice(curMaxIndex),
                                 this.getVertice(neighbourIndexes[0]),
                                 this.getVertice(neighbourIndexes[1])));
                         if (this.getY(neighbourIndexes[1]) != curMaxY) {
                             // Checking second face if BB is rotated around at least one axis
                             faces.add(
-                                new Plane(
+                                new CubeFace(
                                     this.getVertice(curMaxIndex),
                                     this.getVertice(neighbourIndexes[0]),
                                     this.getVertice(neighbourIndexes[2])));
                             if (this.getY(neighbourIndexes[0]) != curMaxY) {
                                 // Checking third face if BB is rotated around both x and z axises
                                 faces.add(
-                                    new Plane(
+                                    new CubeFace(
                                         this.getVertice(curMaxIndex),
                                         this.getVertice(neighbourIndexes[1]),
                                         this.getVertice(neighbourIndexes[2])));
@@ -1177,11 +1195,12 @@ public class OrientedBB extends AxisAlignedBB {
                         }
 
                         localYOffset = yOffset;
-                        for (Plane face : faces) {
+                        for (CubeFace face : faces) {
                             for (int i = 0; i < 4; i++) {
                                 Vector3D intersection = face.intersection(corners[i]);
 
-                                if (intersection != null && intersection.getY() <= curMaxY
+                                if (intersection != null && face.contains(intersection)
+                                    && intersection.getY() <= curMaxY
                                     && aabb.minY >= intersection.getY() - subworldExpander) {
                                     newYOffset = intersection.getY() - aabb.minY + 0.01D;
                                     if (newYOffset > localYOffset) {
@@ -1333,24 +1352,24 @@ public class OrientedBB extends AxisAlignedBB {
                             if (localZOffset != zOffset) zOffset = localZOffset;
                         } else {
                             // AABB doesn't intersect any edges. Let's check negative z faces then
-                            List<Plane> faces = new ArrayList<Plane>();
+                            List<CubeFace> faces = new ArrayList<CubeFace>();
                             // Checking the closest face anyway
                             faces.add(
-                                new Plane(
+                                new CubeFace(
                                     this.getVertice(curMaxIndex),
                                     this.getVertice(neighbourIndexes[0]),
                                     this.getVertice(neighbourIndexes[1])));
                             if (this.getZ(neighbourIndexes[1]) != curMaxZ) {
                                 // Checking second face if BB is rotated around at least one axis
                                 faces.add(
-                                    new Plane(
+                                    new CubeFace(
                                         this.getVertice(curMaxIndex),
                                         this.getVertice(neighbourIndexes[0]),
                                         this.getVertice(neighbourIndexes[2])));
                                 if (this.getZ(neighbourIndexes[0]) != curMaxZ) {
                                     // Checking third face if BB is rotated around both y and x axises
                                     faces.add(
-                                        new Plane(
+                                        new CubeFace(
                                             this.getVertice(curMaxIndex),
                                             this.getVertice(neighbourIndexes[1]),
                                             this.getVertice(neighbourIndexes[2])));
@@ -1358,11 +1377,12 @@ public class OrientedBB extends AxisAlignedBB {
                             }
 
                             localZOffset = zOffset;
-                            for (Plane face : faces) {
+                            for (CubeFace face : faces) {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection != null && intersection.getZ() >= curMaxZ
+                                    if (intersection != null && face.contains(intersection)
+                                        && intersection.getZ() >= curMaxZ
                                         && aabb.maxZ <= intersection.getZ() + subworldExpander) {
                                         newZOffset = intersection.getZ() - aabb.maxZ - subworldExtenderHorizontal;
                                         if (newZOffset < localZOffset) {
@@ -1456,24 +1476,24 @@ public class OrientedBB extends AxisAlignedBB {
                             if (localZOffset != zOffset) zOffset = localZOffset;
                         } else {
                             // AABB doesn't intersect any edges. Let's check positive z faces then
-                            List<Plane> faces = new ArrayList<Plane>();
+                            List<CubeFace> faces = new ArrayList<CubeFace>();
                             // Checking the closest face anyway
                             faces.add(
-                                new Plane(
+                                new CubeFace(
                                     this.getVertice(curMaxIndex),
                                     this.getVertice(neighbourIndexes[0]),
                                     this.getVertice(neighbourIndexes[1])));
                             if (this.getZ(neighbourIndexes[1]) != curMaxZ) {
                                 // Checking second face if BB is rotated around at least one axis
                                 faces.add(
-                                    new Plane(
+                                    new CubeFace(
                                         this.getVertice(curMaxIndex),
                                         this.getVertice(neighbourIndexes[0]),
                                         this.getVertice(neighbourIndexes[2])));
                                 if (this.getZ(neighbourIndexes[0]) != curMaxZ) {
                                     // Checking third face if BB is rotated around both y and x axises
                                     faces.add(
-                                        new Plane(
+                                        new CubeFace(
                                             this.getVertice(curMaxIndex),
                                             this.getVertice(neighbourIndexes[1]),
                                             this.getVertice(neighbourIndexes[2])));
@@ -1481,11 +1501,12 @@ public class OrientedBB extends AxisAlignedBB {
                             }
 
                             localZOffset = zOffset;
-                            for (Plane face : faces) {
+                            for (CubeFace face : faces) {
                                 for (int i = 0; i < 4; i++) {
                                     Vector3D intersection = face.intersection(corners[i]);
 
-                                    if (intersection != null && intersection.getZ() <= curMaxZ
+                                    if (intersection != null && face.contains(intersection)
+                                        && intersection.getZ() <= curMaxZ
                                         && aabb.minZ >= intersection.getZ() - subworldExpander) {
                                         newZOffset = intersection.getZ() - aabb.minZ + subworldExtenderHorizontal;
                                         if (newZOffset > localZOffset) {
