@@ -44,21 +44,21 @@ public class MixinWorldServer extends MixinWorld {
             value = "INVOKE",
             target = "Lnet/minecraftforge/common/DimensionManager;setWorld(ILnet/minecraft/world/WorldServer;)V"))
     public void setWorld(int par1int, WorldServer par2worldServer, Operation<Void> original) {
-        if (!((IMixinWorld) par2worldServer).isSubWorld()) DimensionManager.setWorld(par1int, par2worldServer);
+        if (!((IMixinWorld) par2worldServer).isSubWorld()) original.call(par1int, par2worldServer);
     }
 
     @WrapOperation(
         method = "tick()V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setWorldTime(J)V"))
     public void setWorldTimeRedirected(WorldInfo worldInfo, long par1long, Operation<Void> original) {
-        this.setWorldTime(par1long);
+        if (!this.isSubWorld()) original.call(worldInfo, par1long);
     }
 
     @WrapOperation(
         method = "tick()V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;incrementTotalWorldTime(J)V"))
     public void incrementTotalWorldTime(WorldInfo worldInfo, long par1long, Operation<Void> original) {
-        this.worldInfo.incrementTotalWorldTime(this.getTotalWorldTime() + 1L);
+        if (!this.isSubWorld()) original.call(worldInfo, par1long);
     }
 
     @WrapOperation(
@@ -69,7 +69,7 @@ public class MixinWorldServer extends MixinWorld {
     public boolean getGameRuleBooleanValue(GameRules gameRules, String string, Operation<Boolean> original) {
         if (string == "doMobSpawning") return !this.isSubWorld() && this.getGameRules()
             .getGameRuleBooleanValue("doMobSpawning");
-        else return gameRules.getGameRuleBooleanValue(string);
+        else return original.call(gameRules, string);
     }
 
     @Inject(method = "saveAllChunks(ZLnet/minecraft/util/IProgressUpdate;)V", at = @At("TAIL"))
