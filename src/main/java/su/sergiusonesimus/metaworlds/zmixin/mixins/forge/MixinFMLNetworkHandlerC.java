@@ -29,8 +29,9 @@ public class MixinFMLNetworkHandlerC {
             shift = Shift.BEFORE),
         locals = LocalCapture.CAPTURE_FAILHARD)
     private static void openGui1(EntityPlayer entityPlayer, Object mod, int modGuiId, World world, int x, int y, int z,
-        CallbackInfo ci, @Local(name = "guiContainer") Object guiContainer) {
-        if (guiContainer != null) entityPlayer.openContainer = ((GuiContainer) guiContainer).inventorySlots;
+        CallbackInfo ci, @Local(name = "guiContainer") Object gui) {
+        if (gui != null && gui instanceof GuiContainer guiContainer)
+            entityPlayer.openContainer = guiContainer.inventorySlots;
     }
 
     @Inject(
