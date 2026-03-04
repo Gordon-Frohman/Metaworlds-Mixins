@@ -199,6 +199,11 @@ public enum Mixins {
             .setPhase(Phase.LATE)
             .addMixinClasses("nei.MixinHUDRenderer")),
 
+    WARPDRIVE_COMPAT(new Builder("").addTargetedMod(TargetedMod.WARPDRIVE)
+        .setSide(Side.CLIENT)
+        .setPhase(Phase.LATE)
+        .addMixinClasses("warpdrive.MixinClientCameraHandler")),
+
     ;
 
     private final List<String> mixinClasses;
