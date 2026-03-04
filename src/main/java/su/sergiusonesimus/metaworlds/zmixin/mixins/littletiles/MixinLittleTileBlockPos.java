@@ -25,7 +25,8 @@ public class MixinLittleTileBlockPos implements IMixinLittleTileBlockPos {
     private World worldObj;
 
     @Inject(method = "fromMovingObjectPosition", remap = false, at = @At(value = "HEAD"))
-    private static void storeVariables(MovingObjectPosition pos, CallbackInfoReturnable<LittleTileBlockPos> cir) {
+    private static void storeVariables(MovingObjectPosition pos, int align,
+        CallbackInfoReturnable<LittleTileBlockPos> cir) {
         localVec = ((IMixinWorld) ((IMixinMovingObjectPosition) pos).getWorld()).transformToLocal(pos.hitVec);
     }
 
@@ -54,7 +55,8 @@ public class MixinLittleTileBlockPos implements IMixinLittleTileBlockPos {
     }
 
     @Inject(method = "fromMovingObjectPosition", remap = false, at = @At(value = "RETURN"), cancellable = true)
-    private static void setWorldObj(MovingObjectPosition pos, CallbackInfoReturnable<LittleTileBlockPos> cir) {
+    private static void setWorldObj(MovingObjectPosition pos, int align,
+        CallbackInfoReturnable<LittleTileBlockPos> cir) {
         cir.setReturnValue(
             ((IMixinLittleTileBlockPos) cir.getReturnValue()).setWorld(((IMixinMovingObjectPosition) pos).getWorld()));
     }

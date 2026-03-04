@@ -8,7 +8,6 @@ import net.minecraft.util.Vec3;
 import com.creativemd.creativecore.common.utils.Rotation;
 import com.creativemd.littletiles.common.tileentity.TileEntityLittleTiles;
 import com.creativemd.littletiles.common.utils.LittleTile;
-import com.creativemd.littletiles.common.utils.small.LittleTileBox;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
@@ -54,9 +53,9 @@ public class LittleTilesIntegration {
             }
 
             for (LittleTile tile : telt.getTiles()) {
-                for (LittleTileBox boundingBox : tile.boundingBoxes) {
+                if (tile.boundingBox != null) {
                     for (Rotation rotation : rotationsList) {
-                        boundingBox.rotateBoxWithCenter(rotation, center);
+                        tile.boundingBox.rotateBoxWithCenter(rotation, center);
                     }
                 }
             }

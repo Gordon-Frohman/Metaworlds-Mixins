@@ -38,7 +38,7 @@ public class MixinLittlePlacePacket {
         remap = false,
         at = @At(
             value = "INVOKE",
-            target = "Lcom/creativemd/littletiles/common/items/ItemBlockTiles;placeBlockAt(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lcom/creativemd/littletiles/common/utils/LittleTileBlockPos;Lcom/creativemd/littletiles/common/utils/PlacementHelper;Z)Z",
+            target = "Lcom/creativemd/littletiles/common/items/ItemBlockTiles;placeBlockAt(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Lcom/creativemd/littletiles/common/utils/LittleTileBlockPos;Lcom/creativemd/littletiles/common/utils/PlacementHelper;ZLcom/creativemd/littletiles/common/utils/LittleTileCutoutInfo;)Z",
             remap = false))
     public void executeServer(EntityPlayer player, CallbackInfo ci) {
         ((IMixinLittleTileBlockPos) pos).setWorld(((IMixinWorld) player.worldObj).getSubWorld(subworldId));

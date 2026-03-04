@@ -18,6 +18,7 @@ import com.creativemd.littletiles.common.items.ItemBlockTiles;
 import com.creativemd.littletiles.common.structure.LittleStructure;
 import com.creativemd.littletiles.common.utils.LittleTile;
 import com.creativemd.littletiles.common.utils.LittleTileBlockPos;
+import com.creativemd.littletiles.common.utils.LittleTileCutoutInfo;
 import com.creativemd.littletiles.common.utils.PlacementHelper;
 import com.creativemd.littletiles.utils.PreviewTile;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -34,7 +35,8 @@ public class MixinItemBlockTiles {
 
     @Inject(method = "placeBlockAt", remap = false, at = @At(value = "HEAD"))
     private void placeBlockAt(EntityPlayer player, ItemStack stack, World world, LittleTileBlockPos pos,
-        PlacementHelper helper, boolean customPlacement, CallbackInfoReturnable<Boolean> cir) {
+        PlacementHelper helper, boolean customPlacement, LittleTileCutoutInfo cutoutInfo,
+        CallbackInfoReturnable<Boolean> cir) {
         storedPos = pos;
     }
 
@@ -55,10 +57,10 @@ public class MixinItemBlockTiles {
         remap = false,
         at = @At(
             value = "INVOKE",
-            target = "Lcom/creativemd/littletiles/common/items/ItemBlockTiles;placeTiles(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Ljava/util/ArrayList;Lcom/creativemd/littletiles/common/structure/LittleStructure;IIILnet/minecraft/item/ItemStack;Ljava/util/ArrayList;)Z"))
+            target = "Lcom/creativemd/littletiles/common/items/ItemBlockTiles;placeTiles(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Ljava/util/ArrayList;Lcom/creativemd/littletiles/common/structure/LittleStructure;IIILnet/minecraft/item/ItemStack;Ljava/util/ArrayList;Lcom/creativemd/littletiles/common/utils/LittleTileCutoutInfo;)Z"))
     private boolean placeTiles(World world, EntityPlayer player, ArrayList<PreviewTile> previews,
         LittleStructure structure, int x, int y, int z, ItemStack stack, ArrayList<LittleTile> unplaceableTiles,
-        Operation<Boolean> original) {
+        LittleTileCutoutInfo cutoutInfo, Operation<Boolean> original) {
         return original.call(
             ((IMixinLittleTileBlockPos) storedPos).getWorld(),
             player,
@@ -68,7 +70,8 @@ public class MixinItemBlockTiles {
             y,
             z,
             stack,
-            unplaceableTiles);
+            unplaceableTiles,
+            cutoutInfo);
     }
 
     @WrapOperation(

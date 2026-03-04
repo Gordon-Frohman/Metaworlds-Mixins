@@ -140,13 +140,14 @@ public enum Mixins {
             .addMixinClasses(
                 addPrefix(
                     "littletiles.",
-                    "MixinLittleTileBlockPos",
-                    "MixinPreviewRenderer",
-                    "MixinItemBlockTiles",
-                    "MixinLittlePlacePacket",
                     "MixinBlockTile",
+                    "MixinItemBlockTiles",
+                    "MixinItemTool",
                     "MixinLittleBlockPacket",
-                    "MixinPlacementHelper"))),
+                    "MixinLittlePlacePacket",
+                    "MixinLittleTileBlockPos",
+                    "MixinPlacementHelper",
+                    "MixinPreviewRenderer"))),
 
     TERRAFIRMACRAFT_COMPAT(new Builder("Adding subworld data to TerraFirmaCraft tile entity packets")
         .addTargetedMod(TargetedMod.TERRAFIRMACRAFT)
