@@ -6,4 +6,6 @@ public class MixinPriorities {
     public static final int BACKHAND = 1100;
     public static final int BEDDIUM = 901;
     public static final int FORGE = 1000;
+    public static final int WARPDRIVE = 2000;
+
 }

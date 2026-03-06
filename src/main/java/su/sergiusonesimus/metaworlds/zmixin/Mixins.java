@@ -200,9 +200,26 @@ public enum Mixins {
             .addMixinClasses("nei.MixinHUDRenderer")),
 
     WARPDRIVE_COMPAT(new Builder("").addTargetedMod(TargetedMod.WARPDRIVE)
+        .setSide(Side.BOTH)
+        .setPhase(Phase.LATE)
+        .addMixinClasses(
+            addPrefix("warpdrive.", "MixinCameraRegistryItem", "MixinCamerasRegistry", "MixinChunkHandler"))),
+
+    WARPDRIVE_COMPAT_CLIENT_EARLY(new Builder("").addTargetedMod(TargetedMod.WARPDRIVE)
+        .setSide(Side.CLIENT)
+        .setPhase(Phase.EARLY)
+        .addMixinClasses("warpdrive.MixinWorldClient")),
+
+    WARPDRIVE_COMPAT_CLIENT_LATE(new Builder("").addTargetedMod(TargetedMod.WARPDRIVE)
         .setSide(Side.CLIENT)
         .setPhase(Phase.LATE)
-        .addMixinClasses("warpdrive.MixinClientCameraHandler")),
+        .addMixinClasses(
+            addPrefix(
+                "warpdrive.",
+                "MixinBlockMonitor",
+                "MixinClientCameraHandler",
+                "MixinCloakManager",
+                "MixinEntityCamera"))),
 
     ;
 
