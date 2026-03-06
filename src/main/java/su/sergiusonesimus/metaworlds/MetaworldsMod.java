@@ -212,8 +212,4 @@ public class MetaworldsMod {
         }
     }
 
-    public static void breakpoint() {
-        int x = 0;
-    }
-
 }

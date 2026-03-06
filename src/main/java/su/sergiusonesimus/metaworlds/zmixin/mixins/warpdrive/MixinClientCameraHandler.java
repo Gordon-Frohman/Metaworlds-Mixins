@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.render.ClientCameraHandler;
-import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.integrations.warpdrive.SubworldClientCameraHandler;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -16,7 +15,6 @@ public class MixinClientCameraHandler {
 
     @Overwrite(remap = false)
     public static boolean isValidContext(World world) {
-        MetaworldsMod.breakpoint();
         if (SubworldClientCameraHandler.check1_world == null || SubworldClientCameraHandler.check2_world == null
             || world.provider.dimensionId != ClientCameraHandler.dimensionId) {
             return false;
