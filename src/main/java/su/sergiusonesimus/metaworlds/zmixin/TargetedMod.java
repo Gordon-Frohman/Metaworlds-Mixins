@@ -14,7 +14,8 @@ public enum TargetedMod {
     GREGTECH6("GregTech", "gregtech.asm.GT_ASM", "gregtech"),
     BACKHAND("Backhand", "xonin.backhand.coremod.BackhandLoadingPlugin", "backhand"),
     WAILA("WAILA", null, "Waila"),
-    NOTENOUGHITEMS("NotEnoughItems", "codechicken.nei.asm.NEICorePlugin", "NotEnoughItems");
+    NOTENOUGHITEMS("NotEnoughItems", "codechicken.nei.asm.NEICorePlugin", "NotEnoughItems"),
+    WARPDRIVE("WarpDrive", "cr0s.warpdrive.core.FMLLoadingPlugin", "WarpDrive");
 
     /** The "name" in the @Mod annotation */
     public final String modName;

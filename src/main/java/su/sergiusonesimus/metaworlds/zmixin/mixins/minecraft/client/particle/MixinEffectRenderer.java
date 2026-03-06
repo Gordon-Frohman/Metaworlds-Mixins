@@ -1,6 +1,7 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.client.particle;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
@@ -86,18 +87,15 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
      * @reason Water and outline boxes render messes up otherwise
      */
     @Overwrite
-    public void renderParticles(Entity p_78874_1_, float p_78874_2_) {
+    public void renderParticles(Entity camera, float partialTicks) {
         float f1 = ActiveRenderInfo.rotationX;
         float f2 = ActiveRenderInfo.rotationZ;
         float f3 = ActiveRenderInfo.rotationYZ;
         float f4 = ActiveRenderInfo.rotationXY;
         float f5 = ActiveRenderInfo.rotationXZ;
-        EntityFX.interpPosX = p_78874_1_.lastTickPosX
-            + (p_78874_1_.posX - p_78874_1_.lastTickPosX) * (double) p_78874_2_;
-        EntityFX.interpPosY = p_78874_1_.lastTickPosY
-            + (p_78874_1_.posY - p_78874_1_.lastTickPosY) * (double) p_78874_2_;
-        EntityFX.interpPosZ = p_78874_1_.lastTickPosZ
-            + (p_78874_1_.posZ - p_78874_1_.lastTickPosZ) * (double) p_78874_2_;
+        EntityFX.interpPosX = camera.lastTickPosX + (camera.posX - camera.lastTickPosX) * (double) partialTicks;
+        EntityFX.interpPosY = camera.lastTickPosY + (camera.posY - camera.lastTickPosY) * (double) partialTicks;
+        EntityFX.interpPosZ = camera.lastTickPosZ + (camera.posZ - camera.lastTickPosZ) * (double) partialTicks;
         if (((IMixinWorld) this.worldObj).isSubWorld()) {
             Vec3 transformedViewDir = ((IMixinWorld) this.worldObj).rotateToLocal(f3, f5, f4);
             f3 = (float) transformedViewDir.xCoord;
@@ -106,7 +104,7 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
             float planarMagSq = f3 * f3 + f4 * f4;
             if (planarMagSq > 0.0f) {
                 float planarMag = (float) Math.sqrt(planarMagSq);
-                if (p_78874_1_.rotationPitch < 0.0f) planarMag = -planarMag;
+                if (camera.rotationPitch < 0.0f) planarMag = -planarMag;
                 f1 = f4 / planarMag;
                 f2 = -f3 / planarMag;
             }
@@ -148,10 +146,10 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
                 for (int j = 0; j < this.fxLayers[i].size(); ++j) {
                     final EntityFX entityfx = (EntityFX) this.fxLayers[i].get(j);
                     if (entityfx == null) continue;
-                    tessellator.setBrightness(entityfx.getBrightnessForRender(p_78874_2_));
+                    tessellator.setBrightness(entityfx.getBrightnessForRender(partialTicks));
 
                     try {
-                        entityfx.renderParticle(tessellator, p_78874_2_, f1, f5, f2, f3, f4);
+                        entityfx.renderParticle(tessellator, partialTicks, f1, f5, f2, f3, f4);
                     } catch (Throwable throwable) {
                         CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Rendering Particle");
                         CrashReportCategory crashreportcategory = crashreport.makeCategory("Particle being rendered");
@@ -187,10 +185,10 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
         }
 
         if (!((IMixinWorld) this.worldObj).isSubWorld()) {
-            for (EntityPlayerProxy curPlayer : ((IMixinEntity) p_78874_1_).getPlayerProxyMap()
-                .values()) {
+            Map<Integer, EntityPlayerProxy> proxyMap = ((IMixinEntity) camera).getPlayerProxyMap();
+            if (proxyMap != null) for (EntityPlayerProxy curPlayer : proxyMap.values()) {
                 EntityClientPlayerMPSubWorldProxy curPlayerProxy = (EntityClientPlayerMPSubWorldProxy) curPlayer;
-                curPlayerProxy.getMinecraft().effectRenderer.renderParticles(p_78874_1_, p_78874_2_);
+                curPlayerProxy.getMinecraft().effectRenderer.renderParticles(camera, partialTicks);
             }
         }
     }
