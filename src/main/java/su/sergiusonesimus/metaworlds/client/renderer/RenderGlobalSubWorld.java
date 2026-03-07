@@ -32,11 +32,11 @@ public class RenderGlobalSubWorld extends RenderGlobal {
 
     private RenderGlobal parentRenderGlobal;
 
-    public RenderGlobalSubWorld(Minecraft par1Minecraft, RenderGlobal origRenderGlobal) {
-        super(null);
+    public RenderGlobalSubWorld(Minecraft mc, RenderGlobal origRenderGlobal) {
+        super(mc);
 
-        this.mc = par1Minecraft;
-        this.renderEngine = par1Minecraft.getTextureManager();
+        this.mc = mc;
+        this.renderEngine = mc.getTextureManager();
 
         this.worldRenderersToUpdate = ((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersToUpdate();
         if (!MetaworldsMod.isAngelicaLoaded) {
@@ -67,7 +67,7 @@ public class RenderGlobalSubWorld extends RenderGlobal {
             ARBOcclusionQuery.glGenQueriesARB(this.glOcclusionQueryBase);
         }
 
-        this.theWorld = par1Minecraft.theWorld;
+        this.theWorld = mc.theWorld;
 
         this.parentRenderGlobal = origRenderGlobal;
     }

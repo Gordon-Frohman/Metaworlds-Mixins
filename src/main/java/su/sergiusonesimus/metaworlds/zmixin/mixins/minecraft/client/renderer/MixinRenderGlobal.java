@@ -69,6 +69,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
+import su.sergiusonesimus.metaworlds.client.MinecraftSubWorldProxy;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinDestroyBlockProgress;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
@@ -138,7 +139,7 @@ public class MixinRenderGlobal implements IMixinRenderGlobal {
             target = "Lnet/minecraft/client/renderer/RenderGlobal;mc:Lnet/minecraft/client/Minecraft;"),
         method = "<init>")
     private void init(Minecraft mc, CallbackInfo ci) {
-        if (mc == null) generateEmpty = true;
+        if (mc == null || mc instanceof MinecraftSubWorldProxy) generateEmpty = true;
     }
 
     @WrapOperation(
