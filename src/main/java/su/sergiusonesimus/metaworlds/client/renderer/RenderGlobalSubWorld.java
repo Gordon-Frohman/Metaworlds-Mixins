@@ -22,8 +22,10 @@ import net.minecraft.world.World;
 
 import org.lwjgl.opengl.ARBOcclusionQuery;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobalVanilla;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class RenderGlobalSubWorld extends RenderGlobal {
@@ -37,12 +39,14 @@ public class RenderGlobalSubWorld extends RenderGlobal {
         this.renderEngine = par1Minecraft.getTextureManager();
 
         this.worldRenderersToUpdate = ((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersToUpdate();
-        ((IMixinRenderGlobal) this)
-            .setSortedWorldRenderersList(((IMixinRenderGlobal) origRenderGlobal).getSortedWorldRenderersList());
-        ((IMixinRenderGlobal) this)
-            .setWorldRenderersMap(((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersMap());
-        ((IMixinRenderGlobal) this)
-            .setWorldRenderersList(((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersList());
+        if (!MetaworldsMod.isAngelicaLoaded) {
+            ((IMixinRenderGlobalVanilla) this).setSortedWorldRenderersList(
+                ((IMixinRenderGlobalVanilla) origRenderGlobal).getSortedWorldRenderersList());
+            ((IMixinRenderGlobalVanilla) this)
+                .setWorldRenderersMap(((IMixinRenderGlobalVanilla) origRenderGlobal).getWorldRenderersMap());
+            ((IMixinRenderGlobalVanilla) this)
+                .setWorldRenderersList(((IMixinRenderGlobalVanilla) origRenderGlobal).getWorldRenderersList());
+        }
 
         this.renderChunksWide = ((IMixinRenderGlobal) origRenderGlobal).getRenderChunksWide();
         this.renderChunksTall = ((IMixinRenderGlobal) origRenderGlobal).getRenderChunksTall();

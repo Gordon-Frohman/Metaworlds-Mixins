@@ -62,6 +62,7 @@ public class MetaworldsMod {
         serverSide = "su.sergiusonesimus.metaworlds.ServerProxy")
     public static CommonProxy proxy;
 
+    public static boolean isAngelicaLoaded = false;
     public static boolean isForgeMultipartLoaded = false;
     public static boolean areLittleTilesLoaded = false;
 
@@ -100,6 +101,7 @@ public class MetaworldsMod {
         SubWorldTypeManager.registerSubWorldType(SubWorldTypeManager.SUBWORLD_TYPE_BOAT);
 
         // check if various integrations are required
+        isAngelicaLoaded = Loader.isModLoaded("angelica");
         isForgeMultipartLoaded = Loader.isModLoaded("McMultipart");
         areLittleTilesLoaded = Loader.isModLoaded("littletiles");
     }
