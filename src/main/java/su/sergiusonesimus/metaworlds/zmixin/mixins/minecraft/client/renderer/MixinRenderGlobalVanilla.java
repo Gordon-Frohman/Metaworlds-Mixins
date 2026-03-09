@@ -547,7 +547,6 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
         ci.cancel();
     }
 
-    @SuppressWarnings("unused")
     public void markRenderersForNewPositionSingle(double par1d, double par2d, double par3d, int subWorldID) {
         World curWorld = ((IMixinWorld) this.theWorld).getSubWorld(subWorldID);
         Vec3 tranformedVec = ((IMixinWorld) curWorld).transformToLocal((double) par1d, (double) par2d, (double) par3d);
