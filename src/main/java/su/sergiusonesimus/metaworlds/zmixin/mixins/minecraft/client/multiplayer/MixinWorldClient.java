@@ -80,6 +80,7 @@ public class MixinWorldClient extends MixinWorld {
             proxyPlayer.getMinecraft().renderViewEntity = proxyPlayer;
 
             newSubWorld.addWorldAccess(proxyPlayer.getMinecraft().renderGlobal);
+            newSubWorld.loadedEntityList.add(proxyPlayer);
             MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(proxyPlayer, newSubWorld));
 
             if (!MetaworldsMod.isAngelicaLoaded) ((IMixinRenderGlobalVanilla) this.mc.renderGlobal)
