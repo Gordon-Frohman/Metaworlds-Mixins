@@ -47,7 +47,6 @@ public class MixinEntityRenderer {
 
     private Map<Integer, Frustrum> subworldFrustums = new HashMap<Integer, Frustrum>();
 
-    private int storedJ;
     private float storedPartialTicks;
     private double storedInterpolatedX, storedInterpolatedY, storedInterpolatedZ;
 
@@ -61,35 +60,21 @@ public class MixinEntityRenderer {
     public void clipRenderersForSubworlds(float partialTicks, long totalTime, CallbackInfo ci, @Local(name = "j") int j,
         @Local(name = "entitylivingbase") EntityLivingBase entitylivingbase, @Local(name = "d0") double interpolatedX,
         @Local(name = "d1") double interpolatedY, @Local(name = "d2") double interpolatedZ) {
-        storedJ = j;
         storedInterpolatedX = interpolatedX;
         storedInterpolatedY = interpolatedY;
         storedInterpolatedZ = interpolatedZ;
         storedPartialTicks = partialTicks;
         if (entitylivingbase instanceof EntityPlayer player) {
-            for (World subworld : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
+            for (World world : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
                 EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) player)
-                    .getProxyPlayer(subworld);
-                Minecraft mc = proxy.mc;
+                    .getProxyPlayer(world);
 
                 Frustrum frustrum = new Frustrum();
-                Vec3 localPos = ((IMixinWorld) subworld).transformToLocal(interpolatedX, interpolatedY, interpolatedZ);
+                Vec3 localPos = ((IMixinWorld) world).transformToLocal(interpolatedX, interpolatedY, interpolatedZ);
                 frustrum.setPosition(localPos.xCoord, localPos.yCoord, localPos.zCoord);
-                subworldFrustums.put(((IMixinWorld) subworld).getSubWorldID(), frustrum);
+                subworldFrustums.put(((IMixinWorld) world).getSubWorldID(), frustrum);
 
-                mc.renderGlobal.clipRenderersByFrustum(frustrum, partialTicks);
-
-                if (j == 0) {
-                    mc.mcProfiler.endStartSection("updatechunks");
-
-                    while (!mc.renderGlobal.updateRenderers(proxy, false) && totalTime != 0L) {
-                        long k = totalTime - System.nanoTime();
-
-                        if (k < 0L || k > 1000000000L) {
-                            break;
-                        }
-                    }
-                }
+                proxy.mc.renderGlobal.clipRenderersByFrustum(frustrum, partialTicks);
             }
         }
     }
@@ -109,7 +94,6 @@ public class MixinEntityRenderer {
                 SubWorld subworld = (SubWorld) world;
 
                 GL11.glPushMatrix();
-                this.setupCameraTransform(storedPartialTicks, storedJ);
 
                 GL11.glTranslated(subworld.getTranslationX(), subworld.getTranslationY(), subworld.getTranslationZ());
 
@@ -135,7 +119,6 @@ public class MixinEntityRenderer {
                 GL11.glPopMatrix();
             }
 
-            this.setupCameraTransform(storedPartialTicks, storedJ);
             ActiveRenderInfo.updateRenderInfo((EntityPlayer) entitylivingbase, mc.gameSettings.thirdPersonView == 2);
             Camera.INSTANCE.update(entitylivingbase, storedPartialTicks);
             RenderingState.INSTANCE.setCameraPosition(

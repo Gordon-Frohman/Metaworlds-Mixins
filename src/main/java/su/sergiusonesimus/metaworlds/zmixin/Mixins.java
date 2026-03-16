@@ -93,12 +93,25 @@ public enum Mixins {
         .setPhase(Phase.EARLY)
         .addMixinClasses("minecraft.client.renderer.MixinRenderGlobalVanilla")),
 
-    ANGELICA_COMPAT(new Builder(
+    ANGELICA_COMPAT_EARLY(new Builder(
         "Reenable vanilla rendering disabled by Angelica for subworlds. Not the best fix, but a fix nevertheless")
             .addTargetedMod(TargetedMod.ANGELICA)
             .setSide(Side.CLIENT)
             .setPhase(Phase.EARLY)
-            .addMixinClasses(addPrefix("angelica.", "MixinEntityRenderer", "MixinEffectRenderer", "MixinClientProxy"))),
+            .addMixinClasses(
+                addPrefix(
+                    "angelica.",
+                    "MixinClientProxy",
+                    "MixinEffectRenderer",
+                    "MixinEntityRenderer",
+                    "MixinRenderGlobal"))),
+
+    ANGELICA_COMPAT_LATE(new Builder(
+        "Reenable vanilla rendering disabled by Angelica for subworlds. Not the best fix, but a fix nevertheless")
+            .addTargetedMod(TargetedMod.ANGELICA)
+            .setSide(Side.CLIENT)
+            .setPhase(Phase.LATE)
+            .addMixinClasses("angelica.MixinViewport")),
 
     HARDCORE_ENDER_EXPANSION_COMPAT(new Builder("Disable generation of additional data for player proxies")
         .addTargetedMod(TargetedMod.HARDCORE_ENDER_EXPANSION)
