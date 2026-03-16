@@ -118,6 +118,7 @@ public class DisplacementHelper {
             if (entity instanceof EntityPlayer player) {
                 AxisAlignedBB playerBB = player.boundingBox;
                 AxisAlignedBB blockBB = block.getCollisionBoundingBoxFromPool(sourceWorld, x, y, z);
+                if (playerBB == null || blockBB == null) continue;
                 if (playerBB.minX <= blockBB.maxX && playerBB.maxX >= blockBB.minX
                     && playerBB.minZ <= blockBB.maxZ
                     && playerBB.maxZ >= blockBB.minZ
