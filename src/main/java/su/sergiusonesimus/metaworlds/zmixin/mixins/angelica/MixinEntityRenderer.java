@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.culling.Frustrum;
-import net.minecraft.client.renderer.culling.ICamera;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Vec3;
@@ -128,27 +127,6 @@ public class MixinEntityRenderer {
         }
 
         return result;
-    }
-
-    @WrapOperation(
-        method = "renderWorld",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/RenderGlobal;renderEntities(Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/client/renderer/culling/ICamera;F)V"))
-    public void renderEntitiesForSubworlds(RenderGlobal instance, EntityLivingBase entitylivingbase, ICamera frustum,
-        float partialTicks, Operation<Void> original) {
-        original.call(instance, entitylivingbase, frustum, partialTicks);
-        if (entitylivingbase instanceof EntityPlayer player) {
-            for (World subworld : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
-                EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) player)
-                    .getProxyPlayer(subworld);
-                original.call(
-                    proxy.mc.renderGlobal,
-                    proxy,
-                    subworldFrustums.get(((IMixinWorld) subworld).getSubWorldID()),
-                    partialTicks);
-            }
-        }
     }
 
 }
