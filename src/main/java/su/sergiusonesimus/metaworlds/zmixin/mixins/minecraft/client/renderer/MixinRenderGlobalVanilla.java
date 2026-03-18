@@ -407,21 +407,22 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
 
     @Inject(
         method = "renderEntities",
-        at = { @At(value = "INVOKE", target = "Lnet/minecraft/profiler/Profiler;endSection()V", shift = Shift.AFTER) },
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/Profiler;endSection()V", shift = Shift.AFTER),
         locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void injectRenderEntities(ICamera p_147589_2_, float p_147589_3_, @Local(name = "pass") int pass,
-        @Local(name = "d0") double d0, @Local(name = "d1") double d1, @Local(name = "d2") double d2,
-        @Local(name = "d3") double d3, @Local(name = "d4") double d4, @Local(name = "d5") double d5) {
+    private void injectRenderEntities(EntityLivingBase player, ICamera camera, float partialTicks, CallbackInfo ci,
+        @Local(name = "pass") int pass, @Local(name = "d0") double globalX, @Local(name = "d1") double globalY,
+        @Local(name = "d2") double globalZ, @Local(name = "d3") double interpolatedX,
+        @Local(name = "d4") double interpolatedY, @Local(name = "d5") double interpolatedZ) {
         for (World curWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
             WorldClient curClientWorld = (WorldClient) curWorld;
-            Vec3 transformedPos = ((IMixinWorld) curWorld).transformToLocal(d0, d1, d2);
+            Vec3 transformedPos = ((IMixinWorld) curWorld).transformToLocal(globalX, globalY, globalZ);
             this.theWorld.theProfiler.startSection("prepare");
             TileEntityRendererDispatcher.instance.cacheActiveRenderInfo(
                 curClientWorld,
                 this.mc.getTextureManager(),
                 this.mc.fontRenderer,
                 this.mc.renderViewEntity,
-                p_147589_3_);
+                partialTicks);
             RenderManager.instance.cacheActiveRenderInfo(
                 curClientWorld,
                 this.mc.getTextureManager(),
@@ -429,18 +430,18 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
                 this.mc.renderViewEntity,
                 this.mc.pointedEntity,
                 this.mc.gameSettings,
-                p_147589_3_);
+                partialTicks);
 
             EntityLivingBase entitylivingbase1 = this.mc.renderViewEntity;
-            d3 = entitylivingbase1.lastTickPosX
-                + (entitylivingbase1.posX - entitylivingbase1.lastTickPosX) * (double) p_147589_3_;
-            d4 = entitylivingbase1.lastTickPosY
-                + (entitylivingbase1.posY - entitylivingbase1.lastTickPosY) * (double) p_147589_3_;
-            d5 = entitylivingbase1.lastTickPosZ
-                + (entitylivingbase1.posZ - entitylivingbase1.lastTickPosZ) * (double) p_147589_3_;
-            TileEntityRendererDispatcher.staticPlayerX = d3;
-            TileEntityRendererDispatcher.staticPlayerY = d4;
-            TileEntityRendererDispatcher.staticPlayerZ = d5;
+            interpolatedX = entitylivingbase1.lastTickPosX
+                + (entitylivingbase1.posX - entitylivingbase1.lastTickPosX) * (double) partialTicks;
+            interpolatedY = entitylivingbase1.lastTickPosY
+                + (entitylivingbase1.posY - entitylivingbase1.lastTickPosY) * (double) partialTicks;
+            interpolatedZ = entitylivingbase1.lastTickPosZ
+                + (entitylivingbase1.posZ - entitylivingbase1.lastTickPosZ) * (double) partialTicks;
+            TileEntityRendererDispatcher.staticPlayerX = interpolatedX;
+            TileEntityRendererDispatcher.staticPlayerY = interpolatedY;
+            TileEntityRendererDispatcher.staticPlayerZ = interpolatedZ;
             this.theWorld.theProfiler.endStartSection("staticentities");
 
             if (this.displayListEntitiesDirty) {
@@ -452,13 +453,13 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
 
             GL11.glMatrixMode(GL11.GL_MODELVIEW);
             GL11.glPushMatrix();
-            GL11.glTranslated(-d3, -d4, -d5);
+            GL11.glTranslated(-interpolatedX, -interpolatedY, -interpolatedZ);
             GL11.glCallList(this.displayListEntities);
             GL11.glPopMatrix();
-            RenderManager.renderPosX = d3;
-            RenderManager.renderPosY = d4;
-            RenderManager.renderPosZ = d5;
-            this.mc.entityRenderer.enableLightmap((double) p_147589_3_);
+            RenderManager.renderPosX = interpolatedX;
+            RenderManager.renderPosY = interpolatedY;
+            RenderManager.renderPosZ = interpolatedZ;
+            this.mc.entityRenderer.enableLightmap((double) partialTicks);
             this.theWorld.theProfiler.endStartSection("global");
             List<Entity> list = curWorld.getLoadedEntityList();
             if (pass == 0) // no indentation for smaller patch size
@@ -472,7 +473,7 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
                 entity = (Entity) curWorld.weatherEffects.get(i);
                 if (!entity.shouldRenderInPass(pass)) continue;
                 if (entity.isInRangeToRender3d(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord)) {
-                    RenderManager.instance.renderEntitySimple(entity, p_147589_3_);
+                    RenderManager.instance.renderEntitySimple(entity, partialTicks);
                 }
             }
 
@@ -483,7 +484,7 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
                 if (!entity.shouldRenderInPass(pass)) continue;
                 boolean flag = entity
                     .isInRangeToRender3d(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord)
-                    && (entity.ignoreFrustumCheck || p_147589_2_.isBoundingBoxInFrustum(
+                    && (entity.ignoreFrustumCheck || camera.isBoundingBoxInFrustum(
                         ((IMixinAxisAlignedBB) entity.boundingBox).getTransformedToGlobalBoundingBox(entity.worldObj))
                         || entity.riddenByEntity == this.mc.thePlayer);
 
@@ -492,7 +493,7 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
 
                     if (entityliving.getLeashed() && entityliving.getLeashedToEntity() != null) {
                         Entity entity1 = entityliving.getLeashedToEntity();
-                        flag = p_147589_2_.isBoundingBoxInFrustum(
+                        flag = camera.isBoundingBoxInFrustum(
                             ((IMixinAxisAlignedBB) entity1.boundingBox)
                                 .getTransformedToGlobalBoundingBox(entity.worldObj));
                     }
@@ -503,7 +504,7 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
                         || this.mc.renderViewEntity.isPlayerSleeping())
                     && curWorld
                         .blockExists(MathHelper.floor_double(entity.posX), 0, MathHelper.floor_double(entity.posZ))) {
-                    RenderManager.instance.renderEntitySimple(entity, p_147589_3_);
+                    RenderManager.instance.renderEntitySimple(entity, partialTicks);
                 }
             }
 
@@ -512,15 +513,15 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
 
             for (i = 0; i < curClientWorld.mc.renderGlobal.tileEntities.size(); ++i) {
                 TileEntity tile = (TileEntity) curClientWorld.mc.renderGlobal.tileEntities.get(i);
-                if (tile.shouldRenderInPass(pass) && p_147589_2_.isBoundingBoxInFrustum(
+                if (tile.shouldRenderInPass(pass) && camera.isBoundingBoxInFrustum(
                     tile.getWorldObj() == null ? tile.getRenderBoundingBox()
                         : ((IMixinAxisAlignedBB) tile.getRenderBoundingBox())
                             .getTransformedToGlobalBoundingBox(tile.getWorldObj()))) {
-                    TileEntityRendererDispatcher.instance.renderTileEntity(tile, p_147589_3_);
+                    TileEntityRendererDispatcher.instance.renderTileEntity(tile, partialTicks);
                 }
             }
 
-            this.mc.entityRenderer.disableLightmap((double) p_147589_3_);
+            this.mc.entityRenderer.disableLightmap((double) partialTicks);
             this.theWorld.theProfiler.endSection();
         }
     }
@@ -650,7 +651,7 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
     public int sortAndRender(EntityLivingBase par1EntityLivingBase, int par2, double par3) {
         this.theWorld.theProfiler.startSection("sortchunks");
 
-        for (int j = 0; j < 10; ++j) {
+        if (!this.worldRenderersList.isEmpty()) for (int j = 0; j < 10; ++j) {
             this.worldRenderersCheckIndex = (this.worldRenderersCheckIndex + 1) % this.worldRenderersList.size();
             WorldRenderer worldrenderer = this.worldRenderersList.get(this.worldRenderersCheckIndex);
 
