@@ -111,7 +111,7 @@ public enum Mixins {
             .addTargetedMod(TargetedMod.ANGELICA)
             .setSide(Side.CLIENT)
             .setPhase(Phase.LATE)
-            .addMixinClasses("angelica.MixinViewport")),
+            .addMixinClasses(addPrefix("angelica.", "MixinThreadedChunkTaskProvider", "MixinViewport"))),
 
     HARDCORE_ENDER_EXPANSION_COMPAT(new Builder("Disable generation of additional data for player proxies")
         .addTargetedMod(TargetedMod.HARDCORE_ENDER_EXPANSION)
