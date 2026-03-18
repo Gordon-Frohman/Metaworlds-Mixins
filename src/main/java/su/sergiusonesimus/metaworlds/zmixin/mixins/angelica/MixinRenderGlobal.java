@@ -78,4 +78,62 @@ public class MixinRenderGlobal {
         return ((IMixinViewport) (Object) original.call(instance)).setWorld(theWorld);
     }
 
+    /**
+     * 
+     * @author Sergius Onesimus
+     * @reason Angelica's optimization broke OBBs render. Using modified vanilla renderer for it
+     */
+    @WrapOperation(
+        method = "drawOutlinedBoundingBox",
+        remap = true,
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/gtnewhorizons/angelica/render/SelectionBoxRenderer;draw(Lnet/minecraft/util/AxisAlignedBB;I)V",
+            remap = false))
+    private static void drawOrientedBoundingBox(AxisAlignedBB aabb, int color,
+        Operation<SelectionBoxRenderer> original) {
+        if (aabb instanceof OrientedBB obb) {
+            Tessellator tessellator = Tessellator.instance;
+            tessellator.startDrawing(3);
+
+            if (color != -1) {
+                tessellator.setColorOpaque_I(color);
+            }
+
+            tessellator.addVertex(obb.getX(0), obb.getY(0), obb.getZ(0));
+            tessellator.addVertex(obb.getX(1), obb.getY(1), obb.getZ(1));
+            tessellator.addVertex(obb.getX(3), obb.getY(3), obb.getZ(3));
+            tessellator.addVertex(obb.getX(2), obb.getY(2), obb.getZ(2));
+            tessellator.addVertex(obb.getX(0), obb.getY(0), obb.getZ(0));
+            tessellator.draw();
+            tessellator.startDrawing(3);
+
+            if (color != -1) {
+                tessellator.setColorOpaque_I(color);
+            }
+
+            tessellator.addVertex(obb.getX(4), obb.getY(4), obb.getZ(4));
+            tessellator.addVertex(obb.getX(5), obb.getY(5), obb.getZ(5));
+            tessellator.addVertex(obb.getX(7), obb.getY(7), obb.getZ(7));
+            tessellator.addVertex(obb.getX(6), obb.getY(6), obb.getZ(6));
+            tessellator.addVertex(obb.getX(4), obb.getY(4), obb.getZ(4));
+            tessellator.draw();
+            tessellator.startDrawing(1);
+
+            if (color != -1) {
+                tessellator.setColorOpaque_I(color);
+            }
+
+            tessellator.addVertex(obb.getX(0), obb.getY(0), obb.getZ(0));
+            tessellator.addVertex(obb.getX(4), obb.getY(4), obb.getZ(4));
+            tessellator.addVertex(obb.getX(1), obb.getY(1), obb.getZ(1));
+            tessellator.addVertex(obb.getX(5), obb.getY(5), obb.getZ(5));
+            tessellator.addVertex(obb.getX(3), obb.getY(3), obb.getZ(3));
+            tessellator.addVertex(obb.getX(7), obb.getY(7), obb.getZ(7));
+            tessellator.addVertex(obb.getX(2), obb.getY(2), obb.getZ(2));
+            tessellator.addVertex(obb.getX(6), obb.getY(6), obb.getZ(6));
+            tessellator.draw();
+        } else original.call(aabb, color);
+    }
+
 }

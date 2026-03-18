@@ -36,10 +36,10 @@
 dependencies {
     shadowImplementation group: 'org.joml', name: 'joml', version: '1.10.8'
 	shadowImplementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
-    implementation("com.github.GTNewHorizons:Angelica:2.1.0:dev")
-    implementation("com.github.GTNewHorizons:NotEnoughItems:2.7.49-GTNH:dev") { transitive = false }
+    implementation("com.github.GTNewHorizons:Angelica:2.1.4:dev")
+    implementation("com.github.GTNewHorizons:NotEnoughItems:2.7.91-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:ForgeMultipart:1.7.2:dev") { transitive = false }
-    implementation("com.github.GTNewHorizons:CodeChickenCore:1.4.3:dev") // For NEI and ForgeMultipart runtime
+    implementation("com.github.GTNewHorizons:CodeChickenCore:1.4.7:dev") // For NEI and ForgeMultipart runtime
     //compileOnly("ganymedes01.etfuturum:Et-Futurum-Requiem:2.6.2.6-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Hardcore-Ender-Expansion:1.13.0-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:LittleTiles:1.6.18:dev")

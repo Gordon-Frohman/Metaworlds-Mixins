@@ -60,17 +60,14 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.MinecraftSubWorldProxy;
-import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinDestroyBlockProgress;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
@@ -452,59 +449,6 @@ public class MixinRenderGlobal implements IMixinRenderGlobal {
     private AxisAlignedBB wrapGetOffsetBoundingBox(AxisAlignedBB instance, double x, double y, double z,
         Operation<AxisAlignedBB> original) {
         return instance.offset(x, y, z);
-    }
-
-    // drawOutlinedBoundingBox
-
-    private static AxisAlignedBB storedAABB;
-    private static OrientedBB storedOBB;
-
-    @Inject(method = "drawOutlinedBoundingBox", at = @At(value = "HEAD"))
-    private static void storeVariables(AxisAlignedBB aabb, int color, CallbackInfo ci) {
-        storedAABB = aabb;
-        storedOBB = ((IMixinAxisAlignedBB) aabb).getOrientedBB();
-    }
-
-    @ModifyArgs(
-        method = "drawOutlinedBoundingBox",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;addVertex(DDD)V"))
-    private static void modifyAddVertex(Args args) {
-        double x = args.get(0);
-        double y = args.get(1);
-        double z = args.get(2);
-        int vertexIndex;
-        if (y == storedAABB.minY) {
-            if (z == storedAABB.minZ) {
-                if (x == storedAABB.minX) {
-                    vertexIndex = 0;
-                } else {
-                    vertexIndex = 1;
-                }
-            } else {
-                if (x == storedAABB.minX) {
-                    vertexIndex = 2;
-                } else {
-                    vertexIndex = 3;
-                }
-            }
-        } else {
-            if (z == storedAABB.minZ) {
-                if (x == storedAABB.minX) {
-                    vertexIndex = 4;
-                } else {
-                    vertexIndex = 5;
-                }
-            } else {
-                if (x == storedAABB.minX) {
-                    vertexIndex = 6;
-                } else {
-                    vertexIndex = 7;
-                }
-            }
-        }
-        args.set(0, storedOBB.getX(vertexIndex));
-        args.set(1, storedOBB.getY(vertexIndex));
-        args.set(2, storedOBB.getZ(vertexIndex));
     }
 
     /**
