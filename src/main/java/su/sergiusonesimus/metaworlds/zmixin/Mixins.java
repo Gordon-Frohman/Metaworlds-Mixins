@@ -93,8 +93,8 @@ public enum Mixins {
         .setPhase(Phase.EARLY)
         .addMixinClasses("minecraft.client.renderer.MixinRenderGlobalVanilla")),
 
-    ANGELICA_COMPAT_EARLY(new Builder(
-        "Reenable vanilla rendering disabled by Angelica for subworlds. Not the best fix, but a fix nevertheless")
+    ANGELICA_COMPAT_EARLY(
+        new Builder("Using a modified version of the original Metaworlds rendering algorythm supporting Celeritas")
             .addTargetedMod(TargetedMod.ANGELICA)
             .setSide(Side.CLIENT)
             .setPhase(Phase.EARLY)
@@ -106,12 +106,11 @@ public enum Mixins {
                     "MixinEntityRenderer",
                     "MixinRenderGlobal"))),
 
-    ANGELICA_COMPAT_LATE(new Builder(
-        "Reenable vanilla rendering disabled by Angelica for subworlds. Not the best fix, but a fix nevertheless")
-            .addTargetedMod(TargetedMod.ANGELICA)
-            .setSide(Side.CLIENT)
-            .setPhase(Phase.LATE)
-            .addMixinClasses(addPrefix("angelica.", "MixinThreadedChunkTaskProvider", "MixinViewport"))),
+    ANGELICA_COMPAT_LATE(new Builder("Modifying Angelica and Embeddium classes to support Metaworlds rendering")
+        .addTargetedMod(TargetedMod.ANGELICA)
+        .setSide(Side.CLIENT)
+        .setPhase(Phase.LATE)
+        .addMixinClasses(addPrefix("angelica.", "MixinThreadedChunkTaskProvider", "MixinViewport"))),
 
     HARDCORE_ENDER_EXPANSION_COMPAT(new Builder("Disable generation of additional data for player proxies")
         .addTargetedMod(TargetedMod.HARDCORE_ENDER_EXPANSION)
