@@ -4,17 +4,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 
+import com.gtnewhorizons.angelica.proxy.ClientProxy;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 import su.sergiusonesimus.metaworlds.zmixin.MixinPriorities;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinMovingObjectPosition;
 
-@Pseudo
-@Mixin(targets = "com.gtnewhorizons.angelica.proxy.ClientProxy", remap = false, priority = MixinPriorities.ANGELICA)
+@Mixin(value = ClientProxy.class, priority = MixinPriorities.ANGELICA)
 public class MixinClientProxy {
 
     @WrapOperation(
