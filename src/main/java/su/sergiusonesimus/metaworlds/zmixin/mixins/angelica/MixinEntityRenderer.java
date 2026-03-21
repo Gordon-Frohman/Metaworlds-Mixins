@@ -56,7 +56,7 @@ public class MixinEntityRenderer {
             target = "Lnet/minecraft/client/renderer/RenderGlobal;clipRenderersByFrustum(Lnet/minecraft/client/renderer/culling/ICamera;F)V",
             shift = Shift.AFTER),
         locals = LocalCapture.CAPTURE_FAILHARD)
-    public void clipRenderersForSubworlds(float partialTicks, long totalTime, CallbackInfo ci, @Local(name = "j") int j,
+    public void clipRenderersForSubworlds(float partialTicks, long totalTime, CallbackInfo ci,
         @Local(name = "entitylivingbase") EntityLivingBase entitylivingbase, @Local(name = "d0") double interpolatedX,
         @Local(name = "d1") double interpolatedY, @Local(name = "d2") double interpolatedZ) {
         storedInterpolatedX = interpolatedX;
