@@ -1,10 +1,15 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.angelica;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.coderbot.iris.pipeline.ShadowRenderer;
 import net.coderbot.iris.shadows.frustum.FrustumHolder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Vec3;
@@ -117,6 +122,27 @@ public class MixinShadowRenderer {
                 original.call(proxy.mc.renderGlobal, player, pass, partialTicks);
 
                 MODELVIEW.set(storedModelView);
+            }
+        }
+
+        return result;
+    }
+
+    @WrapOperation(
+        method = "renderEntities",
+        remap = false,
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/client/multiplayer/WorldClient;loadedEntityList:Ljava/util/List;",
+            remap = true))
+    public List<Entity> getAllEntities(WorldClient instance, Operation<List<Entity>> original) {
+        List<Entity> result = new ArrayList<Entity>();
+
+        result.addAll(original.call(instance));
+        for (World currentWorld : ((IMixinWorld) instance).getSubWorlds()) {
+            for (Entity entity : original.call(currentWorld)) {
+                if (entity instanceof EntityPlayer) continue;
+                result.add(entity);
             }
         }
 
