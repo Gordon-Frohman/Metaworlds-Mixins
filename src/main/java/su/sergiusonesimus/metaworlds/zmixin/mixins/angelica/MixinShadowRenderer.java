@@ -1,14 +1,10 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.angelica;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.coderbot.iris.pipeline.ShadowRenderer;
 import net.coderbot.iris.shadows.frustum.FrustumHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.culling.Frustrum;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.Vec3;
@@ -46,8 +42,6 @@ public class MixinShadowRenderer {
     @Shadow(remap = false)
     public static Matrix4f MODELVIEW;
 
-    private Map<Integer, Frustrum> subworldFrustums = new HashMap<Integer, Frustrum>();
-
     private Camera storedPlayerCamera;
 
     @Inject(
@@ -68,13 +62,16 @@ public class MixinShadowRenderer {
             EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) player)
                 .getProxyPlayer(world);
 
-            Frustrum localFrustrum = new Frustrum();
             Vec3 localPos = ((IMixinWorld) world).transformToLocal(cameraPos.x, cameraPos.y, cameraPos.z);
-            localFrustrum.setPosition(localPos.xCoord, localPos.yCoord, localPos.zCoord);
-            subworldFrustums.put(((IMixinWorld) world).getSubWorldID(), localFrustrum);
+            terrainFrustumHolder.getFrustum()
+                .setPosition(localPos.xCoord, localPos.yCoord, localPos.zCoord);
 
-            proxy.mc.renderGlobal.clipRenderersByFrustum(localFrustrum, playerCamera.getPartialTicks());
+            proxy.mc.renderGlobal
+                .clipRenderersByFrustum(terrainFrustumHolder.getFrustum(), playerCamera.getPartialTicks());
         }
+
+        terrainFrustumHolder.getFrustum()
+            .setPosition(cameraPos.x, cameraPos.y, cameraPos.z);
     }
 
     @WrapOperation(
