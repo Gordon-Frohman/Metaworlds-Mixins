@@ -9,9 +9,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.RenderGlobal;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
@@ -26,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import com.gtnewhorizons.angelica.compat.mojang.Camera;
+import com.gtnewhorizons.angelica.glsm.GLStateManager;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -33,6 +36,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.tileentity.IMixinTileEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 @Mixin(ShadowRenderer.class)
@@ -147,6 +151,57 @@ public class MixinShadowRenderer {
         }
 
         return result;
+    }
+
+    // renderTileEntity
+
+    @WrapOperation(
+        method = "renderTileEntity",
+        remap = false,
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;getDistanceFrom(DDD)D"))
+    private double redirectGetDistanceFromGlobal(TileEntity instance, double x, double y, double z,
+        Operation<Double> original) {
+        return ((IMixinTileEntity) instance).getDistanceFromGlobal(x, y, z);
+    }
+
+    @Inject(
+        method = "renderTileEntity",
+        remap = false,
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/gtnewhorizons/angelica/glsm/GLStateManager;glColor4f(FFFF)V",
+            remap = false,
+            shift = Shift.AFTER))
+    private void injectRenderTileEntity1(TileEntity tile, double cameraX, double cameraY, double cameraZ,
+        float partialTicks, CallbackInfo ci) {
+        GLStateManager.glPushMatrix();
+        if (tile.hasWorldObj() && ((IMixinWorld) tile.getWorldObj()).isSubWorld()) {
+            GLStateManager.glTranslated(
+                -TileEntityRendererDispatcher.staticPlayerX,
+                -TileEntityRendererDispatcher.staticPlayerY,
+                -TileEntityRendererDispatcher.staticPlayerZ);
+
+            SubWorld parentSubWorld = (SubWorld) tile.getWorldObj();
+            GLStateManager.glMultMatrix(parentSubWorld.getTransformToGlobalMatrixDirectBuffer());
+
+            GLStateManager.glTranslated(
+                TileEntityRendererDispatcher.staticPlayerX,
+                TileEntityRendererDispatcher.staticPlayerY,
+                TileEntityRendererDispatcher.staticPlayerZ);
+        }
+    }
+
+    @Inject(
+        method = "renderTileEntity",
+        remap = false,
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher;renderTileEntityAt(Lnet/minecraft/tileentity/TileEntity;DDDF)V",
+            remap = true,
+            shift = Shift.AFTER))
+    private void injectRenderTileEntity2(TileEntity tile, double cameraX, double cameraY, double cameraZ,
+        float partialTicks, CallbackInfo ci) {
+        GLStateManager.glPopMatrix();
     }
 
 }
