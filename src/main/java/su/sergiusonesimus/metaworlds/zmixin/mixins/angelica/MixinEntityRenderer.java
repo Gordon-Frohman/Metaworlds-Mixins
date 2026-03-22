@@ -103,6 +103,9 @@ public class MixinEntityRenderer {
                 GL11.glRotated(subworld.getRotationPitch() % 360D, 0.0D, 0.0D, 1.0D);
                 GL11.glRotated(subworld.getRotationRoll() % 360D, 1.0D, 0.0D, 0.0D);
 
+                double scale = subworld.getScaling();
+                GL11.glScaled(scale, scale, scale);
+
                 GL11.glTranslated(-subworld.getCenterX(), -subworld.getCenterY(), -subworld.getCenterZ());
                 GL11.glTranslated(storedInterpolatedX, storedInterpolatedY, storedInterpolatedZ);
 

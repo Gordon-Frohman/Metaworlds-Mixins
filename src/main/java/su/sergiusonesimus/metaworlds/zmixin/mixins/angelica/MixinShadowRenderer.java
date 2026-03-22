@@ -116,6 +116,7 @@ public class MixinShadowRenderer {
                 MODELVIEW.rotate((float) (subworld.getRotationYaw() % 360D / 180D * Math.PI), 0.0F, 1.0F, 0.0F);
                 MODELVIEW.rotate((float) (subworld.getRotationPitch() % 360D / 180D * Math.PI), 0.0F, 0.0F, 1.0F);
                 MODELVIEW.rotate((float) (subworld.getRotationRoll() % 360D / 180D * Math.PI), 1.0F, 0.0F, 0.0F);
+                MODELVIEW.scale((float) subworld.getScaling());
 
                 MODELVIEW.translate(
                     (float) -subworld.getCenterX(),
