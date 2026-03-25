@@ -46,9 +46,6 @@ public class MixinShadowRenderer {
     private FrustumHolder terrainFrustumHolder;
 
     @Shadow(remap = false)
-    private FrustumHolder entityFrustumHolder;
-
-    @Shadow(remap = false)
     public static Matrix4f MODELVIEW;
 
     private Camera storedPlayerCamera;
