@@ -33,6 +33,7 @@ import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
+import su.sergiusonesimus.metaworlds.integrations.AngelicaIntegration;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
@@ -91,6 +92,7 @@ public class MixinEntityRenderer {
         double partialTicks, Operation<Integer> original, @Share("interpolatedX") LocalDoubleRef interpolatedX,
         @Share("interpolatedY") LocalDoubleRef interpolatedY, @Share("interpolatedZ") LocalDoubleRef interpolatedZ,
         @Share("partialTicks") LocalFloatRef sharedPartialTicks) {
+        AngelicaIntegration.currentWorld = mc.theWorld;
         int result = original.call(instance, entitylivingbase, pass, partialTicks);
         if (entitylivingbase instanceof EntityPlayer player) {
             for (World world : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
@@ -122,6 +124,7 @@ public class MixinEntityRenderer {
                     Camera.INSTANCE.getEntityPos().y,
                     Camera.INSTANCE.getEntityPos().z);
 
+                AngelicaIntegration.currentWorld = world;
                 original.call(proxy.mc.renderGlobal, player, pass, partialTicks);
 
                 GL11.glPopMatrix();

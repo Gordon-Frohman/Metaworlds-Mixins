@@ -41,7 +41,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
+import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
+import su.sergiusonesimus.metaworlds.integrations.AngelicaIntegration;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.MixinPriorities;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.angelica.IMixinViewport;
@@ -346,6 +348,14 @@ public class MixinRenderGlobal {
             tessellator.addVertex(obb.getX(6), obb.getY(6), obb.getZ(6));
             tessellator.draw();
         } else original.call(aabb, color);
+    }
+
+    @WrapOperation(
+        method = "sortAndRender",
+        remap = true,
+        at = @At(value = "FIELD", target = "Lnet/coderbot/iris/Iris;enabled:Z", remap = false))
+    public boolean disableIrisForSubworld(Operation<Boolean> original) {
+        return original.call() && !(AngelicaIntegration.currentWorld instanceof SubWorld);
     }
 
 }
