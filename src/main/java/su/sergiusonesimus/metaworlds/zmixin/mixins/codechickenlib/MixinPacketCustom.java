@@ -19,14 +19,14 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import codechicken.lib.packet.PacketCustom;
 import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 
 @Mixin(PacketCustom.class)
 public class MixinPacketCustom {
-
-    private static PlayerManager storedPlayerManager;
 
     @Inject(
         method = "sendToChunk(Lnet/minecraft/network/Packet;Lnet/minecraft/world/World;II)V",
@@ -37,9 +37,10 @@ public class MixinPacketCustom {
             remap = true,
             shift = Shift.BEFORE),
         locals = LocalCapture.CAPTURE_FAILHARD)
-    private static void storePlayerManager(Packet packet, World world, int chunkX, int chunkZ, CallbackInfo ci,
-        @Local(name = "playerManager") PlayerManager playerManager) {
-        storedPlayerManager = playerManager;
+    private static void sharePlayerManager(Packet packet, World world, int chunkX, int chunkZ, CallbackInfo ci,
+        @Local(name = "playerManager") PlayerManager playerManager,
+        @Share("playerManager") LocalRef<PlayerManager> sharedPlayerManager) {
+        sharedPlayerManager.set(playerManager);
     }
 
     @SuppressWarnings("unchecked")
@@ -51,8 +52,8 @@ public class MixinPacketCustom {
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;playerEntityList:Ljava/util/List;",
             remap = true))
     private static List<EntityPlayerMP> getPlayersList(ServerConfigurationManager instance,
-        Operation<List<EntityPlayerMP>> original) {
-        return storedPlayerManager.players;
+        Operation<List<EntityPlayerMP>> original, @Share("playerManager") LocalRef<PlayerManager> playerManager) {
+        return playerManager.get().players;
     }
 
     @WrapOperation(

@@ -65,6 +65,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.MinecraftSubWorldProxy;
@@ -412,12 +414,10 @@ public class MixinRenderGlobal implements IMixinRenderGlobal {
 
     // drawSelectionBox
 
-    private MovingObjectPosition storedMovingObjectPosition;
-
     @Inject(method = "drawSelectionBox", at = @At(value = "HEAD"))
-    private void storeMovingObjectPosition(EntityPlayer p_72731_1_, MovingObjectPosition p_72731_2_, int p_72731_3_,
-        float p_72731_4_, CallbackInfo ci) {
-        storedMovingObjectPosition = p_72731_2_;
+    private void storeMovingObjectPosition(EntityPlayer player, MovingObjectPosition mop, int p_72731_3_,
+        float p_72731_4_, CallbackInfo ci, @Share("mop") LocalRef<MovingObjectPosition> sharedMovingObjectPosition) {
+        sharedMovingObjectPosition.set(mop);
     }
 
     @WrapOperation(
@@ -426,8 +426,9 @@ public class MixinRenderGlobal implements IMixinRenderGlobal {
             value = "FIELD",
             target = "Lnet/minecraft/client/renderer/RenderGlobal;theWorld:Lnet/minecraft/client/multiplayer/WorldClient;",
             opcode = Opcodes.GETFIELD))
-    private WorldClient wrapTheWorld(RenderGlobal instance, Operation<WorldClient> original) {
-        return (WorldClient) ((IMixinMovingObjectPosition) storedMovingObjectPosition).getWorld();
+    private WorldClient wrapTheWorld(RenderGlobal instance, Operation<WorldClient> original,
+        @Share("mop") LocalRef<MovingObjectPosition> mop) {
+        return (WorldClient) ((IMixinMovingObjectPosition) mop.get()).getWorld();
     }
 
     @WrapOperation(
@@ -436,9 +437,9 @@ public class MixinRenderGlobal implements IMixinRenderGlobal {
             value = "INVOKE",
             target = "Lnet/minecraft/util/AxisAlignedBB;expand(DDD)Lnet/minecraft/util/AxisAlignedBB;"))
     private AxisAlignedBB wrapExpandBB(AxisAlignedBB instance, double x, double y, double z,
-        Operation<AxisAlignedBB> original) {
+        Operation<AxisAlignedBB> original, @Share("mop") LocalRef<MovingObjectPosition> mop) {
         return ((IMixinAxisAlignedBB) original.call(instance, x, y, z))
-            .getTransformedToGlobalBoundingBox(((IMixinMovingObjectPosition) storedMovingObjectPosition).getWorld());
+            .getTransformedToGlobalBoundingBox(((IMixinMovingObjectPosition) mop.get()).getWorld());
     }
 
     @WrapOperation(

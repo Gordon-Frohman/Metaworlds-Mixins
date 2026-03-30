@@ -13,6 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 
 import codechicken.lib.packet.PacketCustom;
 import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
@@ -21,11 +23,10 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWor
 @Mixin(targets = "codechicken.multipart.handler.MultipartSPH$")
 public class MixinMultipartSPH {
 
-    private int storedSubworldID;
-
     @Inject(method = "getDescPacket", remap = false, at = @At(value = "HEAD"))
-    public void storeSubworldID(Chunk chunk, final Iterator<TileEntity> it, CallbackInfoReturnable<PacketCustom> cir) {
-        storedSubworldID = ((IMixinWorld) chunk.worldObj).getSubWorldID();
+    public void storeSubworldID(Chunk chunk, final Iterator<TileEntity> it, CallbackInfoReturnable<PacketCustom> cir,
+        @Share("subworldId") LocalIntRef subworldId) {
+        subworldId.set(((IMixinWorld) chunk.worldObj).getSubWorldID());
     }
 
     @WrapOperation(
@@ -34,9 +35,10 @@ public class MixinMultipartSPH {
         at = @At(
             value = "INVOKE",
             target = "Lcodechicken/lib/packet/PacketCustom;compress()Lcodechicken/lib/packet/PacketCustom;"))
-    public PacketCustom writeSubworldID(PacketCustom packet, Operation<PacketCustom> original) {
+    public PacketCustom writeSubworldID(PacketCustom packet, Operation<PacketCustom> original,
+        @Share("subworldId") LocalIntRef subworldId) {
         return original.call(packet)
-            .writeInt(storedSubworldID);
+            .writeInt(subworldId.get());
     }
 
     @WrapOperation(

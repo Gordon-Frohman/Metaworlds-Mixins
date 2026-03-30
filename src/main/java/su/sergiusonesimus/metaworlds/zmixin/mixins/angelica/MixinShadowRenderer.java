@@ -32,6 +32,8 @@ import com.gtnewhorizons.angelica.glsm.GLStateManager;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
@@ -48,8 +50,6 @@ public class MixinShadowRenderer {
     @Shadow(remap = false)
     public static Matrix4f MODELVIEW;
 
-    private Camera storedPlayerCamera;
-
     @Inject(
         method = "renderShadows",
         remap = false,
@@ -60,8 +60,8 @@ public class MixinShadowRenderer {
             shift = Shift.AFTER),
         locals = LocalCapture.CAPTURE_FAILHARD)
     public void clipRenderersForSubworlds(EntityRenderer levelRenderer, Camera playerCamera, CallbackInfo ci,
-        @Local(name = "mc") Minecraft mc) {
-        storedPlayerCamera = playerCamera;
+        @Local(name = "mc") Minecraft mc, @Share("playerCamera") LocalRef<Camera> sharedPlayerCamera) {
+        sharedPlayerCamera.set(playerCamera);
         Vector3d cameraPos = playerCamera.getPos();
         EntityPlayer player = mc.thePlayer;
         for (World world : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
@@ -88,12 +88,13 @@ public class MixinShadowRenderer {
             target = "Lnet/minecraft/client/renderer/RenderGlobal;sortAndRender(Lnet/minecraft/entity/EntityLivingBase;ID)I",
             remap = true))
     public int sortAndRenderForSubworlds(RenderGlobal instance, EntityLivingBase entitylivingbase, int pass,
-        double partialTicks, Operation<Integer> original) {
+        double partialTicks, Operation<Integer> original, @Share("playerCamera") LocalRef<Camera> playerCamera) {
         int result = original.call(instance, entitylivingbase, pass, partialTicks);
         if (entitylivingbase instanceof EntityPlayer player) {
             Minecraft mc = Minecraft.getMinecraft();
-            Vector3d cameraPos = storedPlayerCamera.getPos();
-            Matrix4f storedModelView = new Matrix4f(MODELVIEW);
+            Vector3d cameraPos = playerCamera.get()
+                .getPos();
+            Matrix4f modelView = new Matrix4f(MODELVIEW);
             for (World world : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
                 EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) mc.thePlayer)
                     .getProxyPlayer(world);
@@ -123,7 +124,7 @@ public class MixinShadowRenderer {
 
                 original.call(proxy.mc.renderGlobal, player, pass, partialTicks);
 
-                MODELVIEW.set(storedModelView);
+                MODELVIEW.set(modelView);
             }
         }
 

@@ -27,6 +27,9 @@ import com.gtnewhorizons.angelica.rendering.RenderingState;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalFloatRef;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
@@ -46,9 +49,6 @@ public class MixinEntityRenderer {
 
     private Map<Integer, Frustrum> subworldFrustums = new HashMap<Integer, Frustrum>();
 
-    private float storedPartialTicks;
-    private double storedInterpolatedX, storedInterpolatedY, storedInterpolatedZ;
-
     @Inject(
         method = "renderWorld",
         at = @At(
@@ -58,11 +58,15 @@ public class MixinEntityRenderer {
         locals = LocalCapture.CAPTURE_FAILHARD)
     public void clipRenderersForSubworlds(float partialTicks, long totalTime, CallbackInfo ci,
         @Local(name = "entitylivingbase") EntityLivingBase entitylivingbase, @Local(name = "d0") double interpolatedX,
-        @Local(name = "d1") double interpolatedY, @Local(name = "d2") double interpolatedZ) {
-        storedInterpolatedX = interpolatedX;
-        storedInterpolatedY = interpolatedY;
-        storedInterpolatedZ = interpolatedZ;
-        storedPartialTicks = partialTicks;
+        @Local(name = "d1") double interpolatedY, @Local(name = "d2") double interpolatedZ,
+        @Share("interpolatedX") LocalDoubleRef sharedInterpolatedX,
+        @Share("interpolatedY") LocalDoubleRef sharedInterpolatedY,
+        @Share("interpolatedZ") LocalDoubleRef sharedInterpolatedZ,
+        @Share("partialTicks") LocalFloatRef sharedPartialTicks) {
+        sharedInterpolatedX.set(interpolatedX);
+        sharedInterpolatedY.set(interpolatedY);
+        sharedInterpolatedZ.set(interpolatedZ);
+        sharedPartialTicks.set(partialTicks);
         if (entitylivingbase instanceof EntityPlayer player) {
             for (World world : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
                 EntityClientPlayerMPSubWorldProxy proxy = (EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) player)
@@ -84,7 +88,9 @@ public class MixinEntityRenderer {
             value = "INVOKE",
             target = "Lnet/minecraft/client/renderer/RenderGlobal;sortAndRender(Lnet/minecraft/entity/EntityLivingBase;ID)I"))
     public int sortAndRenderForSubworlds(RenderGlobal instance, EntityLivingBase entitylivingbase, int pass,
-        double partialTicks, Operation<Integer> original) {
+        double partialTicks, Operation<Integer> original, @Share("interpolatedX") LocalDoubleRef interpolatedX,
+        @Share("interpolatedY") LocalDoubleRef interpolatedY, @Share("interpolatedZ") LocalDoubleRef interpolatedZ,
+        @Share("partialTicks") LocalFloatRef sharedPartialTicks) {
         int result = original.call(instance, entitylivingbase, pass, partialTicks);
         if (entitylivingbase instanceof EntityPlayer player) {
             for (World world : ((IMixinWorld) mc.theWorld).getSubWorlds()) {
@@ -97,7 +103,7 @@ public class MixinEntityRenderer {
                 GL11.glTranslated(subworld.getTranslationX(), subworld.getTranslationY(), subworld.getTranslationZ());
 
                 GL11.glTranslated(subworld.getCenterX(), subworld.getCenterY(), subworld.getCenterZ());
-                GL11.glTranslated(-storedInterpolatedX, -storedInterpolatedY, -storedInterpolatedZ);
+                GL11.glTranslated(-interpolatedX.get(), -interpolatedY.get(), -interpolatedZ.get());
 
                 GL11.glRotated(subworld.getRotationYaw() % 360D, 0.0D, 1.0D, 0.0D);
                 GL11.glRotated(subworld.getRotationPitch() % 360D, 0.0D, 0.0D, 1.0D);
@@ -107,10 +113,10 @@ public class MixinEntityRenderer {
                 GL11.glScaled(scale, scale, scale);
 
                 GL11.glTranslated(-subworld.getCenterX(), -subworld.getCenterY(), -subworld.getCenterZ());
-                GL11.glTranslated(storedInterpolatedX, storedInterpolatedY, storedInterpolatedZ);
+                GL11.glTranslated(interpolatedX.get(), interpolatedY.get(), interpolatedZ.get());
 
                 ActiveRenderInfo.updateRenderInfo(player, mc.gameSettings.thirdPersonView == 2);
-                Camera.INSTANCE.update(player, storedPartialTicks);
+                Camera.INSTANCE.update(player, sharedPartialTicks.get());
                 RenderingState.INSTANCE.setCameraPosition(
                     Camera.INSTANCE.getEntityPos().x,
                     Camera.INSTANCE.getEntityPos().y,
@@ -122,7 +128,7 @@ public class MixinEntityRenderer {
             }
 
             ActiveRenderInfo.updateRenderInfo((EntityPlayer) entitylivingbase, mc.gameSettings.thirdPersonView == 2);
-            Camera.INSTANCE.update(entitylivingbase, storedPartialTicks);
+            Camera.INSTANCE.update(entitylivingbase, sharedPartialTicks.get());
             RenderingState.INSTANCE.setCameraPosition(
                 Camera.INSTANCE.getEntityPos().x,
                 Camera.INSTANCE.getEntityPos().y,

@@ -50,6 +50,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
@@ -1197,55 +1199,56 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
 
     // drawOutlinedBoundingBox
 
-    private static AxisAlignedBB storedAABB;
-    private static OrientedBB storedOBB;
-
     @Inject(method = "drawOutlinedBoundingBox", at = @At(value = "HEAD"))
-    private static void storeVariables(AxisAlignedBB aabb, int color, CallbackInfo ci) {
-        storedAABB = aabb;
-        storedOBB = ((IMixinAxisAlignedBB) aabb).getOrientedBB();
+    private static void shareVariables(AxisAlignedBB aabb, int color, CallbackInfo ci,
+        @Share("aabb") LocalRef<AxisAlignedBB> sharedAABB, @Share("obb") LocalRef<OrientedBB> sharedOBB) {
+        sharedAABB.set(aabb);
+        sharedOBB.set(((IMixinAxisAlignedBB) aabb).getOrientedBB());
     }
 
     @ModifyArgs(
         method = "drawOutlinedBoundingBox",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/Tessellator;addVertex(DDD)V"))
-    private static void modifyAddVertex(Args args) {
+    private static void modifyAddVertex(Args args, @Share("aabb") LocalRef<AxisAlignedBB> sharedAABB,
+        @Share("obb") LocalRef<OrientedBB> sharedOBB) {
         double x = args.get(0);
         double y = args.get(1);
         double z = args.get(2);
         int vertexIndex;
-        if (y == storedAABB.minY) {
-            if (z == storedAABB.minZ) {
-                if (x == storedAABB.minX) {
+        AxisAlignedBB aabb = sharedAABB.get();
+        OrientedBB obb = sharedOBB.get();
+        if (y == aabb.minY) {
+            if (z == aabb.minZ) {
+                if (x == aabb.minX) {
                     vertexIndex = 0;
                 } else {
                     vertexIndex = 1;
                 }
             } else {
-                if (x == storedAABB.minX) {
+                if (x == aabb.minX) {
                     vertexIndex = 2;
                 } else {
                     vertexIndex = 3;
                 }
             }
         } else {
-            if (z == storedAABB.minZ) {
-                if (x == storedAABB.minX) {
+            if (z == aabb.minZ) {
+                if (x == aabb.minX) {
                     vertexIndex = 4;
                 } else {
                     vertexIndex = 5;
                 }
             } else {
-                if (x == storedAABB.minX) {
+                if (x == aabb.minX) {
                     vertexIndex = 6;
                 } else {
                     vertexIndex = 7;
                 }
             }
         }
-        args.set(0, storedOBB.getX(vertexIndex));
-        args.set(1, storedOBB.getY(vertexIndex));
-        args.set(2, storedOBB.getZ(vertexIndex));
+        args.set(0, obb.getX(vertexIndex));
+        args.set(1, obb.getY(vertexIndex));
+        args.set(2, obb.getZ(vertexIndex));
     }
 
 }

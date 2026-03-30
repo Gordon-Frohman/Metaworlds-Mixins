@@ -23,6 +23,8 @@ import com.creativemd.littletiles.common.utils.PlacementHelper;
 import com.creativemd.littletiles.utils.PreviewTile;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.littletiles.IMixinLittleTileBlockPos;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
@@ -31,13 +33,11 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinMovi
 @Mixin(ItemBlockTiles.class)
 public class MixinItemBlockTiles {
 
-    private static LittleTileBlockPos storedPos;
-
     @Inject(method = "placeBlockAt", remap = false, at = @At(value = "HEAD"))
-    private void placeBlockAt(EntityPlayer player, ItemStack stack, World world, LittleTileBlockPos pos,
+    private void sharePos(EntityPlayer player, ItemStack stack, World world, LittleTileBlockPos pos,
         PlacementHelper helper, boolean customPlacement, LittleTileCutoutInfo cutoutInfo,
-        CallbackInfoReturnable<Boolean> cir) {
-        storedPos = pos;
+        CallbackInfoReturnable<Boolean> cir, @Share("pos") LocalRef<LittleTileBlockPos> sharedPos) {
+        sharedPos.set(pos);
     }
 
     @WrapOperation(
@@ -48,8 +48,9 @@ public class MixinItemBlockTiles {
             target = "Lcom/creativemd/littletiles/common/items/ItemBlockTiles;canPlaceTiles(Lnet/minecraft/world/World;Lcom/creativemd/creativecore/common/utils/HashMapList;Ljava/util/ArrayList;)Z",
             remap = false))
     private static boolean canPlaceTiles(World world, HashMapList<ChunkCoordinates, PreviewTile> splitted,
-        ArrayList<ChunkCoordinates> coordsToCheck, Operation<Boolean> original) {
-        return original.call(((IMixinLittleTileBlockPos) storedPos).getWorld(), splitted, coordsToCheck);
+        ArrayList<ChunkCoordinates> coordsToCheck, Operation<Boolean> original,
+        @Share("pos") LocalRef<LittleTileBlockPos> pos) {
+        return original.call(((IMixinLittleTileBlockPos) pos.get()).getWorld(), splitted, coordsToCheck);
     }
 
     @WrapOperation(
@@ -60,9 +61,9 @@ public class MixinItemBlockTiles {
             target = "Lcom/creativemd/littletiles/common/items/ItemBlockTiles;placeTiles(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/EntityPlayer;Ljava/util/ArrayList;Lcom/creativemd/littletiles/common/structure/LittleStructure;IIILnet/minecraft/item/ItemStack;Ljava/util/ArrayList;Lcom/creativemd/littletiles/common/utils/LittleTileCutoutInfo;)Z"))
     private boolean placeTiles(World world, EntityPlayer player, ArrayList<PreviewTile> previews,
         LittleStructure structure, int x, int y, int z, ItemStack stack, ArrayList<LittleTile> unplaceableTiles,
-        LittleTileCutoutInfo cutoutInfo, Operation<Boolean> original) {
+        LittleTileCutoutInfo cutoutInfo, Operation<Boolean> original, @Share("pos") LocalRef<LittleTileBlockPos> pos) {
         return original.call(
-            ((IMixinLittleTileBlockPos) storedPos).getWorld(),
+            ((IMixinLittleTileBlockPos) pos.get()).getWorld(),
             player,
             previews,
             structure,

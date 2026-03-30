@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import cpw.mods.fml.common.network.internal.FMLMessage.OpenGui;
 import cpw.mods.fml.common.network.internal.OpenGuiHandler;
@@ -20,11 +22,10 @@ import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEn
 @Mixin(OpenGuiHandler.class)
 public class MixinOpenGuiHandler {
 
-    private OpenGui storedMessage;
-
     @Inject(method = "channelRead0", remap = false, at = @At(value = "HEAD"))
-    protected void storeMessage(ChannelHandlerContext ctx, OpenGui msg, CallbackInfo ci) {
-        storedMessage = msg;
+    protected void shareMessage(ChannelHandlerContext ctx, OpenGui msg, CallbackInfo ci,
+        @Share("message") LocalRef<OpenGui> message) {
+        message.set(msg);
     }
 
     @WrapOperation(
@@ -34,9 +35,10 @@ public class MixinOpenGuiHandler {
             value = "FIELD",
             target = "Lnet/minecraft/client/Minecraft;thePlayer:Lnet/minecraft/client/entity/EntityClientPlayerMP;",
             remap = true))
-    protected EntityClientPlayerMP getThePlayer(Minecraft instance, Operation<EntityClientPlayerMP> original) {
+    protected EntityClientPlayerMP getThePlayer(Minecraft instance, Operation<EntityClientPlayerMP> original,
+        @Share("message") LocalRef<OpenGui> message) {
         return (EntityClientPlayerMP) ((IMixinEntity) original.call(instance))
-            .getProxyPlayer(((IMixinOpenGui) storedMessage).getSubworldId());
+            .getProxyPlayer(((IMixinOpenGui) message.get()).getSubworldId());
     }
 
 }
