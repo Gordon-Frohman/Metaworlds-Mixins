@@ -354,7 +354,7 @@ public class MixinRenderGlobal {
         method = "sortAndRender",
         remap = true,
         at = @At(value = "FIELD", target = "Lnet/coderbot/iris/Iris;enabled:Z", remap = false))
-    public boolean disableIrisForSubworld(Operation<Boolean> original) {
+    public boolean disableIrisForSubworlds(Operation<Boolean> original) {
         return original.call() && !(AngelicaIntegration.currentWorld instanceof SubWorld);
     }
 
