@@ -22,7 +22,7 @@ import su.sergiusonesimus.metaworlds.api.SubWorld;
 @Mixin(AngelicaRenderSectionManager.class)
 public class MixinAngelicaRenderSectionManager {
 
-    private static RenderPassConfiguration<BlockRenderLayer> arpcGlobal;
+    private static RenderPassConfiguration<BlockRenderLayer> rpcGlobal;
 
     @Inject(method = "create", remap = false, at = @At(value = "HEAD"))
     private static void shareWorld(ChunkVertexType vertexType, WorldClient world, int renderDistance,
@@ -41,8 +41,8 @@ public class MixinAngelicaRenderSectionManager {
     private static RenderPassConfiguration<BlockRenderLayer> wrapBuild(ChunkVertexType vertexType,
         Operation<RenderPassConfiguration<BlockRenderLayer>> original,
         @Share("world") LocalRef<WorldClient> sharedWorld) {
-        if (!(sharedWorld.get() instanceof SubWorld subworld)) arpcGlobal = original.call(vertexType);
-        return arpcGlobal;
+        if (!(sharedWorld.get() instanceof SubWorld subworld)) rpcGlobal = original.call(vertexType);
+        return rpcGlobal;
     }
 
 }
