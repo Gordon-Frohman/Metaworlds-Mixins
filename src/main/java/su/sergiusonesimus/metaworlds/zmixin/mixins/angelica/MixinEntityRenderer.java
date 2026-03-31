@@ -1,8 +1,5 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.angelica;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.EntityRenderer;
@@ -48,8 +45,6 @@ public class MixinEntityRenderer {
     @Shadow(remap = true)
     private void setupCameraTransform(float p_78479_1_, int p_78479_2_) {}
 
-    private Map<Integer, Frustrum> subworldFrustums = new HashMap<Integer, Frustrum>();
-
     @Inject(
         method = "renderWorld",
         at = @At(
@@ -76,7 +71,6 @@ public class MixinEntityRenderer {
                 Frustrum frustrum = new Frustrum();
                 Vec3 localPos = ((IMixinWorld) world).transformToLocal(interpolatedX, interpolatedY, interpolatedZ);
                 frustrum.setPosition(localPos.xCoord, localPos.yCoord, localPos.zCoord);
-                subworldFrustums.put(((IMixinWorld) world).getSubWorldID(), frustrum);
 
                 proxy.mc.renderGlobal.clipRenderersByFrustum(frustrum, partialTicks);
             }
