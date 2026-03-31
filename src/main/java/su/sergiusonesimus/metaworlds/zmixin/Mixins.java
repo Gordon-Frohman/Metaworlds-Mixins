@@ -108,6 +108,7 @@ public enum Mixins {
         .addMixinClasses(
             addPrefix(
                 "angelica.",
+                "MixinAngelicaRenderSectionManager",
                 "MixinClientProxy",
                 "MixinShadowRenderer",
                 "MixinThreadedChunkTaskProvider",
