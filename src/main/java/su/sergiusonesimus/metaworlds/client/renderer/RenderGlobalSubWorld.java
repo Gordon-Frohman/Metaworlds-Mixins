@@ -605,9 +605,9 @@ public class RenderGlobalSubWorld extends RenderGlobal {
      * value
      */
     @Override
-    public void destroyBlockPartially(int par1, int par2, int par3, int par4, int par5) {
+    public void destroyBlockPartially(int playerId, int x, int y, int z, int destructionStage) {
         ((IMixinRenderGlobal) parentRenderGlobal)
-            .destroyBlockPartially(par1, par2, par3, par4, par5, ((IMixinWorld) this.theWorld).getSubWorldID());
+            .destroyBlockPartially(playerId, x, y, z, destructionStage, ((IMixinWorld) this.theWorld).getSubWorldID());
     }
 
     @Override
