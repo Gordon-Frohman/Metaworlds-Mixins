@@ -107,6 +107,7 @@ public abstract class MixinPlayerManager implements IMixinPlayerManager {
     public void removePlayer(EntityPlayerMP player, CallbackInfo ci) {
         for (World curSubWorld : ((IMixinWorld) this.theWorldServer).getSubWorlds()) {
             EntityPlayer proxyPlayer = ((IMixinEntity) player).getProxyPlayer(curSubWorld);
+            if (proxyPlayer == null) continue;
             ((WorldServer) curSubWorld).getPlayerManager()
                 .removePlayer((EntityPlayerMP) proxyPlayer);
             // Sadly we need to do this check because minecraft in inconsequentian in the order it removes the player

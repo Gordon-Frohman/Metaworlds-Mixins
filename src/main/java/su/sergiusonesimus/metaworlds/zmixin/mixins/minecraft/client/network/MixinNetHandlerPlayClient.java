@@ -25,6 +25,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import su.sergiusonesimus.metaworlds.EventHookContainer;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
@@ -55,19 +57,18 @@ public abstract class MixinNetHandlerPlayClient {
 
     // TODO
 
-    private Packet storedPacket;
-
     @Inject(method = "handleEntityTeleport", at = @At(value = "HEAD"))
-    public void handleEntityTeleport(S18PacketEntityTeleport packetIn, CallbackInfo ci) {
-        storedPacket = packetIn;
+    public void sharePacket(S18PacketEntityTeleport packetIn, CallbackInfo ci,
+        @Share("packet") LocalRef<Packet> packet) {
+        packet.set(packetIn);
     }
 
     @WrapOperation(
         method = "handleEntityTeleport",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPositionAndRotation2(DDDFFI)V"))
     private void handleEntityTeleportSetPositionAndRotation2(Entity instance, double x, double y, double z, float yaw,
-        float pitch, int rotationIncrements, Operation<Void> original) {
-        S18PacketEntityTeleport packetIn = (S18PacketEntityTeleport) storedPacket;
+        float pitch, int rotationIncrements, Operation<Void> original, @Share("packet") LocalRef<Packet> packet) {
+        S18PacketEntityTeleport packetIn = (S18PacketEntityTeleport) packet.get();
         if (((IMixinS18PacketEntityTeleport) packetIn).getSendSubWorldPosFlag() != 0) {
             if (((IMixinS18PacketEntityTeleport) packetIn).getXPosOnSubWorld()
                 != ((IMixinEntity) instance).getServerPosXOnSubWorld()
@@ -97,16 +98,16 @@ public abstract class MixinNetHandlerPlayClient {
     }
 
     @Inject(method = "handleEntityMovement", at = @At(value = "HEAD"))
-    public void storePacket(S14PacketEntity packetIn, CallbackInfo ci) {
-        storedPacket = packetIn;
+    public void sharePacket(S14PacketEntity packetIn, CallbackInfo ci, @Share("packet") LocalRef<Packet> packet) {
+        packet.set(packetIn);
     }
 
     @WrapOperation(
         method = "handleEntityMovement",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setPositionAndRotation2(DDDFFI)V"))
     private void handleEntityMovementSetPositionAndRotation2(Entity entity, double x, double y, double z, float yaw,
-        float pitch, int rotationIncrements, Operation<Void> original) {
-        S14PacketEntity packetIn = (S14PacketEntity) storedPacket;
+        float pitch, int rotationIncrements, Operation<Void> original, @Share("packet") LocalRef<Packet> packet) {
+        S14PacketEntity packetIn = (S14PacketEntity) packet.get();
         if (((IMixinS14PacketEntity) packetIn).getSendSubWorldPosFlag() != 0) {
             if (((IMixinS14PacketEntity) packetIn).getXPosDiffOnSubWorld() != 0
                 || ((IMixinS14PacketEntity) packetIn).getYPosDiffOnSubWorld() != 0
@@ -134,8 +135,9 @@ public abstract class MixinNetHandlerPlayClient {
     }
 
     @Inject(method = "handlePlayerPosLook", at = @At(value = "HEAD"))
-    public void storePacket(S08PacketPlayerPosLook packetIn, CallbackInfo ci) {
-        storedPacket = packetIn;
+    public void sharePacket(S08PacketPlayerPosLook packetIn, CallbackInfo ci,
+        @Share("packet") LocalRef<Packet> packet) {
+        packet.set(packetIn);
     }
 
     @WrapOperation(
@@ -144,8 +146,8 @@ public abstract class MixinNetHandlerPlayClient {
             value = "INVOKE",
             target = "Lnet/minecraft/client/entity/EntityClientPlayerMP;setPositionAndRotation(DDDFF)V"))
     private void setPositionAndRotation(EntityClientPlayerMP instance, double x, double y, double z, float yaw,
-        float pitch, Operation<Void> original) {
-        int subWorldID = ((IMixinS08PacketPlayerPosLook) storedPacket).getSubWorldBelowFeetID();
+        float pitch, Operation<Void> original, @Share("packet") LocalRef<Packet> packet) {
+        int subWorldID = ((IMixinS08PacketPlayerPosLook) packet.get()).getSubWorldBelowFeetID();
         EntityClientPlayerMP entityclientplayermp = this.gameController.thePlayer;
         World subworld = ((IMixinWorld) ((IMixinWorld) entityclientplayermp.worldObj).getParentWorld())
             .getSubWorldsMap()
@@ -154,7 +156,7 @@ public abstract class MixinNetHandlerPlayClient {
             original.call(instance, x, y, z, yaw, pitch);
         } else {
             Vec3 globalPos = ((IMixinWorld) subworld)
-                .transformToGlobal(((IMixinS08PacketPlayerPosLook) storedPacket).getSubWorldPosition());
+                .transformToGlobal(((IMixinS08PacketPlayerPosLook) packet.get()).getSubWorldPosition());
             original.call(instance, globalPos.xCoord, globalPos.yCoord, globalPos.zCoord, yaw, pitch);
         }
     }

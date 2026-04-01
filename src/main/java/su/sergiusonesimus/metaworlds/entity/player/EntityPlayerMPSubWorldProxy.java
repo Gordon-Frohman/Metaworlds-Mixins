@@ -92,24 +92,24 @@ public class EntityPlayerMPSubWorldProxy extends EntityPlayerMP implements Entit
         return this.realPlayer;
     }
 
-    public void travelToDimension(int par1) {
-        this.realPlayer.travelToDimension(par1);
+    public void travelToDimension(int dimId) {
+        this.realPlayer.travelToDimension(dimId);
     }
 
-    public void setPosition(double par1, double par3, double par5) {
-        super.setPosition(par1, par3, par5);
+    public void setPosition(double x, double y, double z) {
+        super.setPosition(x, y, z);
     }
 
-    public void moveEntity(double par1, double par3, double par5) {
-        super.moveEntity(par1, par3, par5);
+    public void moveEntity(double dX, double dY, double dZ) {
+        super.moveEntity(dX, dY, dZ);
     }
 
-    public void setPositionAndRotation(double par1, double par3, double par5, float par7, float par8) {
-        super.setPositionAndRotation(par1, par3, par5, par7, par8);
+    public void setPositionAndRotation(double x, double y, double z, float yaw, float pitch) {
+        super.setPositionAndRotation(x, y, z, yaw, pitch);
     }
 
-    public void setLocationAndAngles(double par1, double par3, double par5, float par7, float par8) {
-        super.setLocationAndAngles(par1, par3, par5, par7, par8);
+    public void setLocationAndAngles(double x, double y, double z, float yaw, float pitch) {
+        super.setLocationAndAngles(x, y, z, yaw, pitch);
     }
 
     public EntityPlayer.EnumStatus sleepInBedAt(int par1, int par2, int par3) {

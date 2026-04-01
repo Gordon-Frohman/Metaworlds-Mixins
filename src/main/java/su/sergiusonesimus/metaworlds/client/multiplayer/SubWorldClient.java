@@ -36,12 +36,13 @@ import org.jblas.DoubleMatrix;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.api.SubWorldTypeManager;
 import su.sergiusonesimus.metaworlds.client.renderer.RenderGlobalSubWorld;
 import su.sergiusonesimus.metaworlds.network.play.server.S03SubWorldUpdatePacket;
 import su.sergiusonesimus.metaworlds.util.SubWorldTransformationHandler;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobalVanilla;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -151,7 +152,8 @@ public class SubWorldClient extends WorldClient implements SubWorld {
     public void removeSubWorld() {
         ((IMixinWorld) this.m_parentWorld).getSubWorlds()
             .remove(this);
-        ((IMixinRenderGlobal) Minecraft.getMinecraft().renderGlobal).unloadRenderersForSubWorld(this.getSubWorldID());
+        if (!MetaworldsMod.isAngelicaLoaded) ((IMixinRenderGlobalVanilla) Minecraft.getMinecraft().renderGlobal)
+            .unloadRenderersForSubWorld(this.getSubWorldID());
         if (this.renderGlobalSubWorld != null) {
             this.renderGlobalSubWorld.onWorldRemove();
         }
@@ -578,11 +580,12 @@ public class SubWorldClient extends WorldClient implements SubWorld {
             }
 
             EntityLivingBase playerEntity = Minecraft.getMinecraft().renderViewEntity;
-            ((IMixinRenderGlobal) Minecraft.getMinecraft().renderGlobal).markRenderersForNewPositionSingle(
-                playerEntity.posX,
-                playerEntity.posY,
-                playerEntity.posZ,
-                this.getSubWorldID());
+            if (!MetaworldsMod.isAngelicaLoaded)
+                ((IMixinRenderGlobalVanilla) Minecraft.getMinecraft().renderGlobal).markRenderersForNewPositionSingle(
+                    playerEntity.posX,
+                    playerEntity.posY,
+                    playerEntity.posZ,
+                    this.getSubWorldID());
         }
     }
 

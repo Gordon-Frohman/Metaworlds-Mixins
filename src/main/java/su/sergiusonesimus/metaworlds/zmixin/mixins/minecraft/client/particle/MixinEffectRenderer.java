@@ -36,6 +36,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalDoubleRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
@@ -259,14 +263,13 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
 
     // addBlockHitEffects
 
-    private MovingObjectPosition storedTarget;
-
     @Inject(
         method = "addBlockHitEffects(IIILnet/minecraft/util/MovingObjectPosition;)V",
         remap = false,
         at = { @At(value = "HEAD") })
-    private void captureTarget(int x, int y, int z, MovingObjectPosition target, CallbackInfo ci) {
-        this.storedTarget = target;
+    private void shareTarget(int x, int y, int z, MovingObjectPosition target, CallbackInfo ci,
+        @Share("target") LocalRef<MovingObjectPosition> sharedTarget) {
+        sharedTarget.set(target);
     }
 
     @WrapOperation(
@@ -277,8 +280,9 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
             target = "Lnet/minecraft/client/particle/EffectRenderer;worldObj:Lnet/minecraft/world/World;",
             remap = true,
             opcode = Opcodes.GETFIELD))
-    private World getWorldObj(EffectRenderer instance, Operation<World> original) {
-        return ((IMixinMovingObjectPosition) storedTarget).getWorld();
+    private World getWorldObj(EffectRenderer instance, Operation<World> original,
+        @Share("target") LocalRef<MovingObjectPosition> sharedTarget) {
+        return ((IMixinMovingObjectPosition) sharedTarget.get()).getWorld();
     }
 
     @WrapOperation(
@@ -288,21 +292,13 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
             value = "INVOKE",
             target = "Lnet/minecraft/client/particle/EffectRenderer;addBlockHitEffects(IIII)V",
             remap = true))
-    private void addBlockHitEffects(EffectRenderer instance, int x, int y, int z, int side, Operation<Void> original) {
+    private void addBlockHitEffects(EffectRenderer instance, int x, int y, int z, int side, Operation<Void> original,
+        @Share("target") LocalRef<MovingObjectPosition> sharedTarget) {
         ((IMixinEffectRenderer) this)
-            .addBlockHitEffects(x, y, z, side, ((IMixinMovingObjectPosition) storedTarget).getWorld());
+            .addBlockHitEffects(x, y, z, side, ((IMixinMovingObjectPosition) sharedTarget.get()).getWorld());
     }
 
     // addBlockDestroyEffects
-
-    private double storedD0;
-    private double storedD1;
-    private double storedD2;
-    private int storedX;
-    private int storedY;
-    private int storedZ;
-    private Block storedBlock;
-    private int storedMeta;
 
     @Inject(
         method = "addBlockDestroyEffects",
@@ -311,16 +307,19 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
             value = "INVOKE",
             target = "Lnet/minecraft/client/particle/EffectRenderer;addEffect(Lnet/minecraft/client/particle/EntityFX;)V",
             remap = true))
-    private void storeData(int x, int y, int z, Block block, int meta, CallbackInfo ci, @Local(name = "d0") double d0,
-        @Local(name = "d1") double d1, @Local(name = "d2") double d2) {
-        storedD0 = d0;
-        storedD1 = d1;
-        storedD2 = d2;
-        storedX = x;
-        storedY = y;
-        storedZ = z;
-        storedBlock = block;
-        storedMeta = meta;
+    private void shareData(int x, int y, int z, Block block, int meta, CallbackInfo ci, @Local(name = "d0") double d0,
+        @Local(name = "d1") double d1, @Local(name = "d2") double d2, @Share("d0") LocalDoubleRef sharedD0,
+        @Share("d1") LocalDoubleRef sharedD1, @Share("d2") LocalDoubleRef sharedD2, @Share("x") LocalIntRef sharedX,
+        @Share("y") LocalIntRef sharedY, @Share("z") LocalIntRef sharedZ, @Share("block") LocalRef<Block> sharedBlock,
+        @Share("meta") LocalIntRef sharedMeta) {
+        sharedD0.set(d0);
+        sharedD1.set(d1);
+        sharedD2.set(d2);
+        sharedX.set(x);
+        sharedY.set(y);
+        sharedZ.set(z);
+        sharedBlock.set(block);
+        sharedMeta.set(meta);
     }
 
     @WrapOperation(
@@ -330,22 +329,31 @@ public abstract class MixinEffectRenderer implements IMixinEffectRenderer {
             value = "INVOKE",
             target = "Lnet/minecraft/client/particle/EffectRenderer;addEffect(Lnet/minecraft/client/particle/EntityFX;)V",
             remap = true))
-    private void wrapAddEffect(EffectRenderer instance, EntityFX value, Operation<Void> original) {
+    private void wrapAddEffect(EffectRenderer instance, EntityFX value, Operation<Void> original,
+        @Share("d0") LocalDoubleRef sharedD0, @Share("d1") LocalDoubleRef sharedD1,
+        @Share("d2") LocalDoubleRef sharedD2, @Share("x") LocalIntRef sharedX, @Share("y") LocalIntRef sharedY,
+        @Share("z") LocalIntRef sharedZ, @Share("block") LocalRef<Block> sharedBlock,
+        @Share("meta") LocalIntRef sharedMeta) {
         if (worldObj instanceof SubWorld) {
             World parentWorld = ((SubWorld) this.worldObj).getParentWorld();
-            Vec3 globalCoords = ((IMixinWorld) this.worldObj)
-                .transformToGlobal(Vec3.createVectorHelper(storedD0, storedD1, storedD2));
+            double d0 = sharedD0.get();
+            double d1 = sharedD1.get();
+            double d2 = sharedD2.get();
+            int x = sharedX.get();
+            int y = sharedY.get();
+            int z = sharedZ.get();
+            Vec3 globalCoords = ((IMixinWorld) this.worldObj).transformToGlobal(Vec3.createVectorHelper(d0, d1, d2));
             Minecraft.getMinecraft().effectRenderer.addEffect(
                 (new EntityDiggingFX(
                     parentWorld,
                     globalCoords.xCoord,
                     globalCoords.yCoord,
                     globalCoords.zCoord,
-                    storedD0 - (double) storedX - 0.5D,
-                    storedD1 - (double) storedY - 0.5D,
-                    storedD2 - (double) storedZ - 0.5D,
-                    storedBlock,
-                    storedMeta)).applyColourMultiplier(storedX, storedY, storedZ));
+                    d0 - (double) x - 0.5D,
+                    d1 - (double) y - 0.5D,
+                    d2 - (double) z - 0.5D,
+                    sharedBlock.get(),
+                    sharedMeta.get())).applyColourMultiplier(x, y, z));
         } else {
             original.call(instance, value);
         }

@@ -26,9 +26,10 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobalVanilla;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorldIntermediate;
 import su.sergiusonesimus.metaworlds.zmixin.mixins.minecraft.world.MixinWorld;
@@ -79,9 +80,10 @@ public class MixinWorldClient extends MixinWorld {
             proxyPlayer.getMinecraft().renderViewEntity = proxyPlayer;
 
             newSubWorld.addWorldAccess(proxyPlayer.getMinecraft().renderGlobal);
+            newSubWorld.loadedEntityList.add(proxyPlayer);
             MinecraftForge.EVENT_BUS.post(new EntityJoinWorldEvent(proxyPlayer, newSubWorld));
 
-            ((IMixinRenderGlobal) this.mc.renderGlobal)
+            if (!MetaworldsMod.isAngelicaLoaded) ((IMixinRenderGlobalVanilla) this.mc.renderGlobal)
                 .loadRenderersForNewSubWorld(((IMixinWorld) newSubWorld).getSubWorldID());
             this.mc.renderGlobal.allRenderLists = new RenderList[4 * ((IMixinWorld) this).getWorldsCount()];
             for (int i = 0; i < 4 * ((IMixinWorld) this).getWorldsCount(); ++i) {

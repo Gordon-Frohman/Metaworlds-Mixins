@@ -11,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import codechicken.lib.vec.Cuboid6;
 import codechicken.multipart.JIconHitEffects;
@@ -22,27 +24,25 @@ import su.sergiusonesimus.metaworlds.util.OrientedBB;
 @Mixin(targets = "codechicken.multipart.IconHitEffects$")
 public class MixinIconHitEffects {
 
-    private SubWorld storedSubworld = null;
-
     @Inject(method = "addHitEffects", remap = false, at = @At(value = "HEAD"))
-    private void storeSubworld(JIconHitEffects part, MovingObjectPosition hit, EffectRenderer effectRenderer,
-        CallbackInfo ci) {
-        storeSubworld(part);
+    private void shareSubworld(JIconHitEffects part, MovingObjectPosition hit, EffectRenderer effectRenderer,
+        CallbackInfo ci, @Share("subworld") LocalRef<SubWorld> subworld) {
+        shareSubworld(part, subworld);
     }
 
     @Inject(
         method = "addDestroyEffects(Lcodechicken/multipart/JIconHitEffects;Lnet/minecraft/client/particle/EffectRenderer;Z)V",
         remap = false,
         at = @At(value = "HEAD"))
-    private void storeSubworld(JIconHitEffects part, EffectRenderer effectRenderer, boolean scaleDensity,
-        CallbackInfo ci) {
-        storeSubworld(part);
+    private void shareSubworld(JIconHitEffects part, EffectRenderer effectRenderer, boolean scaleDensity,
+        CallbackInfo ci, @Share("subworld") LocalRef<SubWorld> subworld) {
+        shareSubworld(part, subworld);
     }
 
-    private void storeSubworld(JIconHitEffects part) {
+    private void shareSubworld(JIconHitEffects part, LocalRef<SubWorld> sharedSubworld) {
         World teWorld = ((TMultiPart) part).tile()
             .getWorldObj();
-        if (teWorld instanceof SubWorld subworld) storedSubworld = subworld;
+        if (teWorld instanceof SubWorld subworld) sharedSubworld.set(subworld);
     }
 
     @WrapOperation(
@@ -53,16 +53,18 @@ public class MixinIconHitEffects {
             value = "INVOKE",
             target = "Lcodechicken/lib/vec/Cuboid6;copy()Lcodechicken/lib/vec/Cuboid6;",
             remap = false))
-    public Cuboid6 rotateCuboid(Cuboid6 instance, Operation<Cuboid6> original) {
+    public Cuboid6 rotateCuboid(Cuboid6 instance, Operation<Cuboid6> original,
+        @Share("subworld") LocalRef<SubWorld> sharedSubworld) {
         Cuboid6 result = original.call(instance);
 
-        if (storedSubworld != null) {
+        SubWorld subworld = sharedSubworld.get();
+        if (subworld != null) {
             OrientedBB obb = ForgeMultipartIntegration.createOBB(result);
-            obb.rotatePitch(storedSubworld.getRotationPitch() % 360, 0.5D, 0.5D);
-            obb.rotateYaw(storedSubworld.getRotationYaw() % 360, 0.5D, 0.5D);
-            obb.rotateRoll(storedSubworld.getRotationRoll() % 360, 0.5D, 0.5D);
+            obb.rotatePitch(subworld.getRotationPitch() % 360, 0.5D, 0.5D);
+            obb.rotateYaw(subworld.getRotationYaw() % 360, 0.5D, 0.5D);
+            obb.rotateRoll(subworld.getRotationRoll() % 360, 0.5D, 0.5D);
             result = new Cuboid6(obb.minX, obb.minY, obb.minZ, obb.maxX, obb.maxY, obb.maxZ);
-            storedSubworld = null;
+            sharedSubworld.set(null);
         }
 
         return result;

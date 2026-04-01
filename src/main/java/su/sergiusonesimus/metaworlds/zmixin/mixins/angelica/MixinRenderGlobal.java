@@ -1,868 +1,325 @@
 package su.sergiusonesimus.metaworlds.zmixin.mixins.angelica;
 
-import java.nio.DoubleBuffer;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Map;
 
+import net.coderbot.iris.Iris;
+import net.coderbot.iris.layer.GbufferPrograms;
+import net.coderbot.iris.uniforms.CapturedRenderingState;
+import net.coderbot.iris.uniforms.EntityIdHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
-import net.minecraft.client.renderer.EntityRenderer;
-import net.minecraft.client.renderer.EntitySorter;
-import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.RenderList;
-import net.minecraft.client.renderer.RenderSorter;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.util.RenderDistanceSorter;
+import net.minecraft.client.renderer.entity.RenderManager;
+import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.IIcon;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-import org.lwjgl.opengl.ARBOcclusionQuery;
+import org.embeddedt.embeddium.impl.render.viewport.Viewport;
+import org.embeddedt.embeddium.impl.render.viewport.ViewportProvider;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import com.gtnewhorizons.angelica.render.SelectionBoxRenderer;
+import com.gtnewhorizons.angelica.rendering.celeritas.CeleritasWorldRenderer;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.client.multiplayer.SubWorldClient;
+import su.sergiusonesimus.metaworlds.client.entity.EntityClientPlayerMPSubWorldProxy;
+import su.sergiusonesimus.metaworlds.integrations.AngelicaIntegration;
+import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.zmixin.MixinPriorities;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderList;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.angelica.IMixinViewport;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.entity.IMixinEntity;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 @Mixin(value = RenderGlobal.class, priority = MixinPriorities.ANGELICA)
 public class MixinRenderGlobal {
 
-    @Shadow(remap = false)
-    private List<WorldRenderer> worldRenderersList;
-
-    @Shadow(remap = false)
-    private List<WorldRenderer> sortedWorldRenderersList;
-
-    @Shadow(remap = false)
-    private Map<Integer, WorldRenderer> worldRenderersMap;
-
-    @Shadow(remap = true)
-    private Minecraft mc;
-
-    @Shadow(remap = true)
-    private TextureManager renderEngine;
-
     @Shadow(remap = true)
     private WorldClient theWorld;
 
     @Shadow(remap = true)
-    private boolean occlusionEnabled;
+    public Minecraft mc;
 
     @Shadow(remap = true)
-    private IntBuffer glOcclusionQueryBase;
+    public boolean displayListEntitiesDirty;
 
     @Shadow(remap = true)
-    private List<WorldRenderer> worldRenderersToUpdate;
+    public int displayListEntities;
 
     @Shadow(remap = true)
-    private int renderChunksWide;
+    public int countEntitiesTotal;
 
-    @Shadow(remap = true)
-    private int renderChunksTall;
+    @Shadow(remap = false)
+    private CeleritasWorldRenderer celeritas$renderer;
 
-    @Shadow(remap = true)
-    private int renderChunksDeep;
+    @Shadow(remap = false)
+    private static int[] sodium$entityItemCount;
 
-    @SuppressWarnings("rawtypes")
-    @Shadow(remap = true)
-    private List tileEntities;
-
-    @Shadow(remap = true)
-    private int glRenderListBase;
-
-    @Shadow(remap = true)
-    private int renderDistanceChunks;
-
-    @Shadow(remap = true)
-    private int minBlockX;
-
-    @Shadow(remap = true)
-    private int minBlockY;
-
-    @Shadow(remap = true)
-    private int minBlockZ;
-
-    @Shadow(remap = true)
-    private int maxBlockX;
-
-    @Shadow(remap = true)
-    private int maxBlockY;
-
-    @Shadow(remap = true)
-    private int maxBlockZ;
-
-    @Shadow(remap = true)
-    private int renderEntitiesStartupCounter;
-
-    @Shadow(remap = true)
-    private int countEntitiesTotal;
-
-    @Shadow(remap = true)
-    private int countEntitiesRendered;
-
-    @Shadow(remap = true)
-    private int countEntitiesHidden;
-
-    @Shadow(remap = true)
-    private boolean displayListEntitiesDirty;
-
-    @Shadow(remap = true)
-    private int displayListEntities;
-
-    @Shadow(remap = true)
-    private int worldRenderersCheckIndex;
-
-    @Shadow(remap = true)
-    private int renderersLoaded;
-
-    @Shadow(remap = true)
-    private int dummyRenderInt;
-
-    @Shadow(remap = true)
-    private int renderersBeingClipped;
-
-    @Shadow(remap = true)
-    private int renderersBeingOccluded;
-
-    @Shadow(remap = true)
-    private int renderersBeingRendered;
-
-    @Shadow(remap = true)
-    private int renderersSkippingRenderPass;
-
-    @Shadow(remap = true)
-    private double prevSortX;
-
-    @Shadow(remap = true)
-    private double prevSortY;
-
-    @Shadow(remap = true)
-    private double prevSortZ;
-
-    @Shadow(remap = true)
-    private int prevChunkSortX;
-
-    @Shadow(remap = true)
-    private int prevChunkSortY;
-
-    @Shadow(remap = true)
-    private int prevChunkSortZ;
-
-    @Shadow(remap = true)
-    private double prevRenderSortX;
-
-    @Shadow(remap = true)
-    private double prevRenderSortY;
-
-    @Shadow(remap = true)
-    private double prevRenderSortZ;
-
-    @Shadow(remap = true)
-    public IntBuffer occlusionResult;
-
-    @Shadow(remap = true)
-    private int cloudTickCounter;
-
-    @Shadow(remap = true)
-    public List<WorldRenderer> glRenderLists;
-
-    @Shadow(remap = true)
-    public RenderList[] allRenderLists;
-
-    @Shadow(remap = true)
-    private int frustumCheckOffset;
-
-    @Shadow(remap = true)
-    public RenderBlocks renderBlocksRg;
-
-    @Shadow(remap = true)
-    public IIcon[] destroyBlockIcons;
+    @Shadow(remap = false)
+    private static int sodium$itemRenderDist;
 
     // TODO
 
-    @Shadow(remap = false)
-    public void markRenderersForNewPositionSingle(double par1d, double par2d, double par3d, int subWorldID) {}
+    @Shadow(remap = true)
+    public void rebuildDisplayListEntities() {}
 
-    @Shadow(remap = false)
-    public WorldRenderer createWorldRenderer(World targetWorld, int chunkIndexX, int chunkIndexY, int chunkIndexZ) {
-        return null;
+    @WrapOperation(
+        method = "clipRenderersByFrustum",
+        remap = true,
+        at = @At(
+            value = "INVOKE",
+            target = "Lorg/embeddedt/embeddium/impl/render/viewport/ViewportProvider;sodium$createViewport()Lorg/embeddedt/embeddium/impl/render/viewport/Viewport;",
+            remap = false))
+    private Viewport setRenderWorld(ViewportProvider instance, Operation<Viewport> original) {
+        return ((IMixinViewport) (Object) original.call(instance)).setWorld(theWorld);
     }
 
-    @Shadow(remap = false)
-    public void removeWorldRenderer(World targetWorld, int chunkIndexX, int chunkIndexY, int chunkIndexZ) {};
+    @Inject(
+        method = "renderEntities",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V",
+            ordinal = 0,
+            shift = Shift.BEFORE),
+        locals = LocalCapture.CAPTURE_FAILHARD)
+    private void injectRenderEntities(EntityLivingBase player, ICamera camera, float partialTicks, CallbackInfo ci,
+        @Local(name = "pass") int pass, @Local(name = "d0") double globalX, @Local(name = "d1") double globalY,
+        @Local(name = "d2") double globalZ) {
+        for (World curWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
+            WorldClient curClientWorld = (WorldClient) curWorld;
+            Vec3 transformedPos = ((IMixinWorld) curWorld).transformToLocal(globalX, globalY, globalZ);
+            this.theWorld.theProfiler.startSection("prepare");
+            TileEntityRendererDispatcher.instance.cacheActiveRenderInfo(
+                curClientWorld,
+                this.mc.getTextureManager(),
+                this.mc.fontRenderer,
+                this.mc.renderViewEntity,
+                partialTicks);
+            RenderManager.instance.cacheActiveRenderInfo(
+                curClientWorld,
+                this.mc.getTextureManager(),
+                this.mc.fontRenderer,
+                this.mc.renderViewEntity,
+                this.mc.pointedEntity,
+                this.mc.gameSettings,
+                partialTicks);
 
-    @Shadow(remap = false)
-    public void markRenderersForNewPositionSubworlds(double par1, double pass, double partialTicks) {}
+            EntityLivingBase entitylivingbase1 = this.mc.renderViewEntity;
+            double interpolatedX = entitylivingbase1.lastTickPosX
+                + (entitylivingbase1.posX - entitylivingbase1.lastTickPosX) * (double) partialTicks;
+            double interpolatedY = entitylivingbase1.lastTickPosY
+                + (entitylivingbase1.posY - entitylivingbase1.lastTickPosY) * (double) partialTicks;
+            double interpolatedZ = entitylivingbase1.lastTickPosZ
+                + (entitylivingbase1.posZ - entitylivingbase1.lastTickPosZ) * (double) partialTicks;
+            TileEntityRendererDispatcher.staticPlayerX = interpolatedX;
+            TileEntityRendererDispatcher.staticPlayerY = interpolatedY;
+            TileEntityRendererDispatcher.staticPlayerZ = interpolatedZ;
+            this.theWorld.theProfiler.endStartSection("staticentities");
 
-    @Shadow(remap = true)
-    private void renderStars() {}
-
-    @Shadow(remap = true)
-    protected void onStaticEntitiesChanged() {};
-
-    // These methods are now overwritten by Angelica
-    // To fix rendering issues, we re-overwrite them, leaving only subworlds renderers
-
-    @SuppressWarnings("unchecked")
-    @Overwrite
-    public void loadRenderers() {
-        if (this.theWorld != null) {
-            Blocks.leaves.setGraphicsLevel(this.mc.gameSettings.fancyGraphics);
-            Blocks.leaves2.setGraphicsLevel(this.mc.gameSettings.fancyGraphics);
-            this.renderDistanceChunks = this.mc.gameSettings.renderDistanceChunks;
-
-            for (Map.Entry<Integer, WorldRenderer> curRendererEntry : this.worldRenderersMap.entrySet()) {
-                curRendererEntry.getValue()
-                    .stopRendering();
+            if (this.displayListEntitiesDirty) {
+                RenderManager.renderPosX = 0.0D;
+                RenderManager.renderPosY = 0.0D;
+                RenderManager.renderPosZ = 0.0D;
+                this.rebuildDisplayListEntities();
             }
 
+            GL11.glMatrixMode(GL11.GL_MODELVIEW);
+            GL11.glPushMatrix();
+            GL11.glTranslated(-interpolatedX, -interpolatedY, -interpolatedZ);
+            GL11.glCallList(this.displayListEntities);
+            GL11.glPopMatrix();
+            RenderManager.renderPosX = interpolatedX;
+            RenderManager.renderPosY = interpolatedY;
+            RenderManager.renderPosZ = interpolatedZ;
+            this.mc.entityRenderer.enableLightmap((double) partialTicks);
+            this.theWorld.theProfiler.endStartSection("global");
+            List<Entity> list = curWorld.getLoadedEntityList();
+            if (pass == 0) // no indentation for smaller patch size
+            {
+                this.countEntitiesTotal = list.size();
+            }
             int i;
-            i = this.renderDistanceChunks * 2 + 1;
-            this.renderChunksWide = i;
-            this.renderChunksTall = 16;
-            this.renderChunksDeep = i;
+            Entity entity;
 
-            this.worldRenderersMap.clear();
-            this.worldRenderersList.clear();
-            this.sortedWorldRenderersList.clear();
+            for (i = 0; i < curWorld.weatherEffects.size(); ++i) {
+                entity = (Entity) curWorld.weatherEffects.get(i);
+                if (!entity.shouldRenderInPass(pass)) continue;
+                if (entity.isInRangeToRender3d(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord)
+                    && this.celeritas$renderer.isEntityVisible(entity)) {
+                    int entityId = EntityIdHelper.getEntityId(entity);
+                    CapturedRenderingState.INSTANCE.setCurrentEntity(entityId);
+                    GbufferPrograms.beginEntities();
 
-            this.minBlockX = 0;
-            this.minBlockY = 0;
-            this.minBlockZ = 0;
-            this.maxBlockX = this.renderChunksWide;
-            this.maxBlockY = this.renderChunksTall;
-            this.maxBlockZ = this.renderChunksDeep;
-            int l;
-
-            for (l = 0; l < this.worldRenderersToUpdate.size(); ++l) {
-                ((WorldRenderer) this.worldRenderersToUpdate.get(l)).needsUpdate = false;
-            }
-
-            this.worldRenderersToUpdate.clear();
-            this.tileEntities.clear();
-            this.onStaticEntitiesChanged();
-
-            for (World curWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
-                for (l = 0; l < this.renderChunksWide; ++l) {
-                    for (int i1 = 0; i1 < this.renderChunksTall; ++i1) {
-
-                        for (int j1 = 0; j1 < this.renderChunksDeep; ++j1) {
-
-                            if (((IMixinWorld) curWorld).isSubWorld()) {
-                                SubWorld curSubWorld = (SubWorld) curWorld;
-                                if (curSubWorld.getMaxX() < l * 16 || curSubWorld.getMinX() > (l + 1) * 16
-                                    || curSubWorld.getMaxY() < i1 * 16
-                                    || curSubWorld.getMinY() > (i1 + 1) * 16
-                                    || curSubWorld.getMaxZ() < j1 * 16
-                                    || curSubWorld.getMinZ() > (j1 + 1) * 16) {
-                                    this.removeWorldRenderer(curWorld, l, i1, j1);
-                                    continue;
-                                }
-                            }
-                            this.createWorldRenderer(curWorld, l, i1, j1);
-                        }
+                    try {
+                        RenderManager.instance.renderEntitySimple(entity, partialTicks);
+                    } finally {
+                        CapturedRenderingState.INSTANCE.setCurrentEntity(-1);
+                        GbufferPrograms.endEntities();
                     }
                 }
             }
 
-            if (this.theWorld != null) {
-                EntityLivingBase entitylivingbase = this.mc.renderViewEntity;
+            this.theWorld.theProfiler.endStartSection("entities");
 
-                if (entitylivingbase != null) {
-                    this.markRenderersForNewPositionSubworlds(
-                        entitylivingbase.posX,
-                        entitylivingbase.posY,
-                        entitylivingbase.posZ);
-                    Collections.sort(this.sortedWorldRenderersList, new EntitySorter(entitylivingbase));
+            for (i = 0; i < list.size(); ++i) {
+                entity = (Entity) list.get(i);
+                if (!entity.shouldRenderInPass(pass)) continue;
+                boolean flag = entity
+                    .isInRangeToRender3d(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord)
+                    && this.celeritas$renderer.isEntityVisible(entity)
+                    && (entity.ignoreFrustumCheck || camera.isBoundingBoxInFrustum(
+                        ((IMixinAxisAlignedBB) entity.boundingBox).getTransformedToGlobalBoundingBox(entity.worldObj))
+                        || entity.riddenByEntity == this.mc.thePlayer);
+                if (flag && entity instanceof EntityItem) {
+                    int j = Math.min(
+                        (int) (entity.getDistanceSq(transformedPos.xCoord, transformedPos.yCoord, transformedPos.zCoord)
+                            / 4.0D),
+                        255);
+                    sodium$entityItemCount[j]++;
+                    flag = j <= sodium$itemRenderDist;
+                }
+
+                if (!flag && entity instanceof EntityLiving) {
+                    EntityLiving entityliving = (EntityLiving) entity;
+
+                    if (entityliving.getLeashed() && entityliving.getLeashedToEntity() != null) {
+                        Entity entity1 = entityliving.getLeashedToEntity();
+                        flag = camera.isBoundingBoxInFrustum(
+                            ((IMixinAxisAlignedBB) entity1.boundingBox)
+                                .getTransformedToGlobalBoundingBox(entity.worldObj));
+                    }
+                }
+
+                if (flag
+                    && (entity != this.mc.renderViewEntity || this.mc.gameSettings.thirdPersonView != 0
+                        || this.mc.renderViewEntity.isPlayerSleeping())
+                    && curWorld
+                        .blockExists(MathHelper.floor_double(entity.posX), 0, MathHelper.floor_double(entity.posZ))) {
+                    int entityId = EntityIdHelper.getEntityId(entity);
+                    CapturedRenderingState.INSTANCE.setCurrentEntity(entityId);
+                    GbufferPrograms.beginEntities();
+
+                    try {
+                        RenderManager.instance.renderEntitySimple(entity, partialTicks);
+                    } finally {
+                        CapturedRenderingState.INSTANCE.setCurrentEntity(-1);
+                        GbufferPrograms.endEntities();
+                    }
                 }
             }
 
-            this.renderEntitiesStartupCounter = 2;
+            this.theWorld.theProfiler.endStartSection("blockentities");
+            RenderHelper.enableStandardItemLighting();
+
+            if (Iris.enabled) {
+                GbufferPrograms.beginBlockEntities();
+                GbufferPrograms.setBlockEntityDefaults();
+            }
+
+            RenderGlobal rgProxy = ((EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) Minecraft
+                .getMinecraft().thePlayer).getProxyPlayer(curWorld)).mc.renderGlobal;
+            try {
+                Field celeritas$renderer = RenderGlobal.class.getDeclaredField("celeritas$renderer");
+                celeritas$renderer.setAccessible(true);
+                CeleritasWorldRenderer cwr = (CeleritasWorldRenderer) celeritas$renderer.get(rgProxy);
+                cwr.renderBlockEntities(partialTicks);
+            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+            if (Iris.enabled) {
+                GbufferPrograms.endBlockEntities();
+            }
+
+            this.mc.entityRenderer.disableLightmap((double) partialTicks);
+            this.theWorld.theProfiler.endSection();
         }
+    }
+
+    /**
+     * 
+     * @author Sergius Onesimus
+     * @reason Angelica's optimization broke OBBs render. Using modified vanilla renderer for it
+     */
+    @WrapOperation(
+        method = "drawOutlinedBoundingBox",
+        remap = true,
+        at = @At(
+            value = "INVOKE",
+            target = "Lcom/gtnewhorizons/angelica/render/SelectionBoxRenderer;draw(Lnet/minecraft/util/AxisAlignedBB;I)V",
+            remap = false))
+    private static void drawOrientedBoundingBox(AxisAlignedBB aabb, int color,
+        Operation<SelectionBoxRenderer> original) {
+        if (aabb instanceof OrientedBB obb) {
+            Tessellator tessellator = Tessellator.instance;
+            tessellator.startDrawing(3);
+
+            if (color != -1) {
+                tessellator.setColorOpaque_I(color);
+            }
+
+            tessellator.addVertex(obb.getX(0), obb.getY(0), obb.getZ(0));
+            tessellator.addVertex(obb.getX(1), obb.getY(1), obb.getZ(1));
+            tessellator.addVertex(obb.getX(3), obb.getY(3), obb.getZ(3));
+            tessellator.addVertex(obb.getX(2), obb.getY(2), obb.getZ(2));
+            tessellator.addVertex(obb.getX(0), obb.getY(0), obb.getZ(0));
+            tessellator.draw();
+            tessellator.startDrawing(3);
+
+            if (color != -1) {
+                tessellator.setColorOpaque_I(color);
+            }
+
+            tessellator.addVertex(obb.getX(4), obb.getY(4), obb.getZ(4));
+            tessellator.addVertex(obb.getX(5), obb.getY(5), obb.getZ(5));
+            tessellator.addVertex(obb.getX(7), obb.getY(7), obb.getZ(7));
+            tessellator.addVertex(obb.getX(6), obb.getY(6), obb.getZ(6));
+            tessellator.addVertex(obb.getX(4), obb.getY(4), obb.getZ(4));
+            tessellator.draw();
+            tessellator.startDrawing(1);
+
+            if (color != -1) {
+                tessellator.setColorOpaque_I(color);
+            }
+
+            tessellator.addVertex(obb.getX(0), obb.getY(0), obb.getZ(0));
+            tessellator.addVertex(obb.getX(4), obb.getY(4), obb.getZ(4));
+            tessellator.addVertex(obb.getX(1), obb.getY(1), obb.getZ(1));
+            tessellator.addVertex(obb.getX(5), obb.getY(5), obb.getZ(5));
+            tessellator.addVertex(obb.getX(3), obb.getY(3), obb.getZ(3));
+            tessellator.addVertex(obb.getX(7), obb.getY(7), obb.getZ(7));
+            tessellator.addVertex(obb.getX(2), obb.getY(2), obb.getZ(2));
+            tessellator.addVertex(obb.getX(6), obb.getY(6), obb.getZ(6));
+            tessellator.draw();
+        } else original.call(aabb, color);
     }
 
     @WrapOperation(
         method = "sortAndRender",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/EntityRenderer;disableLightmap(D)V"))
-    private void sortAndRender(EntityRenderer entityRenderer, double partialTicks, Operation<Void> original) {
-        // We will disable it later
-    }
-
-    @SuppressWarnings({ "unused", "unchecked" })
-    @Inject(method = "sortAndRender", at = @At("RETURN"), cancellable = true)
-    private void sortAndRender(EntityLivingBase entity, int pass, double partialTicks,
-        CallbackInfoReturnable<Integer> ci) {
-        this.theWorld.theProfiler.startSection("sortchunks");
-
-        if (this.worldRenderersList.size() > 0) for (int j = 0; j < 10; ++j) {
-            this.worldRenderersCheckIndex = (this.worldRenderersCheckIndex + 1) % this.worldRenderersList.size();
-            WorldRenderer worldrenderer = this.worldRenderersList.get(this.worldRenderersCheckIndex);
-
-            if (worldrenderer.needsUpdate && !this.worldRenderersToUpdate.contains(worldrenderer)) {
-                this.worldRenderersToUpdate.add(worldrenderer);
-            }
-        }
-
-        if (pass == 0) {
-            this.renderersLoaded = 0;
-            this.dummyRenderInt = 0;
-            this.renderersBeingClipped = 0;
-            this.renderersBeingOccluded = 0;
-            this.renderersBeingRendered = 0;
-            this.renderersSkippingRenderPass = 0;
-        }
-
-        double d9 = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-        double d1 = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-        double d2 = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-        double d3 = entity.posX - this.prevSortX;
-        double d4 = entity.posY - this.prevSortY;
-        double d5 = entity.posZ - this.prevSortZ;
-
-        if (this.prevChunkSortX != entity.chunkCoordX || this.prevChunkSortY != entity.chunkCoordY
-            || this.prevChunkSortZ != entity.chunkCoordZ
-            || d3 * d3 + d4 * d4 + d5 * d5 > 16.0D) {
-            this.prevSortX = entity.posX;
-            this.prevSortY = entity.posY;
-            this.prevSortZ = entity.posZ;
-            this.prevChunkSortX = entity.chunkCoordX;
-            this.prevChunkSortY = entity.chunkCoordY;
-            this.prevChunkSortZ = entity.chunkCoordZ;
-            this.markRenderersForNewPositionSubworlds(entity.posX, entity.posY, entity.posZ);
-            Collections.sort(this.sortedWorldRenderersList, new EntitySorter(entity));
-        } else {
-            boolean rendererPositionsChanged = false;
-            for (World curSubWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
-                if (((SubWorldClient) curSubWorld).rendererUpdateRequired()) {
-                    rendererPositionsChanged = true;
-                    this.markRenderersForNewPositionSingle(
-                        this.prevSortX,
-                        this.prevSortY,
-                        this.prevSortZ,
-                        ((IMixinWorld) curSubWorld).getSubWorldID());
-                    ((SubWorldClient) curSubWorld).markRendererUpdateDone();
-                }
-            }
-            if (rendererPositionsChanged) Collections.sort(this.sortedWorldRenderersList, new EntitySorter(entity));
-        }
-
-        double d6 = entity.posX - this.prevRenderSortX;
-        double d7 = entity.posY - this.prevRenderSortY;
-        double d8 = entity.posZ - this.prevRenderSortZ;
-        int k;
-
-        if (d6 * d6 + d7 * d7 + d8 * d8 > 1.0D) {
-            this.prevRenderSortX = entity.posX;
-            this.prevRenderSortY = entity.posY;
-            this.prevRenderSortZ = entity.posZ;
-
-            if (this.sortedWorldRenderersList.size() > 0) for (k = 0; k < 27; ++k) {
-                if (k >= this.sortedWorldRenderersList.size()) break;
-                this.sortedWorldRenderersList.get(k)
-                    .updateRendererSort(entity);
-            }
-        }
-
-        RenderHelper.disableStandardItemLighting();
-        byte b1 = 0;
-
-        if (this.occlusionEnabled && this.mc.gameSettings.advancedOpengl
-            && !this.mc.gameSettings.anaglyph
-            && pass == 0) {
-            int index = 0;
-            for (WorldRenderer curRenderer : this.sortedWorldRenderersList) {
-                if (curRenderer.distanceToEntitySquared(entity) > 675.0f)/*
-                                                                          * 3 * (16/2 + 6)Ġ = 588... let's
-                                                                          * add some space
-                                                                          */
-                    break;
-                index++;
-            }
-
-            byte b0 = 0;
-            int l = Math.max(16, index);// 16;
-            this.checkOcclusionQueryResult(b0, l);
-
-            for (int i1 = b0; i1 < l && i1 < this.sortedWorldRenderersList.size(); ++i1) {
-                this.sortedWorldRenderersList.get(i1).isVisible = true;
-            }
-
-            this.theWorld.theProfiler.endStartSection("render");
-            k = b1 + this.renderSortedRenderers(b0, l, pass, partialTicks);
-
-            do {
-                this.theWorld.theProfiler.endStartSection("occ");
-                int l1 = l;
-                l *= 2;
-
-                if (l > this.sortedWorldRenderersList.size()) {
-                    l = this.sortedWorldRenderersList.size();
-                }
-
-                GL11.glDisable(GL11.GL_TEXTURE_2D);
-                GL11.glDisable(GL11.GL_LIGHTING);
-                GL11.glDisable(GL11.GL_ALPHA_TEST);
-                GL11.glDisable(GL11.GL_FOG);
-                GL11.glColorMask(false, false, false, false);
-                GL11.glDepthMask(false);
-                this.theWorld.theProfiler.startSection("check");
-                this.checkOcclusionQueryResult(l1, l);
-                this.theWorld.theProfiler.endSection();
-                GL11.glPushMatrix();
-                float f9 = 0.0F;
-                float f = 0.0F;
-                float f1 = 0.0F;
-
-                for (int j1 = l1; j1 < l && j1 < this.sortedWorldRenderersList.size(); ++j1) {
-                    WorldRenderer curRenderer = this.sortedWorldRenderersList.get(j1);
-
-                    if (curRenderer.skipAllRenderPasses()) {
-                        curRenderer.isInFrustum = false;
-                    } else {
-                        if (!curRenderer.isInFrustum) {
-                            curRenderer.isVisible = true;
-                        }
-
-                        if (curRenderer.isInFrustum && !curRenderer.isWaitingOnOcclusionQuery) {
-                            float f2 = MathHelper.sqrt_float(curRenderer.distanceToEntitySquared(entity));
-                            int k1 = (int) (1.0F + f2 / 128.0F);
-
-                            if (this.cloudTickCounter % k1 == j1 % k1) {
-                                WorldRenderer worldrenderer1 = curRenderer;
-                                float f3 = (float) ((double) worldrenderer1.posXMinus - d9);
-                                float f4 = (float) ((double) worldrenderer1.posYMinus - d1);
-                                float f5 = (float) ((double) worldrenderer1.posZMinus - d2);
-                                float f6 = f3 - f9;
-                                float f7 = f4 - f;
-                                float f8 = f5 - f1;
-
-                                GL11.glPushMatrix();
-                                GL11.glTranslatef((float) -d9, (float) -d1, (float) -d2);
-                                if (((IMixinWorld) worldrenderer1.worldObj).isSubWorld()) {
-                                    GL11.glMultMatrix(
-                                        ((SubWorld) worldrenderer1.worldObj).getTransformToGlobalMatrixDirectBuffer());
-                                }
-                                GL11.glTranslatef(
-                                    (float) worldrenderer1.posXMinus,
-                                    (float) worldrenderer1.posYMinus,
-                                    (float) worldrenderer1.posZMinus);
-
-                                this.theWorld.theProfiler.startSection("bb");
-                                ARBOcclusionQuery.glBeginQueryARB(
-                                    ARBOcclusionQuery.GL_SAMPLES_PASSED_ARB,
-                                    curRenderer.glOcclusionQuery);
-                                curRenderer.callOcclusionQueryList();
-                                ARBOcclusionQuery.glEndQueryARB(ARBOcclusionQuery.GL_SAMPLES_PASSED_ARB);
-                                this.theWorld.theProfiler.endSection();
-                                curRenderer.isWaitingOnOcclusionQuery = true;
-                                GL11.glPopMatrix();
-                            }
-                        }
-                    }
-                }
-
-                GL11.glPopMatrix();
-
-                if (this.mc.gameSettings.anaglyph) {
-                    if (EntityRenderer.anaglyphField == 0) {
-                        GL11.glColorMask(false, true, true, true);
-                    } else {
-                        GL11.glColorMask(true, false, false, true);
-                    }
-                } else {
-                    GL11.glColorMask(true, true, true, true);
-                }
-
-                GL11.glDepthMask(true);
-                GL11.glEnable(GL11.GL_TEXTURE_2D);
-                GL11.glEnable(GL11.GL_ALPHA_TEST);
-                GL11.glEnable(GL11.GL_FOG);
-                this.theWorld.theProfiler.endStartSection("render");
-                k += this.renderSortedRenderers(l1, l, pass, partialTicks);
-            } while (l < this.sortedWorldRenderersList.size());
-        } else {
-            this.theWorld.theProfiler.endStartSection("render");
-            k = b1 + this.renderSortedRenderers(0, this.sortedWorldRenderersList.size(), pass, partialTicks);
-        }
-
-        this.mc.entityRenderer.disableLightmap(partialTicks);
-        this.theWorld.theProfiler.endSection();
-        ci.setReturnValue(k);
-        ci.cancel();
-    }
-
-    @Overwrite
-    public void checkOcclusionQueryResult(int p_72720_1_, int p_72720_2_) {
-        for (int k = p_72720_1_; k < p_72720_2_ && k < this.sortedWorldRenderersList.size(); ++k) {
-            WorldRenderer curRenderer = this.sortedWorldRenderersList.get(k);
-            if (curRenderer.isWaitingOnOcclusionQuery) {
-                this.occlusionResult.clear();
-                ARBOcclusionQuery.glGetQueryObjectuARB(
-                    curRenderer.glOcclusionQuery,
-                    ARBOcclusionQuery.GL_QUERY_RESULT_AVAILABLE_ARB,
-                    this.occlusionResult);
-
-                if (this.occlusionResult.get(0) != 0) {
-                    curRenderer.isWaitingOnOcclusionQuery = false;
-                    this.occlusionResult.clear();
-                    ARBOcclusionQuery.glGetQueryObjectuARB(
-                        curRenderer.glOcclusionQuery,
-                        ARBOcclusionQuery.GL_QUERY_RESULT_ARB,
-                        this.occlusionResult);
-                    curRenderer.isVisible = this.occlusionResult.get(0) != 0;
-                }
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Overwrite
-    public int renderSortedRenderers(int par1, int par2, int par3, double par4) {
-        this.glRenderLists.clear();
-        int l = 0;
-        int i1 = par1;
-        int j1 = par2;
-        byte b0 = 1;
-
-        if (par3 == 1) {
-            i1 = this.sortedWorldRenderersList.size() - 1 - par1;
-            j1 = this.sortedWorldRenderersList.size() - 1 - par2;
-            b0 = -1;
-        }
-
-        for (int k1 = i1; k1 != j1; k1 += b0) {
-            WorldRenderer curRenderer = this.sortedWorldRenderersList.get(k1);
-            if (par3 == 0) {
-                ++this.renderersLoaded;
-
-                if (curRenderer.skipRenderPass[par3]) {
-                    ++this.renderersSkippingRenderPass;
-                } else if (!curRenderer.isInFrustum) {
-                    ++this.renderersBeingClipped;
-                } else if (this.occlusionEnabled && !curRenderer.isVisible) {
-                    ++this.renderersBeingOccluded;
-                } else {
-                    ++this.renderersBeingRendered;
-                }
-            }
-
-            if (!curRenderer.skipRenderPass[par3] && curRenderer.isInFrustum
-                && (!this.occlusionEnabled || curRenderer.isVisible)) {
-                int l1 = curRenderer.getGLCallListForPass(par3);
-
-                if (l1 >= 0) {
-                    this.glRenderLists.add(curRenderer);
-                    ++l;
-                }
-            }
-        }
-
-        EntityLivingBase entitylivingbase = this.mc.renderViewEntity;
-        double d3 = entitylivingbase.lastTickPosX + (entitylivingbase.posX - entitylivingbase.lastTickPosX) * par4;
-        double d1 = entitylivingbase.lastTickPosY + (entitylivingbase.posY - entitylivingbase.lastTickPosY) * par4;
-        double d2 = entitylivingbase.lastTickPosZ + (entitylivingbase.posZ - entitylivingbase.lastTickPosZ) * par4;
-        int i2 = 0;
-        int j2;
-
-        for (j2 = 0; j2 < this.allRenderLists.length; ++j2) {
-            this.allRenderLists[j2].resetList();
-        }
-
-        int k2;
-        int l2;
-
-        for (j2 = 0; j2 < this.glRenderLists.size(); ++j2) {
-            WorldRenderer worldrenderer = (WorldRenderer) this.glRenderLists.get(j2);
-            k2 = -1;
-
-            int subWorldID = ((IMixinWorld) worldrenderer.worldObj).getSubWorldID();
-            DoubleBuffer customTransformation = null;
-            if (((IMixinWorld) worldrenderer.worldObj).isSubWorld())
-                customTransformation = ((SubWorld) worldrenderer.worldObj).getTransformToGlobalMatrixDirectBuffer();
-
-            for (l2 = 0; l2 < i2; ++l2) {
-                if (((IMixinRenderList) this.allRenderLists[l2]).rendersChunk(
-                    worldrenderer.posXMinus,
-                    worldrenderer.posYMinus,
-                    worldrenderer.posZMinus,
-                    subWorldID)) {
-                    k2 = l2;
-                }
-            }
-
-            if (k2 < 0) {
-                k2 = i2++;
-                ((IMixinRenderList) this.allRenderLists[k2]).setupRenderList(
-                    worldrenderer.posXMinus,
-                    worldrenderer.posYMinus,
-                    worldrenderer.posZMinus,
-                    d3,
-                    d1,
-                    d2,
-                    subWorldID,
-                    customTransformation);
-            }
-
-            this.allRenderLists[k2].addGLRenderList(worldrenderer.getGLCallListForPass(par3));
-        }
-
-        j2 = MathHelper.floor_double(d3);
-        int i3 = MathHelper.floor_double(d2);
-        k2 = j2 - (j2 & 1023);
-        l2 = i3 - (i3 & 1023);
-        Arrays.sort(this.allRenderLists, new RenderDistanceSorter(k2, l2));
-        this.renderAllRenderLists(par3, par4);
-        return l;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Inject(method = "updateRenderers", at = @At(value = "RETURN"), cancellable = true)
-    public void updateRenderers(EntityLivingBase p_72716_1_, boolean p_72716_2_, CallbackInfoReturnable<Boolean> ci) {
-        byte b0 = 2;
-        RenderSorter rendersorter = new RenderSorter(p_72716_1_);
-        WorldRenderer[] aworldrenderer = new WorldRenderer[b0];
-        ArrayList<WorldRenderer> arraylist = null;
-        int i = this.worldRenderersToUpdate.size();
-        int j = 0;
-        this.theWorld.theProfiler.startSection("nearChunksSearch");
-        int k;
-        WorldRenderer worldrenderer;
-        int l;
-        int i1;
-        label136:
-
-        for (k = 0; k < i; ++k) {
-            worldrenderer = (WorldRenderer) this.worldRenderersToUpdate.get(k);
-
-            if (worldrenderer != null) {
-                if (!p_72716_2_) {
-                    if (worldrenderer.distanceToEntitySquared(p_72716_1_) > 272.0F) {
-                        for (l = 0; l < b0 && (aworldrenderer[l] == null
-                            || rendersorter.compare(aworldrenderer[l], worldrenderer) <= 0); ++l) {
-                            ;
-                        }
-
-                        --l;
-
-                        if (l > 0) {
-                            i1 = l;
-
-                            while (true) {
-                                --i1;
-
-                                if (i1 == 0) {
-                                    aworldrenderer[l] = worldrenderer;
-                                    continue label136;
-                                }
-
-                                aworldrenderer[i1 - 1] = aworldrenderer[i1];
-                            }
-                        }
-
-                        continue;
-                    }
-                } else if (!worldrenderer.isInFrustum) {
-                    continue;
-                }
-
-                if (arraylist == null) {
-                    arraylist = new ArrayList<WorldRenderer>();
-                }
-
-                ++j;
-                arraylist.add(worldrenderer);
-                this.worldRenderersToUpdate.set(k, null);
-            }
-        }
-
-        this.theWorld.theProfiler.endSection();
-        this.theWorld.theProfiler.startSection("sort");
-
-        if (arraylist != null) {
-            if (arraylist.size() > 1) {
-                Collections.sort(arraylist, rendersorter);
-            }
-
-            for (k = arraylist.size() - 1; k >= 0; --k) {
-                worldrenderer = (WorldRenderer) arraylist.get(k);
-                worldrenderer.updateRenderer(p_72716_1_);
-                worldrenderer.needsUpdate = false;
-            }
-        }
-
-        this.theWorld.theProfiler.endSection();
-        k = 0;
-        this.theWorld.theProfiler.startSection("rebuild");
-        int k1;
-
-        for (k1 = b0 - 1; k1 >= 0; --k1) {
-            WorldRenderer worldrenderer2 = aworldrenderer[k1];
-
-            if (worldrenderer2 != null) {
-                if (!worldrenderer2.isInFrustum && worldrenderer2.isInitialized && k1 != b0 - 1) {
-                    aworldrenderer[k1] = null;
-                    aworldrenderer[0] = null;
-                    break;
-                }
-
-                aworldrenderer[k1].updateRenderer(p_72716_1_);
-                aworldrenderer[k1].needsUpdate = false;
-                ++k;
-            }
-        }
-
-        this.theWorld.theProfiler.endSection();
-        this.theWorld.theProfiler.startSection("cleanup");
-        k1 = 0;
-        l = 0;
-
-        for (i1 = this.worldRenderersToUpdate.size(); k1 != i1; ++k1) {
-            WorldRenderer worldrenderer1 = (WorldRenderer) this.worldRenderersToUpdate.get(k1);
-
-            if (worldrenderer1 != null) {
-                boolean flag1 = false;
-
-                for (int j1 = 0; j1 < b0 && !flag1; ++j1) {
-                    if (worldrenderer1 == aworldrenderer[j1]) {
-                        flag1 = true;
-                    }
-                }
-
-                if (!flag1) {
-                    if (l != k1) {
-                        this.worldRenderersToUpdate.set(l, worldrenderer1);
-                    }
-
-                    ++l;
-                }
-            }
-        }
-
-        this.theWorld.theProfiler.endSection();
-        this.theWorld.theProfiler.startSection("trim");
-
-        while (true) {
-            --k1;
-
-            if (k1 < l) {
-                this.theWorld.theProfiler.endSection();
-                ci.setReturnValue(i == j + k);
-                ci.cancel();
-                break;
-            }
-
-            this.worldRenderersToUpdate.remove(k1);
-        }
-    }
-
-    @Inject(method = "markBlocksForUpdate", at = @At(value = "TAIL"))
-    public void markBlocksForUpdate(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, CallbackInfo ci) {
-        markBlocksForUpdateSubworlds(minX, minY, minZ, maxX, maxY, maxZ);
-    }
-
-    public void markBlocksForUpdateSubworlds(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        int k1 = MathHelper.bucketInt(minX, 16);
-        int l1 = MathHelper.bucketInt(minY, 16);
-        int i2 = MathHelper.bucketInt(minZ, 16);
-        int j2 = MathHelper.bucketInt(maxX, 16);
-        int k2 = MathHelper.bucketInt(maxY, 16);
-        int l2 = MathHelper.bucketInt(maxZ, 16);
-
-        for (World curWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
-            for (int i3 = k1; i3 <= j2; ++i3) {
-                int j3 = i3 % this.renderChunksWide;
-
-                if (j3 < 0) {
-                    j3 += this.renderChunksWide;
-                }
-
-                for (int k3 = l1; k3 <= k2; ++k3) {
-                    int l3 = k3 % this.renderChunksTall;
-
-                    if (l3 < 0) {
-                        l3 += this.renderChunksTall;
-                    }
-
-                    for (int i4 = i2; i4 <= l2; ++i4) {
-                        int j4 = i4 % this.renderChunksDeep;
-
-                        if (j4 < 0) {
-                            j4 += this.renderChunksDeep;
-                        }
-
-                        int k4 = ((((IMixinWorld) curWorld).getSubWorldID() * this.renderChunksDeep + j4)
-                            * this.renderChunksTall + l3) * this.renderChunksWide + j3;
-                        WorldRenderer worldrenderer = this.worldRenderersMap.get(k4);
-
-                        if (worldrenderer != null && !worldrenderer.needsUpdate) {
-                            this.worldRenderersToUpdate.add(worldrenderer);
-                            worldrenderer.markDirty();
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Inject(method = "clipRenderersByFrustum", at = @At(value = "TAIL"))
-    public void clipRenderersByFrustum(ICamera p_72729_1_, float p_72729_2_, CallbackInfo ci) {
-        for (Map.Entry<Integer, WorldRenderer> curRendererEntry : this.worldRenderersMap.entrySet()) {
-            WorldRenderer curRenderer = curRendererEntry.getValue();
-            if (!curRenderer.skipAllRenderPasses()
-                && (!curRenderer.isInFrustum || (curRendererEntry.getKey() + this.frustumCheckOffset & 15) == 0)) {
-                curRenderer.updateInFrustum(p_72729_1_);
-            }
-        }
-
-        ++this.frustumCheckOffset;
-    }
-
-    /**
-     * Render all render lists
-     */
-    @Overwrite
-    public void renderAllRenderLists(int p_72733_1_, double p_72733_2_) {
-        for (int j = 0; j < this.allRenderLists.length; ++j) {
-            this.allRenderLists[j].callLists();
-        }
-    }
-
-    @Inject(method = "markBlockForUpdate", at = @At(value = "TAIL"))
-    public void markBlockForUpdate(int x, int y, int z, CallbackInfo ci) {
-        this.markBlocksForUpdateSubworlds(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
-    }
-
-    @Inject(method = "markBlockForRenderUpdate", at = @At(value = "TAIL"))
-    public void markBlockForRenderUpdate(int x, int y, int z, CallbackInfo ci) {
-        this.markBlocksForUpdateSubworlds(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
-    }
-
-    @Inject(method = "markBlockRangeForRenderUpdate", at = @At(value = "TAIL"))
-    public void markBlockRangeForRenderUpdate(int minX, int minY, int minZ, int maxX, int maxY, int maxZ,
-        CallbackInfo ci) {
-        this.markBlocksForUpdateSubworlds(minX - 1, minY - 1, minZ - 1, maxX + 1, maxY + 1, maxZ + 1);
+        remap = true,
+        at = @At(value = "FIELD", target = "Lnet/coderbot/iris/Iris;enabled:Z", remap = false))
+    public boolean disableIrisForSubworlds(Operation<Boolean> original) {
+        return original.call() && !(AngelicaIntegration.currentWorld instanceof SubWorld);
     }
 
 }

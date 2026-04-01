@@ -3,6 +3,7 @@ package su.sergiusonesimus.metaworlds.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.resources.IResourceManager;
 import net.minecraft.client.resources.LanguageManager;
 import net.minecraft.client.resources.ResourcePackRepository;
@@ -105,5 +106,10 @@ public class MinecraftSubWorldProxy extends Minecraft {
     @Override
     public void func_152348_aa() {
         this.realMinecraft.func_152348_aa();
+    }
+
+    @Override
+    public TextureMap getTextureMapBlocks() {
+        return this.realMinecraft.getTextureMapBlocks();
     }
 }

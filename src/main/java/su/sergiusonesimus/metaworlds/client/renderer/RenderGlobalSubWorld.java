@@ -22,27 +22,31 @@ import net.minecraft.world.World;
 
 import org.lwjgl.opengl.ARBOcclusionQuery;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobal;
+import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.renderer.IMixinRenderGlobalVanilla;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class RenderGlobalSubWorld extends RenderGlobal {
 
     private RenderGlobal parentRenderGlobal;
 
-    public RenderGlobalSubWorld(Minecraft par1Minecraft, RenderGlobal origRenderGlobal) {
-        super(null);
+    public RenderGlobalSubWorld(Minecraft mc, RenderGlobal origRenderGlobal) {
+        super(mc);
 
-        this.mc = par1Minecraft;
-        this.renderEngine = par1Minecraft.getTextureManager();
+        this.mc = mc;
+        this.renderEngine = mc.getTextureManager();
 
         this.worldRenderersToUpdate = ((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersToUpdate();
-        ((IMixinRenderGlobal) this)
-            .setSortedWorldRenderersList(((IMixinRenderGlobal) origRenderGlobal).getSortedWorldRenderersList());
-        ((IMixinRenderGlobal) this)
-            .setWorldRenderersMap(((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersMap());
-        ((IMixinRenderGlobal) this)
-            .setWorldRenderersList(((IMixinRenderGlobal) origRenderGlobal).getWorldRenderersList());
+        if (!MetaworldsMod.isAngelicaLoaded) {
+            ((IMixinRenderGlobalVanilla) this).setSortedWorldRenderersList(
+                ((IMixinRenderGlobalVanilla) origRenderGlobal).getSortedWorldRenderersList());
+            ((IMixinRenderGlobalVanilla) this)
+                .setWorldRenderersMap(((IMixinRenderGlobalVanilla) origRenderGlobal).getWorldRenderersMap());
+            ((IMixinRenderGlobalVanilla) this)
+                .setWorldRenderersList(((IMixinRenderGlobalVanilla) origRenderGlobal).getWorldRenderersList());
+        }
 
         this.renderChunksWide = ((IMixinRenderGlobal) origRenderGlobal).getRenderChunksWide();
         this.renderChunksTall = ((IMixinRenderGlobal) origRenderGlobal).getRenderChunksTall();
@@ -63,7 +67,7 @@ public class RenderGlobalSubWorld extends RenderGlobal {
             ARBOcclusionQuery.glGenQueriesARB(this.glOcclusionQueryBase);
         }
 
-        this.theWorld = par1Minecraft.theWorld;
+        this.theWorld = mc.theWorld;
 
         this.parentRenderGlobal = origRenderGlobal;
     }
@@ -74,32 +78,6 @@ public class RenderGlobalSubWorld extends RenderGlobal {
         if (((IMixinRenderGlobal) this).getOcclusionEnabled()) {
             ARBOcclusionQuery.glDeleteQueriesARB(((IMixinRenderGlobal) this).getOcclusionQueryBase());
         }
-    }
-
-    /**
-     * On the client, re-renders the block. On the server, sends the block to the client (which will re-render it),
-     * including the tile entity description packet if applicable. Args: x, y, z
-     */
-    @Override
-    public void markBlockForUpdate(int par1, int par2, int par3) {
-        parentRenderGlobal.markBlockForUpdate(par1, par2, par3);
-    }
-
-    /**
-     * On the client, re-renders this block. On the server, does nothing. Used for lighting updates.
-     */
-    @Override
-    public void markBlockForRenderUpdate(int par1, int par2, int par3) {
-        parentRenderGlobal.markBlockForRenderUpdate(par1, par2, par3);
-    }
-
-    /**
-     * On the client, re-renders all blocks in this range, inclusive. On the server, does nothing. Args: min x, min y,
-     * min z, max x, max y, max z
-     */
-    @Override
-    public void markBlockRangeForRenderUpdate(int par1, int par2, int par3, int par4, int par5, int par6) {
-        parentRenderGlobal.markBlockRangeForRenderUpdate(par1, par2, par3, par4, par5, par6);
     }
 
     /**

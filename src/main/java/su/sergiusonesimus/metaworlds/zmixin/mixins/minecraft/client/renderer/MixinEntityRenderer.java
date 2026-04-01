@@ -17,6 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.util.IMixinAxisAlignedBB;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
@@ -29,17 +31,15 @@ public abstract class MixinEntityRenderer {
 
     // getMouseOver
 
-    private Entity storedEntity;
-
     @ModifyVariable(method = "getMouseOver", at = @At(value = "STORE", ordinal = 0), ordinal = 0)
-    private Entity storeEntity(Entity original) {
-        storedEntity = original;
+    private Entity shareEntity(Entity original, @Share("entity") LocalRef<Entity> entity) {
+        entity.set(original);
         return original;
     }
 
     @ModifyVariable(method = "getMouseOver", at = @At(value = "STORE", ordinal = 0), ordinal = 0)
-    private AxisAlignedBB transformAABB(AxisAlignedBB original) {
-        return ((IMixinAxisAlignedBB) original).getTransformedToGlobalBoundingBox(storedEntity.worldObj);
+    private AxisAlignedBB transformAABB(AxisAlignedBB original, @Share("entity") LocalRef<Entity> entity) {
+        return ((IMixinAxisAlignedBB) original).getTransformedToGlobalBoundingBox(entity.get().worldObj);
     }
 
     @WrapOperation(
@@ -48,8 +48,8 @@ public abstract class MixinEntityRenderer {
             value = "INVOKE",
             target = "Lnet/minecraft/util/AxisAlignedBB;calculateIntercept(Lnet/minecraft/util/Vec3;Lnet/minecraft/util/Vec3;)Lnet/minecraft/util/MovingObjectPosition;"))
     private MovingObjectPosition calculateInterceptLocal(AxisAlignedBB instance, Vec3 vec3, Vec3 vec32,
-        Operation<MovingObjectPosition> original) {
-        return ((IMixinAxisAlignedBB) instance).calculateIntercept(vec3, vec32, storedEntity.worldObj);
+        Operation<MovingObjectPosition> original, @Share("entity") LocalRef<Entity> entity) {
+        return ((IMixinAxisAlignedBB) instance).calculateIntercept(vec3, vec32, entity.get().worldObj);
     }
 
     // renderWorld

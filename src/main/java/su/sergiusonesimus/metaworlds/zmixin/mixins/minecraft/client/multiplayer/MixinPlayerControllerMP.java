@@ -29,6 +29,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import su.sergiusonesimus.metaworlds.compat.CompatUtil;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.client.multiplayer.IMixinPlayerControllerMP;
@@ -320,35 +322,36 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
 
     // onPlayerRightClick
 
-    Vec3 transformedVec;
-    World storedWorld;
-
     @Inject(method = "onPlayerRightClick", at = { @At(value = "HEAD") })
     private void injectOnPlayerRightClick(EntityPlayer player, World worldIn, ItemStack itemStackIn, int x, int y,
-        int z, int side, Vec3 hitVector, CallbackInfoReturnable<Boolean> ci) {
-        transformedVec = ((IMixinWorld) worldIn).transformToLocal(hitVector);
-        storedWorld = worldIn;
+        int z, int side, Vec3 hitVector, CallbackInfoReturnable<Boolean> ci,
+        @Share("transformedVec") LocalRef<Vec3> transformedVec, @Share("world") LocalRef<World> world) {
+        transformedVec.set(((IMixinWorld) worldIn).transformToLocal(hitVector));
+        world.set(worldIn);
     }
 
     @WrapOperation(
         method = "onPlayerRightClick",
         at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;xCoord:D", opcode = Opcodes.GETFIELD))
-    private double getXcoord(Vec3 instance, Operation<Double> original) {
-        return transformedVec.xCoord;
+    private double getXcoord(Vec3 instance, Operation<Double> original,
+        @Share("transformedVec") LocalRef<Vec3> transformedVec) {
+        return transformedVec.get().xCoord;
     }
 
     @WrapOperation(
         method = "onPlayerRightClick",
         at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;yCoord:D", opcode = Opcodes.GETFIELD))
-    private double getYcoord(Vec3 instance, Operation<Double> original) {
-        return transformedVec.yCoord;
+    private double getYcoord(Vec3 instance, Operation<Double> original,
+        @Share("transformedVec") LocalRef<Vec3> transformedVec) {
+        return transformedVec.get().yCoord;
     }
 
     @WrapOperation(
         method = "onPlayerRightClick",
         at = @At(value = "FIELD", target = "Lnet/minecraft/util/Vec3;zCoord:D", opcode = Opcodes.GETFIELD))
-    private double getZcoord(Vec3 instance, Operation<Double> original) {
-        return transformedVec.zCoord;
+    private double getZcoord(Vec3 instance, Operation<Double> original,
+        @Share("transformedVec") LocalRef<Vec3> transformedVec) {
+        return transformedVec.get().zCoord;
     }
 
     @WrapOperation(
@@ -358,23 +361,23 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
             target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
             opcode = Opcodes.GETFIELD))
     private NetHandlerPlayClient getNetClientHandlerOnPlayerRightClick(PlayerControllerMP instance,
-        Operation<NetHandlerPlayClient> original) {
+        Operation<NetHandlerPlayClient> original, @Share("world") LocalRef<World> world) {
         return ((EntityClientPlayerMP) ((IMixinEntity) (Object) this.mc.thePlayer)
-            .getProxyPlayer(storedWorld)).sendQueue;
+            .getProxyPlayer(world.get())).sendQueue;
     }
 
     // attackEntity, interactWithEntitySendPacket
 
-    private EntityPlayer storedPlayer;
-
     @Inject(method = "attackEntity", at = @At(value = "HEAD"))
-    private void storePlayer(EntityPlayer player, Entity targetEntity, CallbackInfo ci) {
-        storedPlayer = player;
+    private void sharePlayer(EntityPlayer player, Entity targetEntity, CallbackInfo ci,
+        @Share("player") LocalRef<EntityPlayer> sharedPlayer) {
+        sharedPlayer.set(player);
     }
 
     @Inject(method = "interactWithEntitySendPacket", at = @At(value = "HEAD"))
-    private void storePlayer(EntityPlayer player, Entity targetEntity, CallbackInfoReturnable<Boolean> cir) {
-        storedPlayer = player;
+    private void sharePlayer(EntityPlayer player, Entity targetEntity, CallbackInfoReturnable<Boolean> cir,
+        @Share("player") LocalRef<EntityPlayer> sharedPlayer) {
+        sharedPlayer.set(player);
     }
 
     @WrapOperation(
@@ -384,8 +387,8 @@ public abstract class MixinPlayerControllerMP implements IMixinPlayerControllerM
             target = "Lnet/minecraft/client/multiplayer/PlayerControllerMP;netClientHandler:Lnet/minecraft/client/network/NetHandlerPlayClient;",
             opcode = Opcodes.GETFIELD))
     private NetHandlerPlayClient getNetClientHandlerAttackEntity(PlayerControllerMP instance,
-        Operation<NetHandlerPlayClient> original) {
-        return ((EntityClientPlayerMP) storedPlayer).sendQueue;
+        Operation<NetHandlerPlayClient> original, @Share("player") LocalRef<EntityPlayer> sharedPlayer) {
+        return ((EntityClientPlayerMP) sharedPlayer.get()).sendQueue;
     }
 
 }

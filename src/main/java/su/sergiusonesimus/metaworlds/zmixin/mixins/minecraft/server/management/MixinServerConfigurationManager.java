@@ -42,6 +42,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.google.common.base.Charsets;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import com.mojang.authlib.GameProfile;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -246,19 +249,17 @@ public class MixinServerConfigurationManager {
 
     // respawnPlayer
 
-    private int spawnWorld;
-    private EntityPlayerMP storedPlayer;
-
     @Inject(
         method = "respawnPlayer",
         at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/entity/EntityTracker;removePlayerFromTrackers(Lnet/minecraft/entity/player/EntityPlayerMP;)V",
             shift = Shift.BEFORE))
-    public void storeVariables(EntityPlayerMP player, int dimension, boolean conqueredEnd,
-        CallbackInfoReturnable<EntityPlayerMP> ci) {
-        spawnWorld = ((IMixinEntityPlayer) player).getSpawnWorldID(dimension);
-        storedPlayer = player;
+    public void shareVariables(EntityPlayerMP player, int dimension, boolean conqueredEnd,
+        CallbackInfoReturnable<EntityPlayerMP> ci, @Share("spawnWorld") LocalIntRef spawnWorld,
+        @Share("player") LocalRef<EntityPlayerMP> sharedPlayer) {
+        spawnWorld.set(((IMixinEntityPlayer) player).getSpawnWorldID(dimension));
+        sharedPlayer.set(player);
     }
 
     @WrapOperation(
@@ -267,14 +268,16 @@ public class MixinServerConfigurationManager {
             value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;verifyRespawnCoordinates(Lnet/minecraft/world/World;Lnet/minecraft/util/ChunkCoordinates;Z)Lnet/minecraft/util/ChunkCoordinates;"))
     public ChunkCoordinates verifyRespawnCoordinates(World world, ChunkCoordinates spawnCoordinates,
-        boolean forcedSpawn, Operation<ChunkCoordinates> original) {
-        if (spawnWorld == 0) return original.call(world, spawnCoordinates, forcedSpawn);
+        boolean forcedSpawn, Operation<ChunkCoordinates> original, @Share("spawnWorld") LocalIntRef spawnWorld,
+        @Share("player") LocalRef<EntityPlayerMP> sharedPlayer) {
+        int spawnWorldId = spawnWorld.get();
+        if (spawnWorldId == 0) return original.call(world, spawnCoordinates, forcedSpawn);
         else {
-            World subworld = ((IMixinWorld) ((IMixinWorld) world).getParentWorld()).getSubWorld(spawnWorld);
+            World subworld = ((IMixinWorld) ((IMixinWorld) world).getParentWorld()).getSubWorld(spawnWorldId);
             ChunkCoordinates result = EntityPlayer.verifyRespawnCoordinates(subworld, spawnCoordinates, forcedSpawn);
             if (result == null) {
-                ((IMixinEntityPlayer) storedPlayer).setSpawnWorldID(0);
-                spawnWorld = 0;
+                ((IMixinEntityPlayer) sharedPlayer.get()).setSpawnWorldID(0);
+                spawnWorld.set(0);
             } else {
                 ChunkCoordinates localSpawn = ((SubWorld) subworld).transformBlockToLocal(spawnCoordinates);
                 subworld.getChunkProvider()
@@ -290,23 +293,24 @@ public class MixinServerConfigurationManager {
             value = "INVOKE",
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;func_72381_a(Lnet/minecraft/entity/player/EntityPlayerMP;Lnet/minecraft/entity/player/EntityPlayerMP;Lnet/minecraft/world/World;)V"))
     public void func_72381_a(ServerConfigurationManager instance, EntityPlayerMP newPlayer, EntityPlayerMP oldPlayer,
-        World world, Operation<Void> original) {
+        World world, Operation<Void> original, @Share("player") LocalRef<EntityPlayerMP> sharedPlayer) {
         original.call(instance, newPlayer, oldPlayer, world);
-        storedPlayer = newPlayer;
+        sharedPlayer.set(newPlayer);
     }
 
     @WrapOperation(
         method = "respawnPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;setLocationAndAngles(DDDFF)V"))
     public void setLocationAndAngles(EntityPlayerMP player, double x, double y, double z, float yaw, float pitch,
-        Operation<Void> original) {
-        if (spawnWorld == 0) original.call(player, x, y, z, yaw, pitch);
+        Operation<Void> original, @Share("spawnWorld") LocalIntRef spawnWorld) {
+        int spawnWorldId = spawnWorld.get();
+        if (spawnWorldId == 0) original.call(player, x, y, z, yaw, pitch);
         else {
             World worldBelowFeet = ((IMixinWorld) ((IMixinWorld) player.worldObj).getParentWorld())
-                .getSubWorld(spawnWorld);
+                .getSubWorld(spawnWorldId);
             SubWorld subworld = (SubWorld) worldBelowFeet;
             Vec3 globalPos = subworld.transformToGlobal(x, y, z);
-            ((IMixinEntityPlayer) player).setSpawnWorldID(spawnWorld);
+            ((IMixinEntityPlayer) player).setSpawnWorldID(spawnWorldId);
             ((IMixinEntity) player).setWorldBelowFeet(worldBelowFeet);
             ((IMixinEntityPlayer) player).setCurrentSubworldPosition(x, y, z);
             subworld.registerEntityToDrag(player);
@@ -325,7 +329,7 @@ public class MixinServerConfigurationManager {
                     yaw - (float) (subworld.getRotationYaw() % 360 / 180 * Math.PI),
                     pitch,
                     false,
-                    spawnWorld,
+                    spawnWorldId,
                     SubWorldTypeManager.getTypeID(((IMixinWorld) worldBelowFeet).getSubWorldType()),
                     x,
                     y + 1.6200000047683716D,
@@ -358,12 +362,15 @@ public class MixinServerConfigurationManager {
         method = "respawnPlayer",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;setPlayerLocation(DDDFF)V"))
     public void setPlayerLocation(NetHandlerPlayServer handler, double x, double y, double z, float yaw, float pitch,
-        Operation<Void> original) {
-        World worldBelowFeet = ((IMixinWorld) ((IMixinWorld) storedPlayer.worldObj).getParentWorld()).getSubWorldsMap()
-            .get(spawnWorld);
-        if (spawnWorld == 0 || worldBelowFeet == null) original.call(handler, x, y, z, yaw, pitch);
+        Operation<Void> original, @Share("spawnWorld") LocalIntRef spawnWorld,
+        @Share("player") LocalRef<EntityPlayerMP> sharedPlayer) {
+        int spawnWorldId = spawnWorld.get();
+        World worldBelowFeet = ((IMixinWorld) ((IMixinWorld) sharedPlayer.get().worldObj).getParentWorld())
+            .getSubWorldsMap()
+            .get(spawnWorldId);
+        if (spawnWorldId == 0 || worldBelowFeet == null) original.call(handler, x, y, z, yaw, pitch);
         else {
-            Vec3 localPos = ((IMixinEntityPlayer) storedPlayer).getCurrentSubworldPosition();
+            Vec3 localPos = ((IMixinEntityPlayer) sharedPlayer.get()).getCurrentSubworldPosition();
             Vec3 globalPos = ((IMixinWorld) worldBelowFeet).transformToGlobal(localPos);
             ((IMixinNetHandlerPlayServer) handler).setPlayerLocation(
                 globalPos.xCoord,
@@ -371,7 +378,7 @@ public class MixinServerConfigurationManager {
                 globalPos.zCoord,
                 yaw,
                 pitch,
-                spawnWorld,
+                spawnWorldId,
                 SubWorldTypeManager.getTypeID(((IMixinWorld) worldBelowFeet).getSubWorldType()),
                 localPos.xCoord,
                 localPos.yCoord,
@@ -385,8 +392,9 @@ public class MixinServerConfigurationManager {
             value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V",
             ordinal = 2))
-    public void sendPacket(NetHandlerPlayServer handler, Packet packetIn, Operation<Void> original) {
-        original.call(handler, ((IMixinS05PacketSpawnPosition) packetIn).setSpawnWorldID(spawnWorld));
+    public void sendPacket(NetHandlerPlayServer handler, Packet packetIn, Operation<Void> original,
+        @Share("spawnWorld") LocalIntRef spawnWorld) {
+        original.call(handler, ((IMixinS05PacketSpawnPosition) packetIn).setSpawnWorldID(spawnWorld.get()));
     }
 
 }

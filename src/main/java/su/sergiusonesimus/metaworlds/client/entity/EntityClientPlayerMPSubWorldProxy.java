@@ -63,6 +63,7 @@ public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP impl
         this.mc.playerController = new PlayerControllerMPSubWorldProxy(Minecraft.getMinecraft().playerController, this);
         this.mc.effectRenderer = new EffectRenderer(targetSubWorld, Minecraft.getMinecraft().renderEngine);
         this.mc.renderGlobal = new RenderGlobalSubWorld(this.mc, Minecraft.getMinecraft().renderGlobal);
+        this.mc.renderGlobal.setWorldAndLoadRenderers((WorldClient) targetSubWorld);
 
         this.mc.theWorld.mc = this.mc;
 
