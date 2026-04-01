@@ -101,18 +101,18 @@ public enum Mixins {
             .addMixinClasses(
                 addPrefix("angelica.", "MixinEffectRenderer", "MixinEntityRenderer", "MixinRenderGlobal"))),
 
-    ANGELICA_COMPAT_LATE(new Builder("Modifying Angelica and Embeddium classes to support Metaworlds rendering")
-        .addTargetedMod(TargetedMod.ANGELICA)
-        .setSide(Side.CLIENT)
-        .setPhase(Phase.LATE)
-        .addMixinClasses(
-            addPrefix(
-                "angelica.",
-                "MixinAngelicaRenderSectionManager",
-                "MixinClientProxy",
-                "MixinShadowRenderer",
-                "MixinThreadedChunkTaskProvider",
-                "MixinViewport"))),
+    ANGELICA_COMPAT_LATE(
+        new Builder("Modifying Angelica classes to support Metaworlds rendering").addTargetedMod(TargetedMod.ANGELICA)
+            .setSide(Side.CLIENT)
+            .setPhase(Phase.LATE)
+            .addMixinClasses(
+                addPrefix(
+                    "angelica.",
+                    "MixinAngelicaRenderSectionManager",
+                    "MixinClientProxy",
+                    "MixinShadowRenderer",
+                    "MixinThreadedChunkTaskProvider",
+                    "MixinViewport"))),
 
     HARDCORE_ENDER_EXPANSION_COMPAT(new Builder("Disable generation of additional data for player proxies")
         .addTargetedMod(TargetedMod.HARDCORE_ENDER_EXPANSION)

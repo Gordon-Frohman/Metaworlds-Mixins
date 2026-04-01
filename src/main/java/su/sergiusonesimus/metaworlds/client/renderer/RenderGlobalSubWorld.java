@@ -81,32 +81,6 @@ public class RenderGlobalSubWorld extends RenderGlobal {
     }
 
     /**
-     * On the client, re-renders the block. On the server, sends the block to the client (which will re-render it),
-     * including the tile entity description packet if applicable. Args: x, y, z
-     */
-    @Override
-    public void markBlockForUpdate(int par1, int par2, int par3) {
-        parentRenderGlobal.markBlockForUpdate(par1, par2, par3);
-    }
-
-    /**
-     * On the client, re-renders this block. On the server, does nothing. Used for lighting updates.
-     */
-    @Override
-    public void markBlockForRenderUpdate(int par1, int par2, int par3) {
-        parentRenderGlobal.markBlockForRenderUpdate(par1, par2, par3);
-    }
-
-    /**
-     * On the client, re-renders all blocks in this range, inclusive. On the server, does nothing. Args: min x, min y,
-     * min z, max x, max y, max z
-     */
-    @Override
-    public void markBlockRangeForRenderUpdate(int par1, int par2, int par3, int par4, int par5, int par6) {
-        parentRenderGlobal.markBlockRangeForRenderUpdate(par1, par2, par3, par4, par5, par6);
-    }
-
-    /**
      * Plays the specified sound. Arg: soundName, x, y, z, volume, pitch
      */
     @Override

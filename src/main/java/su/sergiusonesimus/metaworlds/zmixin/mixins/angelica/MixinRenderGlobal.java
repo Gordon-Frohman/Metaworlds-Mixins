@@ -83,42 +83,6 @@ public class MixinRenderGlobal {
     @Shadow(remap = true)
     public void rebuildDisplayListEntities() {}
 
-    @Inject(method = "markBlocksForUpdate", at = @At(value = "TAIL"))
-    public void markBlocksForUpdate(int minX, int minY, int minZ, int maxX, int maxY, int maxZ, CallbackInfo ci) {
-        markBlocksForUpdateSubworlds(minX, minY, minZ, maxX, maxY, maxZ);
-    }
-
-    public void markBlocksForUpdateSubworlds(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        for (World curWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
-            RenderGlobal rgProxy = ((EntityClientPlayerMPSubWorldProxy) ((IMixinEntity) Minecraft
-                .getMinecraft().thePlayer).getProxyPlayer(curWorld)).mc.renderGlobal;
-            try {
-                Field celeritas$renderer = RenderGlobal.class.getDeclaredField("celeritas$renderer");
-                celeritas$renderer.setAccessible(true);
-                CeleritasWorldRenderer cwr = (CeleritasWorldRenderer) celeritas$renderer.get(rgProxy);
-                cwr.scheduleRebuildForBlockArea(minX, minY, minZ, maxX, maxY, maxZ, false);
-            } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Inject(method = "markBlockForUpdate", at = @At(value = "TAIL"))
-    public void markBlockForUpdate(int x, int y, int z, CallbackInfo ci) {
-        this.markBlocksForUpdateSubworlds(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
-    }
-
-    @Inject(method = "markBlockForRenderUpdate", at = @At(value = "TAIL"))
-    public void markBlockForRenderUpdate(int x, int y, int z, CallbackInfo ci) {
-        this.markBlocksForUpdateSubworlds(x - 1, y - 1, z - 1, x + 1, y + 1, z + 1);
-    }
-
-    @Inject(method = "markBlockRangeForRenderUpdate", at = @At(value = "TAIL"))
-    public void markBlockRangeForRenderUpdate(int minX, int minY, int minZ, int maxX, int maxY, int maxZ,
-        CallbackInfo ci) {
-        this.markBlocksForUpdateSubworlds(minX - 1, minY - 1, minZ - 1, maxX + 1, maxY + 1, maxZ + 1);
-    }
-
     @WrapOperation(
         method = "clipRenderersByFrustum",
         remap = true,
