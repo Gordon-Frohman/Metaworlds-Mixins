@@ -1,6 +1,5 @@
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Gordon-Frohman/Metaworlds-Mixins)
-
 # MetaWorlds (Mixins Version)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Gordon-Frohman/Metaworlds-Mixins)
 
 A Minecraft 1.7.10 Forge mod that allows creating fully functional SubWorlds - embedded world instances that can be moved, rotated, and scaled within the main world.
 
