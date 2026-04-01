@@ -113,5 +113,5 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 Since MetaWorlds is implementing hell lot of mixins, it may be incompatible with a lot of other mods, especially ones using custom package systems.
 Therefore I have to write an integration patch for every such mod. If you want me to fix a crash or any other kind of issue with another mod - please open an issue with crash report and/or issue description.
 
-Subworlds also uses a custom system for block rotation on reintegration of a rotated world, which requires every block type to be registered seperately.
+Subworlds are also using a custom system for block rotation on reintegration of a rotated world, which requires every block type to be registered seperately.
 If you want blocks from another mod to be rotated - please provide a full list of such blocks and (preferrably) all the rotations each block can take.
