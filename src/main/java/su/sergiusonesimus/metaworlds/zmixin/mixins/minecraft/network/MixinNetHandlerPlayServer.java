@@ -183,11 +183,12 @@ public class MixinNetHandlerPlayServer implements IMixinNetHandlerPlayServer {
                     }
                     if (!this.hasMoved) {
                         // Then - if the player has moved locally
-                        d0 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldYPosition() - this.lastLocalPosY;
-                        double d1 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldXPosition() - this.lastLocalPosX;
-                        double d2 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldZPosition() - this.lastLocalPosZ;
+                        d0 = ((IMixinC03PacketPlayer) packetPlayer).getSubWorldYPosition() - this.playerEntity.eyeHeight
+                            - this.lastLocalPosY;
 
-                        if (d0 * d0 < 0.01D && d1 * d1 < 0.01D && d2 * d2 < 0.01D) {
+                        if (d0 * d0 < 0.02D
+                            && ((IMixinC03PacketPlayer) packetPlayer).getSubWorldXPosition() == this.lastLocalPosX
+                            && ((IMixinC03PacketPlayer) packetPlayer).getSubWorldZPosition() == this.lastLocalPosZ) {
                             this.hasMoved = true;
                         }
                     }
