@@ -1132,14 +1132,13 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
      * @reason Too complex to be modified without Overwrite
      */
     @Overwrite
-    public void markBlocksForUpdate(int p_72725_1_, int p_72725_2_, int p_72725_3_, int p_72725_4_, int p_72725_5_,
-        int p_72725_6_) {
-        int k1 = MathHelper.bucketInt(p_72725_1_, 16);
-        int l1 = MathHelper.bucketInt(p_72725_2_, 16);
-        int i2 = MathHelper.bucketInt(p_72725_3_, 16);
-        int j2 = MathHelper.bucketInt(p_72725_4_, 16);
-        int k2 = MathHelper.bucketInt(p_72725_5_, 16);
-        int l2 = MathHelper.bucketInt(p_72725_6_, 16);
+    public void markBlocksForUpdate(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+        int k1 = MathHelper.bucketInt(minX, 16);
+        int l1 = MathHelper.bucketInt(minY, 16);
+        int i2 = MathHelper.bucketInt(minZ, 16);
+        int j2 = MathHelper.bucketInt(maxX, 16);
+        int k2 = MathHelper.bucketInt(maxY, 16);
+        int l2 = MathHelper.bucketInt(maxZ, 16);
 
         for (World curWorld : ((IMixinWorld) this.theWorld).getWorlds()) {
             for (int i3 = k1; i3 <= j2; ++i3) {
