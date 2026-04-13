@@ -99,7 +99,12 @@ public enum Mixins {
             .setSide(Side.CLIENT)
             .setPhase(Phase.EARLY)
             .addMixinClasses(
-                addPrefix("angelica.", "MixinEffectRenderer", "MixinEntityRenderer", "MixinRenderGlobal"))),
+                addPrefix(
+                    "angelica.",
+                    "MixinClientProxy",
+                    "MixinEffectRenderer",
+                    "MixinEntityRenderer",
+                    "MixinRenderGlobal"))),
 
     ANGELICA_COMPAT_LATE(
         new Builder("Modifying Angelica classes to support Metaworlds rendering").addTargetedMod(TargetedMod.ANGELICA)
@@ -109,7 +114,6 @@ public enum Mixins {
                 addPrefix(
                     "angelica.",
                     "MixinAngelicaRenderSectionManager",
-                    "MixinClientProxy",
                     "MixinShadowRenderer",
                     "MixinThreadedChunkTaskProvider",
                     "MixinViewport"))),
