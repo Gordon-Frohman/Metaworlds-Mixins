@@ -1,6 +1,7 @@
 package su.sergiusonesimus.metaworlds.block;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -9,9 +10,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.item.MetaworldsItems;
 import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
 import su.sergiusonesimus.metaworlds.util.DisplacementHelper;
@@ -35,6 +39,7 @@ public class BlockContagiousSubWorldCreator extends Block {
             HashSet<ChunkCoordinates> prevMargin = new HashSet<ChunkCoordinates>();
             HashSet<ChunkCoordinates> margin = new HashSet<ChunkCoordinates>();
             HashSet<ChunkCoordinates> newMargin = new HashSet<ChunkCoordinates>();
+            HashMap<ChunkCoordIntPair, Integer> blocksInChunks = new HashMap<ChunkCoordIntPair, Integer>();
             blocksToTake.add(new ChunkCoordinates(x, y, z));
             margin.add(new ChunkCoordinates(x, y, z));
             boolean isValid = true;
@@ -47,10 +52,9 @@ public class BlockContagiousSubWorldCreator extends Block {
                     blocksToTakeVolatile,
                     prevMargin,
                     margin,
-                    newMargin);
-                if (!isValid) {
-                    break;
-                }
+                    newMargin,
+                    blocksInChunks);
+                if (!isValid) break;
 
                 HashSet<ChunkCoordinates> newWorld = prevMargin;
                 prevMargin = margin;
@@ -93,7 +97,7 @@ public class BlockContagiousSubWorldCreator extends Block {
                 for (List<ChunkCoordinates> currentList : listsToParse) {
                     Iterator<ChunkCoordinates> i$ = currentList.iterator();
                     while (i$.hasNext()) {
-                        curCoord = (ChunkCoordinates) i$.next();
+                        curCoord = i$.next();
                         world.setBlockToAir(curCoord.posX, curCoord.posY, curCoord.posZ);
                     }
                 }
@@ -106,7 +110,7 @@ public class BlockContagiousSubWorldCreator extends Block {
     public boolean expandAtMargin(World par1World, List<ChunkCoordinates> blockList,
         List<ChunkCoordinates> solidVolatileBlockList, List<ChunkCoordinates> volatileBlockList,
         HashSet<ChunkCoordinates> prevMarginList, HashSet<ChunkCoordinates> marginList,
-        HashSet<ChunkCoordinates> newMarginList) {
+        HashSet<ChunkCoordinates> newMarginList, HashMap<ChunkCoordIntPair, Integer> blocksInChunks) {
         Iterator<ChunkCoordinates> i$ = marginList.iterator();
 
         while (i$.hasNext()) {
@@ -186,6 +190,18 @@ public class BlockContagiousSubWorldCreator extends Block {
                             } else {
                                 blockList.add(newCoords);
                             }
+                            ChunkCoordIntPair newChunk = new ChunkCoordIntPair(
+                                MathHelper.bucketInt(newCoords.posX, 16),
+                                MathHelper.bucketInt(newCoords.posZ, 16));
+                            Integer blocksCount = blocksInChunks.get(newChunk);
+                            if (blocksCount == null) {
+                                blocksCount = 1;
+                                blocksInChunks.put(newChunk, blocksCount);
+                            } else {
+                                blocksCount++;
+                                blocksInChunks.put(newChunk, blocksCount);
+                            }
+                            if (blocksCount > MetaworldsMod.maxChunkBlockCount) return false;
                         }
                     }
                 }

@@ -68,6 +68,7 @@ public class MetaworldsMod {
 
     public static boolean usePlayerControls;
     public static boolean enableViewBasedRotation;
+    public static int maxChunkBlockCount;
 
     public MetaworldsMod() {
         instance = this;
@@ -121,6 +122,15 @@ public class MetaworldsMod {
             + "similar to position control. Setting it to 'false' allows you to control rotation of subworld around X and Z axis.\n"
             + "Disabled by default.";
         enableViewBasedRotation = viewBasedRotation.getBoolean();
+
+        Property chunkBlockCount = configFile.get("subworldCreators", "maxChunkBlockCount", 2048);
+        chunkBlockCount.comment = "Maximum amount of blocks in one chunk that can be displaced from one world to another by the "
+            + "Contagious Subworld Creator block. Is used to protect the game from freezing if CSC is placed on ground.\n"
+            + "If CSC isn't displacing a very large structure of yours, you may want to increase this value.\n"
+            + "Maximum amount of blocks in one chunk is 16 * 16 * 256 = 65536, though you don't want to use this value.";
+        chunkBlockCount.setMinValue(0);
+        chunkBlockCount.setMaxValue(65536);
+        maxChunkBlockCount = chunkBlockCount.getInt();
 
         if (configFile.hasChanged()) {
             configFile.save();
