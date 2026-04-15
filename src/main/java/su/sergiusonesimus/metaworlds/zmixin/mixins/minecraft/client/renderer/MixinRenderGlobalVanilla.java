@@ -654,7 +654,7 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
      */
     @SuppressWarnings({ "unchecked", "unused" })
     @Overwrite
-    public int sortAndRender(EntityLivingBase par1EntityLivingBase, int par2, double par3) {
+    public int sortAndRender(EntityLivingBase entityLiving, int renderPass, double partialTickTime) {
         this.theWorld.theProfiler.startSection("sortchunks");
 
         if (!this.worldRenderersList.isEmpty()) for (int j = 0; j < 10; ++j) {
@@ -670,33 +670,26 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
             this.loadRenderers();
         }
 
-        if (par2 == 0) {}
+        if (renderPass == 0) {}
 
-        double d9 = par1EntityLivingBase.lastTickPosX
-            + (par1EntityLivingBase.posX - par1EntityLivingBase.lastTickPosX) * par3;
-        double d1 = par1EntityLivingBase.lastTickPosY
-            + (par1EntityLivingBase.posY - par1EntityLivingBase.lastTickPosY) * par3;
-        double d2 = par1EntityLivingBase.lastTickPosZ
-            + (par1EntityLivingBase.posZ - par1EntityLivingBase.lastTickPosZ) * par3;
-        double d3 = par1EntityLivingBase.posX - this.prevSortX;
-        double d4 = par1EntityLivingBase.posY - this.prevSortY;
-        double d5 = par1EntityLivingBase.posZ - this.prevSortZ;
+        double d9 = entityLiving.lastTickPosX + (entityLiving.posX - entityLiving.lastTickPosX) * partialTickTime;
+        double d1 = entityLiving.lastTickPosY + (entityLiving.posY - entityLiving.lastTickPosY) * partialTickTime;
+        double d2 = entityLiving.lastTickPosZ + (entityLiving.posZ - entityLiving.lastTickPosZ) * partialTickTime;
+        double d3 = entityLiving.posX - this.prevSortX;
+        double d4 = entityLiving.posY - this.prevSortY;
+        double d5 = entityLiving.posZ - this.prevSortZ;
 
-        if (this.prevChunkSortX != par1EntityLivingBase.chunkCoordX
-            || this.prevChunkSortY != par1EntityLivingBase.chunkCoordY
-            || this.prevChunkSortZ != par1EntityLivingBase.chunkCoordZ
+        if (this.prevChunkSortX != entityLiving.chunkCoordX || this.prevChunkSortY != entityLiving.chunkCoordY
+            || this.prevChunkSortZ != entityLiving.chunkCoordZ
             || d3 * d3 + d4 * d4 + d5 * d5 > 16.0D) {
-            this.prevSortX = par1EntityLivingBase.posX;
-            this.prevSortY = par1EntityLivingBase.posY;
-            this.prevSortZ = par1EntityLivingBase.posZ;
-            this.prevChunkSortX = par1EntityLivingBase.chunkCoordX;
-            this.prevChunkSortY = par1EntityLivingBase.chunkCoordY;
-            this.prevChunkSortZ = par1EntityLivingBase.chunkCoordZ;
-            this.markRenderersForNewPosition(
-                par1EntityLivingBase.posX,
-                par1EntityLivingBase.posY,
-                par1EntityLivingBase.posZ);
-            Collections.sort(this.sortedWorldRenderersList, new EntitySorter(par1EntityLivingBase));
+            this.prevSortX = entityLiving.posX;
+            this.prevSortY = entityLiving.posY;
+            this.prevSortZ = entityLiving.posZ;
+            this.prevChunkSortX = entityLiving.chunkCoordX;
+            this.prevChunkSortY = entityLiving.chunkCoordY;
+            this.prevChunkSortZ = entityLiving.chunkCoordZ;
+            this.markRenderersForNewPosition(entityLiving.posX, entityLiving.posY, entityLiving.posZ);
+            Collections.sort(this.sortedWorldRenderersList, new EntitySorter(entityLiving));
         } else {
             boolean rendererPositionsChanged = false;
             for (World curSubWorld : ((IMixinWorld) this.theWorld).getSubWorlds()) {
@@ -711,22 +704,22 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
                 }
             }
             if (rendererPositionsChanged)
-                Collections.sort(this.sortedWorldRenderersList, new EntitySorter(par1EntityLivingBase));
+                Collections.sort(this.sortedWorldRenderersList, new EntitySorter(entityLiving));
         }
 
-        double d6 = par1EntityLivingBase.posX - this.prevRenderSortX;
-        double d7 = par1EntityLivingBase.posY - this.prevRenderSortY;
-        double d8 = par1EntityLivingBase.posZ - this.prevRenderSortZ;
+        double d6 = entityLiving.posX - this.prevRenderSortX;
+        double d7 = entityLiving.posY - this.prevRenderSortY;
+        double d8 = entityLiving.posZ - this.prevRenderSortZ;
         int k;
 
         if (d6 * d6 + d7 * d7 + d8 * d8 > 1.0D) {
-            this.prevRenderSortX = par1EntityLivingBase.posX;
-            this.prevRenderSortY = par1EntityLivingBase.posY;
-            this.prevRenderSortZ = par1EntityLivingBase.posZ;
+            this.prevRenderSortX = entityLiving.posX;
+            this.prevRenderSortY = entityLiving.posY;
+            this.prevRenderSortZ = entityLiving.posZ;
 
             for (k = 0; k < 27; ++k) {
                 this.sortedWorldRenderersList.get(k)
-                    .updateRendererSort(par1EntityLivingBase);
+                    .updateRendererSort(entityLiving);
             }
         }
 
@@ -735,13 +728,13 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
 
         if (this.occlusionEnabled && this.mc.gameSettings.advancedOpengl
             && !this.mc.gameSettings.anaglyph
-            && par2 == 0) {
+            && renderPass == 0) {
             int index = 0;
             for (WorldRenderer curRenderer : this.sortedWorldRenderersList) {
-                if (curRenderer.distanceToEntitySquared(par1EntityLivingBase) > 675.0f)/*
-                                                                                        * 3 * (16/2 + 6)Ġ = 588... let's
-                                                                                        * add some space
-                                                                                        */
+                if (curRenderer.distanceToEntitySquared(entityLiving) > 675.0f)/*
+                                                                                * 3 * (16/2 + 6)Ġ = 588... let's
+                                                                                * add some space
+                                                                                */
                     break;
                 index++;
             }
@@ -755,7 +748,7 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
             }
 
             this.theWorld.theProfiler.endStartSection("render");
-            k = b1 + this.renderSortedRenderers(b0, l, par2, par3);
+            k = b1 + this.renderSortedRenderers(b0, l, renderPass, partialTickTime);
 
             do {
                 this.theWorld.theProfiler.endStartSection("occ");
@@ -791,7 +784,7 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
                         }
 
                         if (curRenderer.isInFrustum && !curRenderer.isWaitingOnOcclusionQuery) {
-                            float f2 = MathHelper.sqrt_float(curRenderer.distanceToEntitySquared(par1EntityLivingBase));
+                            float f2 = MathHelper.sqrt_float(curRenderer.distanceToEntitySquared(entityLiving));
                             int k1 = (int) (1.0F + f2 / 128.0F);
 
                             if (this.cloudTickCounter % k1 == j1 % k1) {
@@ -841,11 +834,11 @@ public class MixinRenderGlobalVanilla implements IMixinRenderGlobalVanilla {
                 GL11.glEnable(GL11.GL_ALPHA_TEST);
                 GL11.glEnable(GL11.GL_FOG);
                 this.theWorld.theProfiler.endStartSection("render");
-                k += this.renderSortedRenderers(l1, l, par2, par3);
+                k += this.renderSortedRenderers(l1, l, renderPass, partialTickTime);
             } while (l < this.sortedWorldRenderersList.size());
         } else {
             this.theWorld.theProfiler.endStartSection("render");
-            k = b1 + this.renderSortedRenderers(0, this.sortedWorldRenderersList.size(), par2, par3);
+            k = b1 + this.renderSortedRenderers(0, this.sortedWorldRenderersList.size(), renderPass, partialTickTime);
         }
 
         this.theWorld.theProfiler.endSection();

@@ -167,10 +167,10 @@ public class SubWorldClient extends WorldClient implements SubWorld {
         this.updatePacketToHandle = newPacket;
     }
 
-    public void addWorldAccess(IWorldAccess par1IWorldAccess) {
-        super.addWorldAccess(par1IWorldAccess);
-        if (par1IWorldAccess instanceof RenderGlobalSubWorld) {
-            this.renderGlobalSubWorld = (RenderGlobalSubWorld) par1IWorldAccess;
+    public void addWorldAccess(IWorldAccess worldAccess) {
+        super.addWorldAccess(worldAccess);
+        if (worldAccess instanceof RenderGlobalSubWorld renderGlobalSubWorld) {
+            this.renderGlobalSubWorld = renderGlobalSubWorld;
         }
     }
 

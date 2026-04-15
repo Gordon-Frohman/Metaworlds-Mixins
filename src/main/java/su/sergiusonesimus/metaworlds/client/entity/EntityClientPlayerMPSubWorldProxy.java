@@ -16,6 +16,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import su.sergiusonesimus.metaworlds.MetaworldsMod;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
 import su.sergiusonesimus.metaworlds.client.MinecraftSubWorldProxy;
 import su.sergiusonesimus.metaworlds.client.multiplayer.PlayerControllerMPSubWorldProxy;
@@ -63,7 +64,7 @@ public class EntityClientPlayerMPSubWorldProxy extends EntityClientPlayerMP impl
         this.mc.playerController = new PlayerControllerMPSubWorldProxy(Minecraft.getMinecraft().playerController, this);
         this.mc.effectRenderer = new EffectRenderer(targetSubWorld, Minecraft.getMinecraft().renderEngine);
         this.mc.renderGlobal = new RenderGlobalSubWorld(this.mc, Minecraft.getMinecraft().renderGlobal);
-        this.mc.renderGlobal.setWorldAndLoadRenderers((WorldClient) targetSubWorld);
+        if (MetaworldsMod.isAngelicaLoaded) this.mc.renderGlobal.setWorldAndLoadRenderers((WorldClient) targetSubWorld);
 
         this.mc.theWorld.mc = this.mc;
 

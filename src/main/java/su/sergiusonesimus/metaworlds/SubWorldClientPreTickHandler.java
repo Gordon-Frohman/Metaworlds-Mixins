@@ -23,7 +23,7 @@ public class SubWorldClientPreTickHandler {
                 .iterator();
 
             while (i$.hasNext()) {
-                World curSubWorld = (World) i$.next();
+                World curSubWorld = i$.next();
                 ((SubWorldClient) curSubWorld).onPreTick();
             }
         }
