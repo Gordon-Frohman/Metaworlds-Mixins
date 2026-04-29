@@ -1,2 +1,5 @@
+jdk:
+  - openjdk21
 before_install:
+  - chmod +x gradlew
   - ./gradlew setupCIWorkspace
