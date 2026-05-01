@@ -13,13 +13,19 @@ import su.sergiusonesimus.metaworlds.block.BlockDummyReobfTracker;
 import su.sergiusonesimus.metaworlds.integrations.ForgeMultipartIntegration;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class BlockVolatilityMap {
 
-    private static final Map<Integer, Boolean> blockVolatilityMap = new TreeMap<>();
+    /**
+     * 4096 is default Forge max id for blocks. If any id-extending mod is used this case is covered by
+     * calling {@link #ensureCapacity(int)} in {@link #checkBlockVolatility(Block)}
+     * In future we can switch from storing 8 blocks per 1 byte in an underlying array for 8x compression,
+     * but now memory difference is negligible (64Kb vs 8Kb)
+     */
+    private static boolean[] volatileBlocksFlags = new boolean[4096];
+    private static boolean[] initializedBlocks = new boolean[4096];
 
     // Method descriptors for the two Block methods we inspect
     private static final String CAN_BLOCK_STAY_DESCRIPTOR =
@@ -31,32 +37,42 @@ public class BlockVolatilityMap {
     public static void init() {
         Iterator<Block> iterator = ((FMLControlledNamespacedRegistry<Block>) Block.blockRegistry).typeSafeIterable()
                 .iterator();
+        int maxId = 0;
+        while (iterator.hasNext()) {
+            Block block = iterator.next();
+            int id = Block.getIdFromBlock(block);
+            if (id > maxId) maxId = id;
+        }
+        volatileBlocksFlags = new boolean[maxId + 1];
+        initializedBlocks = new boolean[maxId + 1];
+
+        iterator = ((FMLControlledNamespacedRegistry<Block>) Block.blockRegistry).typeSafeIterable().iterator();
         while (iterator.hasNext()) checkBlockVolatility(iterator.next());
     }
 
     public static boolean checkBlockVolatility(Block block) {
         int blockId = Block.getIdFromBlock(block);
-        Boolean isVolatile = blockVolatilityMap.get(blockId);
-        if (isVolatile != null) {
-            return isVolatile;
+        if (!initializedBlocks[blockId]) {
+            if (MetaworldsMod.isForgeMultipartLoaded && ForgeMultipartIntegration.isBlockMultipart(block)) {
+                return true;
+            }
+
+            boolean overridesCanBlockStay = overridesInSubclass(
+                    block.getClass(),
+                    BlockDummyReobfTracker.canBlockStayMethodName,
+                    CAN_BLOCK_STAY_DESCRIPTOR);
+            boolean overridesOnNeighborBlockChange = overridesInSubclass(
+                    block.getClass(),
+                    BlockDummyReobfTracker.onNeighborBlockChange,
+                    ON_NEIGHBOR_BLOCK_CHANGE_DESCRIPTOR);
+            boolean isVolatile = overridesCanBlockStay || overridesOnNeighborBlockChange;
+
+
+            ensureCapacity(blockId);
+            volatileBlocksFlags[blockId] = isVolatile;
+            initializedBlocks[blockId] = true;
         }
-
-        if (MetaworldsMod.isForgeMultipartLoaded && ForgeMultipartIntegration.isBlockMultipart(block)) {
-            return true;
-        }
-
-        boolean overridesCanBlockStay = overridesInSubclass(
-                block.getClass(),
-                BlockDummyReobfTracker.canBlockStayMethodName,
-                CAN_BLOCK_STAY_DESCRIPTOR);
-        boolean overridesOnNeighborBlockChange = overridesInSubclass(
-                block.getClass(),
-                BlockDummyReobfTracker.onNeighborBlockChange,
-                ON_NEIGHBOR_BLOCK_CHANGE_DESCRIPTOR);
-        isVolatile = overridesCanBlockStay || overridesOnNeighborBlockChange;
-
-        blockVolatilityMap.put(blockId, isVolatile);
-        return isVolatile;
+        return volatileBlocksFlags[blockId];
     }
 
     private static boolean overridesInSubclass(Class<?> cls, String methodName, String methodDescriptor) {
@@ -106,5 +122,13 @@ public class BlockVolatilityMap {
             if (block.isSideSolid(world, x, y, z, dir)) return true;
         }
         return false;
+    }
+
+    private static void ensureCapacity(int blockId) {
+        if (blockId >= volatileBlocksFlags.length) {
+            int newSize = Math.max(blockId + 1, volatileBlocksFlags.length * 2);
+            volatileBlocksFlags = Arrays.copyOf(volatileBlocksFlags, newSize);
+            initializedBlocks = Arrays.copyOf(initializedBlocks, newSize);
+        }
     }
 }
