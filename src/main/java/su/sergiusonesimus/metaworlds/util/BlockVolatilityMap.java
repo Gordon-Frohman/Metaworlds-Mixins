@@ -52,6 +52,8 @@ public class BlockVolatilityMap {
 
     public static boolean checkBlockVolatility(Block block) {
         int blockId = Block.getIdFromBlock(block);
+        ensureCapacity(blockId);
+
         if (!initializedBlocks[blockId]) {
             if (MetaworldsMod.isForgeMultipartLoaded && ForgeMultipartIntegration.isBlockMultipart(block)) {
                 return true;
@@ -66,9 +68,7 @@ public class BlockVolatilityMap {
                     BlockDummyReobfTracker.onNeighborBlockChange,
                     ON_NEIGHBOR_BLOCK_CHANGE_DESCRIPTOR);
             boolean isVolatile = overridesCanBlockStay || overridesOnNeighborBlockChange;
-
-
-            ensureCapacity(blockId);
+            
             volatileBlocksFlags[blockId] = isVolatile;
             initializedBlocks[blockId] = true;
         }
