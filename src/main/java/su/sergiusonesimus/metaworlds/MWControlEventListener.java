@@ -19,7 +19,7 @@ public class MWControlEventListener {
         // if (event.player.worldBelowFeet instanceof SubWorld) {
         // SubWorld world = (SubWorld)event.player.worldBelowFeet;
         // }
-        if (BlockSubWorldController.toMakeFalse && count > 10) {
+        if (event.side.isClient() && BlockSubWorldController.toMakeFalse && count > 10) {
             KeyBinding.setKeyBindState(Minecraft.getMinecraft().gameSettings.keyBindSneak.getKeyCode(), false);
             BlockSubWorldController.toMakeFalse = false;
             count = 0;
