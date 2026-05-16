@@ -24,7 +24,7 @@ public class BlockSubWorldController extends Block {
 
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer,
         int par6, float par7, float par8, float par9) {
-        if (par5EntityPlayer.ridingEntity instanceof EntitySubWorldController) {
+        if (par1World.isRemote && par5EntityPlayer.ridingEntity instanceof EntitySubWorldController) {
             par5EntityPlayer.dismountEntity(par5EntityPlayer.ridingEntity);
             par5EntityPlayer.ridingEntity.setDead();
             par5EntityPlayer.ridingEntity = null;
@@ -32,6 +32,7 @@ public class BlockSubWorldController extends Block {
             toMakeFalse = true;
             return true;
         }
+
         if (par1World.isRemote) {
             return true;
         } else {

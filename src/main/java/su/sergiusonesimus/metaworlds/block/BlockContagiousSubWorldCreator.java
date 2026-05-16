@@ -10,7 +10,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
@@ -191,8 +190,8 @@ public class BlockContagiousSubWorldCreator extends Block {
                                 blockList.add(newCoords);
                             }
                             ChunkCoordIntPair newChunk = new ChunkCoordIntPair(
-                                MathHelper.bucketInt(newCoords.posX, 16),
-                                MathHelper.bucketInt(newCoords.posZ, 16));
+                                newCoords.posX >> 4,
+                                newCoords.posZ >> 4);
                             Integer blocksCount = blocksInChunks.get(newChunk);
                             if (blocksCount == null) {
                                 blocksCount = 1;
