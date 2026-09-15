@@ -43,6 +43,7 @@ import su.sergiusonesimus.metaworlds.network.play.client.C00SubWorldProxyPacket;
 import su.sergiusonesimus.metaworlds.network.play.server.S00SubWorldProxyPacket;
 import su.sergiusonesimus.metaworlds.util.BlockVolatilityMap;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
+import su.sergiusonesimus.metaworlds.world.SubWorldContextHandler;
 
 @Mod(modid = MetaworldsMod.MODID, name = "MetaWorlds (Mixins Version)")
 public class MetaworldsMod {
@@ -150,6 +151,9 @@ public class MetaworldsMod {
             .bus()
             .register(playerTickHandler);
         MinecraftForge.EVENT_BUS.register(playerTickHandler);
+
+        // Both sides: senders derive a subworld's address, receivers resolve it.
+        SubWorldContextHandler.register();
 
         proxy.onLoad();
 
