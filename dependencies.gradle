@@ -42,7 +42,7 @@ dependencies {
     // from ProjectRed at its published version and the world-addressing changes are absent at runtime.
     devOnlyNonPublishable("com.github.GTNewHorizons:ForgeMultipart:9.9.9:dev") { transitive = false }
     api("com.github.GTNewHorizons:GTNHLib:9.9.9:dev")
-    implementation("com.github.GTNewHorizons:CodeChickenCore:9.9.9:dev") // For NEI and ForgeMultipart runtime
+    implementation("com.github.GTNewHorizons:CodeChickenCore:1.4.20:dev") // For NEI and ForgeMultipart runtime
     api("com.github.GTNewHorizons:ProjectRed:4.12.43-GTNH:dev") {
         // ProjectRed drags in the published ForgeMultipart, which would outrank the local 9.9.9 on the
         // runtime classpath and leave the world-addressing changes out of the game.

@@ -2,10 +2,12 @@ package su.sergiusonesimus.metaworlds.world;
 
 import java.util.Collection;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.World;
 
 import com.gtnewhorizon.gtnhlib.api.world.WorldContextRegistry;
 
+import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 /**
@@ -43,5 +45,12 @@ public final class SubWorldContextHandler implements WorldContextRegistry.Handle
     @Override
     public World getSubWorld(World hostWorld, int subId) {
         return ((IMixinWorld) hostWorld).getSubWorld(subId);
+    }
+
+    /** A subworld proxy is replaceable, while the host-world player is its stable identity. */
+    @Override
+    public EntityPlayerMP getHostPlayer(EntityPlayerMP player) {
+        return player instanceof EntityPlayerProxy ? (EntityPlayerMP) ((EntityPlayerProxy) player).getRealPlayer()
+            : player;
     }
 }
