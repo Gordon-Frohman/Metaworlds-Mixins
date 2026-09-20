@@ -41,6 +41,8 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.world.WorldEvent;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -150,6 +152,7 @@ public class SubWorldServer extends WorldServer implements SubWorld {
 
     @SuppressWarnings("rawtypes")
     public void removeSubWorld() {
+        MinecraftForge.EVENT_BUS.post(new WorldEvent.Unload(this));
         Iterator<EntityPlayer> minecraftexception = this.playerEntities.iterator();
 
         while (minecraftexception.hasNext()) {

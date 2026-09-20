@@ -1,7 +1,6 @@
 package su.sergiusonesimus.metaworlds.integrations;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MovingObjectPosition;
@@ -19,20 +18,13 @@ import codechicken.multipart.TMultiPart;
 import codechicken.multipart.TileMultipart;
 import codechicken.multipart.minecraft.McSidedMetaPart;
 import su.sergiusonesimus.metaworlds.api.SubWorld;
-import su.sergiusonesimus.metaworlds.entity.player.EntityPlayerProxy;
 import su.sergiusonesimus.metaworlds.util.Direction;
 import su.sergiusonesimus.metaworlds.util.OrientedBB;
 import su.sergiusonesimus.metaworlds.util.RotationHelper;
-import su.sergiusonesimus.metaworlds.zmixin.interfaces.minecraft.world.IMixinWorld;
 
 public class ForgeMultipartIntegration {
 
     public static MovingObjectPosition currentMOP;
-
-    public static int getSubworldSpecificEntityId(EntityPlayer player) {
-        return player.getEntityId()
-            | (player instanceof EntityPlayerProxy ? ((IMixinWorld) player.worldObj).getSubWorldID() << 16 : 0);
-    }
 
     public static boolean isBlockMultipart(Block block) {
         return block instanceof BlockMultipart;

@@ -7,7 +7,6 @@ import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -57,11 +56,7 @@ public abstract class MixinTileEntityRendererDispatcher {
 
     @Inject(
         method = "renderTileEntity(Lnet/minecraft/tileentity/TileEntity;F)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lorg/lwjgl/opengl/GL11;glColor4f(FFFF)V",
-            remap = false,
-            shift = Shift.AFTER))
+        at = @At("HEAD"))
     private void injectRenderTileEntity1(TileEntity p_147544_1_, float p_147544_2_, CallbackInfo ci) {
         GL11.glPushMatrix();
         if (p_147544_1_.hasWorldObj() && ((IMixinWorld) p_147544_1_.getWorldObj()).isSubWorld()) {
@@ -76,10 +71,7 @@ public abstract class MixinTileEntityRendererDispatcher {
 
     @Inject(
         method = "renderTileEntity(Lnet/minecraft/tileentity/TileEntity;F)V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/tileentity/TileEntityRendererDispatcher;renderTileEntityAt(Lnet/minecraft/tileentity/TileEntity;DDDF)V",
-            shift = Shift.AFTER))
+        at = @At("RETURN"))
     private void injectRenderTileEntity2(TileEntity p_147544_1_, float p_147544_2_, CallbackInfo ci) {
         GL11.glPopMatrix();
     }
