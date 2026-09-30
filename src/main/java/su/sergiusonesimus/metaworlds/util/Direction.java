@@ -136,6 +136,24 @@ public enum Direction {
         return closest;
     }
 
+    public static Direction[] getNearestLookingDirections(EntityLivingBase entity) {
+        Direction[] result = new Direction[6];
+        Vec3 lookVec = entity.getLookVec();
+        boolean[] disableAxes = new boolean[] { false, false, false };
+
+        for (int i = 0; i < 3; i++) {
+            Direction closest = Direction.getNearest(
+                disableAxes[0] ? 0 : (float) lookVec.xCoord,
+                disableAxes[1] ? 0 : (float) lookVec.yCoord,
+                disableAxes[2] ? 0 : (float) lookVec.zCoord);
+            result[i] = closest;
+            result[5 - i] = closest.getOpposite();
+            disableAxes[closest.axis.ordinal()] = true;
+        }
+
+        return result;
+    }
+
     public Direction getOpposite() {
         return VALUES[this.oppositeIndex];
     }
